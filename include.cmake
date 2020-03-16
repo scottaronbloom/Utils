@@ -33,6 +33,7 @@ set(qtproject_H
 
 set(project_H
     utils.h
+    EnumUtils.h
 )
 
 set(qtproject_UIS
