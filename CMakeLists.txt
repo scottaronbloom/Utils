@@ -26,14 +26,6 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 project( SABUtils )
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED true)
-find_package(Threads REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
-include_directories( ${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} )
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
 include( include.cmake )
 include( Project.cmake )
 
