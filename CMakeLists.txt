@@ -24,6 +24,9 @@ cmake_minimum_required(VERSION 3.1)
 if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
+
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
+
 project( SABUtils )
 
 include( include.cmake )
@@ -42,3 +45,4 @@ add_library(SABUtils STATIC
     ${qtproject_QRC_SOURCES}
     ${_CMAKE_FILES}
 )
+set_target_properties( SABUtils PROPERTIES FOLDER Libs )
