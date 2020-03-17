@@ -81,8 +81,7 @@ inline EnumName operator~( const EnumName & lhs )                             \
     return retVal;                                                            \
 }
 
-#define DECLARE_ENUM_FUNCS( EnumName ) \
-    DECLARE_ENUM_FUNCS_LOGIC( EnumName )                                      \
+#define DECLARE_ENUM_FUNCS_ARITHMETIC( EnumName ) \
 inline EnumName operator+( const EnumName & lhs, const EnumName & rhs )       \
 {                                                                             \
     using IntType = std::underlying_type<EnumName>::type;                     \
@@ -105,6 +104,36 @@ inline EnumName operator++( EnumName & lhs )                                  \
     lhs = static_cast< EnumName >( val + 1 );                                 \
     return lhs;                                                               \
 }
+
+#define DECLARE_ENUM_FUNCS_ARITHMETIC_ONEHOT( EnumName ) \
+inline EnumName operator--( EnumName & lhs )                                  \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    auto val = static_cast< IntType >( lhs );                                 \
+    lhs = static_cast< EnumName >( val >> 1 );                                \
+    return lhs;                                                               \
+}                                                                             \
+inline EnumName operator++( EnumName & lhs )                                  \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    auto val = static_cast< IntType >( lhs );                                 \
+    lhs = static_cast< EnumName >( val << 1 );                                \
+    return lhs;                                                               \
+}
+
+#define DECLARE_ENUM_ITERATORS( EnumName, First, Last )                       \
+inline EnumName operator*( EnumName val ){ return val; }                      \
+inline EnumName begin( EnumName ){ return First; }                            \
+inline EnumName end( EnumName )                                               \
+{                                                                             \
+    EnumName tmp = Last;                                                      \
+    return ++tmp;                                                             \
+}                                                                             \
+
+#define DECLARE_ENUM_FUNCS( EnumName, First, Last ) \
+    DECLARE_ENUM_FUNCS_LOGIC( EnumName )                                      \
+    DECLARE_ENUM_FUNCS_ITERATORS( EnumName, First, Last )                     \
+    DECLARE_ENUM_FUNCS_ARITHMETIC( EnumName )                                 \
 
 #endif
 

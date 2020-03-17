@@ -30,7 +30,8 @@
 #include <list>
 #include <utility>
 #include <vector>
-
+#include <optional>
+#include <bitset>
 namespace NUtils
 {
 
@@ -88,6 +89,19 @@ std::pair< bool, std::list< int64_t > > isAbundant( int64_t num );
 
 std::string getNumberListString( const std::list<int64_t>& numbers, int base );
 std::string getNumberListString( const std::list<uint64_t>& numbers, int base );
+
+template <size_t N>
+constexpr std::optional<int> find_last_index_of_bit_set( std::bitset<N> set )
+{
+    for ( int64_t ii = static_cast< int64_t >( set.size() )- 1; ii > -1; --ii )
+    {
+        if ( set.test( ii ) )
+        {
+            return std::optional( ii );
+        }
+    }
+    return std::nullopt;
+}
 }
 
 #endif
