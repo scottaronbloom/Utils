@@ -71,34 +71,67 @@ auto power( T1 x, T2 y )
 int fromChar( char ch, int base, bool& aOK );
 char toChar( int value );
 
+void toDigits( int64_t val, int base, std::pair< int8_t*, int >& retVal, size_t& numDigits, bool * aOK = nullptr );
 std::string toString( int64_t val, int base );
-void toDigits( int64_t val, int base, std::pair< int8_t*, int >& retVal, size_t& numDigits );
 int64_t fromString( const std::string& str, int base );
 std::string getTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point >& startEndTime, bool reportTotalSeconds, bool highPrecision );
 std::string getTimeString( const std::chrono::system_clock::duration& duration, bool reportTotalSeconds, bool highPrecision );
 double getSeconds( const std::chrono::system_clock::duration& duration, bool highPrecision );
 
-bool isNarcissistic( int64_t val, int base, bool& aOK );
-std::list< int64_t > computeFactors( int64_t num );
+std::list< int64_t > computeFactors( int64_t num, bool properFactors=false );
 std::list< int64_t > computePrimeFactors( int64_t num );
-bool isSemiPerfect( const std::vector< int64_t >& numbers, size_t n, int64_t num );
-std::pair< bool, std::list< int64_t > > isSemiPerfect( int64_t num );
+
+bool isNarcissistic( int64_t val, int base, bool& aOK );
+// return Value, the list of factors since the factors are often needed
 std::pair< int64_t, std::list< int64_t > > getSumOfFactors( int64_t curr, bool properFactors );
+std::pair< bool, std::list< int64_t > > isSemiPerfect( int64_t num );
 std::pair< bool, std::list< int64_t > > isPerfect( int64_t num );
 std::pair< bool, std::list< int64_t > > isAbundant( int64_t num );
 
-std::string getNumberListString( const std::list<int64_t>& numbers, int base );
-std::string getNumberListString( const std::list<uint64_t>& numbers, int base );
+bool isSemiPerfect( const std::vector< int64_t >& numbers, size_t n, int64_t num );
+
+template< typename T >
+std::string getNumberListString( const T & numbers, int base )
+{
+    std::ostringstream oss;
+    bool first = true;
+    size_t ii = 0;
+    std::string str;
+    for ( auto&& currVal : numbers )
+    {
+        if ( ii && ( ii % 5 == 0 ) )
+        {
+            oss << "\n";
+            first = true;
+        }
+        if ( !first )
+            oss << ", ";
+        else
+            oss << "    ";
+        first = false;
+
+        oss << NUtils::toString( currVal, base );
+        if ( base != 10 )
+            oss << "(=" << currVal << ")";
+        ii++;
+    }
+    return oss.str();
+}
 
 template <size_t N>
-constexpr std::optional<int> find_last_index_of_bit_set( std::bitset<N> set )
+constexpr std::optional<size_t> findLargestIndexInBitSet( const std::bitset<N> & set )
 {
-    for ( int64_t ii = static_cast< int64_t >( set.size() )- 1; ii > -1; --ii )
+    if ( set.size() == 0 )
+        return std::nullopt;
+
+    for ( size_t ii = set.size() - 1; ii >= 0; --ii )
     {
         if ( set.test( ii ) )
         {
-            return std::optional( ii );
+            return std::optional<size_t>( ii );
         }
+        if ( ii == 0 )
+            break;
     }
     return std::nullopt;
 }

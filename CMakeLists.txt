@@ -27,7 +27,7 @@ endif()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
-project( SABUtils )
+project( Utils )
 
 include( include.cmake )
 include( Project.cmake )

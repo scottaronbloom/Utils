@@ -29,13 +29,17 @@ namespace NUtils
 {
     int fromChar( char ch, int base, bool& aOK )
     {
-        if ( ch == '-' )
+        aOK = false;
+        if ( base < 2 || base > 36 )
+            return 0;
+
+        if ( ch == '-' || ch == '_' )
         {
             aOK = true;
             return 1;
         }
-        aOK = false;
-        if ( ( ch >= '0' ) && ch <= ( '0' + ( base - 1 ) ) )
+        // only short cut if its '0' - '9'
+        if ( ( ch >= '0' ) && ( ch <= '9' ) && ch <= ( '0' + ( base - 1 ) ) )
         {
             aOK = true;
             return ( ch - '0' );
@@ -64,14 +68,22 @@ namespace NUtils
         return 'a' + value - 10;
     }
 
-    void toDigits( int64_t val, int base, std::pair< int8_t *, int > & retVal, size_t & numDigits )
+    void toDigits( int64_t val, int base, std::pair< int8_t *, int > & retVal, size_t & numDigits, bool * aOK )
     {
         numDigits = 0;
+        if ( aOK )
+            *aOK = true;
         do
         {
             int64_t quotient = val / base;
             int8_t remainder = static_cast< int8_t >( val % base );
             retVal.first[ numDigits++ ] = remainder;
+            if ( numDigits > retVal.second ) // not a string, can use the whole array
+            {
+                if ( aOK )
+                    *aOK = false;
+                return;
+            }
             val = quotient;
         } while ( val != 0 );
     }
@@ -79,6 +91,8 @@ namespace NUtils
     std::string toString( int64_t val, int base )
     {
         std::string retVal;
+        bool isNeg = val < 0;
+        val = std::abs( val );
         do
         {
             int64_t quotient = val / base;
@@ -86,6 +100,8 @@ namespace NUtils
             retVal.insert( retVal.begin(), toChar( remainder ) );
             val = quotient;
         } while ( val != 0 );
+        if ( isNeg )
+            retVal.insert( retVal.begin(), '-' );
         return retVal;
     }
 
@@ -199,7 +215,7 @@ namespace NUtils
         return isNarcissisticDigits( val, base, aOK );
     }
 
-    std::list< int64_t > computeFactors( int64_t num )
+    std::list< int64_t > computeFactors( int64_t num, bool properFactors )
     {
         std::list< int64_t > retVal;
         std::list< int64_t > retVal2;
@@ -223,6 +239,9 @@ namespace NUtils
             retVal2.pop_front();
         retVal.insert( retVal.end(), retVal2.begin(), retVal2.end() );
         retVal.sort();
+
+        if ( properFactors && !retVal.empty() )
+            retVal.pop_back();
         return retVal;
     }
 
@@ -238,7 +257,7 @@ namespace NUtils
 
         int64_t lastNum = static_cast< int64_t >( std::floor( std::sqrt( num ) ) );
 
-        for ( int64_t ii = 3; ii < lastNum; ii = ii + 2 )
+        for ( int64_t ii = 3; ii <= lastNum; ii = ii + 2 )
         {
             while ( ( num % ii ) == 0 )
             {
@@ -253,9 +272,7 @@ namespace NUtils
     
     std::pair< int64_t, std::list< int64_t > > getSumOfFactors( int64_t curr, bool properFactors )
     {
-        auto factors = computeFactors( curr );
-        if ( properFactors && !factors.empty() )
-            factors.pop_back();
+        auto factors = computeFactors( curr, properFactors );
         int64_t sum = 0;
         for ( auto ii : factors )
             sum += ii;
@@ -293,42 +310,5 @@ namespace NUtils
     {
         auto sum = getSumOfFactors( num, true );
         return std::make_pair( sum.first > num, sum.second );
-    }
-
-    template< typename T >
-    std::string getNumberListString( const std::list<T>& numbers, int base )
-    {
-        std::ostringstream oss;
-        bool first = true;
-        size_t ii = 0;
-        std::string str;
-        for ( auto&& currVal : numbers )
-        {
-            if ( ii && ( ii % 5 == 0 ) )
-            {
-                oss << "\n";
-                first = true;
-            }
-            if ( !first )
-                oss << ", ";
-            else
-                oss << "    ";
-            first = false;
-            
-            oss << NUtils::toString( currVal, base );
-            if ( base != 10 )
-                oss << "(=" << currVal << ")";
-            ii++;
-        }
-        return oss.str();
-    }
-
-    std::string getNumberListString( const std::list< int64_t >& numbers, int base )
-    {
-        return getNumberListString< int64_t >( numbers, base );
-    }
-    std::string getNumberListString( const std::list< uint64_t >& numbers, int base )
-    {
-        return getNumberListString< uint64_t >( numbers, base );
     }
 }
