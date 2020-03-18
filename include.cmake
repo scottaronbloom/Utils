@@ -22,6 +22,7 @@
 
 set(qtproject_SRCS
     utils.cpp
+    QtUtils.cpp
     SpinBox64.cpp
     SpinBox64U.cpp
 )
@@ -33,6 +34,7 @@ set(qtproject_H
 
 set(project_H
     utils.h
+    QtUtils.h
     EnumUtils.h
 )
 
