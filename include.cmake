@@ -22,6 +22,10 @@
 
 set(qtproject_SRCS
     utils.cpp
+    FileUtils.cpp
+    FromString.cpp
+    StringUtils.cpp
+    StringComparisonClasses.cpp
     QtUtils.cpp
     SpinBox64.cpp
     SpinBox64U.cpp
@@ -34,8 +38,12 @@ set(qtproject_H
 
 set(project_H
     utils.h
+    FileUtils.h
+    FromString.h
     QtUtils.h
     EnumUtils.h
+    StringComparisonClasses.h
+    StringUtils.h
 )
 
 set(qtproject_UIS

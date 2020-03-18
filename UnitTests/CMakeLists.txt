@@ -18,9 +18,7 @@
 #
 #
 
-SET( QT_LIBRARIES Qt5::Core )
-
-SAB_UNIT_TEST(CardTester
+SAB_UNIT_TEST(Utils
     Test.cpp
     "${QT_LIBRARIES};SABUtils;gmock"
     )

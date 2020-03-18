@@ -27,7 +27,11 @@ endif()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
+find_package(Qt5 COMPONENTS Core Widgets Xml XmlPatterns REQUIRED)
+
 project( Utils )
+
+AddQtIncludes()
 
 include( include.cmake )
 include( Project.cmake )
