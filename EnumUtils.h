@@ -82,6 +82,21 @@ inline EnumName operator~( const EnumName & lhs )                             \
 }
 
 #define DECLARE_ENUM_FUNCS_ARITHMETIC( EnumName ) \
+inline EnumName operator-( const EnumName & lhs, const EnumName & rhs )       \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    IntType lhsVal = static_cast<IntType>( lhs );                             \
+    IntType rhsVal = static_cast<IntType>( rhs );                             \
+    EnumName retVal = static_cast<EnumName>( lhsVal - rhsVal );               \
+    return retVal;                                                            \
+}                                                                             \
+inline EnumName operator-( const EnumName & lhs, size_t rhs )                 \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    IntType lhsVal = static_cast<IntType>( lhs );                             \
+    EnumName retVal = static_cast<EnumName>( lhsVal - rhs );                  \
+    return retVal;                                                            \
+}                                                                             \
 inline EnumName operator+( const EnumName & lhs, const EnumName & rhs )       \
 {                                                                             \
     using IntType = std::underlying_type<EnumName>::type;                     \
@@ -103,6 +118,27 @@ inline EnumName operator++( EnumName & lhs )                                  \
     auto val = static_cast< IntType >( lhs );                                 \
     lhs = static_cast< EnumName >( val + 1 );                                 \
     return lhs;                                                               \
+}                                                                             \
+inline EnumName operator--( EnumName& lhs )                                   \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    auto val = static_cast<IntType>( lhs );                                   \
+    lhs = static_cast<EnumName>( val - 1 );                                   \
+    return lhs;                                                               \
+}                                                                             \
+inline EnumName operator++( EnumName& lhs, int n )                            \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    auto val = static_cast<IntType>( lhs );                                   \
+    lhs = static_cast<EnumName>( val + ( ( n != 0 ) ? n : 1 ) );              \
+    return lhs;                                                               \
+}                                                                             \
+inline EnumName operator--( EnumName& lhs, int n )                            \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    auto val = static_cast<IntType>( lhs );                                   \
+    lhs = static_cast<EnumName>( val - ( ( n != 0 ) ? n : 1 ) );              \
+    return lhs;                                                               \
 }
 
 #define DECLARE_ENUM_FUNCS_ARITHMETIC_ONEHOT( EnumName ) \
@@ -110,14 +146,28 @@ inline EnumName operator--( EnumName & lhs )                                  \
 {                                                                             \
     using IntType = std::underlying_type<EnumName>::type;                     \
     auto val = static_cast< IntType >( lhs );                                 \
-    lhs = static_cast< EnumName >( val >> 1 );                                \
+    lhs = static_cast<EnumName>( val >> 1 );                                  \
     return lhs;                                                               \
 }                                                                             \
 inline EnumName operator++( EnumName & lhs )                                  \
 {                                                                             \
     using IntType = std::underlying_type<EnumName>::type;                     \
     auto val = static_cast< IntType >( lhs );                                 \
-    lhs = static_cast< EnumName >( val << 1 );                                \
+    lhs = static_cast<EnumName>( val << 1 );                                  \
+    return lhs;                                                               \
+}                                                                             \
+inline EnumName operator--( EnumName& lhs, int n )                            \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    auto val = static_cast<IntType>( lhs );                                   \
+    lhs = static_cast<EnumName>( val >> ( ( n != 0 ) ? n : 1 ) );             \
+    return lhs;                                                               \
+}                                                                             \
+inline EnumName operator++( EnumName& lhs, int n )                            \
+{                                                                             \
+    using IntType = std::underlying_type<EnumName>::type;                     \
+    auto val = static_cast<IntType>( lhs );                                   \
+    lhs = static_cast<EnumName>( val << ( ( n != 0 ) ? n : 1 ) );             \
     return lhs;                                                               \
 }
 
