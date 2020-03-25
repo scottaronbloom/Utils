@@ -32,6 +32,7 @@
 #include <vector>
 #include <optional>
 #include <bitset>
+#include <functional>
 namespace NUtils
 {
 
@@ -135,6 +136,75 @@ constexpr std::optional<size_t> findLargestIndexInBitSet( const std::bitset<N> &
     }
     return std::nullopt;
 }
+template <size_t N>
+constexpr std::optional<size_t> findSmallestIndexInBitSet( const std::bitset<N>& set )
+{
+    if ( set.size() == 0 )
+        return std::nullopt;
+
+    for ( size_t ii = 0; ii < set.size(); ++ii )
+    {
+        if ( set.test( ii ) )
+        {
+            return std::optional<size_t>( ii );
+        }
+    }
+    return std::nullopt;
+}
+
+template< typename T >
+void combinationUtil( const std::vector< T >& arr, std::vector< T >& data,
+                      size_t start, size_t end,
+                      size_t index, size_t r, const std::function< void( const std::vector< T > & sub ) >& func )
+{
+    // Current combination is ready 
+    // to be printed, print it  
+    if ( index == r )
+    {
+        if ( func )
+        {
+            func( data );
+        }
+        return;
+    }
+
+    // replace index with all possible  
+    // elements. The condition "end-i+1 >= r-index" 
+    // makes sure that including one element  
+    // at index will make a combination with  
+    // remaining elements at remaining positions  
+    for ( size_t i = start; ( i <= end ) && ( end - i + 1 ) >= ( r - index ); i++ )
+    {
+        data[ index ] = arr[ i ];
+        combinationUtil( arr, data, i + 1, end, index + 1, r, func );
+    }
+}
+
+template< typename T >
+void allCombinations( const std::vector< T >& arr, size_t r, const std::function< void( const std::vector< T > & sub ) >& func )
+{
+    // A temporary array to store 
+    // all combination one by one  
+    std::vector< T > data( r );
+
+    // Print all combination using 
+    // temprary array 'data[]'  
+    combinationUtil( arr, data, 0, arr.size() - 1, 0, r, func );
+}
+
+template< typename T >
+std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, size_t r )
+{
+    std::vector< std::vector< T > > combinations;
+    NUtils::allCombinations< T >( arr, 5,
+                                    [ &combinations ]( const std::vector< T >& sub )
+                                    {
+                                        combinations.push_back( sub );
+                                    } );
+    return combinations;
+}
+
+
 }
 
 #endif

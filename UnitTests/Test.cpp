@@ -278,6 +278,20 @@ namespace
         EXPECT_EQ( 7, NUtils::findLargestIndexInBitSet( std::bitset< 16 >( 255 ) ).value_or( -99 ) );
         EXPECT_EQ( 15, NUtils::findLargestIndexInBitSet( std::bitset< 16 >( 32768   ) ).value_or( -99 ) );
     }
+
+    TEST( TestUtils, findSmallestIndexInBitSet )
+    {
+        EXPECT_EQ( -99, NUtils::findSmallestIndexInBitSet( std::bitset< 16 >() ).value_or( -99 ) );
+        EXPECT_EQ( 0, NUtils::findSmallestIndexInBitSet( std::bitset< 16 >( 255 ) ).value_or( -99 ) );
+        EXPECT_EQ( 15, NUtils::findSmallestIndexInBitSet( std::bitset< 16 >( 32768 ) ).value_or( -99 ) );
+    }
+
+    TEST( TestUtils, TestCombinational )
+    {
+        std::vector< int > arr = { 1, 2, 3, 4, 5, 6, 7 };
+        auto combinations = NUtils::allCombinations( arr, 5 );
+        EXPECT_EQ( 21, combinations.size() );
+    }
 }
 
 
