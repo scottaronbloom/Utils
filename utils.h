@@ -204,6 +204,40 @@ std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, si
     return combinations;
 }
 
+template< typename T >
+std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::vector< T > >& lhs, const std::list< T >& rhs, const std::function< bool( const std::vector< T >& curr, const T & obj ) > & addToResult = std::function< bool( const std::vector< T >& curr, const T& obj ) >() )
+{
+    std::vector< std::vector< T > > retVal;
+    for( auto && ii : lhs )
+    {
+        for( auto && jj : rhs )
+        {
+            if ( addToResult && addToResult( ii, jj ) )
+                continue;
+            auto temp = ii;
+            temp.push_back( jj );
+            retVal.push_back( temp );
+            if ( retVal.size() == 676 )
+                int xyz = 0;
+        }
+    }
+    return retVal;
+}
+
+template< typename T >
+std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::list< T > > & arr, const std::function< bool( const std::vector< T >& curr, const T& obj ) >& addToResult = std::function< bool( const std::vector< T >& curr, const T& obj ) >() )
+{
+    if ( arr.empty() )
+        return {};
+
+    auto temp = std::vector< std::vector< T > >( { { arr[0].begin(), arr[ 0 ].end() } } );
+    for ( size_t ii = 1; ii < arr.size(); ++ii )
+    {
+        temp = cartiseanProduct( temp, arr[ ii ], addToResult );
+    }
+    return temp;
+}
+
 
 }
 

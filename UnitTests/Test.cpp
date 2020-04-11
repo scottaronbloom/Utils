@@ -292,6 +292,115 @@ namespace
         auto combinations = NUtils::allCombinations( arr, 5 );
         EXPECT_EQ( 21, combinations.size() );
     }
+
+    TEST( TestUtils, TestCartiseanProduct )
+    {
+        std::vector< std::list< int > > arr = { { 1 }, { 2, 3 }, { 4, 5 }, { 6, 7 }, { 8, 9, 10 } };
+
+        auto products = NUtils::cartiseanProduct( arr );
+        ASSERT_EQ( 24, products.size() );
+        auto ii = 0;
+        EXPECT_EQ( std::vector< int >( { 1, 2, 4, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 4, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 4, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 2, 4, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 4, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 4, 7, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 2, 5, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 5, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 5, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 2, 5, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 5, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 5, 7, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 10 } ), products[ ii++ ] );
+    }
+
+    TEST( TestUtils, TestCartiseanProductWDupe )
+    {
+        std::vector< std::list< int > > arr = { { 1 }, { 1, 3 }, { 4, 5 }, { 6, 7 }, { 8, 9, 10 } };
+
+        auto products = NUtils::cartiseanProduct( arr );
+        ASSERT_EQ( 24, products.size() );
+        auto ii = 0;
+        EXPECT_EQ( std::vector< int >( { 1, 1, 4, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 4, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 4, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 1, 4, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 4, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 4, 7, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 1, 5, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 5, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 5, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 1, 5, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 5, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 1, 5, 7, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 10 } ), products[ ii++ ] );
+    }
+
+    TEST( TestUtils, TestCartiseanProductNoDupe )
+    {
+        std::vector< std::list< int > > arr = { { 1 }, { 1, 3 }, { 4, 5 }, { 6, 7 }, { 8, 9, 10 } };
+
+        std::function< bool( const std::vector< int >& curr, const int & obj ) > func = []( const std::vector< int >& curr, const int& obj )
+        {
+            return std::find( curr.begin(), curr.end(), obj ) != curr.end();
+        };
+
+        auto products = NUtils::cartiseanProduct( arr, func );
+        ASSERT_EQ( 12, products.size() );
+        auto ii = 0;
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 4, 7, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 6, 10 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 8 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 9 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 10 } ), products[ ii++ ] );
+    }
 }
 
 
