@@ -217,8 +217,6 @@ std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::vector
             auto temp = ii;
             temp.push_back( jj );
             retVal.push_back( temp );
-            if ( retVal.size() == 676 )
-                int xyz = 0;
         }
     }
     return retVal;
