@@ -212,7 +212,7 @@ std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::vector
     {
         for( auto && jj : rhs )
         {
-            if ( addToResult && addToResult( ii, jj ) )
+            if ( addToResult && !addToResult( ii, jj ) )
                 continue;
             auto temp = ii;
             temp.push_back( jj );
@@ -228,7 +228,12 @@ std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::list< 
     if ( arr.empty() )
         return {};
 
-    auto temp = std::vector< std::vector< T > >( { { arr[0].begin(), arr[ 0 ].end() } } );
+    std::vector< std::vector< std::shared_ptr< CCard > > > temp;
+    for ( auto&& ii : arr[0] )
+    {
+        temp.push_back( { ii } );
+    }
+
     for ( size_t ii = 1; ii < arr.size(); ++ii )
     {
         temp = cartiseanProduct( temp, arr[ ii ], addToResult );
