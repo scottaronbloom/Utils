@@ -12,9 +12,6 @@
 # remains in all copies of this software.
 #
 #
-# $Author: scott $ - $Revision: 56205 $ - $Date: 2019-11-21 10:23:08 -0800 (Thu, 21 Nov 2019) $
-# $HeadURL: http://bpsvn/svn/trunk/CoreApp/dr/UnitTests/CMakeLists.txt $
-#
 #
 #
 

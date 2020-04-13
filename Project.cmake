@@ -30,7 +30,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 find_package(Threads REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 AddQtIncludes()
-
+add_definitions(
+   -DQT_NO_KEYWORDS
+   )
+   
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 SET(CMAKE_AUTOMOC OFF)

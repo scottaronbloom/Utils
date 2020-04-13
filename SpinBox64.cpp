@@ -102,8 +102,8 @@ void CSpinBox64Impl::emitSignals( EEmitPolicy ep, const int64_t& old )
     {
         if ( ep == EEmitPolicy::eAlwaysEmit || fValue != old )
         {
-            emit fParent->valueChanged( fParent->lineEdit()->displayText() );
-            emit fParent->valueChanged( fValue );
+            Q_EMIT fParent->valueChanged( fParent->lineEdit()->displayText() );
+            Q_EMIT fParent->valueChanged( fValue );
         }
     }
 }

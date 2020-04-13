@@ -33,6 +33,7 @@
 #include <optional>
 #include <bitset>
 #include <functional>
+#include <algorithm>
 namespace NUtils
 {
 
@@ -228,17 +229,18 @@ std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::list< 
     if ( arr.empty() )
         return {};
 
-    std::vector< std::vector< std::shared_ptr< CCard > > > temp;
+
+    std::vector< std::vector< T > > retVal;
     for ( auto&& ii : arr[0] )
     {
-        temp.push_back( { ii } );
+        retVal.push_back( { ii } );
     }
 
     for ( size_t ii = 1; ii < arr.size(); ++ii )
     {
-        temp = cartiseanProduct( temp, arr[ ii ], addToResult );
+        retVal = cartiseanProduct( retVal, arr[ ii ], addToResult );
     }
-    return temp;
+    return retVal;
 }
 
 
