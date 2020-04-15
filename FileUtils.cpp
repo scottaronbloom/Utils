@@ -612,7 +612,7 @@ bool backup( const QString & fileName, const std::string & msg, bool useTrash, c
 // format 
 // %FN for filename, %TS for timestamp
 // empty -> %f.bak
-bool backup( const std::string & fileName, const std::string & msg, bool useTrash, const std::string & format, bool moveFile )
+bool backup( const std::string & fileName, const std::string & /*msg*/, bool useTrash, const std::string & format, bool moveFile )
 {
     if( NFileUtils::exists( fileName ) )
     {
