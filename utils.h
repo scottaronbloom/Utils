@@ -197,7 +197,7 @@ template< typename T >
 std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, size_t r )
 {
     std::vector< std::vector< T > > combinations;
-    NUtils::allCombinations< T >( arr, 5,
+    NUtils::allCombinations< T >( arr, r,
                                     [ &combinations ]( const std::vector< T >& sub )
                                     {
                                         combinations.push_back( sub );
