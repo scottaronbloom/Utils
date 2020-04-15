@@ -30,10 +30,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 find_package(Threads REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 AddQtIncludes()
-add_definitions(
-   -DQT_NO_KEYWORDS
-   )
-   
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 SET(CMAKE_AUTOMOC OFF)
@@ -56,4 +53,6 @@ SET( _CMAKE_FILES "CMakeLists.txt;include.cmake" )
 source_group("CMake Files" FILES ${_CMAKE_FILES} )
 FILE(GLOB _CMAKE_MODULE_FILES "${CMAKE_SOURCE_DIR}/Modules/*")
 source_group("CMake Files\\Modues" FILES ${_CMAKE_MODULE_FILES} )
+
+include( ${CMAKE_SOURCE_DIR}/SABUtils/CompilerSettings.cmake )
 
