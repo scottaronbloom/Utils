@@ -27,6 +27,7 @@ set(qtproject_SRCS
     StringUtils.cpp
     StringComparisonClasses.cpp
     QtUtils.cpp
+    ScrollMessageBox.cpp
     SpinBox64.cpp
     SpinBox64U.cpp
 )
@@ -34,6 +35,7 @@ set(qtproject_SRCS
 set(qtproject_H
     SpinBox64.h
     SpinBox64U.h
+    ScrollMessageBox.h
 )
 
 set(project_H
@@ -47,6 +49,7 @@ set(project_H
 )
 
 set(qtproject_UIS
+    ScrollMessageBox.ui
 )
 
 
