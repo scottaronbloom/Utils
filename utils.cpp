@@ -187,17 +187,18 @@ namespace NUtils
     bool isNarcissisticDigits( int64_t val, int base, bool& aOK )
     {
         aOK = true;
-        int8_t digits[ 4096 ] = {0};
+        int8_t rawDigits[ 4096 ] = {0};
         size_t numDigits;
-        toDigits( val, base, std::make_pair( digits, 4096 ), numDigits );
+        auto digits = std::make_pair( rawDigits, 4096 );
+        toDigits( val, base, digits, numDigits );
 
         int64_t sumOfPowers = 0;
         int64_t value = 0;
         for ( int64_t ii = numDigits - 1; ii >= 0; --ii )
         {
-            sumOfPowers += NUtils::power( digits[ ii ], numDigits );
+            sumOfPowers += NUtils::power( rawDigits[ ii ], numDigits );
 
-            value = ( value * base ) + digits[ ii ];
+            value = ( value * base ) + rawDigits[ ii ];
         }
 
         auto retVal = ( value == sumOfPowers );

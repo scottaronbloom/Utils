@@ -97,18 +97,21 @@ namespace
     {
         int8_t digits[ 10 ] = {0};
         size_t numDigits = 0;
+        auto retVal = std::make_pair( digits, 2 );
         bool aOK;
-        NUtils::toDigits( 101, 10, std::make_pair( digits, 2 ), numDigits, &aOK );
+        NUtils::toDigits( 101, 10, retVal, numDigits, &aOK );
         EXPECT_FALSE( aOK );
 
-        NUtils::toDigits( 123, 10, std::make_pair( digits, 3 ), numDigits, &aOK );
+        retVal = std::make_pair( digits, 3 );
+        NUtils::toDigits( 123, 10, retVal, numDigits, &aOK );
         EXPECT_TRUE( aOK );
         EXPECT_EQ( 3, numDigits );
         EXPECT_EQ( 3, digits[ 0 ] );
         EXPECT_EQ( 2, digits[ 1 ] );
         EXPECT_EQ( 1, digits[ 2 ] );
 
-        NUtils::toDigits( 1234567890, 10, std::make_pair( digits, 10 ), numDigits, &aOK );
+        retVal = std::make_pair( digits, 10 );
+        NUtils::toDigits( 1234567890, 10, retVal, numDigits, &aOK );
         EXPECT_TRUE( aOK );
         EXPECT_EQ( 10, numDigits );
         EXPECT_EQ( 0, digits[ 0 ] );

@@ -37,19 +37,19 @@ class CSpinBox64 : public QAbstractSpinBox
     Q_PROPERTY( QString suffix READ suffix WRITE setSuffix )
     Q_PROPERTY( QString prefix READ prefix WRITE setPrefix )
     Q_PROPERTY( QString cleanText READ cleanText )
-    Q_PROPERTY( int64_t minimum READ minimum WRITE setMinimum )
-    Q_PROPERTY( int64_t maximum READ maximum WRITE setMaximum )
-    Q_PROPERTY( int64_t singleStep READ singleStep WRITE setSingleStep )
+    Q_PROPERTY( qlonglong minimum READ minimum WRITE setMinimum )
+    Q_PROPERTY( qlonglong maximum READ maximum WRITE setMaximum )
+    Q_PROPERTY( qlonglong singleStep READ singleStep WRITE setSingleStep )
     Q_PROPERTY( StepType stepType READ stepType WRITE setStepType )
-    Q_PROPERTY( int64_t value READ value WRITE setValue NOTIFY valueChanged USER true )
-    Q_PROPERTY( int64_t displayIntegerBase READ displayIntegerBase WRITE setDisplayIntegerBase )
+    Q_PROPERTY( qlonglong value READ value WRITE setValue NOTIFY valueChanged USER true )
+    Q_PROPERTY( qlonglong displayIntegerBase READ displayIntegerBase WRITE setDisplayIntegerBase )
 public:
     explicit CSpinBox64( QWidget* parent = nullptr );
     CSpinBox64( const CSpinBox64& ) = delete;
     CSpinBox64& operator=( const CSpinBox64& ) = delete;
     ~CSpinBox64();
 
-    int64_t value() const ;
+    qlonglong value() const ;
 
     QString prefix() const;
     void setPrefix( const QString& prefix );
@@ -62,16 +62,16 @@ public:
 
     QString cleanText() const;
 
-    int64_t singleStep() const;
-    void setSingleStep( int64_t val );
+    qlonglong singleStep() const;
+    void setSingleStep( qlonglong val );
 
-    int64_t minimum() const;
-    void setMinimum( int64_t min );
+    qlonglong minimum() const;
+    void setMinimum( qlonglong min );
 
-    int64_t maximum() const;
-    void setMaximum( int64_t max );
+    qlonglong maximum() const;
+    void setMaximum( qlonglong max );
 
-    void setRange( int64_t min, int64_t max );
+    void setRange( qlonglong min, qlonglong max );
 
     StepType stepType() const;
     void setStepType( StepType stepType );
@@ -83,18 +83,18 @@ public:
 
     virtual void stepBy( int steps ) override;
 
-    static int64_t maxAllowed() { return std::numeric_limits< int64_t >::max(); }
-    static int64_t minAllowed() { return std::numeric_limits< int64_t >::min(); }
+    static qlonglong maxAllowed() { return std::numeric_limits< qlonglong >::max(); }
+    static qlonglong minAllowed() { return std::numeric_limits< qlonglong >::min(); }
     QValidator::State validate( QString& input, int& pos ) const override;
     virtual void fixup( QString& str ) const override;
     virtual QAbstractSpinBox::StepEnabled stepEnabled() const override;
 
 public Q_SLOTS:
-    void setValue( int64_t val );
+    void setValue( qlonglong val );
     void slotEditorCursorPositionChanged( int oldpos, int newpos );
     void slotEditorTextChanged( const QString& t );
 Q_SIGNALS:
-    void valueChanged( int64_t v );
+    void valueChanged( qlonglong v );
     void valueChanged( const QString & v );
 
 protected:

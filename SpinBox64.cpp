@@ -29,6 +29,8 @@
 #include <QStyleOption>
 #include <QApplication>
 
+#include <cmath>
+
 enum class EEmitPolicy
 {
     eEmitIfChanged,
@@ -41,26 +43,26 @@ class CSpinBox64Impl
 public:
     CSpinBox64Impl( CSpinBox64 * parent ) : fParent( parent ){};
 
-    virtual int64_t valueFromText( const QString& text ) const;
-    virtual QString textFromValue( int64_t val ) const;
-    void setValue( int64_t value, EEmitPolicy ep, bool update = true );
+    virtual qlonglong valueFromText( const QString& text ) const;
+    virtual QString textFromValue( qlonglong val ) const;
+    void setValue( qlonglong value, EEmitPolicy ep, bool update = true );
     QVariant validateAndInterpret( QString& input, int& pos, QValidator::State& state ) const;
     QVariant calculateAdaptiveDecimalStep( int steps ) const;
     void updateEdit();
     QString stripped( const QString& text, int* pos = 0 ) const;
     void clearCache() const;
-    int64_t bound( const int64_t& val, const int64_t& old = 0, int steps = 0 ) const;
+    qlonglong bound( const qlonglong& val, const qlonglong& old = 0, int steps = 0 ) const;
     bool specialValue() const;
-    void emitSignals( EEmitPolicy ep, const int64_t& old );
-    void setRange( int64_t min, int64_t max );
+    void emitSignals( EEmitPolicy ep, const qlonglong& old );
+    void setRange( qlonglong min, qlonglong max );
     QSize sizeHint() const;
     QAbstractSpinBox::StepEnabled stepEnabled() const;
     QString longestAllowedString() const;
 
-    int64_t fValue{ 0 };
-    int64_t fMinimum{ 0 };
-    int64_t fMaximum{ 99 };
-    int64_t fSingleStep{ 1 };
+    qlonglong fValue{ 0 };
+    qlonglong fMinimum{ 0 };
+    qlonglong fMaximum{ 99 };
+    qlonglong fSingleStep{ 1 };
     int fDisplayBase{ 10 };
     QString fPrefix;
     QString fSuffix;
@@ -69,7 +71,7 @@ public:
     QString fSpecialValueText;
 
     mutable QString fCachedText;
-    mutable int64_t fCachedValue;
+    mutable qlonglong fCachedValue;
     mutable QValidator::State fCachedState;
     mutable QString fCachedLongestAllowedString;
 
@@ -80,7 +82,7 @@ public:
     CSpinBox64 * fParent{ nullptr };
 };
 
-void CSpinBox64Impl::setValue( int64_t value, EEmitPolicy ep, bool update )
+void CSpinBox64Impl::setValue( qlonglong value, EEmitPolicy ep, bool update )
 {
     auto old = fValue;
     fValue = bound( value );
@@ -96,7 +98,7 @@ void CSpinBox64Impl::setValue( int64_t value, EEmitPolicy ep, bool update )
     }
 }
 
-void CSpinBox64Impl::emitSignals( EEmitPolicy ep, const int64_t& old )
+void CSpinBox64Impl::emitSignals( EEmitPolicy ep, const qlonglong& old )
 {
     if ( ep != EEmitPolicy::eNeverEmit )
     {
@@ -147,9 +149,9 @@ void CSpinBox64Impl::clearCache() const
     fCachedState = QValidator::Acceptable;
 }
 
-int64_t CSpinBox64Impl::bound( const int64_t& val, const int64_t& old, int steps ) const
+qlonglong CSpinBox64Impl::bound( const qlonglong& val, const qlonglong& old, int steps ) const
 {
-    int64_t v = val;
+    qlonglong v = val;
     if ( !fWrapping || ( steps == 0 ) || ( old == 0 ) )
     {
         if ( v < fMinimum )
@@ -191,7 +193,7 @@ bool CSpinBox64Impl::specialValue() const
     return ( fValue == fMinimum && !fSpecialValueText.isEmpty() );
 }
 
-int64_t CSpinBox64Impl::valueFromText( const QString& text ) const
+qlonglong CSpinBox64Impl::valueFromText( const QString& text ) const
 {
     QString copy = text;
     int pos = fParent->lineEdit()->cursorPosition();
@@ -222,7 +224,7 @@ QVariant CSpinBox64Impl::validateAndInterpret( QString& input, int& pos, QValida
     if ( fCachedText == input && !input.isEmpty() )
     {
         state = fCachedState;
-        return fCachedValue;
+        return (qlonglong)fCachedValue;
     }
 
     QString copy = stripped( input, &pos );
@@ -297,8 +299,8 @@ QVariant CSpinBox64Impl::validateAndInterpret( QString& input, int& pos, QValida
 
 QVariant CSpinBox64Impl::calculateAdaptiveDecimalStep( int steps ) const
 {
-    const int64_t intValue = fValue;
-    const int64_t absValue = std::abs( intValue );
+    const qlonglong intValue = fValue;
+    const qlonglong absValue = std::abs( intValue );
 
     if ( absValue < 100 )
         return 1;
@@ -308,7 +310,7 @@ QVariant CSpinBox64Impl::calculateAdaptiveDecimalStep( int steps ) const
     const int signCompensation = ( valueNegative == stepsNegative ) ? 0 : 1;
 
     const int log = static_cast<int>( std::log10( absValue - signCompensation ) ) - 1;
-    return static_cast<int64_t>( std::pow( 10, log ) );
+    return static_cast<qlonglong>( std::pow( 10, log ) );
 }
 
 void CSpinBox64Impl::updateEdit()
@@ -339,7 +341,7 @@ void CSpinBox64Impl::updateEdit()
     fParent->update();
 }
 
-void CSpinBox64Impl::setRange( int64_t min, int64_t max )
+void CSpinBox64Impl::setRange( qlonglong min, qlonglong max )
 {
     clearCache();
     fMinimum = min;
@@ -405,7 +407,7 @@ QSize CSpinBox64Impl::sizeHint() const
     return fCachedSizeHint;
 }
 
-QString CSpinBox64Impl::textFromValue( int64_t value ) const
+QString CSpinBox64Impl::textFromValue( qlonglong value ) const
 {
     QString str;
 
@@ -426,13 +428,13 @@ QString CSpinBox64Impl::textFromValue( int64_t value ) const
     return str;
 }
 
-Q_DECLARE_METATYPE( int64_t );
+Q_DECLARE_METATYPE( qlonglong );
 
 CSpinBox64::CSpinBox64( QWidget* parent /*= 0 */ ) :
     QAbstractSpinBox( parent ),
     fImpl( new CSpinBox64Impl( this ) )
 {
-    qRegisterMetaType< int64_t >( "int64_t" );
+    qRegisterMetaType< qlonglong >( "qlonglong" );
     connectLineEdit();
 }
 
@@ -440,7 +442,7 @@ CSpinBox64::~CSpinBox64()
 {
 }
 
-int64_t CSpinBox64::value() const
+qlonglong CSpinBox64::value() const
 {
     return fImpl->fValue;
 }
@@ -511,7 +513,7 @@ void CSpinBox64::slotEditorTextChanged( const QString& t )
     }
 }
 
-void CSpinBox64::setValue( int64_t value )
+void CSpinBox64::setValue( qlonglong value )
 {
     fImpl->setValue( value, EEmitPolicy::eEmitIfChanged, true );
 }
@@ -551,12 +553,12 @@ QString CSpinBox64::cleanText() const
     return fImpl->stripped( lineEdit()->displayText() );
 }
 
-int64_t CSpinBox64::singleStep() const
+qlonglong CSpinBox64::singleStep() const
 {
     return fImpl->fSingleStep;
 }
 
-void CSpinBox64::setSingleStep( int64_t value )
+void CSpinBox64::setSingleStep( qlonglong value )
 {
     if ( value >= 0 )
     {
@@ -569,7 +571,7 @@ void CSpinBox64::stepBy( int steps )
 {
     auto old = fImpl->fValue;
     EEmitPolicy e = EEmitPolicy::eEmitIfChanged;
-    int64_t singleStep = fImpl->fSingleStep;
+    qlonglong singleStep = fImpl->fSingleStep;
     switch ( stepType() )
     {
         case QAbstractSpinBox::StepType::AdaptiveDecimalStepType:
@@ -580,7 +582,7 @@ void CSpinBox64::stepBy( int steps )
     }
     
     double tmp = (double)fImpl->fValue + (double)( singleStep * steps );
-    int64_t tmpValue = 0;
+    qlonglong tmpValue = 0;
     if ( tmp > maxAllowed() )
         tmpValue = maxAllowed();
     else if ( tmp < minAllowed() )
@@ -588,7 +590,7 @@ void CSpinBox64::stepBy( int steps )
     else
         tmpValue = fImpl->fValue + ( singleStep * steps );
 
-    fImpl->setValue( fImpl->bound( static_cast< int64_t >( tmpValue ), old, steps ), e );
+    fImpl->setValue( fImpl->bound( static_cast< qlonglong >( tmpValue ), old, steps ), e );
     selectAll();
 }
 
@@ -612,27 +614,27 @@ void CSpinBox64::setWrapping( bool wrapping )
     fImpl->fWrapping = wrapping;
 }
 
-int64_t CSpinBox64::minimum() const
+qlonglong CSpinBox64::minimum() const
 {
     return fImpl->fMinimum;
 }
 
-void CSpinBox64::setMinimum( int64_t minimum )
+void CSpinBox64::setMinimum( qlonglong minimum )
 {
     setRange( minimum, ( fImpl->fMaximum > minimum ) ? fImpl->fMaximum : minimum );
 }
 
-int64_t CSpinBox64::maximum() const
+qlonglong CSpinBox64::maximum() const
 {
     return fImpl->fMaximum;
 }
 
-void CSpinBox64::setMaximum( int64_t maximum )
+void CSpinBox64::setMaximum( qlonglong maximum )
 {
     setRange( ( fImpl->fMinimum < maximum ) ? fImpl->fMinimum : maximum, maximum );
 }
 
-void CSpinBox64::setRange( int64_t min, int64_t max )
+void CSpinBox64::setRange( qlonglong min, qlonglong max )
 {
     fImpl->setRange( min, max );
 }

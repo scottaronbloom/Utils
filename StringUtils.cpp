@@ -886,7 +886,7 @@ namespace NStringUtils
         int written = 0;
 
         va_copy( tmp, marker );
-        written = vsnprintf_s( buff, len, len, fmt, tmp );
+        written = vsnprintf( buff, len, fmt, tmp );
         va_end( tmp );
 
         std::string retVal;

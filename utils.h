@@ -34,6 +34,8 @@
 #include <bitset>
 #include <functional>
 #include <algorithm>
+#include <sstream>
+
 namespace NUtils
 {
 

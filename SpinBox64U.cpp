@@ -28,6 +28,7 @@
 #include <QStyle>
 #include <QStyleOption>
 #include <QApplication>
+#include <cmath>
 
 enum class EEmitPolicy
 {
@@ -41,26 +42,26 @@ class CSpinBox64UImpl
 public:
     CSpinBox64UImpl( CSpinBox64U * parent ) : fParent( parent ){};
 
-    virtual uint64_t valueFromText( const QString& text ) const;
-    virtual QString textFromValue( uint64_t val ) const;
-    void setValue( uint64_t value, EEmitPolicy ep, bool update = true );
+    virtual qulonglong valueFromText( const QString& text ) const;
+    virtual QString textFromValue( qulonglong val ) const;
+    void setValue( qulonglong value, EEmitPolicy ep, bool update = true );
     QVariant validateAndInterpret( QString& input, int& pos, QValidator::State& state ) const;
     QVariant calculateAdaptiveDecimalStep( int steps ) const;
     void updateEdit();
     QString stripped( const QString& text, int* pos = 0 ) const;
     void clearCache() const;
-    uint64_t bound( const uint64_t& val, const uint64_t& old = 0, int steps = 0 ) const;
+    qulonglong bound( const qulonglong& val, const qulonglong& old = 0, int steps = 0 ) const;
     bool specialValue() const;
-    void emitSignals( EEmitPolicy ep, const uint64_t& old );
+    void emitSignals( EEmitPolicy ep, const qulonglong& old );
     QString longestAllowedString() const;
-    void setRange( uint64_t min, uint64_t max );
+    void setRange( qulonglong min, qulonglong max );
     QSize sizeHint() const;
     QAbstractSpinBox::StepEnabled stepEnabled() const;
 
-    uint64_t fValue{ 0 };
-    uint64_t fMinimum{ 0 };
-    uint64_t fMaximum{ 99 };
-    uint64_t fSingleStep{ 1 };
+    qulonglong fValue{ 0 };
+    qulonglong fMinimum{ 0 };
+    qulonglong fMaximum{ 99 };
+    qulonglong fSingleStep{ 1 };
     int fDisplayBase{ 10 };
     QString fPrefix;
     QString fSuffix;
@@ -69,7 +70,7 @@ public:
     QString fSpecialValueText;
 
     mutable QString fCachedText;
-    mutable uint64_t fCachedValue;
+    mutable qulonglong fCachedValue;
     mutable QValidator::State fCachedState;
     mutable QString fCachedMaxAllowedString;
 
@@ -80,7 +81,7 @@ public:
     CSpinBox64U * fParent{ nullptr };
 };
 
-void CSpinBox64UImpl::setValue( uint64_t value, EEmitPolicy ep, bool update )
+void CSpinBox64UImpl::setValue( qulonglong value, EEmitPolicy ep, bool update )
 {
     auto old = fValue;
     fValue = bound( value );
@@ -96,7 +97,7 @@ void CSpinBox64UImpl::setValue( uint64_t value, EEmitPolicy ep, bool update )
     }
 }
 
-void CSpinBox64UImpl::emitSignals( EEmitPolicy ep, const uint64_t& old )
+void CSpinBox64UImpl::emitSignals( EEmitPolicy ep, const qulonglong& old )
 {
     if ( ep != EEmitPolicy::eNeverEmit )
     {
@@ -147,9 +148,9 @@ void CSpinBox64UImpl::clearCache() const
     fCachedState = QValidator::Acceptable;
 }
 
-uint64_t CSpinBox64UImpl::bound( const uint64_t& val, const uint64_t& old, int steps ) const
+qulonglong CSpinBox64UImpl::bound( const qulonglong& val, const qulonglong& old, int steps ) const
 {
-    uint64_t v = val;
+    qulonglong v = val;
     if ( !fWrapping || ( steps == 0 ) || ( old == 0 ) )
     {
         if ( v < fMinimum )
@@ -191,7 +192,7 @@ bool CSpinBox64UImpl::specialValue() const
     return ( fValue == fMinimum && !fSpecialValueText.isEmpty() );
 }
 
-uint64_t CSpinBox64UImpl::valueFromText( const QString& text ) const
+qulonglong CSpinBox64UImpl::valueFromText( const QString& text ) const
 {
     QString copy = text;
     int pos = fParent->lineEdit()->cursorPosition();
@@ -230,12 +231,12 @@ QVariant CSpinBox64UImpl::validateAndInterpret( QString& input, int& pos, QValid
     auto num = fMinimum;
 
     if ( fMaximum != fMinimum && ( copy.isEmpty()
-                                   || ( fMinimum < 0 && copy == QLatin1String( "-" ) )
-                                   || ( fMaximum >= 0 && copy == QLatin1String( "+" ) ) ) )
+                                   || ( /* fMinimum < 0 && */ copy == QLatin1String( "-" ) )
+                                   || ( /* fMaximum >= 0 && */ copy == QLatin1String( "+" ) ) ) )
     {
         state = QValidator::Intermediate;
     }
-    else if ( copy.startsWith( QLatin1Char( '-' ) ) && fMinimum >= 0 )
+    else if ( copy.startsWith( QLatin1Char( '-' ) ) )
     {
         state = QValidator::Invalid; // special-case -0 will be interpreted as 0 and thus not be invalid with a range from 0-100
     }
@@ -275,7 +276,7 @@ QVariant CSpinBox64UImpl::validateAndInterpret( QString& input, int& pos, QValid
         }
         else
         {
-            if ( ( num >= 0 && num > fMaximum ) || ( num < 0 && num < fMinimum ) )
+            if ( ( num > fMaximum ) || ( num < fMinimum ) )
             {
                 state = QValidator::Invalid;
             }
@@ -297,18 +298,18 @@ QVariant CSpinBox64UImpl::validateAndInterpret( QString& input, int& pos, QValid
 
 QVariant CSpinBox64UImpl::calculateAdaptiveDecimalStep( int steps ) const
 {
-    const uint64_t intValue = fValue;
-    const uint64_t absValue = intValue;
+    const qulonglong intValue = fValue;
+    const qulonglong absValue = intValue;
 
     if ( absValue < 100 )
         return 1;
 
-    const bool valueNegative = intValue < 0;
+    const bool valueNegative = false;
     const bool stepsNegative = steps < 0;
     const int signCompensation = ( valueNegative == stepsNegative ) ? 0 : 1;
 
     const int log = static_cast<int>( std::log10( absValue - signCompensation ) ) - 1;
-    return static_cast<uint64_t>( std::pow( 10, log ) );
+    return static_cast<qulonglong>( std::pow( 10, log ) );
 }
 
 void CSpinBox64UImpl::updateEdit()
@@ -339,7 +340,7 @@ void CSpinBox64UImpl::updateEdit()
     fParent->update();
 }
 
-void CSpinBox64UImpl::setRange( uint64_t min, uint64_t max )
+void CSpinBox64UImpl::setRange( qulonglong min, qulonglong max )
 {
     clearCache();
     fMinimum = min;
@@ -405,13 +406,13 @@ QSize CSpinBox64UImpl::sizeHint() const
     return fCachedLongestAllowedString;
 }
 
-QString CSpinBox64UImpl::textFromValue( uint64_t value ) const
+QString CSpinBox64UImpl::textFromValue( qulonglong value ) const
 {
     QString str;
 
     if ( fDisplayBase != 10 )
     {
-        const QLatin1String prefix = value < 0 ? QLatin1String( "-" ) : QLatin1String();
+        const QLatin1String prefix = QLatin1String();
         str = prefix + QString::number( value, fDisplayBase );
     }
     else
@@ -426,13 +427,13 @@ QString CSpinBox64UImpl::textFromValue( uint64_t value ) const
     return str;
 }
 
-Q_DECLARE_METATYPE( uint64_t );
+Q_DECLARE_METATYPE( qulonglong );
 
 CSpinBox64U::CSpinBox64U( QWidget* parent /*= 0 */ ) :
     QAbstractSpinBox( parent ),
     fImpl( new CSpinBox64UImpl( this ) )
 {
-    qRegisterMetaType< uint64_t >( "uint64_t" );
+    qRegisterMetaType< qulonglong >( "qulonglong" );
     connectLineEdit();
 }
 
@@ -440,7 +441,7 @@ CSpinBox64U::~CSpinBox64U()
 {
 }
 
-uint64_t CSpinBox64U::value() const
+qulonglong CSpinBox64U::value() const
 {
     return fImpl->fValue;
 }
@@ -511,7 +512,7 @@ void CSpinBox64U::slotEditorTextChanged( const QString& t )
     }
 }
 
-void CSpinBox64U::setValue( uint64_t value )
+void CSpinBox64U::setValue( qulonglong value )
 {
     fImpl->setValue( value, EEmitPolicy::eEmitIfChanged, true );
 }
@@ -551,25 +552,22 @@ QString CSpinBox64U::cleanText() const
     return fImpl->stripped( lineEdit()->displayText() );
 }
 
-uint64_t CSpinBox64U::singleStep() const
+qulonglong CSpinBox64U::singleStep() const
 {
     return fImpl->fSingleStep;
 }
 
-void CSpinBox64U::setSingleStep( uint64_t value )
+void CSpinBox64U::setSingleStep( qulonglong value )
 {
-    if ( value >= 0 )
-    {
-        fImpl->fSingleStep = value;
-        fImpl->updateEdit();
-    }
+    fImpl->fSingleStep = value;
+    fImpl->updateEdit();
 }
 
 void CSpinBox64U::stepBy( int steps )
 {
     auto old = fImpl->fValue;
     EEmitPolicy e = EEmitPolicy::eEmitIfChanged;
-    uint64_t singleStep = fImpl->fSingleStep;
+    qulonglong singleStep = fImpl->fSingleStep;
     switch ( stepType() )
     {
         case QAbstractSpinBox::StepType::AdaptiveDecimalStepType:
@@ -580,7 +578,7 @@ void CSpinBox64U::stepBy( int steps )
     }
     
     double tmp = (double)fImpl->fValue + (double)( singleStep * steps );
-    uint64_t tmpValue = 0;
+    qulonglong tmpValue = 0;
     if ( tmp > maxAllowed() )
         tmpValue = maxAllowed();
     else if ( tmp < minAllowed() )
@@ -588,7 +586,7 @@ void CSpinBox64U::stepBy( int steps )
     else
         tmpValue = fImpl->fValue + ( singleStep * steps );
 
-    fImpl->setValue( fImpl->bound( static_cast< uint64_t >( tmpValue ), old, steps ), e );
+    fImpl->setValue( fImpl->bound( static_cast< qulonglong >( tmpValue ), old, steps ), e );
     selectAll();
 }
 
@@ -612,27 +610,27 @@ void CSpinBox64U::setWrapping( bool wrapping )
     fImpl->fWrapping = wrapping;
 }
 
-uint64_t CSpinBox64U::minimum() const
+qulonglong CSpinBox64U::minimum() const
 {
     return fImpl->fMinimum;
 }
 
-void CSpinBox64U::setMinimum( uint64_t minimum )
+void CSpinBox64U::setMinimum( qulonglong minimum )
 {
     setRange( minimum, ( fImpl->fMaximum > minimum ) ? fImpl->fMaximum : minimum );
 }
 
-uint64_t CSpinBox64U::maximum() const
+qulonglong CSpinBox64U::maximum() const
 {
     return fImpl->fMaximum;
 }
 
-void CSpinBox64U::setMaximum( uint64_t maximum )
+void CSpinBox64U::setMaximum( qulonglong maximum )
 {
     setRange( ( fImpl->fMinimum < maximum ) ? fImpl->fMinimum : maximum, maximum );
 }
 
-void CSpinBox64U::setRange( uint64_t min, uint64_t max )
+void CSpinBox64U::setRange( qulonglong min, qulonglong max )
 {
     fImpl->setRange( min, max );
 }
