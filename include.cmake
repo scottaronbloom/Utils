@@ -30,12 +30,14 @@ set(qtproject_SRCS
     ScrollMessageBox.cpp
     SpinBox64.cpp
     SpinBox64U.cpp
+    CollapsableGroupBox.cpp
 )
 
 set(qtproject_H
     SpinBox64.h
     SpinBox64U.h
     ScrollMessageBox.h
+    CollapsableGroupBox.h
 )
 
 set(project_H

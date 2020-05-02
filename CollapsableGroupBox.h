@@ -1,5 +1,5 @@
-#ifndef GROUPBOX_H
-#define GROUPBOX_H
+#ifndef COLLAPSABLEGROUPBOX_H
+#define COLLAPSABLEGROUPBOX_H
 // The MIT License( MIT )
 //
 // Copyright( c ) 2020 Scott Aron Bloom
@@ -24,17 +24,17 @@
 
 #include <QGroupBox>
 
-class CGroupBoxImpl;
+class CCollapsableGroupBoxImpl;
 
-class CGroupBox : public QGroupBox
+class CCollapsableGroupBox : public QGroupBox
 {
     Q_OBJECT;
     Q_PROPERTY(bool collapsive READ isCollapsible WRITE setCollapsible )
 
 public:
-    explicit CGroupBox(QWidget* parent = 0);
-    explicit CGroupBox(const QString& title, QWidget* parent = 0);
-    virtual ~CGroupBox();
+    explicit CCollapsableGroupBox(QWidget* parent = 0);
+    explicit CCollapsableGroupBox(const QString& title, QWidget* parent = 0);
+    virtual ~CCollapsableGroupBox();
 
     bool isCollapsible() const;
     void setCollapsible(bool enabled);
@@ -46,7 +46,7 @@ public Q_SLOTS:
 protected:
     virtual void childEvent(QChildEvent* event);
 private:
-    CGroupBoxImpl * fImpl;
+    CCollapsableGroupBoxImpl * fImpl;
 };
 
-#endif // CGroupBox_H
+#endif // CCollapsableGroupBox_H

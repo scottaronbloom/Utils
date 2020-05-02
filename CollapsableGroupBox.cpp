@@ -20,52 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "GroupBox.h"
+#include "CollapsableGroupBox.h"
 #include <QChildEvent>
 
-class CGroupBoxImpl 
+class CCollapsableGroupBoxImpl 
 {
 public:
 
-    CGroupBoxImpl();
+    CCollapsableGroupBoxImpl();
     bool fCollapsible;
     bool fFlat; // so we can restore it when expanding
 };
 
-CGroupBoxImpl::CGroupBoxImpl() : 
+CCollapsableGroupBoxImpl::CCollapsableGroupBoxImpl() : 
     fCollapsible(true), 
     fFlat(false)
 {}
 
 
-CGroupBox::CGroupBox(QWidget* parent)
+CCollapsableGroupBox::CCollapsableGroupBox(QWidget* parent)
         : QGroupBox(parent)
 {
-    fImpl = new CGroupBoxImpl;
+    fImpl = new CCollapsableGroupBoxImpl;
     
     setCheckable(true);
     setChecked(true);
-    connect(this, &CGroupBox::toggled, this, &CGroupBox::setExpanded);
+    connect(this, &CCollapsableGroupBox::toggled, this, &CCollapsableGroupBox::setExpanded);
 }
 
-CGroupBox::CGroupBox(const QString& title, QWidget* parent)
-        : CGroupBox( parent )
+CCollapsableGroupBox::CCollapsableGroupBox(const QString& title, QWidget* parent)
+        : CCollapsableGroupBox( parent )
 {
     setTitle( title );
 }
 
 
-CGroupBox::~CGroupBox()
+CCollapsableGroupBox::~CCollapsableGroupBox()
 {
     delete fImpl;
 }
 
-bool CGroupBox::isCollapsible() const
+bool CCollapsableGroupBox::isCollapsible() const
 {
     return fImpl->fCollapsible;
 }
 
-void CGroupBox::setCollapsible(bool enable)
+void CCollapsableGroupBox::setCollapsible(bool enable)
 {
     if (fImpl->fCollapsible != enable)
     {
@@ -77,12 +77,12 @@ void CGroupBox::setCollapsible(bool enable)
     }
 }
 
-void CGroupBox::setCollapsed(bool collapsed)
+void CCollapsableGroupBox::setCollapsed(bool collapsed)
 {
     setExpanded(!collapsed);
 }
 
-void CGroupBox::setExpanded(bool expanded)
+void CCollapsableGroupBox::setExpanded(bool expanded)
 {
     if (fImpl->fCollapsible || expanded)
     {
@@ -101,7 +101,7 @@ void CGroupBox::setExpanded(bool expanded)
     }
 }
 
-void CGroupBox::childEvent(QChildEvent* event)
+void CCollapsableGroupBox::childEvent(QChildEvent* event)
 {
     QObject* child = event->child();
     if (event->added() && child->isWidgetType())

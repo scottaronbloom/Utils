@@ -93,7 +93,7 @@ function(DeployQt target directory)
             env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
                 ${_QTDEPLOY_OPTIONS}
                 ${_QTDEPLOY_TARGET_DIR}
-        COMMENT "Deploying Qt to Build Area..."
+        COMMENT "Deploying Qt to Build Area for Project '${target}' ..."
     )
 
     # install(CODE ...) doesn't support generator expressions, but
@@ -147,7 +147,7 @@ function(DeployQt target directory)
             ENDIF()
             list(REMOVE_AT _files 0 1)
         endwhile()
-        MESSAGE( STATUS \"Finished deplying Qt\" )
+        MESSAGE( STATUS \"Finished deploying Qt\" )
         "
     )
 endfunction()
