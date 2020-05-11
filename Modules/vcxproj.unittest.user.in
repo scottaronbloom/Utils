@@ -14,4 +14,18 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
 PATH=$(PATH)
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|@SAB_VCX_ARCH@'">
+    <LocalDebuggerCommandArguments>@SAB_DEBUG_TEST@</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerEnvironment>
+PATH=$(PATH)
+$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|@SAB_VCX_ARCH@'">
+    <LocalDebuggerCommandArguments>@SAB_DEBUG_TEST@</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerEnvironment>
+PATH=$(PATH)
+$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
+  </PropertyGroup>
 </Project>
