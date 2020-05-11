@@ -19,6 +19,50 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+FUNCTION(CreateUserProj)
+    IF(WIN32)
+        SET(USER_VCXPROJ ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vcxproj.user )
+        IF ( NOT EXISTS ${USER_VCXPROJ} )
+            SET(SAB_DEBUG_TEST "--gtest_catch_exceptions=0  --gtest_also_run_disabled_tests --gtest_filter=*" CACHE STRING "Added command line arguments for the Unit Tests" )
+    
+            SET(SAB_VCX_ARCH x64)
+            IF(CMAKE_SIZEOF_VOID_P EQUAL 4) 
+                SET(SAB_VCX_ARCH Win32)
+            ELSE()
+                SET(SAB_VCX_ARCH x64)
+            ENDIF()
+
+            SET(ProjName ${PROJECT_NAME})
+            if ( ARGV0 )
+                SET(ProjName ${ARGV0})
+            endif()
+
+            set( templateFound false )
+            foreach( currDir ${CMAKE_MODULE_PATH} )
+                #MESSAGE( STATUS "${currDir}" )
+                if ( EXISTS "${currDir}/vcxproj.unittest.user.in" )
+                    SET( FILE_TEMPLATE ${currDir}/vcxproj.unittest.user.in )
+                    Message( STATUS "=== Generating User VCXProj User File ===" )
+                    MESSAGE( STATUS "   Project:${PROJECT_NAME}" )
+                    MESSAGE( STATUS "   File:${USER_VCXPROJ}" )
+                    MESSAGE( STATUS "   SOURCE=${FILE_TEMPLATE}" )
+                    MESSAGE( STATUS "   USER=$ENV{USERDOMAIN}.$ENV{USERNAME}" )
+                    MESSAGE( STATUS "   DebugDir:${CMAKE_INSTALL_PREFIX}" )
+                    configure_file(
+                        "${FILE_TEMPLATE}"
+                        "${USER_VCXPROJ}"
+                    )
+                    Message( STATUS "=== Finished Generating User VCXProj User File ===" )
+                    set( templateFound true )
+                ENDIF()
+            endforeach()
+            if ( NOT templateFound )
+                message( FATAL_ERROR "Could not find vcxproj.unittest.user.in" )
+            ENDIF()
+        ENDIF()
+    ENDIF()
+ENDFUNCTION(CreateUserProj)
+
 
 FUNCTION(SAB_UNIT_TEST_RESOURCE name)
     STRING(REPLACE "${CMAKE_SOURCE_DIR}" "" LCL_DIR ${CMAKE_CURRENT_LIST_DIR})
@@ -87,6 +131,6 @@ FUNCTION(SAB_UNIT_TEST name file libs)
     ADD_DEPENDENCIES(SABTests_${TOP_FOLDER} ${TEST_NAME} )
     set_target_properties( SABTests_${TOP_FOLDER} PROPERTIES FOLDER CMakePredefinedTargets/UnitTests )
 
-    #CreateUserProj( Test_${PROJECT_NAME} )
+    CreateUserProj( Test_${PROJECT_NAME} )
 ENDFUNCTION()
 
