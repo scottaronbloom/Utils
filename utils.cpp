@@ -312,4 +312,24 @@ namespace NUtils
         auto sum = getSumOfFactors( num, true );
         return std::make_pair( sum.first > num, sum.second );
     }
+
+    long double factorial( int64_t num )
+    {
+        double retVal = 1.0;
+        for ( int64_t ii = num; ii > 0; --ii)
+        {
+            retVal *= ii;
+        }
+        return retVal;
+    }
+
+    uint64_t numCombinations( int64_t numPossible, int64_t numSelections )
+    {
+        auto t1 = factorial( numPossible );
+        auto t2 = factorial( numSelections );
+        auto t3 = factorial( numPossible - numSelections );
+        auto t4 = t1/( t2*t3 );
+        auto retVal = static_cast< uint64_t >( t4 );
+        return retVal;
+    }
 }

@@ -259,6 +259,9 @@ std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, si
     return combinations;
 }
 
+long double factorial( int64_t num );
+uint64_t numCombinations( int64_t numPossible, int64_t numSelections );
+
 template< typename T >
 std::vector< std::vector< T > > addVectorElementToSets( const std::vector< std::vector< T > >& currentSets, const std::list< T >& rhs, const std::function< bool( const std::vector< T >& curr, const T & obj ) > & addToResult = std::function< bool( const std::vector< T >& curr, const T& obj ) >() )
 {
