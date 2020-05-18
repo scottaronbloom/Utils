@@ -36,6 +36,58 @@
 #include <algorithm>
 #include <sstream>
 
+
+template< typename T >
+std::ostream& operator<<( std::ostream& oss, const std::vector< T >& values )
+{
+    oss << "{ ";
+    bool first = true;
+
+    for ( auto&& ii : values )
+    {
+        if ( !first )
+            oss << ", ";
+        first = false;
+        oss << ii;
+    }
+    oss << " }";
+    return oss;
+}
+
+template< typename T >
+std::ostream& operator<<( std::ostream& oss, const std::vector< std::vector< T > >& values )
+{
+    oss << "{ ";
+    bool first = true;
+
+    for ( auto&& ii : values )
+    {
+        if ( !first )
+            oss << ", ";
+        first = false;
+        oss << ii;
+    }
+    oss << " }";
+    return oss;
+}
+
+template< typename T >
+std::ostream& operator<<( std::ostream& oss, const std::list< std::vector< T > >& values )
+{
+    oss << "{ ";
+    bool first = true;
+
+    for ( auto&& ii : values )
+    {
+        if ( !first )
+            oss << ", ";
+        first = false;
+        oss << ii;
+    }
+    oss << " }";
+    return oss;
+}
+
 namespace NUtils
 {
 
@@ -208,10 +260,10 @@ std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, si
 }
 
 template< typename T >
-std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::vector< T > >& lhs, const std::list< T >& rhs, const std::function< bool( const std::vector< T >& curr, const T & obj ) > & addToResult = std::function< bool( const std::vector< T >& curr, const T& obj ) >() )
+std::vector< std::vector< T > > addVectorElementToSets( const std::vector< std::vector< T > >& currentSets, const std::list< T >& rhs, const std::function< bool( const std::vector< T >& curr, const T & obj ) > & addToResult = std::function< bool( const std::vector< T >& curr, const T& obj ) >() )
 {
     std::vector< std::vector< T > > retVal;
-    for( auto && ii : lhs )
+    for( auto && ii : currentSets )
     {
         for( auto && jj : rhs )
         {
@@ -240,12 +292,10 @@ std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::list< 
 
     for ( size_t ii = 1; ii < arr.size(); ++ii )
     {
-        retVal = cartiseanProduct( retVal, arr[ ii ], addToResult );
+        retVal = addVectorElementToSets( retVal, arr[ ii ], addToResult );
     }
     return retVal;
 }
 
-
 }
-
 #endif

@@ -470,6 +470,39 @@ namespace
         EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 9 } ), products[ ii++ ] );
         EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 10 } ), products[ ii++ ] );
     }
+
+    TEST( TestUtils, TestCartiseanSquare )
+    {
+        auto arr = std::vector< int >( { 0, 1, 2, 3 } );
+
+        auto products = NUtils::allCombinations( arr, 2 );
+
+        // (0,1) (0,2) (0,3) (1,2) (1,3) (2,3)
+        EXPECT_EQ( 6, products.size() ) << products;
+        size_t ii = 0;
+
+        EXPECT_EQ( std::vector< int >( { 0, 1 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 0, 2 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 0, 3 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 1, 2 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 3 } ), products[ ii++ ] );
+
+        EXPECT_EQ( std::vector< int >( { 2, 3 } ), products[ ii++ ] );
+
+        products = NUtils::allCombinations( arr, 3 );
+        EXPECT_EQ( 4, products.size() ) << products;
+        ii = 0;
+        EXPECT_EQ( std::vector< int >( { 0, 1, 2 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 0, 1, 3 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 0, 2, 3 } ), products[ ii++ ] );
+        EXPECT_EQ( std::vector< int >( { 1, 2, 3 } ), products[ ii++ ] );
+
+        products = NUtils::allCombinations( arr, 4 );
+        EXPECT_EQ( 1, products.size() ) << products;
+        ii = 0;
+        EXPECT_EQ( std::vector< int >( { 0, 1, 2, 3 } ), products[ ii++ ] );
+    }
 }
 
 
