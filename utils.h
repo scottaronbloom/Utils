@@ -248,13 +248,15 @@ void allCombinations( const std::vector< T >& arr, size_t r, const std::function
 }
 
 template< typename T >
-std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, size_t r )
+std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, size_t r, const std::pair< bool, size_t > & report = std::make_pair( false, 1 ) )
 {
     std::vector< std::vector< T > > combinations;
     NUtils::allCombinations< T >( arr, r,
-                                    [ &combinations ]( const std::vector< T >& sub )
+                                    [ &combinations, &report = std::as_const( report ) ]( const std::vector< T >& sub )
                                     {
                                         combinations.push_back( sub );
+                                        if ( report.first && ( ( combinations.size() % report.second ) == 0 ) )
+                                            std::cout << "Generating combination: " << combinations.size() << "\n";
                                     } );
     return combinations;
 }
