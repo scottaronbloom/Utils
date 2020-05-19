@@ -1,22 +1,25 @@
+# The MIT License( MIT )
 #
-# (c) Copyright 2004 - 2019 Blue Pearl Software Inc.
-# All rights reserved.
+# Copyright( c ) 2020 Scott Aron Bloom
 #
-# This source code belongs to Blue Pearl Software Inc.
-# It is considered trade secret and confidential, and is not to be used
-# by parties who have not received written authorization
-# from Blue Pearl Software Inc.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files( the "Software" ), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sub-license, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions :
 #
-# Only authorized users are allowed to use, copy and modify
-# this software provided that the above copyright notice
-# remains in all copies of this software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
-#
-# $Author: dave $ - $Revision: 56816 $ - $Date: 2019-12-30 18:50:19 -0800 (Mon, 30 Dec 2019) $
-# $HeadURL: http://bpsvn/svn/trunk/Project.cmake $
-#
-#
-#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4) #32 bit
     SET( BITSIZE 32 )
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8) #64 bit
@@ -40,16 +43,12 @@ IF(WIN32)
         SET(CMAKE_C_FLAGS_DEBUG            "/D_DEBUG /RTC1 /MDd /Zi /W3 /Od /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
         SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503 /DQT_NO_DEBUG_OUTPUT")
         SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "/MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503 /DQT_NO_DEBUG_OUTPUT")
-        #SET( BPS_NO_WARNING_AS_ERROR TRUE )
     ENDIF()
 
-    IF( ${BITSIZE} EQUAL 32 )
-        SET(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /STACK:8388608")
-        SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /STACK:8388608")   
-    ELSE()
-        SET(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /STACK:8388608 /HIGHENTROPYVA:NO")
-        SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /STACK:8388608 /HIGHENTROPYVA:NO")   
-    ENDIF()
+    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${CMAKE_EXE_LINKER_FLAGS_DEBUG}          /STACK:18388608 /HIGHENTROPYVA:NO")
+    SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /STACK:18388608 /HIGHENTROPYVA:NO")   
+    SET(CMAKE_EXE_LINKER_FLAGS_RELEASE        "${CMAKE_EXE_LINKER_FLAGS_RELEASE}        /STACK:18388608 /HIGHENTROPYVA:NO")   
+    SET(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL     "${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL}     /STACK:18388608 /HIGHENTROPYVA:NO")   
 
     IF(NOT NO_WARNING_AS_ERROR)
         SET(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} /WX /w34100")
