@@ -35,7 +35,7 @@
 #include <functional>
 #include <algorithm>
 #include <sstream>
-
+#include <iostream>
 
 template< typename T >
 std::ostream& operator<<( std::ostream& oss, const std::vector< T >& values )
@@ -87,6 +87,14 @@ std::ostream& operator<<( std::ostream& oss, const std::list< std::vector< T > >
     oss << " }";
     return oss;
 }
+
+inline std::ostream & sabsabDebugStreamInternal(){ return std::cout; }
+#  undef sabDebugStream
+#if defined(SAB_DEBUG_TRACE)
+#  define sabDebugStream sabsabDebugStreamInternal
+#else
+#  define sabDebugStream while (false) sabsabDebugStreamInternal
+#endif
 
 namespace NUtils
 {
@@ -256,7 +264,7 @@ std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, si
                                     {
                                         combinations.push_back( sub );
                                         if ( report.first && ( ( combinations.size() % report.second ) == 0 ) )
-                                            std::cout << "Generating combination: " << combinations.size() << "\n";
+                                            sabDebugStream() << "Generating combination: " << combinations.size() << "\n";
                                     } );
     return combinations;
 }
