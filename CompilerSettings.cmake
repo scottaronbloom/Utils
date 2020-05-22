@@ -155,3 +155,6 @@ IF(WIN32)
 ENDIF()
 
 
+IF( SAB_DEBUG_TRACE )
+    add_definitions( -DSAB_DEBUG_TRACE )
+ENDIF()
