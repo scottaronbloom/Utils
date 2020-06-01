@@ -82,12 +82,12 @@ function(DeployQt target directory)
 
     SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
     IF( WIN32 )
-        SET(_QTDEPLOY_OPTIONS "--verbose;0;--no-compiler-runtime;--no-angle;--no-opengl-sw" )
+        SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--no-angle;--no-opengl-sw" )
     ELSEIF( APPLE )
         SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
-        SET(_QTDEPLOY_OPTIONS "--verbose;0;--no-compiler-runtime;--always-overwrite" )
+        SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--always-overwrite" )
     ELSEIF( UNIX )
-        SET(_QTDEPLOY_OPTIONS "--verbose 0" )
+        SET(_QTDEPLOY_OPTIONS "--verbose=0" )
     ENDIF()
 
     # Run deployqt immediately after build to make the build area "complete"
