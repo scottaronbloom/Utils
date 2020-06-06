@@ -87,7 +87,8 @@ function(DeployQt target directory)
         SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
         SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--always-overwrite" )
     ELSEIF( UNIX )
-        SET(_QTDEPLOY_OPTIONS "--verbose=0" )
+        SET(_QTDEPLOY_OPTIONS "-verbose=0" )
+        return()
     ENDIF()
 
     # Run deployqt immediately after build to make the build area "complete"
