@@ -82,7 +82,7 @@ function(DeployQt target directory)
 
     SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
     IF( WIN32 )
-        SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--no-angle;--no-opengl-sw" )
+        SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
     ELSEIF( APPLE )
         SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
         SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--always-overwrite" )

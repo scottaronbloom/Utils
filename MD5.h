@@ -20,38 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef _SCROLLMESSAGEBOX_H
-#define _SCROLLMESSAGEBOX_H
+#ifndef __COMMON_MD5_H
+#define __COMMON_MD5_H
 
-#include <QDialog>
-#include <QMessageBox>
-#include <QDialogButtonBox>
-#include <memory>
-class QAbstractButton;
+class QByteArray;
+class QFileInfo;
+class QString;
+#include <string>
 
-namespace Ui {class CScrollMessageBox;};
-
-class CScrollMessageBox : public QDialog
+namespace Verific{ class verific_stream; }
+namespace NUtils
 {
-    Q_OBJECT
+    QByteArray getMd5( const QByteArray & data );
+    QString getMd5( const QFileInfo & fi );
+    QString getMd5( const QString & data, bool isFileName=false );
+    std::string getMd5( const std::string & data, bool isFileName=false );
+    QByteArray formatMd5( const QByteArray & digest, bool isHex );
+}
 
-public:
-    CScrollMessageBox( QWidget *parent = 0 );
-    CScrollMessageBox( const QString & title, const QString & label, QWidget *parent = 0 );
-    ~CScrollMessageBox();
-
-    void setTitle( const QString & title );
-    void setLabel( const QString & label );
-
-    void setPlainText( const QString & text );
-    void setHtmlText( const QString & text );
-    void setIconLabel( const QMessageBox::Icon & icon );
-    void setButtons( QDialogButtonBox::StandardButtons buttons );
-private Q_SLOTS:
-    void slotButtonClicked( QAbstractButton * btn );
-
-private:
-    std::unique_ptr< Ui::CScrollMessageBox > fImpl;
-};
-
-#endif 
+#endif

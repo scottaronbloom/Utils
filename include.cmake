@@ -24,6 +24,7 @@ set(qtproject_SRCS
     utils.cpp
     FileUtils.cpp
     FromString.cpp
+    MD5.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
     QtUtils.cpp
@@ -44,6 +45,7 @@ set(project_H
     utils.h
     FileUtils.h
     FromString.h
+    MD5.h
     QtUtils.h
     EnumUtils.h
     StringComparisonClasses.h

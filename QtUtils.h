@@ -39,6 +39,7 @@ class QXmlQuery;
 #include <QList>
 #include <set>
 
+#ifndef QHASHFUNCTIONS_H
 namespace std
 {
     template <>
@@ -50,7 +51,7 @@ namespace std
         }
     };
 }
-
+#endif
 
 namespace NQtUtils
 {

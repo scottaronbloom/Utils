@@ -61,8 +61,6 @@
 
 namespace NFileUtils
 {
-using namespace std;
-
 std::string getFileName( const std::string & path )
 {
     std::string::size_type pos = path.find_last_of( "/\\" );
@@ -91,8 +89,8 @@ void extractFilePath(const std::string & pathName,std::string * dirPath, std::st
     std::string fileName = pathName;
 
     // Get last directory specifier
-    string::size_type idx = pathName.find_last_of( "/\\" );
-    if (idx != string::npos)
+    auto idx = pathName.find_last_of( "/\\" );
+    if (idx != std::string::npos)
     {
         if ( dirPath )
             *dirPath = pathName.substr(0,idx);
@@ -101,7 +99,7 @@ void extractFilePath(const std::string & pathName,std::string * dirPath, std::st
     }
 
     idx = fileName.rfind(".");
-    if (idx != string::npos)
+    if (idx != std::string::npos)
     {
         if ( ext )
             *ext = fileName.substr(idx+1);
@@ -140,12 +138,12 @@ bool fileCompare( const std::string & pattern, const std::string & filename, boo
         return false;
 
     QString qPattern = QString::fromStdString( pattern );
-    auto patternList = qPattern.split( QRegularExpression( "[\\\\/]" ), QString::SkipEmptyParts );
+    auto patternList = qPattern.split( QRegularExpression( "[\\\\/]" ), Qt::SkipEmptyParts );
     if ( patternList.isEmpty() )
         return false;
 
     QString qFileName = QString::fromStdString( filename );
-    auto fileNameList = qFileName.split( QRegularExpression( "[\\\\/]" ), QString::SkipEmptyParts );
+    auto fileNameList = qFileName.split( QRegularExpression( "[\\\\/]" ), Qt::SkipEmptyParts );
     if ( fileNameList.isEmpty() )
         return false;
 
@@ -322,11 +320,11 @@ QString getRelativePath( const QDir & absDir, const QString & path )
 
     QString result;
 #if defined(Q_OS_WIN)
-    QStringList dirElts = dir.split( QLatin1Char( '/' ), QString::SkipEmptyParts );
-    QStringList fileElts = file.split( QLatin1Char( '/' ), QString::SkipEmptyParts );
+    QStringList dirElts = dir.split( QLatin1Char( '/' ), Qt::SkipEmptyParts );
+    QStringList fileElts = file.split( QLatin1Char( '/' ), Qt::SkipEmptyParts );
 #else
-    QVector<QStringRef> dirElts = dir.splitRef( QLatin1Char( '/' ), QString::SkipEmptyParts );
-    QVector<QStringRef> fileElts = file.splitRef( QLatin1Char( '/' ), QString::SkipEmptyParts );
+    QVector<QStringRef> dirElts = dir.splitRef( QLatin1Char( '/' ), Qt::SkipEmptyParts );
+    QVector<QStringRef> fileElts = file.splitRef( QLatin1Char( '/' ), Qt::SkipEmptyParts );
 #endif
     int ii = 0;
     while ( ii < dirElts.size() && ii < fileElts.size() &&

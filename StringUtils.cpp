@@ -1213,7 +1213,7 @@ namespace NStringUtils
             return{};
         }
 
-        QStringList tmp = QString::fromStdString( string ).split( regExp, skipEmpty ? QString::SkipEmptyParts : QString::KeepEmptyParts );
+        QStringList tmp = QString::fromStdString( string ).split( regExp, skipEmpty ? Qt::SkipEmptyParts : Qt::KeepEmptyParts );
         std::list< std::string > retVal;
         for ( auto & ii : tmp )
         {
