@@ -49,6 +49,7 @@ bool CWordExp::beenThere( const QString & path )
         return true;
 }
 
+#ifdef WIN32
 void DisplayError( LPWSTR pszAPI )
 {
     LPVOID lpvMessageBuffer;
@@ -71,6 +72,7 @@ void DisplayError( LPWSTR pszAPI )
     //
     LocalFree( lpvMessageBuffer );
 }
+#endif
 
 QString CWordExp::getUserName()
 {
@@ -127,9 +129,9 @@ QString CWordExp::getUserInfo()
 
 QString CWordExp::getHomeDir( const QString & userName, bool * aOK )
 {
-#ifdef WIN32
     if ( aOK )
         *aOK = false;
+#ifdef WIN32
     if ( userName.compare( getUserName(), Qt::CaseInsensitive ) != 0 )
     {
         return QString();
@@ -165,13 +167,15 @@ QString CWordExp::getHomeDir( const QString & userName, bool * aOK )
     struct passwd pwd;
     struct passwd * result;
     int s = getpwnam_r( qPrintable( userName ), &pwd, buf, bufSize, &result );
-    if ( result == nullptr )
+    if ( ( s != 0 ) || ( result == nullptr ) )
     {
         free( buf );
         return QString();
     }
     QString retVal = pwd.pw_dir;
     free( buf );
+    if ( aOK )
+        *aOK = true;
     return retVal;
 #endif
 }
@@ -195,16 +199,18 @@ std::tuple< bool, QString, QString > CWordExp::isValidTilde( const QString & fil
             userName = userName.left( pos );
         }
 
+#ifdef WIN32
         if ( userName.isEmpty() )
             userName = getUserName();
 
-#ifdef WIN32
         aOK = ( userName == getUserName() );
         if ( !aOK )
         {
             remainder.clear();
             userName.clear();
         }
+#else
+        aOK = true;
 #endif
     }
     else
@@ -232,7 +238,11 @@ QString CWordExp::expandTildePath( const QString & fileName, bool * aOK )
     {
         if ( aOK )
             *aOK = true;
+#ifdef WIN32
         return QDir::toNativeSeparators( fileName );
+#else
+        return QDir::homePath() + remainder;
+#endif
     }
 
     auto homePath = getHomeDir( userName );
@@ -441,7 +451,7 @@ void CWordExp::expandPaths()
 
 #else
     wordexp_t results;
-    int status = wordexp( qPrintable( fileName ), &results, 0 );
+    int status = wordexp( qPrintable( fOrigPathName ), &results, 0 );
     fAOK = status == 0;
     for( int ii = 0; ii < results.we_wordc; ++ii )
     {

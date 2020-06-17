@@ -99,7 +99,9 @@ namespace
         for ( int jj = 0; jj < 36; ++jj )
         {
             char tmp1 = 'a' + jj - 10;
+            (void)tmp1;
             char tmp2 = '0' + jj;
+            (void)tmp2;
             if ( jj <= 9 )
                 EXPECT_EQ( '0' + jj, NUtils::toChar( jj ) ) << "Failed: Value: " << jj;
             else
@@ -517,6 +519,7 @@ namespace
         EXPECT_EQ( std::vector< int >( { 0, 1, 2, 3 } ), products[ ii++ ] );
     }
 
+#ifdef WIN32
     TEST( TestUtils, TestWordExp )
     {
         bool aOK = false;
@@ -552,9 +555,45 @@ namespace
         CWordExp wordExp1( "e:/*/*/sb/*" );
         EXPECT_EQ( 63, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
         EXPECT_TRUE( aOK );
-
-
     }
+#else
+    TEST( TestUtils, TestWordExp )
+    {
+        bool aOK = false;
+        EXPECT_EQ( "/home/scott", CWordExp::getHomeDir( "scott", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "", CWordExp::getHomeDir( "unknown", &aOK ) );
+        EXPECT_FALSE( aOK );
+
+        EXPECT_EQ( "/home/scott", CWordExp::expandTildePath( "~scott", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~scott/", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~scott\\", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~\\", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~/", &aOK ) );
+        EXPECT_TRUE( aOK );
+
+        EXPECT_EQ( "~unknown/", CWordExp::expandTildePath( "~unknown/", &aOK ) );
+        EXPECT_FALSE( aOK );
+        EXPECT_EQ( "~unknown\\", CWordExp::expandTildePath( "~unknown\\", &aOK ) );
+        EXPECT_FALSE( aOK );
+
+        EXPECT_EQ( "scott", CWordExp::getUserName() );
+        EXPECT_EQ( "localhost.localdomain", CWordExp::getHostName() );
+
+        CWordExp wordExp( "$HOME/*/sb" );
+        ASSERT_EQ( 1, wordExp.getAbsoluteFilePaths( &aOK ).size() );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "/home/scott/fuckit/sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
+
+        CWordExp wordExp1( "/*/*/sb/*" );
+        EXPECT_EQ( 17, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
+        EXPECT_TRUE( aOK );
+    }
+#endif
 
 }
 
