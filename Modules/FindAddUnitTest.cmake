@@ -70,8 +70,7 @@ FUNCTION(SAB_UNIT_TEST_RESOURCE name)
     STRING(REGEX REPLACE "/(.*)/(.*)" "SABTests/UnitTests/\\1/\\2" FOLDER_NAME ${FOLDER_NAME})
     SET(FOLDER_NAME "UnitTests/${LCL_DIR}")
 
-    #MESSAGE( "FOLDER_NAME=${FOLDER_NAME}" )
-
+    #MESSAGE( "FOLDER_NAME=${FOLDER_NAME}" ) 
     SET(RESOURCE_LIB_NAME ${LCL_DIR}_${name} ) 
 
     STRING(SUBSTRING ${RESOURCE_LIB_NAME} 1 -1 RESOURCE_LIB_NAME)
@@ -92,27 +91,33 @@ FUNCTION(SAB_UNIT_TEST_RESOURCE name)
 ENDFUNCTION()
 
 FUNCTION(SAB_UNIT_TEST name file libs)
-    set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_STANDARD_REQUIRED true)
-
-    STRING(REPLACE "${CMAKE_SOURCE_DIR}" "" LCL_DIR ${CMAKE_CURRENT_LIST_DIR})
-    STRING(REPLACE "CoreApp" "CLI" LCL_DIR ${LCL_DIR})
-    STRING(REPLACE "/UnitTests" "" LCL_DIR ${LCL_DIR})
-    SET(FOLDER_NAME "${LCL_DIR}")
-    #MESSAGE( "INIT FOLDER_NAME=${FOLDER_NAME}" )
-    STRING(REGEX REPLACE "/(.*)/(.*)" "\\1" TOP_FOLDER ${FOLDER_NAME})
-    STRING(REGEX REPLACE "\/" "" TOP_FOLDER ${TOP_FOLDER})
-
-    STRING(REGEX REPLACE "/(.*)/(.*)" "SABTests/UnitTests/\\1/\\2" FOLDER_NAME ${FOLDER_NAME})
-
-    SET( TEST_NAME ${LCL_DIR}_${name} ) 
-    STRING(SUBSTRING ${TEST_NAME} 1 -1 TEST_NAME)
-    STRING(REGEX REPLACE "(.*)/(.*)" "\\2" TEST_NAME ${TEST_NAME})
-    project( ${TEST_NAME} )
-    # message( "Adding unit test ${TEST_NAME}" )
+    #MESSAGE( STATUS "name=${name}" )
+    #MESSAGE( STATUS "file=${file}" )
+    #MESSAGE( STATUS "libs=${libs}" )
     if(POLICY CMP0020)
         cmake_policy(SET CMP0020 NEW)
     endif()
+
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED true)
+    #MESSAGE( "CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}" )
+    #MESSAGE( "CMAKE_CURRENT_LIST_DIR=${CMAKE_CURRENT_LIST_DIR}" )
+
+    STRING(REPLACE "\\" "/" LCL_DIR ${CMAKE_CURRENT_LIST_DIR})
+    STRING(REPLACE "/" ";" LCL_DIR ${LCL_DIR})
+    LIST( LENGTH LCL_DIR LCL_DIR_LEN )
+
+    LIST( GET LCL_DIR -1 _lastDir )
+    while ( ${_lastDir} STREQUAL "UnitTests" )
+        LIST( GET LCL_DIR -2 _lastDir )
+    endwhile()
+
+    #MESSAGE( "_lastDir=${_lastDir}" )
+
+    SET( TEST_NAME ${_lastDir}_${name} ) 
+    project( ${TEST_NAME} )
+
+    # message( "Adding unit test ${TEST_NAME}" )
     #MESSAGE( "ARGN=${ARGN}" )
 
     add_executable(${TEST_NAME} ${file} ${ARGN})
@@ -121,6 +126,7 @@ FUNCTION(SAB_UNIT_TEST name file libs)
     ENDIF()
     target_link_libraries(${TEST_NAME} ${libs})
     add_test(${TEST_NAME} ${TEST_NAME})
+
     #MESSAGE( "TEST_NAME=${TEST_NAME}" )
     SET( FOLDER_NAME "UnitTests/${FOLDER_NAME}" )
     #MESSAGE( "FOLDER_NAME=${FOLDER_NAME}" )
@@ -129,11 +135,26 @@ FUNCTION(SAB_UNIT_TEST name file libs)
     STRING(REPLACE ";" "\\;" NEWPATH "${NEWPATH}")
     SET_TESTS_PROPERTIES( ${TEST_NAME} PROPERTIES ENVIRONMENT "PATH=${NEWPATH}" )
 
-    #MESSAGE( "TOP_FOLDER=${TOP_FOLDER}" )
-    #MESSAGE( "          =SABTests_${TOP_FOLDER}" )
+    STRING(FIND "${libs}" "Qt5::" pos1)
+    STRING(FIND "${libs}" "Qt::" pos2)
+
+    if( NOT ( ( ${pos1} EQUAL -1 ) AND ( ${pos2} EQUAL -1 ) ) )
+        MESSAGE( STATUS "Adding Qt for Test: '${TEST_NAME}'" )
+        DeployQt( ${TEST_NAME} . )
+    ENDIF()
+    
+    #MESSAGE( "FOLDER_NAME=${FOLDER_NAME}" )
+    #MESSAGE( "TEST_NAME=${TEST_NAME}" )
+    #MESSAGE( "          =SABTests_${TEST_NAME}" )
     #MESSAGE( "          =${TEST_NAME}" )
-    ADD_DEPENDENCIES(SABTests_${TOP_FOLDER} ${TEST_NAME} )
-    set_target_properties( SABTests_${TOP_FOLDER} PROPERTIES FOLDER CMakePredefinedTargets/UnitTests )
+    SET(TARGET_NAME SABTests_${_lastDir} )
+    if( NOT TARGET ${TARGET_NAME} )
+        MESSAGE( STATUS "Adding custom target ${TARGET_NAME}" )
+        add_custom_target( ${TARGET_NAME} )
+    endif()
+
+    ADD_DEPENDENCIES(${TARGET_NAME} ${TEST_NAME} )
+    set_target_properties( ${TARGET_NAME} PROPERTIES FOLDER CMakePredefinedTargets/UnitTests )
 
     CreateUserProj( Test_${PROJECT_NAME} )
 ENDFUNCTION()

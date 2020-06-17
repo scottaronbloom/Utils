@@ -25,11 +25,19 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
+project(SABUtils)
+
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
+SET(SAB_UTILS_DIR ${CMAKE_SOURCE_DIR})
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
 find_package(Qt5 COMPONENTS Core Widgets Xml XmlPatterns REQUIRED)
+find_package(Deploy REQUIRED)
+find_package(AddUnitTest REQUIRED)
+
+option( gtest_force_shared_crt "Use shared ( DLL ) run-time lib even when Google Test is built as static lib." ON )
+add_subdirectory( ${CMAKE_SOURCE_DIR}/googletest )
 
 project( SABUtils )
 
@@ -52,3 +60,5 @@ add_library(SABUtils STATIC
     ${_CMAKE_FILES}
 )
 set_target_properties( SABUtils PROPERTIES FOLDER Libs )
+add_subdirectory(UnitTests)
+

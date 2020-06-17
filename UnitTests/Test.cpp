@@ -19,7 +19,9 @@
 */
 
 #include "../utils.h"
+#include "../WordExp.h"
 
+#include <QCoreApplication>
 #include <string>
 #include <memory>
 #include "gtest/gtest.h"
@@ -30,6 +32,17 @@
 //{
 //    return false;
 //}
+
+void PrintTo( const QString & str, ::std::ostream * oss )
+{
+    *oss << qPrintable( str );
+}
+
+::std::ostream & operator<<( ::std::ostream & oss, const QString & str )
+{
+    oss << qPrintable( str );
+    return oss;
+}
 
 namespace 
 {
@@ -503,10 +516,51 @@ namespace
         ii = 0;
         EXPECT_EQ( std::vector< int >( { 0, 1, 2, 3 } ), products[ ii++ ] );
     }
+
+    TEST( TestUtils, TestWordExp )
+    {
+        bool aOK = false;
+        EXPECT_EQ( "C:\\Users\\scott", CWordExp::getHomeDir( "scott", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "", CWordExp::getHomeDir( "unknown", &aOK ) );
+        EXPECT_FALSE( aOK );
+
+        EXPECT_EQ( "C:\\Users\\scott", CWordExp::expandTildePath( "~scott", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "C:\\Users\\scott\\", CWordExp::expandTildePath( "~scott/", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "C:\\Users\\scott\\", CWordExp::expandTildePath( "~scott\\", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "C:\\Users\\scott\\", CWordExp::expandTildePath( "~\\", &aOK ) );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "C:\\Users\\scott\\", CWordExp::expandTildePath( "~/", &aOK ) );
+        EXPECT_TRUE( aOK );
+
+        EXPECT_EQ( "~unknown/", CWordExp::expandTildePath( "~unknown/", &aOK ) );
+        EXPECT_FALSE( aOK );
+        EXPECT_EQ( "~unknown\\", CWordExp::expandTildePath( "~unknown\\", &aOK ) );
+        EXPECT_FALSE( aOK );
+
+        EXPECT_EQ( "scott", CWordExp::getUserName() );
+        EXPECT_EQ( "strider", CWordExp::getHostName() );
+
+        CWordExp wordExp( "%HOMEDRIVE%%HOMEPATH%/*/sb" );
+        ASSERT_EQ( 1, wordExp.getAbsoluteFilePaths( &aOK ).size() );
+        EXPECT_TRUE( aOK );
+        EXPECT_EQ( "C:\\Users\\scott\\fuckit\\sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
+
+        CWordExp wordExp1( "e:/*/*/sb/*" );
+        EXPECT_EQ( 63, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
+        EXPECT_TRUE( aOK );
+
+
+    }
+
 }
 
 
 int main( int argc, char **argv ) {
+    QCoreApplication appl( argc, argv );
     ::testing::InitGoogleTest( &argc, argv );
     int retVal = RUN_ALL_TESTS();
     return retVal;

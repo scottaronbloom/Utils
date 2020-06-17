@@ -54,5 +54,10 @@ source_group("CMake Files" FILES ${_CMAKE_FILES} )
 FILE(GLOB _CMAKE_MODULE_FILES "${CMAKE_SOURCE_DIR}/Modules/*")
 source_group("CMake Files\\Modues" FILES ${_CMAKE_MODULE_FILES} )
 
-include( ${CMAKE_SOURCE_DIR}/SABUtils/CompilerSettings.cmake )
+if( SAB_UTILS_DIR )
+    include( ${SAB_UTILS_DIR}/CompilerSettings.cmake )
+else()
+    include( ${CMAKE_SOURCE_DIR}/SABUtils/CompilerSettings.cmake )
+endif()
+
 

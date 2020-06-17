@@ -55,6 +55,9 @@ namespace std
 
 namespace NQtUtils
 {
+    QString allFilesFilter();
+    QString defaultFileDialogDir();
+
     QString getString( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     QStringList getStringList( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     std::set< QString > getStringSet( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );

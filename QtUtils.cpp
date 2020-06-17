@@ -37,6 +37,26 @@
 
 namespace NQtUtils
 {
+    QString allFilesFilter()
+    {
+        QString retVal = QObject::tr( "All Files" );
+#ifdef WIN32
+        retVal += " (*.*)";
+#else
+        retVal += " (*)";
+#endif
+        return retVal;
+    }
+
+    QString defaultFileDialogDir()
+    {
+        QString retVal;
+#ifndef WIN32
+        retVal += ".";
+#endif
+        return retVal;
+    }
+
     QString getString( QXmlQuery & query, const QString & queryString, bool * aOK /*= nullptr */ )
     {
         query.setQuery( queryString );
