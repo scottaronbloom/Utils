@@ -458,21 +458,3 @@ void CWordExp::addResult( const QString & path )
     fExpandedPaths << path;
 }
 
-//namespace NVxcQtUtils
-//{
-//
-//    QString getUserFilePath( const QString & fileName )
-//    {
-//        QString retVal = fileName;
-//#ifndef WIN32 
-//        QRegularExpression regExp( "\\$|\\{|\\}|\\[|\\]|\\*|\\?" );
-//        auto pos = retVal.indexOf( regExp );
-//        if ( pos != -1 )
-//            retVal = expandShellPath( fileName );
-//        else if ( !retVal.isEmpty() && ( retVal[ 0 ] == '~' ) )
-//            retVal = expandTildePath( fileName );
-//#endif
-//        return retVal;
-//    }
-//}
-//
