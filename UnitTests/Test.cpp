@@ -25,6 +25,7 @@
 #include <string>
 #include <memory>
 #include "gtest/gtest.h"
+#include "../FileUtils.h"
 
 ////template< typename T1, typename T2 >
 //bool operator==( faketype, faketype ) { return true; }
@@ -594,6 +595,91 @@ namespace
         EXPECT_TRUE( aOK );
     }
 #endif
+
+    TEST( TestUtils, TestExpandEnvVars )
+    {
+        qputenv( "FOOBAR", "ENVVAR" );
+        std::set< QString > envVars;
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "$FOOBAR", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo$FOOBAR/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "\\$FOOBAR", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo\\$FOOBAR/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "\\$(FOOBAR)", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo\\$\\(FOOBAR\\)/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "\\$\\(FOOBAR\\)", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo\\$\\(FOOBAR\\)/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "${FOOBAR}", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo$\\{FOOBAR\\}/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "$\\{FOOBAR\\}", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo$\\{FOOBAR\\}/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "%FOOBAR%", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo%FOOBAR%/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "\\%FOOBAR\\%", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo\\%FOOBAR\\%/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "\\%(FOOBAR)\\%", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo\\%\\(FOOBAR\\)\\%/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "\\%\\(FOOBAR\\)\\%", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo\\%\\(FOOBAR\\)\\%/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "%{FOOBAR}%", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo%\\{FOOBAR\\}%/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "ENVVAR", NFileUtils::expandEnvVars( "%\\{FOOBAR\\}%", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+        EXPECT_EQ( "fooENVVAR/bar", NFileUtils::expandEnvVars( "foo%\\{FOOBAR\\}%/bar", &envVars ) );
+        EXPECT_EQ( 1, envVars.size() );
+        EXPECT_EQ( "FOOBAR", *envVars.begin() );
+    }
 
 }
 

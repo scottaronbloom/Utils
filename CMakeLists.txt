@@ -26,12 +26,15 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 project(SABUtils)
-if ( SAB_ENABLE_TESTING )
+if ( NOT SAB_UTILS_DIR )
+    SET( SAB_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR} )
+endif()
+
+if( SAB_ENABLE_TESTING )
     enable_testing()
 endif()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
-SET(SAB_UTILS_DIR ${CMAKE_SOURCE_DIR})
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
@@ -48,8 +51,8 @@ project( SABUtils )
 
 AddQtIncludes()
 
-include( include.cmake )
-include( Project.cmake )
+include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
+include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
 
 add_library(SABUtils STATIC
     ${project_SRCS} 
