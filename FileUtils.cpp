@@ -289,6 +289,44 @@ bool isBinaryFile( const std::string & fileName, const std::string & relToDir ) 
     return false;
 }
 
+QString expandEnvVars( const QString & fileName, std::set< QString > * envVars )
+{
+    static QStringList regExStrings =
+    {
+         "\\\\?\\$\\\\?\\((?<regex>\\w*)\\\\?\\)"      // handles $(foo) and \$\(foo\)
+        ,"\\\\?\\$\\\\?\\{(?<regex>\\w*)\\\\?\\}"      // handles ${foo} and \$\{foo\}
+        ,"\\\\?\\%\\\\?\\((?<regex>\\w*)\\\\?\\)\\\\?\\%" //handles %(foo)% and \%\(foo\)\%
+        ,"\\\\?\\%\\\\?\\{(?<regex>\\w*)\\\\?\\}\\\\?\\%" //handles %foo% and \%\{foo\}\%
+        , "\\\\?\\$(?<regex>\\w*)"                // handles $foo and \$foo 
+        ,"\\\\?\\%(?<regex>\\w*)\\\\?\\%"           //handles %foo% and \%foo\%
+    };
+
+    if ( envVars )
+        envVars->clear();
+
+    for ( int ii = 0; ii < regExStrings.count(); ++ii )
+    {
+        auto regExString = regExStrings[ ii ];
+        QRegularExpression regExp( regExString );
+        assert( regExp.isValid() );
+        QRegularExpressionMatch match;
+        auto lPos = fileName.indexOf( regExp, 0, &match );
+        if ( lPos != -1 )
+        {
+            // found a match
+            auto prefix = fileName.left( lPos );
+            auto envVar = match.captured( "regex" );
+            if ( envVars && ( envVars->find( envVar ) == envVars->end() ) )
+                envVars->insert( envVar );
+            auto envVarValue = qgetenv( qPrintable( envVar ) );
+            auto remaining = fileName.mid( lPos + match.capturedLength() );
+            return prefix + envVarValue + expandEnvVars( remaining );
+        }
+    }
+
+    return fileName;
+}
+
 QString getRelativePath( const QDir & absDir, const QString & path )
 {
     QString dir = QDir::cleanPath( absDir.absolutePath() );
@@ -835,8 +873,7 @@ std::string getPathFromDirs( const std::list< std::string > & dirs )
     return retVal;
 }
 
-#ifndef BUILDING_VERIFIC_APP
-bool moveToTrashImpl( const QString & fileName );
+bool moveToTrashImpl( const QString & /*fileName*/ ){ return true;}
 bool moveToTrash( const QString & fileName )
 {
     if ( !moveToTrashImpl( fileName ) )
@@ -847,7 +884,6 @@ bool moveToTrash( const std::string & fileName )
 {
     return moveToTrash( QString::fromStdString( fileName ) );
 }
-#endif
 
 static std::unordered_set< std::string, NStringUtils::noCaseStringHash, NStringUtils::noCaseStringEq > sSystemLibDirs;
 static std::unordered_map< std::string, std::string > sSystemFileMap;
