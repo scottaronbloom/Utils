@@ -135,7 +135,7 @@ auto power( T1 x, T2 y )
 int fromChar( char ch, int base, bool& aOK );
 char toChar( int value );
 
-void toDigits( int64_t val, int base, std::pair< int8_t*, int >& retVal, size_t& numDigits, bool * aOK = nullptr );
+void toDigits( int64_t val, int base, std::pair< int8_t*, uint32_t > & retVal, size_t& numDigits, bool * aOK = nullptr );
 std::string toString( int64_t val, int base );
 int64_t fromString( const std::string& str, int base );
 std::string getTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point >& startEndTime, bool reportTotalSeconds, bool highPrecision );

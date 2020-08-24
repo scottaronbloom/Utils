@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2004 - 2019 Blue Pearl Software Inc.
+ * (c) Copyright 2004 - 2019 Scott ARon Bloom
  * All rights reserved.
  *
  * This source code belongs to Blue Pearl Software Inc.
@@ -97,7 +97,7 @@ namespace
     {
         int8_t digits[ 10 ] = {0};
         size_t numDigits = 0;
-        auto retVal = std::make_pair( digits, 2 );
+        auto retVal = std::make_pair( digits, static_cast< uint32_t >( 2 ) );
         bool aOK;
         NUtils::toDigits( 101, 10, retVal, numDigits, &aOK );
         EXPECT_FALSE( aOK );
@@ -113,7 +113,7 @@ namespace
         retVal = std::make_pair( digits, 10 );
         NUtils::toDigits( 1234567890, 10, retVal, numDigits, &aOK );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( 10, numDigits );
+        ASSERT_EQ( 10, numDigits );
         EXPECT_EQ( 0, digits[ 0 ] );
         EXPECT_EQ( 9, digits[ 1 ] );
         EXPECT_EQ( 8, digits[ 2 ] );
