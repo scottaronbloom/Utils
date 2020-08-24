@@ -24,7 +24,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-
+#include <cctype>
 namespace NUtils
 {
     int fromChar( char ch, int base, bool& aOK )
@@ -68,7 +68,7 @@ namespace NUtils
         return 'a' + value - 10;
     }
 
-    void toDigits( int64_t val, int base, std::pair< int8_t *, int > & retVal, size_t & numDigits, bool * aOK )
+    void toDigits( int64_t val, int base, std::pair< int8_t *, uint32_t > & retVal, size_t & numDigits, bool * aOK )
     {
         numDigits = 0;
         if ( aOK )
@@ -189,7 +189,7 @@ namespace NUtils
         aOK = true;
         int8_t rawDigits[ 4096 ] = {0};
         size_t numDigits;
-        auto digits = std::make_pair( rawDigits, 4096 );
+        auto digits = std::make_pair( rawDigits, static_cast< uint32_t >( 4096 ) );
         toDigits( val, base, digits, numDigits );
 
         int64_t sumOfPowers = 0;

@@ -122,7 +122,7 @@ FUNCTION(SAB_UNIT_TEST name file libs)
 
     add_executable(${TEST_NAME} ${file} ${ARGN})
     IF( WIN32 )
-        target_link_options( ${TEST_NAME} PRIVATE /STACK:18388608 )
+        #target_link_options( ${TEST_NAME} PRIVATE /STACK:18388608 )
     ENDIF()
     target_link_libraries(${TEST_NAME} ${libs})
     add_test(${TEST_NAME} ${TEST_NAME})
