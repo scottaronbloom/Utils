@@ -327,6 +327,29 @@ QString expandEnvVars( const QString & fileName, std::set< QString > * envVars )
     return fileName;
 }
 
+QString gSoftenPath( const QString & xFileName, const std::set< QString > & xEnvVars, bool forceUnix)
+{
+    auto lRetVal = xFileName;
+    for ( auto && ii : xEnvVars )
+    {
+        auto lValue = qgetenv( qPrintable( ii ) );
+        
+        auto pos = lRetVal.indexOf( lValue );
+        if ( pos != -1 )
+        {
+            auto lVarName = QString( "${%1}" );
+#ifdef Q_OS_WIN
+            if ( !forceUnix )
+                lVarName = QString( "%%1%");
+#endif
+            lVarName = lVarName.arg( ii );
+            lRetVal.replace( pos, lValue.length(), lVarName );
+        }
+    }
+
+    return lRetVal;
+}
+
 QString getRelativePath( const QDir & absDir, const QString & path )
 {
     QString dir = QDir::cleanPath( absDir.absolutePath() );

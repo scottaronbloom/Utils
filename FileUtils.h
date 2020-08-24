@@ -80,13 +80,15 @@ namespace NFileUtils
 
     bool isBinaryFile( const std::string & fileName ); // if any char in the first 100 characters is non std::isprint return true
     bool isBinaryFile( const std::string & fileName, const std::string & relToDir ); // if any char in the first 100 characters is non std::isprint return true
-        // searches for environmental vars inside filenames of the form
+
+    // searches for environmental vars inside filenames of the form
     // $foo or %foo% \$foo \%foo\%
     // the variable itself can be surrounded by {} or () or \{\} \(\)
     //
     // it gets the prefix (before the start) extracts the variable name and then recursively calls itself 
     // on the suffix.
     QString expandEnvVars( const QString & fileName, std::set< QString > * envVars = nullptr );
+    QString gSoftenPath( const QString & xFileName, const std::set< QString > & xEnvVars, bool forceUnix = false ); // force unix just helps in unit testing
 
 }
 #endif

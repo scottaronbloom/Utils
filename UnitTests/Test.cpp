@@ -681,6 +681,17 @@ namespace
         EXPECT_EQ( "FOOBAR", *envVars.begin() );
     }
 
+    TEST( TestUtils, TestSoftenVars )
+    {
+        qputenv( "HOME", "/home/sbloom" );
+        qputenv( "BAR", "bar" );
+
+        EXPECT_EQ( "${HOME}/foo/bar", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME" }, true ) );
+        EXPECT_EQ( "${HOME}/foo/${BAR}", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME", "BAR" }, true ) );
+
+        EXPECT_EQ( "%HOME%/foo/bar", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME" } ) );
+        EXPECT_EQ( "%HOME%/foo/%BAR%", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME", "BAR" } ) );
+    }
 }
 
 
