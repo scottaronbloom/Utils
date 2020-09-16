@@ -20,14 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-project(TestFlowWidget) 
+project(SABUtils_TestFlowWidget) 
 
 find_package(Qt5SrcMoc REQUIRED)
 
 include( include.cmake )
 include( ${CMAKE_SOURCE_DIR}/SABUtils/Project.cmake )
 
-add_executable( TestFlowWidget WIN32
+add_executable( SABUtils_TestFlowWidget WIN32
                  ${project_SRCS} 
                  ${project_H} 
                  ${qtproject_SRCS} 
@@ -43,19 +43,19 @@ add_executable( TestFlowWidget WIN32
                  ${_CMAKE_FILES}
                  ${_CMAKE_MODULE_FILES}
           )
-set_target_properties( TestFlowWidget PROPERTIES FOLDER UnitTests )
+set_target_properties( SABUtils_TestFlowWidget PROPERTIES FOLDER UnitTests )
           
-target_link_libraries( TestFlowWidget 
+target_link_libraries( SABUtils_TestFlowWidget 
                  Qt5::Widgets
                  Qt5::Core
                  Qt5::Test
                  SABUtils
           )
-DeployQt( TestFlowWidget . )
-DeploySystem( TestFlowWidget )
+DeployQt( SABUtils_TestFlowWidget . )
+DeploySystem( SABUtils_TestFlowWidget )
 
 INSTALL( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION . )
 INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${PROJECT_NAME}.pdb DESTINATION . CONFIGURATIONS Debug )
 
-ADD_TEST( NAME FlowWidgetTests COMMAND TestFlowWidget )
+ADD_TEST( NAME FlowWidgetTests COMMAND SABUtils_TestFlowWidget )
 
