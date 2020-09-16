@@ -551,10 +551,10 @@ namespace
         CWordExp wordExp( "%HOMEDRIVE%%HOMEPATH%/*/sb" );
         ASSERT_EQ( 1, wordExp.getAbsoluteFilePaths( &aOK ).size() );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "C:\\Users\\scott\\fuckit\\sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
+        EXPECT_EQ( "C:\\Users\\scott\\source\\sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
 
         CWordExp wordExp1( "e:/*/*/sb/*" );
-        EXPECT_EQ( 63, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
+        EXPECT_EQ( 66, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
         EXPECT_TRUE( aOK );
     }
 #else
