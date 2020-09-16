@@ -35,7 +35,12 @@ set(qtproject_SRCS
     WordExp.cpp
 )
 
+set(qtproject_CPPMOC_SRCS
+    FlowWidget.cxx
+)
+
 set(qtproject_H
+    FlowWidget.h
     SpinBox64.h
     SpinBox64U.h
     ScrollMessageBox.h

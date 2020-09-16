@@ -31,7 +31,17 @@ if ( NOT SAB_UTILS_DIR )
 endif()
 
 if( SAB_ENABLE_TESTING )
+    SET(GOOGLETEST_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
+    MESSAGE( STATUS "Adding support for testing - ${GOOGLETEST_ROOT_DIR}" )
     enable_testing()
+    add_subdirectory( ${GOOGLETEST_ROOT_DIR} )
+    SET(GOOGLETEST_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googletest)
+    SET(GMOCK_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googlemock)
+    option( gtest_force_shared_crt "Use shared ( DLL ) run-time lib even when Google Test is built as static lib." ON )
+    set_target_properties( gmock PROPERTIES FOLDER 3rdParty/google )
+    set_target_properties( gmock_main PROPERTIES FOLDER 3rdParty/google )
+    set_target_properties( gtest PROPERTIES FOLDER 3rdParty/google )
+    set_target_properties( gtest_main PROPERTIES FOLDER 3rdParty/google )
 endif()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
@@ -41,10 +51,9 @@ OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 find_package(Qt5 COMPONENTS Core Widgets Xml XmlPatterns REQUIRED)
 find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)
+find_package(Qt5SrcMoc REQUIRED)
 
 if ( SAB_ENABLE_TESTING )
-    option( gtest_force_shared_crt "Use shared ( DLL ) run-time lib even when Google Test is built as static lib." ON )
-    add_subdirectory( ${CMAKE_SOURCE_DIR}/googletest )
 endif()
 
 project( SABUtils )
@@ -62,11 +71,15 @@ add_library(SABUtils STATIC
     ${qtproject_QRC_SRCS} 
     ${qtproject_UIS_H} 
     ${qtproject_MOC_SRCS} 
+    ${qtproject_CPPMOC_SRCS}
+    ${qtproject_CPPMOC_H} 
     ${qtproject_H} 
     ${qtproject_UIS}
     ${qtproject_QRC_SOURCES}
     ${_CMAKE_FILES}
+    ${_CMAKE_MODULE_FILES}
 )
 set_target_properties( SABUtils PROPERTIES FOLDER Libs )
 add_subdirectory(UnitTests)
+add_subdirectory(QtUnitTests)
 
