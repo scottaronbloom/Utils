@@ -1,6 +1,7 @@
 #undef QT_NO_DEBUG_OUTPUT
 #include "FlowWidget.h"
 
+#include <unordered_map>
 #include <QAbstractButton>
 #include <QStyleOptionToolBox>
 #include <QScrollArea>
@@ -11,6 +12,9 @@
 #include <QHeaderView>
 #include <QHelpEvent>
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 using TFlowWidgetItems = std::vector< std::unique_ptr< CFlowWidgetItem > >;
 using TDataMap = std::map< int, QVariant >;
@@ -21,6 +25,7 @@ class CFlowWidgetHeader : public QAbstractButton
 public:
     friend class CFlowWidgetImpl;
     CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* xParent );
+    ~CFlowWidgetHeader();
 
     CFlowWidget* mFlowWidget() const;
 
@@ -44,9 +49,6 @@ public:
     int mChildCount() const;
     CFlowWidgetItem* mGetChild( int xIndex ) const;
 
-    void mSetData( int xRole, const QVariant& xData );
-    QVariant mData( int xRole ) const;
-
     void mSetVisible( bool xVisible, bool xExpandIfShow );
     bool mIsVisible() const;
 
@@ -54,7 +56,7 @@ public:
     bool mIsDisabled() const { return !mIsEnabled(); }
 
     void mSetEnabled( bool xEnabled );
-    bool mIsEnabled() const { return isEnabled(); }
+    bool mIsEnabled() const { return dEnabled.first && isEnabled(); }
 
     bool mSelected() const;
     void mSetSelected( bool b ) { mSetExpanded( b ); }
@@ -84,6 +86,7 @@ public:
     {
         emit sigDoubleClicked();
     }
+
 Q_SIGNALS:
     void sigDoubleClicked();
 protected:
@@ -97,6 +100,10 @@ protected:
 
     void initStyleOption( QStyleOptionToolBox* opt ) const;
     void paintEvent( QPaintEvent* ) override;
+    void mCollectDisabledTreeWidgetItems( QTreeWidgetItem* xItem );
+    void mCollectDisabledTreeWidgetItems();
+    void mSetTreeWidgetItemsEnabled( QTreeWidgetItem* xItem, bool xEnabled );
+    void mSetTreeWidgetItemsEnabled( bool xEnabled );
 
 private:
     CFlowWidgetItem* dContainer{ nullptr }; // not owned no delete
@@ -104,11 +111,11 @@ private:
     QTreeWidget* dTreeWidget{ nullptr }; // child of dScrollArea
 
     bool dSelected{ false };
+    std::pair< bool, std::unordered_map< QTreeWidgetItem *, bool > > dEnabled{ true, {} };
     int dIndexInPage{ -1 };
     std::vector< CFlowWidgetItem* > dTopItems; // owned in the dContainers dChildren
     std::map< QTreeWidgetItem*, CFlowWidgetItem* > dTopItemMap; // only the top level items
     std::map< QTreeWidgetItem*, CFlowWidgetItem* > dAllChildItemMap; // the individual items own the memory
-    TDataMap dData;
 };
 
 class CFlowWidgetItemImpl
@@ -281,9 +288,8 @@ public:
 
     void mSetData( int xRole, const QVariant& xData, bool xSetState = true )
     {
-        if ( dHeader )
-            dHeader->mSetData( xRole, xData );
-        else if ( dTreeWidgetItem )
+        // header data comes from here
+        if ( dTreeWidgetItem )
             dTreeWidgetItem->setData( 0, xRole, xData );
 
         dData[ xRole ] = xData;
@@ -371,7 +377,11 @@ public:
         if ( dHeader )
             dHeader->mSetDisabled( xDisabled );
         else if ( dTreeWidgetItem )
+        {
             dTreeWidgetItem->setDisabled( xDisabled );
+            if ( xDisabled )
+                dTreeWidgetItem->setSelected( false );
+        }
 
         if ( xDisabled != mIsStateDisabled() )
         {
@@ -412,6 +422,7 @@ public:
         }
         return false;
     }
+    
     CFlowWidgetHeader* mHeader() const
     {
         if ( dHeader )
@@ -428,16 +439,50 @@ public:
         else if ( dTreeWidgetItem )
             dTreeWidgetItem->setExpanded( xExpanded );
     }
-    void mTakeWidgets();
+    void mRemoveWidgets();
+    void mClearWidgets( bool xClearCurrent );
+
+    void mDump( QJsonObject& xJSON, bool xRecursive ) const
+    {
+        xJSON[ "StateID" ] = dStateID;
+        xJSON[ "Text" ] = dText;
+        xJSON[ "ToolTip" ] = dToolTip;
+        xJSON[ "HasIcon" ] = !dIcon.isNull();
+        xJSON[ "Disabled" ] = mIsDisabled();
+        xJSON[ "Visible" ] = mIsVisible();
+        QJsonArray lDataArray;
+        for( auto && ii : dData )
+        {
+            QJsonObject lCurr;
+            lCurr[ QString::number( ii.first ) ] = ii.second.toString();
+            lDataArray.push_back( lCurr );
+        }
+        if ( lDataArray.size() )
+            xJSON[ "Data" ] = lDataArray;
+
+        if ( xRecursive )
+        {
+            QJsonArray lChildren;
+            int childNum = 0;
+            for ( auto&& ii : dChildren )
+            {
+                QJsonObject lCurr;
+                ii->mDump( lCurr, true );
+                lChildren.push_back( lCurr );
+            }
+            if ( lChildren.size() )
+                xJSON[ "Children" ] = lChildren;
+        }
+    }
 
     CFlowWidgetItem* dContainer{ nullptr };
-    int dStateID{ -1 };
     CFlowWidgetItem* dParent{ nullptr };
     CFlowWidgetHeader* dHeader{ nullptr };
     QTreeWidgetItem* dTreeWidgetItem{ nullptr };
 
     std::map< QTreeWidgetItem*, CFlowWidgetItem* > dChildItemMap;  // flowItems owned by dChildren
 
+    int dStateID{ -1 };
     QString dText;
     QString dToolTip;
     QIcon dIcon;
@@ -457,7 +502,7 @@ public:
     size_t mOpenCount() const
     {
         size_t retVal = 0;
-        for ( auto&& ii : fTopLevelItems )
+        for ( auto&& ii : dTopLevelItems )
         {
             if ( ii->mIsVisible() )
                 retVal++;
@@ -503,9 +548,9 @@ public:
 
     int mIndexOfTopLevelItem( CFlowWidgetItem* xItem )
     {
-        for ( size_t ii = 0; ii < fTopLevelItems.size(); ++ii )
+        for ( size_t ii = 0; ii < dTopLevelItems.size(); ++ii )
         {
-            if ( fTopLevelItems[ ii ].get() == xItem )
+            if ( dTopLevelItems[ ii ].get() == xItem )
                 return static_cast<int>(ii);
         }
         return -1;
@@ -513,9 +558,9 @@ public:
 
     CFlowWidgetItem* mGetTopLevelItem( int xIndex ) const
     {
-        if ( (xIndex < 0) || (xIndex >= fTopLevelItems.size()) )
+        if ( (xIndex < 0) || (xIndex >= dTopLevelItems.size()) )
             return nullptr;
-        return fTopLevelItems[ xIndex ].get();
+        return dTopLevelItems[ xIndex ].get();
     }
 
     CFlowWidgetItem* mCurrentTopLevelItem() const
@@ -533,7 +578,7 @@ public:
 
     int mTopLevelItemCount() const
     {
-        return static_cast<int>(fTopLevelItems.size());
+        return static_cast<int>(dTopLevelItems.size());
     }
 
     int mFindReplacementHeader( CFlowWidgetItem* xItem )
@@ -590,6 +635,29 @@ public:
     void mRemoveTopLevelItem( int xIndex );
 
     void mToggleTopLevelItem( int index ); // if already open, close it, if closed open it
+    void mDump( QJsonObject& xJSON ) const
+    {
+        if ( dCurrentTopLevelItem )
+        {
+            QJsonObject lCurrentObject;
+            dCurrentTopLevelItem->mDump( lCurrentObject, false );
+            xJSON[ "Current" ] = lCurrentObject;
+        }
+        else
+        {
+            xJSON[ "Current" ] = "nullptr";
+        }
+
+        QJsonArray lChildren;
+        for ( auto && ii : dTopLevelItems )
+        {
+            QJsonObject lCurr;
+            ii->mDump( lCurr, true );
+            lChildren.append( lCurr );
+        }
+        if ( lChildren.size() )
+            xJSON[ "Children" ] = lChildren;
+    }
 
     void mUpdateTabs();
     void mRelayout();
@@ -597,9 +665,9 @@ public:
     QVBoxLayout* fTopLayout{ nullptr };
     CFlowWidget* dFlowWidget{ nullptr };
 
-    CFlowWidgetItem* dCurrentTopLevelItem{ nullptr };
+    CFlowWidgetItem * dCurrentTopLevelItem{ nullptr };
 
-    TFlowWidgetItems fTopLevelItems;
+    TFlowWidgetItems dTopLevelItems;
 };
 
 CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon )
@@ -801,14 +869,36 @@ bool CFlowWidgetItemImpl::mBeenPlaced() const
     return (dHeader != nullptr) || (dTreeWidgetItem != nullptr);
 }
 
-void CFlowWidgetItemImpl::mTakeWidgets()
+void CFlowWidgetItemImpl::mClearWidgets( bool xClearCurrent )
 {
+    if ( xClearCurrent )
+    {
+        dHeader = nullptr;
+        dTreeWidgetItem = nullptr;
+    }
+
+    dChildItemMap.clear();
     for ( int ii = 0; ii < mChildCount(); ++ii )
     {
         auto lCurr = mGetChild( ii );
         if ( !lCurr )
             continue;
-        dChildren.push_back( std::move( std::unique_ptr< CFlowWidgetItem >( lCurr ) ) );
+        lCurr->dImpl->mClearWidgets( true ); // clears all tree widget items
+    }
+}
+
+void CFlowWidgetItemImpl::mRemoveWidgets()
+{
+    mClearWidgets( false );
+    if ( dHeader )
+    {
+        delete dHeader;
+        dHeader = nullptr;
+    }
+    else if ( dTreeWidgetItem )
+    {
+        delete dTreeWidgetItem;
+        dTreeWidgetItem = nullptr;
     }
 }
 
@@ -854,15 +944,15 @@ int CFlowWidgetItem::mIndexInParent() const
 
 CFlowWidgetItem* CFlowWidgetImpl::mTopLevelItem( int xIndex )
 {
-    if ( xIndex >= 0 && xIndex < static_cast<int>(fTopLevelItems.size()) )
-        return fTopLevelItems[ xIndex ].get();
+    if ( xIndex >= 0 && xIndex < static_cast<int>(dTopLevelItems.size()) )
+        return dTopLevelItems[ xIndex ].get();
     return nullptr;
 }
 
 const CFlowWidgetItem* CFlowWidgetImpl::mTopLevelItem( int xIndex ) const
 {
-    if ( xIndex >= 0 && xIndex < static_cast<int>(fTopLevelItems.size()) )
-        return fTopLevelItems[ xIndex ].get();
+    if ( xIndex >= 0 && xIndex < static_cast<int>(dTopLevelItems.size()) )
+        return dTopLevelItems[ xIndex ].get();
     return nullptr;
 }
 
@@ -871,7 +961,7 @@ void CFlowWidgetImpl::mUpdateTabs()
     CFlowWidgetHeader* lLastButton = dCurrentTopLevelItem ? dCurrentTopLevelItem->dImpl->dHeader : nullptr;
     bool lAfter = false;
     int lIndex = 0;
-    for ( const auto& lCurrItem : fTopLevelItems )
+    for ( const auto& lCurrItem : dTopLevelItems )
     {
         auto lHeader = lCurrItem->dImpl->dHeader;
         // update indexes, since the updates are delayed, the indexes will be correct
@@ -915,6 +1005,11 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
     dScrollArea->hide();
     dScrollArea->setFrameStyle( QFrame::NoFrame );
     dTreeWidget->installEventFilter( this );
+}
+
+CFlowWidgetHeader::~CFlowWidgetHeader()
+{
+    delete dScrollArea;
 }
 
 bool CFlowWidgetHeader::eventFilter( QObject* xWatched, QEvent* xEvent )
@@ -1010,6 +1105,20 @@ int CFlowWidgetHeader::mInsertChild( int xIndex, CFlowWidgetItem* xItem )
     return xIndex;
 }
 
+QString CFlowWidgetItem::mDump( bool xRecursive, bool xCompacted ) const
+{
+    QJsonObject lObject;
+    mDump( lObject, xRecursive );
+    auto lRetVal = QJsonDocument( lObject ).toJson( xCompacted ? QJsonDocument::Compact : QJsonDocument::Indented );
+    return lRetVal;
+}
+
+void CFlowWidgetItem::mDump( QJsonObject& xJSON, bool xRecursive ) const
+{
+    dImpl->mDump( xJSON, xRecursive );
+}
+
+
 CFlowWidgetItem* CFlowWidgetItem::mTakeChild( CFlowWidgetItem* xItem )
 {
     return dImpl->mTakeChild( xItem );
@@ -1053,26 +1162,19 @@ CFlowWidgetItem* CFlowWidgetHeader::mGetChild( int xIndex ) const
     return dTopItems[ xIndex ];
 }
 
-void CFlowWidgetHeader::mSetData( int xRole, const QVariant& xData )
-{
-    dData[ xRole ] = xData;
-}
-
-QVariant CFlowWidgetHeader::mData( int xRole ) const
-{
-    auto pos = dData.find( xRole );
-    if ( pos == dData.end() )
-        return QVariant();
-    return (*pos).second;
-}
-
 void CFlowWidgetHeader::initStyleOption( QStyleOptionToolBox* xOption ) const
 {
     if ( !xOption )
         return;
     xOption->initFrom( this );
+    if ( !mIsEnabled() )
+    {
+        xOption->state &= ~QStyle::State_Enabled;
+        xOption->palette.setCurrentColorGroup( QPalette::Disabled );
+    }
     if ( dSelected )
         xOption->state |= QStyle::State_Selected;
+
     if ( isDown() )
         xOption->state |= QStyle::State_Sunken;
     xOption->text = text();
@@ -1151,7 +1253,12 @@ void CFlowWidgetHeader::mSetExpanded( bool xExpanded )
     dSelected = xExpanded;
     mFlowWidget()->dImpl->mUpdateTabs();
     if ( dSelected )
+    {
+        auto lCurrSelected = dTreeWidget->selectedItems();
+        for( auto && ii : lCurrSelected )
+            ii->setSelected( false );
         emit mFlowWidget()->sigFlowWidgetItemSelected( dContainer, dSelected );
+    }
 }
 
 bool CFlowWidgetHeader::mIsExpanded() const
@@ -1276,7 +1383,7 @@ void CFlowWidgetImpl::mRelayout()
     delete fTopLayout;
     fTopLayout = new QVBoxLayout( dFlowWidget );
     fTopLayout->setContentsMargins( QMargins() );
-    for ( const auto& page : fTopLevelItems )
+    for ( const auto& page : dTopLevelItems )
     {
         page->dImpl->dHeader->mAddToLayout( fTopLayout );
     }
@@ -1292,14 +1399,14 @@ auto gPageEquals = []( const CFlowWidgetItem* page )
 
 CFlowWidgetItem* CFlowWidgetImpl::mRemoveFromTopLevelItems( CFlowWidgetItem* xItem )
 {
-    auto first = std::find_if( fTopLevelItems.begin(), fTopLevelItems.end(), gPageEquals( xItem ) );
+    auto first = std::find_if( dTopLevelItems.begin(), dTopLevelItems.end(), gPageEquals( xItem ) );
 
     std::list< CFlowWidgetItem* > lRetVal;
-    if ( first != fTopLevelItems.end() )
+    if ( first != dTopLevelItems.end() )
     {
         lRetVal.push_back( (*first).get() );
         (*first).release();
-        for ( auto ii = first; ++ii != fTopLevelItems.end(); )
+        for ( auto ii = first; ++ii != dTopLevelItems.end(); )
         {
             if ( (*ii).get() != xItem )
             {
@@ -1312,7 +1419,7 @@ CFlowWidgetItem* CFlowWidgetImpl::mRemoveFromTopLevelItems( CFlowWidgetItem* xIt
             }
         }
     }
-    fTopLevelItems.erase( first, fTopLevelItems.end() );
+    dTopLevelItems.erase( first, dTopLevelItems.end() );
     if ( lRetVal.empty() )
         return nullptr;
     auto lRetValItem = *lRetVal.begin();
@@ -1321,7 +1428,7 @@ CFlowWidgetItem* CFlowWidgetImpl::mRemoveFromTopLevelItems( CFlowWidgetItem* xIt
 
 CFlowWidgetItem* CFlowWidgetImpl::mTakeItem( CFlowWidgetItem* xItem )
 {
-    xItem->dImpl->mTakeWidgets(); // removes all GUI items from item
+    xItem->dImpl->mRemoveWidgets(); // removes all GUI items from item
 
     auto lParent = xItem->mParentItem();
     if ( lParent )
@@ -1331,14 +1438,11 @@ CFlowWidgetItem* CFlowWidgetImpl::mTakeItem( CFlowWidgetItem* xItem )
     if ( lTopLevelIndex == -1 )
         return nullptr;
 
-    xItem->dImpl->mTakeWidgets();
-    xItem->dImpl->dHeader->mTakeFromLayout( fTopLayout );
-
     bool lRemoveCurrent = xItem == dCurrentTopLevelItem;
 
     auto lRetVal = mRemoveFromTopLevelItems( xItem );
 
-    if ( fTopLevelItems.empty() )
+    if ( dTopLevelItems.empty() )
     {
         dCurrentTopLevelItem = nullptr;
         emit dFlowWidget->sigFlowWidgetItemSelected( nullptr, false );
@@ -1398,19 +1502,72 @@ int CFlowWidget::mIndexOfTopLevelItem( const CFlowWidgetItem* xItem ) const
     if ( xItem->mParentItem() )
         return -1;
 
-    const auto it = std::find_if( dImpl->fTopLevelItems.cbegin(), dImpl->fTopLevelItems.cend(), gPageEquals( xItem ) );
-    if ( it == dImpl->fTopLevelItems.cend() )
+    const auto it = std::find_if( dImpl->dTopLevelItems.cbegin(), dImpl->dTopLevelItems.cend(), gPageEquals( xItem ) );
+    if ( it == dImpl->dTopLevelItems.cend() )
         return -1;
-    return static_cast<int>(it - dImpl->fTopLevelItems.cbegin());
+    return static_cast<int>(it - dImpl->dTopLevelItems.cbegin());
+}
+
+void CFlowWidgetHeader::mCollectDisabledTreeWidgetItems( QTreeWidgetItem * xItem )
+{
+    if ( !xItem )
+        return;
+    dEnabled.second[ xItem ] = xItem->isDisabled();
+    for( auto ii = 0; ii < xItem->childCount(); ++ii )
+    {
+        mCollectDisabledTreeWidgetItems( xItem->child( ii ) );
+    }
+}
+
+void CFlowWidgetHeader::mCollectDisabledTreeWidgetItems()
+{
+    for( auto ii = 0; ii < dTreeWidget->topLevelItemCount(); ++ii )
+    {
+        mCollectDisabledTreeWidgetItems( dTreeWidget->topLevelItem( ii ) );
+    }
+}
+
+void CFlowWidgetHeader::mSetTreeWidgetItemsEnabled( QTreeWidgetItem* xItem, bool xEnabled )
+{
+    if ( !xItem )
+        return;
+    xItem->setDisabled( !xEnabled );
+    for ( auto ii = 0; ii < xItem->childCount(); ++ii )
+    {
+        mSetTreeWidgetItemsEnabled( xItem->child( ii ), xEnabled );
+    }
+}
+
+void CFlowWidgetHeader::mSetTreeWidgetItemsEnabled( bool xEnabled )
+{
+    for ( auto ii = 0; ii < dTreeWidget->topLevelItemCount(); ++ii )
+    {
+        mSetTreeWidgetItemsEnabled( dTreeWidget->topLevelItem( ii ), xEnabled );
+    }
 }
 
 void CFlowWidgetHeader::mSetEnabled( bool xEnabled )
 {
-    setEnabled( xEnabled );
-    if ( !xEnabled && mFlowWidget()->mCurrentTopLevelItem() == dContainer )
+    if ( dEnabled.first != xEnabled )
     {
-        auto lNewIndex = mFlowWidget()->dImpl->mFindReplacementHeader( dContainer );
-        mFlowWidget()->dImpl->mSetCurrentTopLevelItem( lNewIndex );
+        dEnabled.first = xEnabled;
+        // if we are disabling collect all items that are already disabled
+        if ( !xEnabled )
+        {
+            dEnabled.second.clear();
+            mCollectDisabledTreeWidgetItems();
+        }
+        mSetTreeWidgetItemsEnabled( xEnabled ); // set all items
+
+        // if we are enabling, disable all that were previously disabled
+        if ( xEnabled )
+        {
+            for ( auto&& ii : dEnabled.second )
+            {
+                ii.first->setDisabled( ii.second );
+            }
+        }
+        repaint();
     }
 }
 
@@ -1450,10 +1607,10 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
 
     auto lFlowItem = xItem.get();
     bool lCurrentChanged = false;
-    if ( xIndex < 0 || xIndex >= static_cast<int>(fTopLevelItems.size()) )
+    if ( xIndex < 0 || xIndex >= static_cast<int>(dTopLevelItems.size()) )
     {
-        xIndex = static_cast<int>(fTopLevelItems.size());
-        fTopLevelItems.push_back( std::move( xItem ) );
+        xIndex = static_cast<int>(dTopLevelItems.size());
+        dTopLevelItems.push_back( std::move( xItem ) );
         lFlowItem->dImpl->dHeader->mAddToLayout( fTopLayout );
         if ( xIndex == 0 )
         {
@@ -1463,7 +1620,7 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
     }
     else
     {
-        fTopLevelItems.insert( fTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
+        dTopLevelItems.insert( dTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
         mRelayout();
         if ( dCurrentTopLevelItem )
         {
@@ -1481,26 +1638,26 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
                       [this, lFlowItem]()
     {
         auto lIndex = mIndexOfTopLevelItem( lFlowItem );
-        if ( (lIndex < 0) || (lIndex >= static_cast<int>(fTopLevelItems.size())) )
+        if ( (lIndex < 0) || (lIndex >= static_cast<int>(dTopLevelItems.size())) )
             return;
-        dFlowWidget->dImpl->mSetCurrentTopLevelItem( fTopLevelItems[ lIndex ].get() );
-        dFlowWidget->sigFlowWidgetItemSelected( fTopLevelItems[ lIndex ].get(), true );
+        dFlowWidget->dImpl->mSetCurrentTopLevelItem( dTopLevelItems[ lIndex ].get() );
+        dFlowWidget->sigFlowWidgetItemSelected( dTopLevelItems[ lIndex ].get(), true );
     } );
 
     QObject::connect( lFlowItem->dImpl->dHeader, &CFlowWidgetHeader::sigDoubleClicked,
                       [this, lFlowItem]()
     {
         auto lIndex = mIndexOfTopLevelItem( lFlowItem );
-        if ( (lIndex < 0) || (lIndex >= static_cast<int>(fTopLevelItems.size())) )
+        if ( (lIndex < 0) || (lIndex >= static_cast<int>(dTopLevelItems.size())) )
             return;
-        dFlowWidget->dImpl->mSetCurrentTopLevelItem( fTopLevelItems[ lIndex ].get() );
-        dFlowWidget->sigFlowWidgetItemDoubleClicked( fTopLevelItems[ lIndex ].get() );
+        dFlowWidget->dImpl->mSetCurrentTopLevelItem( dTopLevelItems[ lIndex ].get() );
+        dFlowWidget->sigFlowWidgetItemDoubleClicked( dTopLevelItems[ lIndex ].get() );
     } );
 
     lFlowItem->dImpl->dHeader->mSetVisible( true, lCurrentChanged );
 
     mUpdateTabs();
-    emit dFlowWidget->sigFlowWidgetItemInserted( fTopLevelItems[ xIndex ].get() );
+    emit dFlowWidget->sigFlowWidgetItemInserted( dTopLevelItems[ xIndex ].get() );
     return xIndex;
 }
 
@@ -1562,6 +1719,19 @@ CFlowWidgetItem* CFlowWidget::mSelectedItem() const
 
     auto lItemSelected = lCurrentTop->dImpl->mSelectedItem();
     return lItemSelected ? lItemSelected : lCurrentTop;
+}
+
+void CFlowWidget::mDump( QJsonObject & xJSON ) const
+{
+    dImpl->mDump( xJSON );
+}
+
+QString CFlowWidget::mDump( bool xCompacted ) const
+{
+    QJsonObject lObject;
+    mDump( lObject );
+    auto lRetVal = QJsonDocument( lObject ).toJson( xCompacted ? QJsonDocument::Compact : QJsonDocument::Indented );
+    return lRetVal;
 }
 
 #include "FlowWidget.moc"

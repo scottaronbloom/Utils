@@ -12,6 +12,7 @@ class CFlowWidget;
 class CFlowWidgetHeader;
 class QVBoxLayout;
 class QStyleOptionToolBox;
+class QJsonObject;
 
 class CFlowWidgetItemImpl;
 class CFlowWidgetImpl;
@@ -114,6 +115,8 @@ public:
     bool mIsTopLevelItem() const;
 
     int mIndexInParent() const;
+    QString mDump( bool xRecursive, bool xCompacted ) const;
+    void mDump( QJsonObject& xJSON, bool xRecursive ) const;
 private:
     CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon );
     std::unique_ptr< CFlowWidgetItemImpl > dImpl;
@@ -169,6 +172,8 @@ public:
 
     virtual CFlowWidgetItem* mSelectedItem() const; // only one item is selectable at a time.
 
+    virtual QString mDump( bool xCompacted ) const;
+    virtual void mDump( QJsonObject& xTS ) const;
 protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );

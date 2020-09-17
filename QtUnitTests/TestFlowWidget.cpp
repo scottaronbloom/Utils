@@ -412,6 +412,28 @@ private Q_SLOTS:
         QVERIFY( !dFlowItem32->mIsDisabled() );
         QVERIFY( !dFlowItem321->mIsDisabled() );
     }
+
+    void testDump()
+    {
+        QCOMPARE( "{\"Children\":[{\"Children\":[{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"StateID\":2,\"Text\":\"SubFlowItem 1-1-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"StateID\":1,\"Text\":\"SubFlowItem 1-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Disabled\":false,\"HasIcon\":false,\"StateID\":3,\"Text\":\"SubFlowItem 1-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"StateID\":0,\"Text\":\"FlowItem 1\",\"ToolTip\":\"\",\"Visible\":false},{\"Children\":[{\"Disabled\":false,\"HasIcon\":false,\"StateID\":5,\"Text\":\"SubFlowItem 2-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"StateID\":7,\"Text\":\"SubFlowItem 2-2-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Disabled\":false,\"HasIcon\":true,\"StateID\":8,\"Text\":\"SubFlowItem 2-2-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"StateID\":6,\"Text\":\"SubFlowItem 2-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"StateID\":4,\"Text\":\"FlowItem 2\",\"ToolTip\":\"\",\"Visible\":false},{\"Children\":[{\"Disabled\":false,\"HasIcon\":false,\"StateID\":10,\"Text\":\"SubFlowItem 3-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"StateID\":12,\"Text\":\"SubFlowItem 3-2-1\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"StateID\":11,\"Text\":\"SubFlowItem 3-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"StateID\":9,\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}],\"Current\":{\"Disabled\":false,\"HasIcon\":false,\"StateID\":9,\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}}", dFlowWidget->mDump( true ) );
+
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StateID\":0,\"Text\":\"FlowItem 1\",\"ToolTip\":\"\",\"Visible\":false}", dFlowItem1->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StateID\":1,\"Text\":\"SubFlowItem 1-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem11->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StateID\":2,\"Text\":\"SubFlowItem 1-1-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem112->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StateID\":3,\"Text\":\"SubFlowItem 1-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem12->mDump( false, true ) );
+
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StateID\":4,\"Text\":\"FlowItem 2\",\"ToolTip\":\"\",\"Visible\":false}", dFlowItem2->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StateID\":5,\"Text\":\"SubFlowItem 2-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem21->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StateID\":6,\"Text\":\"SubFlowItem 2-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem22->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StateID\":7,\"Text\":\"SubFlowItem 2-2-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem221->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StateID\":8,\"Text\":\"SubFlowItem 2-2-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem222->mDump( false, true ) );
+
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StateID\":9,\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}", dFlowItem3->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StateID\":10,\"Text\":\"SubFlowItem 3-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem31->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StateID\":11,\"Text\":\"SubFlowItem 3-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem32->mDump( false, true ) );
+        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StateID\":12,\"Text\":\"SubFlowItem 3-2-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem321->mDump( false, true ) );
+    }
+
 private:
     CFlowWidget* dFlowWidget{ nullptr };
 

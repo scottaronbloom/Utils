@@ -27,7 +27,7 @@ find_package(Qt5SrcMoc REQUIRED)
 include( include.cmake )
 include( ${CMAKE_SOURCE_DIR}/SABUtils/Project.cmake )
 
-add_executable( SABUtils_TestFlowWidget WIN32
+add_executable( SABUtils_TestFlowWidget
                  ${project_SRCS} 
                  ${project_H} 
                  ${qtproject_SRCS} 
