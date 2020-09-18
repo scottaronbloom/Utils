@@ -67,6 +67,7 @@ public:
 
     void mAddChild( CFlowWidgetItem* xChild );
     int mInsertChild( int xIndex, CFlowWidgetItem* xChild );
+    int mInsertChild( CFlowWidgetItem* xPeer, CFlowWidgetItem* xChild, bool xBefore );
 
     int mIndexOfChild( const CFlowWidgetItem* xChild );
 
@@ -149,6 +150,7 @@ public:
 
     virtual std::pair< CFlowWidgetItem*, bool > mAddTopLevelItem( CFlowWidgetItem* xItem ) { return mInsertTopLevelItem( -1, xItem ); }
     virtual std::pair< CFlowWidgetItem*, bool > mInsertTopLevelItem( int xIndex, CFlowWidgetItem* xItem );
+    virtual std::pair< CFlowWidgetItem*, bool > mInsertTopLevelItem( CFlowWidgetItem* xPeer, CFlowWidgetItem* xItem, bool xBefore );
 
     virtual CFlowWidgetItem* mAddItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStateID, xFlowName, xDescIcon, xParent ); }
     virtual CFlowWidgetItem* mAddItem( int xStateID, const QString& xFlowName, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStateID, xFlowName, QIcon(), xParent ); }

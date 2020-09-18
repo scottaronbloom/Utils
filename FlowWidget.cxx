@@ -43,6 +43,7 @@ public:
 
     void mAddChild( CFlowWidgetItem* xChild ) { mInsertChild( -1, xChild ); }
     int mInsertChild( int xIndex, CFlowWidgetItem* xChild );
+    void mAddChildren( const TFlowWidgetItems & xChildren );
 
     int mIndexOfChild( const CFlowWidgetItem* xItem ) const;
     CFlowWidgetItem* mTakeChild( CFlowWidgetItem* xItem );
@@ -184,7 +185,7 @@ public:
         return (dHeader == xOther.dHeader) && (dTreeWidgetItem == xOther.dTreeWidgetItem);
     }
 
-    CFlowWidget* mFlowWidget() const
+    CFlowWidget* mGetFlowWidget() const
     {
         if ( dHeader )
             return dynamic_cast<CFlowWidget*>(dHeader->mFlowWidget());
@@ -235,6 +236,38 @@ public:
         return nullptr;
     }
 
+    int mCreateTreeWidgetItem( int xIndex )
+    {
+        if ( !dParent || !dParent->dImpl )
+            return -1;
+
+        auto lTreeWidgetItem = new QTreeWidgetItem( QStringList() << mText() );
+        lTreeWidgetItem->setIcon( 0, mIcon() );
+        dTreeWidgetItem = lTreeWidgetItem;
+
+        int lRetVal = -1;
+        if ( dParent->dImpl->dHeader ) // its a top level, thus it becomes a top level to the tree
+        {
+            lRetVal = dParent->dImpl->dHeader->mInsertChild( xIndex, dContainer );
+        }
+        else if ( dParent->dImpl->dTreeWidgetItem )
+        {
+            Q_ASSERT( xIndex >= 0 && (xIndex <= dParent->dImpl->dTreeWidgetItem->childCount()) );
+
+            dParent->dImpl->dTreeWidgetItem->insertChild( xIndex, dTreeWidgetItem );
+            if ( dParent->dImpl->mHeader() )
+                dParent->dImpl->mHeader()->mAddToMap( dTreeWidgetItem, dContainer );
+            dChildItemMap[ dTreeWidgetItem ] = dContainer;
+            lRetVal = xIndex;
+        }
+        for ( auto ii = 0; ii < static_cast<int>(dChildren.size()); ++ii )
+        {
+            auto && lChild = dChildren[ ii ];
+            lChild->dImpl->mCreateTreeWidgetItem( ii );
+        }
+        return lRetVal;
+    }
+
     int mInsertChild( int xIndex, std::unique_ptr< CFlowWidgetItem > xChild )
     {
         auto lChildPtr = xChild.get();
@@ -246,25 +279,7 @@ public:
         if ( !lChildPtr->dImpl->dParent )
             lChildPtr->dImpl->dParent = dContainer;
 
-        auto lChildTreeWidgetItem = new QTreeWidgetItem( QStringList() << lChildPtr->mText() );
-        lChildTreeWidgetItem->setIcon( 0, lChildPtr->mIcon() );
-        lChildPtr->dImpl->dTreeWidgetItem = lChildTreeWidgetItem;
-
-        if ( dHeader ) // its a top level, thus it becomes a top level to the tree
-        {
-            return dHeader->mInsertChild( xIndex, lChildPtr );
-        }
-        else if ( dTreeWidgetItem )
-        {
-            Q_ASSERT( xIndex >= 0 && (xIndex <= dTreeWidgetItem->childCount()) );
-
-            dTreeWidgetItem->insertChild( xIndex, lChildTreeWidgetItem );
-            if ( mHeader() )
-                mHeader()->mAddToMap( lChildTreeWidgetItem, lChildPtr );
-            dChildItemMap[ lChildTreeWidgetItem ] = lChildPtr;
-            return xIndex;
-        }
-        return -1;
+        return lChildPtr->dImpl->mCreateTreeWidgetItem( xIndex );
     }
 
     int mInsertChild( int xIndex, CFlowWidgetItem* xChild )
@@ -441,6 +456,15 @@ public:
     }
     void mRemoveWidgets();
     void mClearWidgets( bool xClearCurrent );
+
+    void mCreateFlowWidget( CFlowWidget * xFlowWidget )
+    {
+        dHeader = new CFlowWidgetHeader( dContainer, xFlowWidget );        
+        mSetIcon( mIcon() );
+        mSetText( mText() );
+        dHeader->setObjectName( QLatin1String( "flowwidgetitem_flowwidgetheader" ) );
+        dHeader->mAddChildren( dChildren );
+    }
 
     void mDump( QJsonObject& xJSON, bool xRecursive ) const
     {
@@ -731,12 +755,23 @@ CFlowWidgetItem* CFlowWidgetItem::mParentItem() const
 
 CFlowWidget* CFlowWidgetItem::mGetFlowWidget() const
 {
-    return dImpl->mFlowWidget();
+    return dImpl->mGetFlowWidget();
 }
 
 void CFlowWidgetItem::mAddChild( CFlowWidgetItem* xChild )
 {
     mInsertChild( -1, xChild );
+}
+
+int CFlowWidgetItem::mInsertChild( CFlowWidgetItem* xPeer, CFlowWidgetItem* xItem, bool xBefore )
+{
+    if ( !xPeer || !xItem )
+        return -1;
+
+    auto lIndex = xPeer->mIndexInParent();
+    if ( !xBefore )
+        lIndex++;
+    return mInsertChild( lIndex, xItem );
 }
 
 int CFlowWidgetItem::mInsertChild( int xIndex, CFlowWidgetItem* xChild )
@@ -931,7 +966,7 @@ int CFlowWidgetItem::mIndexInParent() const
 {
     if ( !mParentItem() )
     {
-        auto lFlowWidget = dImpl->mFlowWidget();
+        auto lFlowWidget = dImpl->mGetFlowWidget();
         if ( !lFlowWidget )
             return -1;
 
@@ -1103,6 +1138,16 @@ int CFlowWidgetHeader::mInsertChild( int xIndex, CFlowWidgetItem* xItem )
     dTopItems.insert( dTopItems.begin() + xIndex, xItem );
     dTopItemMap[ xItem->dImpl->dTreeWidgetItem ] = xItem;
     return xIndex;
+}
+
+void CFlowWidgetHeader::mAddChildren( const TFlowWidgetItems& xChildren )
+{
+    for ( auto ii = 0; ii < static_cast<int>(xChildren.size()); ++ii )
+    {
+        auto && lChild = xChildren[ ii ];
+        lChild->dImpl->dParent = dContainer;
+        lChild->dImpl->mCreateTreeWidgetItem( ii );
+    }
 }
 
 QString CFlowWidgetItem::mDump( bool xRecursive, bool xCompacted ) const
@@ -1595,14 +1640,11 @@ bool CFlowWidget::event( QEvent* e )
 
 int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidgetItem > xItem )
 {
-    if ( !xItem || !xItem->dImpl || !xItem->dImpl->dHeader )
+    if ( !xItem || !xItem->dImpl )
+        return -1;
+    if ( !xItem->dImpl->mBeenPlaced() )
     {
-        auto dIcon = xItem->mIcon();
-        auto dText = xItem->mText();
-        xItem->dImpl->dHeader = new CFlowWidgetHeader( xItem.get(), dFlowWidget );
-        xItem->dImpl->mSetIcon( dIcon );
-        xItem->dImpl->mSetText( dText );
-        xItem->dImpl->dHeader->setObjectName( QLatin1String( "flowwidgetitem_flowwidgetheader" ) );
+        xItem->dImpl->mCreateFlowWidget( dFlowWidget );
     }
 
     auto lFlowItem = xItem.get();
@@ -1682,6 +1724,17 @@ CFlowWidgetItem* CFlowWidget::mInsertTopLevelItem( int xIndex, int xStateID, con
     auto lItem = new CFlowWidgetItem( xStateID, xFlowName, xDescIcon );
     auto lRetVal = mInsertTopLevelItem( xIndex, lItem );
     return lRetVal.second ? lRetVal.first : nullptr;
+}
+
+std::pair< CFlowWidgetItem*, bool > CFlowWidget::mInsertTopLevelItem( CFlowWidgetItem * xPeer, CFlowWidgetItem* xItem, bool xBefore )
+{
+    if ( !xPeer || !xItem )
+        return std::make_pair( xItem, false );
+
+    auto lIndex = xPeer->mIndexInParent();
+    if ( !xBefore )
+        lIndex++;
+    return mInsertTopLevelItem( lIndex, xItem );
 }
 
 std::pair< CFlowWidgetItem*, bool > CFlowWidget::mInsertTopLevelItem( int xIndex, CFlowWidgetItem* xItem )
