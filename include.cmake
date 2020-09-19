@@ -33,6 +33,7 @@ set(qtproject_SRCS
     SpinBox64U.cpp
     CollapsableGroupBox.cpp
     WordExp.cpp
+    QtDumper.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -57,6 +58,7 @@ set(project_H
     StringComparisonClasses.h
     StringUtils.h
     WordExp.h
+    QtDumper.h
 )
 
 set(qtproject_UIS

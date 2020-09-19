@@ -118,6 +118,7 @@ public:
     int mIndexInParent() const;
     QString mDump( bool xRecursive, bool xCompacted ) const;
     void mDump( QJsonObject& xJSON, bool xRecursive ) const;
+
 private:
     CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon );
     std::unique_ptr< CFlowWidgetItemImpl > dImpl;

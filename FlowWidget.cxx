@@ -1017,6 +1017,7 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
     setFocusPolicy( Qt::NoFocus );
 
     dTreeWidget = new QTreeWidget;
+    dTreeWidget->setObjectName( "flowwidgetheader_treewidget" );
     dTreeWidget->setExpandsOnDoubleClick( false );
     dTreeWidget->header()->setHidden( true );
     connect( dTreeWidget, &QTreeWidget::itemDoubleClicked,
@@ -1035,6 +1036,7 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
     );
 
     dScrollArea = new QScrollArea( parent );
+    dScrollArea->setObjectName( "flowwidgetheader_scrollarea" );
     dScrollArea->setWidget( dTreeWidget );
     dScrollArea->setWidgetResizable( true );
     dScrollArea->hide();
@@ -1162,7 +1164,6 @@ void CFlowWidgetItem::mDump( QJsonObject& xJSON, bool xRecursive ) const
 {
     dImpl->mDump( xJSON, xRecursive );
 }
-
 
 CFlowWidgetItem* CFlowWidgetItem::mTakeChild( CFlowWidgetItem* xItem )
 {
