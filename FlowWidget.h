@@ -168,6 +168,7 @@ public:
     virtual void mRemoveTopLevelItem( int xIndex ); // deletes the CFlowStateDefItem
     virtual CFlowWidgetItem* mTakeTopLevelItem( int xIndex );
 
+    virtual void mClear();
     virtual CFlowWidgetItem* mTakeItem( CFlowWidgetItem* xItem );   // does the work of "get parent, parent->take item
     virtual void mRemoveItem( CFlowWidgetItem* xItem ); // does the work of "get parent, parent->remove item
 

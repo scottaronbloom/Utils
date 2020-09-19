@@ -32,7 +32,11 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-    void mSetText( const QString& text ) { return setText( text ); }
+    void mSetText( const QString& text ) 
+    { 
+        setText( text ); 
+        mSetObjectName();
+    }
     QString mText() const { return text(); }
 
     void mSetIcon( const QIcon& icon ) { return setIcon( icon ); }
@@ -66,6 +70,12 @@ public:
     bool mIsExpanded() const;
 
     void mUpdate();
+
+    void mSetObjectName()
+    {
+        QAbstractButton::setObjectName( QLatin1String( "flowwidgetitem_flowwidgetheader" ) + "_" + mText() );
+        dTreeWidget->setObjectName( QLatin1String( "flowwidgetheader_treewidget" ) + "_" + mText() );
+    }
 
     CFlowWidgetItem* mSelectedItem() const
     {
@@ -462,7 +472,7 @@ public:
         dHeader = new CFlowWidgetHeader( dContainer, xFlowWidget );        
         mSetIcon( mIcon() );
         mSetText( mText() );
-        dHeader->setObjectName( QLatin1String( "flowwidgetitem_flowwidgetheader" ) );
+        dHeader->mSetObjectName();
         dHeader->mAddChildren( dChildren );
     }
 
@@ -521,6 +531,13 @@ public:
         : dCurrentTopLevelItem( nullptr ),
         dFlowWidget( parent )
     {
+    }
+
+    void CFlowWidgetImpl::mClear()
+    {
+        dTopLevelItems.clear();
+        dCurrentTopLevelItem = nullptr;
+        mRelayout();
     }
 
     size_t mOpenCount() const
@@ -1263,6 +1280,8 @@ void CFlowWidgetHeader::mSetVisible( bool xVisible, bool xExpandIfShow )
 {
     if ( isVisible() != xVisible )
     {
+        if ( !xVisible )
+            int xyz = 0;
         if ( dScrollArea )
         {
             if ( xVisible && !dScrollArea->isVisible() )
@@ -1340,7 +1359,6 @@ void CFlowWidgetHeader::mAddToLayout( QVBoxLayout* xLayout )
 
     if ( dScrollArea )
         dScrollArea->setVisible( false );
-    setVisible( false );
 }
 
 void CFlowWidgetHeader::mTakeFromLayout( QVBoxLayout* xLayout )
@@ -1367,8 +1385,7 @@ CFlowWidget::CFlowWidget( QWidget* xParent, Qt::WindowFlags xFlags )
     : QFrame( xParent, xFlags )
 {
     dImpl = std::make_unique< CFlowWidgetImpl >( this );
-    dImpl->fTopLayout = new QVBoxLayout( this );
-    dImpl->fTopLayout->setContentsMargins( QMargins() );
+    dImpl->mRelayout();
     setBackgroundRole( QPalette::Button );
 }
 
@@ -1427,12 +1444,13 @@ void CFlowWidget::mSetCurrentItemExpanded( bool xExpanded )
 void CFlowWidgetImpl::mRelayout()
 {
     delete fTopLayout;
-    fTopLayout = new QVBoxLayout( dFlowWidget );
+    fTopLayout = new QVBoxLayout;
     fTopLayout->setContentsMargins( QMargins() );
     for ( const auto& page : dTopLevelItems )
     {
         page->dImpl->dHeader->mAddToLayout( fTopLayout );
     }
+    dFlowWidget->setLayout( fTopLayout );
 }
 
 auto gPageEquals = []( const CFlowWidgetItem* page )
@@ -1510,6 +1528,11 @@ CFlowWidgetItem* CFlowWidget::mTakeTopLevelItem( int xIndex )
         return nullptr;
 
     return mTakeItem( lTopLevelItem );
+}
+
+void CFlowWidget::mClear()
+{
+    dImpl->mClear();
 }
 
 CFlowWidgetItem* CFlowWidget::mTakeItem( CFlowWidgetItem* xItem )
@@ -1650,31 +1673,53 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
 
     auto lFlowItem = xItem.get();
     bool lCurrentChanged = false;
+    //if ( xIndex < 0 || xIndex >= static_cast<int>(dTopLevelItems.size()) )
+    //{
+    //    xIndex = static_cast<int>(dTopLevelItems.size());
+    //    dTopLevelItems.insert( dTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
+    //    lFlowItem->dImpl->dHeader->mAddToLayout( fTopLayout );
+    //    mRelayout();
+    //    if ( xIndex == 0 )
+    //    {
+    //        mSetCurrentTopLevelItem( xIndex );
+    //        lCurrentChanged = true;
+    //    }
+    //}
+    //else
+    //{
+    //    dTopLevelItems.insert( dTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
+    //    mRelayout();
+    //    if ( dCurrentTopLevelItem )
+    //    {
+    //        int oldindex = mIndexOfTopLevelItem( dCurrentTopLevelItem );
+    //        if ( xIndex <= oldindex )
+    //        {
+    //            dCurrentTopLevelItem = nullptr; // trigger change
+    //            lCurrentChanged = true;
+    //            mSetCurrentTopLevelItem( oldindex );
+    //        }
+    //    }
+    //}
+
     if ( xIndex < 0 || xIndex >= static_cast<int>(dTopLevelItems.size()) )
-    {
         xIndex = static_cast<int>(dTopLevelItems.size());
-        dTopLevelItems.push_back( std::move( xItem ) );
-        lFlowItem->dImpl->dHeader->mAddToLayout( fTopLayout );
-        if ( xIndex == 0 )
+
+    dTopLevelItems.insert( dTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
+    mRelayout();
+    if ( dCurrentTopLevelItem )
+    {
+        int oldindex = mIndexOfTopLevelItem( dCurrentTopLevelItem );
+        if ( xIndex <= oldindex )
         {
-            mSetCurrentTopLevelItem( xIndex );
+            dCurrentTopLevelItem = nullptr; // trigger change
             lCurrentChanged = true;
+            mSetCurrentTopLevelItem( oldindex );
         }
     }
     else
     {
-        dTopLevelItems.insert( dTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
-        mRelayout();
-        if ( dCurrentTopLevelItem )
-        {
-            int oldindex = mIndexOfTopLevelItem( dCurrentTopLevelItem );
-            if ( xIndex <= oldindex )
-            {
-                dCurrentTopLevelItem = nullptr; // trigger change
-                lCurrentChanged = true;
-                mSetCurrentTopLevelItem( oldindex );
-            }
-        }
+        mSetCurrentTopLevelItem( xIndex );
+        lCurrentChanged = true;
     }
 
     QObject::connect( lFlowItem->dImpl->dHeader, &CFlowWidgetHeader::clicked,
