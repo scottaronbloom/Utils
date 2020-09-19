@@ -66,21 +66,6 @@ void dumpClassName( const QMetaObject* metaObject, QStandardItem * parent )
         dumpClassName( metaObject->superClass(), item );
 }
 
-QString dumpClassName( const QMetaObject * metaObject, int level )
-{
-    if ( !metaObject )
-        return QString();
-
-    QString retVal;
-    QTextStream ts( &retVal );
-
-    ts << QString( 2*level, QChar( ' ' ) ) << "ClsName: " << metaObject->className() << "\n";
-    if ( metaObject->superClass() )
-        ts << dumpClassName( metaObject->superClass(), level + 1 );
-
-    return retVal;
-}
-
 QStandardItem * getWidgetInfo( const QWidget& w, QStandardItem * parent, bool skipScrollBar )
 {
     if ( !parent )
@@ -106,29 +91,6 @@ QStandardItem * getWidgetInfo( const QWidget& w, QStandardItem * parent, bool sk
     return widgetItem;
 }
 
-QString getWidgetInfo( const QWidget& w, int level )
-{
-    const QRect& geom = w.geometry();
-    QSize hint = w.sizeHint();
-
-    QString retVal;
-    QTextStream ts( &retVal );
-
-    ts <<  dumpClassName( w.metaObject(), level )
-        << QString( 2*level + 1, QChar( ' ' ) )
-        << "objName: " << ( w.objectName().isEmpty() ? "***UNNAMED***" : w.objectName() )
-        << QString( ", Address(0x%1)" ).arg( (uintptr_t)&w, QT_POINTER_SIZE * 2, 16, QChar( '0' ) )
-        << " , pos(" << geom.x() << ", " << geom.y() << ")"
-        << " , size (" << geom.width() << " x " << geom.height() << ")"
-        << " , szhint (" << hint.width() << " x " << hint.height() << ")"
-        << " , policy " << toString( w.sizePolicy() )
-        << " " << ( w.isVisible() ? "" : "**HIDDEN**")
-        << "\n"
-        ;
-
-    return retVal;
-}
-
 QStandardItem * getLayoutItemInfo( QLayoutItem * layoutItem, QStandardItem * parent, bool skipScrollBar )
 {
     if ( dynamic_cast<QWidgetItem*>(layoutItem) )
@@ -151,108 +113,6 @@ QStandardItem * getLayoutItemInfo( QLayoutItem * layoutItem, QStandardItem * par
         return nullptr;
     }
     return nullptr;
-}
-
-QString getLayoutItemInfo( QLayoutItem* item )
-{
-    if ( dynamic_cast<QWidgetItem*>(item) )
-    {
-        QWidgetItem* wi = dynamic_cast<QWidgetItem*>(item);
-        if ( wi->widget() )
-        {
-            return getWidgetInfo( *wi->widget(), 0 );
-        }
-
-    }
-    else if ( dynamic_cast<QSpacerItem*>(item) )
-    {
-        QSpacerItem* si = dynamic_cast<QSpacerItem*>(item);
-        QSize hint = si->sizeHint();
-        QString retVal = 
-            QString( " SpacerItem hint (%1 x %2) policy: %3 constraint: %4\n" )
-            .arg( hint.width() )
-            .arg( hint.height() )
-            .arg( toString( si->sizePolicy() ) )
-            .arg( toString( si->layout()->sizeConstraint() ) )
-            ;
-        return retVal;
-    }
-    return "";
-}
-
-//------------------------------------------------------------------------
-void dumpWidgetAndChildren( QTextStream& os, const QWidget* w, int level )
-{
-    QString padding = QString( 2 * level, QChar( ' ' ) );
-
-    QLayout* layout = w->layout();
-    QList<QWidget*> dumpedChildren;
-    if ( layout && layout->isEmpty() == false )
-    {
-        os << padding << "Layout ";
-        QMargins margins = layout->contentsMargins();
-        os << " margin: (" << margins.left() << "," << margins.top()
-            << "," << margins.right() << "," << margins.bottom() << "), constraint: "
-            << toString( layout->sizeConstraint() );
-
-        if ( dynamic_cast<QBoxLayout*>(layout) )
-        {
-            QBoxLayout* boxLayout = dynamic_cast<QBoxLayout*>(layout);
-            os << " spacing: " << boxLayout->spacing();
-        }
-        os << ":\n";
-
-        int numItems = layout->count();
-        for ( int ii = 0; ii < numItems; ii++ )
-        {
-            QLayoutItem* layoutItem = layout->itemAt( ii );
-            QString itemInfo = getLayoutItemInfo( layoutItem );
-
-            os << padding << " " << itemInfo;
-
-            QWidgetItem* wi = dynamic_cast<QWidgetItem*>(layoutItem);
-            if ( wi && wi->widget() )
-            {
-                dumpWidgetAndChildren( os, wi->widget(), level + 1 );
-                dumpedChildren.push_back( wi->widget() );
-            }
-        }
-    }
-
-    // now output any child widgets that weren't dumped as part of the layout
-    QList<QWidget*> widgets = w->findChildren<QWidget*>( QString(), Qt::FindDirectChildrenOnly );
-    QList<QWidget*> undumpedChildren;
-    foreach( QWidget * child, widgets )
-    {
-        if ( dumpedChildren.indexOf( child ) == -1 )
-        {
-            undumpedChildren.push_back( child );
-        }
-    }
-
-    if ( undumpedChildren.empty() == false )
-    {
-        os << padding << " non-layout children:\n";
-        foreach( QWidget * child, undumpedChildren )
-        {
-            dumpWidgetAndChildren( os, child, level + 1 );
-        }
-    }
-}
-
-//------------------------------------------------------------------------
-QString dumpWidgetAndChildren( const QWidget* w )
-{
-    QString retVal;
-    QTextStream ts( &retVal );
-    if ( w )
-    {
-        ts << getWidgetInfo( *w, 0 );
-        dumpWidgetAndChildren( ts, w, 0 );
-    }
-    else
-        ts << "<nullptr>";
-    return retVal;
 }
 
 void addItem( QStandardItemModel* model, QStandardItem* parent, QStandardItem* item )
@@ -329,8 +189,6 @@ void dumpWidgetAndChildren( const QWidget* widget, QStandardItemModel* model, QS
 
     QLayout* layout = widget->layout();
     QList<QWidget*> dumpedChildren;
-    //QStandardItem* childItems = new QStandardItem( "Children" );
-    //addItem( model, parent, childItems );
 
     auto widgets = widget->findChildren<QWidget*>( QString(), Qt::FindDirectChildrenOnly );
 
@@ -377,30 +235,6 @@ void dumpWidgetAndChildren( const QWidget* widget, QStandardItemModel* model, QS
         addItem( model, parent, childItems );
         getWidgetInfo( *widget, childItems, skipScrollBar );
     }
-
-    //// now output any child widgets that weren't dumped as part of the layout
-    //QList<QWidget*> undumpedChildren;
-    //QList<QWidget*> widgets = widget->findChildren<QWidget*>( QString(), Qt::FindDirectChildrenOnly );
-    //foreach( QWidget * child, widgets )
-    //{
-    //    if ( dumpedChildren.indexOf( child ) == -1 )
-    //    {
-    //        undumpedChildren.push_back( child );
-    //    }
-    //}
-    //if ( undumpedChildren.empty() == false )
-    //{
-    //    auto nonLayoutChildren = new QStandardItem( "Non-Layedout Children" );
-
-    //    foreach( QWidget * child, undumpedChildren )
-    //    {
-    //        dumpWidgetAndChildren( child, model, nonLayoutChildren, true );
-    //    }
-    //    if ( nonLayoutChildren->rowCount() )
-    //        addItem( model, parent, nonLayoutChildren );
-    //    else
-    //        delete nonLayoutChildren;
-    //}
 }
 
 void dumpWidgetAndChildren( const QWidget* widget, QStandardItemModel* model )
