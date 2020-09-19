@@ -199,7 +199,7 @@ void dumpWidgetAndChildren( const QWidget* widget, QStandardItemModel* model, QS
         int numItems = layout->count();
         if ( numItems )
         {
-            for ( int ii = 0; ii < numItems; ii++ )
+            for ( int ii = 0; ii < numItems; ++ii )
             {
                 QLayoutItem* layoutItem = layout->itemAt( ii );
                 auto layoutWidgetItem = getLayoutItemInfo( layoutItem, layoutInfoItem, skipScrollBar );
