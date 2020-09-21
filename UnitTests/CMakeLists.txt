@@ -14,10 +14,8 @@
 #
 #
 #
-SET( QT_LIBRARIES Qt5::Core )
-
 SAB_UNIT_TEST(Utils
     Test.cpp
-    "SABUtils;gmock;Qt::Core"
+    "SABUtils;gmock;Qt5::Core"
     )
 

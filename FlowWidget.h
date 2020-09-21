@@ -74,7 +74,7 @@ public:
     int mChildCount() const;
     CFlowWidgetItem* mGetChild( int xIndex ) const;
 
-    CFlowWidgetItem* mTakeChild( CFlowWidgetItem* xItem );
+    CFlowWidgetItem* mTakeChild( CFlowWidgetItem* xItem ); // ownership of the returned item is now the client
 
     void mSetData( int xRole, const QVariant& xVariant );
     QVariant mData( int xRole ) const; // for top level items tied to QAbstract Button, for Sub Items tree widget item
@@ -116,9 +116,9 @@ public:
     bool mIsTopLevelItem() const;
 
     int mIndexInParent() const;
+
     QString mDump( bool xRecursive, bool xCompacted ) const;
     void mDump( QJsonObject& xJSON, bool xRecursive ) const;
-
 private:
     CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon );
     std::unique_ptr< CFlowWidgetItemImpl > dImpl;
@@ -182,8 +182,7 @@ protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );
 Q_SIGNALS:
-    void sigFlowWidgetItemInserted( CFlowWidgetItem* index );
-
+    void sigFlowWidgetItemInserted( CFlowWidgetItem * xItem );
     void sigFlowWidgetItemSelected( CFlowWidgetItem* xItem, bool xSelected ); // can be null if all items removed 
     void sigFlowWidgetItemDoubleClicked( CFlowWidgetItem* xItem );
     void sigFlowWidgetItemHovered( CFlowWidgetItem* xItem ); // can be null if hovered over a non item
