@@ -25,6 +25,7 @@
 #include <string>
 #include <list>
 #include <set>
+#include <QStringList>
 
 class QString;
 class QDir;
@@ -89,6 +90,9 @@ namespace NFileUtils
     // on the suffix.
     QString expandEnvVars( const QString & fileName, std::set< QString > * envVars = nullptr );
     QString gSoftenPath( const QString & xFileName, const std::set< QString > & xEnvVars, bool forceUnix = false ); // force unix just helps in unit testing
+
+    QStringList dumpResources( bool ignoreInternal = true );
+    QStringList dumpResources( const QDir & xDir, bool ignoreInternal=true );
 
 }
 #endif

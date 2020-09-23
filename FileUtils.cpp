@@ -1,3 +1,4 @@
+#undef QT_NO_DEBUG_OUTPUT
 // The MIT License( MIT )
 //
 // Copyright( c ) 2020 Scott Aron Bloom
@@ -23,6 +24,7 @@
 #include "FileUtils.h"
 #include "StringUtils.h"
 
+#include <QDebug>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -953,6 +955,47 @@ void addSystemFileDirectories( const std::list< std::string > & dirs )
     }
 }
 
+QStringList dumpResources( const QDir & resourceDir, bool ignoreInternal )
+{
+    QStringList retVal;
+
+    auto tmp = resourceDir.absolutePath();
+    QDirIterator it( resourceDir.absolutePath(), QStringList() << "*" << "*.*", QDir::NoDotAndDotDot | QDir::AllEntries );
+    bool aOK = true;
+    while ( it.hasNext() )
+    {
+        QString path = it.next();
+        QString realPath = path;
+        if ( realPath.isEmpty() )
+            continue;
+        if ( ignoreInternal && 
+             ( realPath.startsWith( ":/trolltech" ) 
+             || realPath.startsWith( ":/webkit" ) 
+             || realPath.startsWith( ":/http:" ) 
+             || realPath.startsWith( ":/qt-project.org" ) 
+             || realPath.startsWith( ":/qpdf" )
+             )
+             )
+            continue;
+
+        QFileInfo fi( path );
+        if ( fi.isDir() )
+        {
+            retVal << dumpResources( QDir( path ), ignoreInternal );
+        }
+        else
+        {
+            retVal << realPath;
+        }
+    }
+    return retVal;
+}
+
+
+QStringList dumpResources( bool ignoreInternal )
+{
+    return dumpResources( QDir( ":/" ), ignoreInternal );
+}
 }
 
 
