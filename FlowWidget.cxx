@@ -26,14 +26,15 @@ using TFlowWidgetItems = std::vector< std::unique_ptr< CFlowWidgetItem > >;
 using TDataMap = std::map< int, QVariant >;
 
 // from QItemDelegatePrivate::textLayoutBounds
-static QRect textLayoutBounds( const QRect& xRect )
+static QRect mTextLayoutBounds( const QRect& xRect, bool xElideText )
 {
     auto lRetVal = xRect;
-    lRetVal.setWidth( INT_MAX / 256 );
+    if ( !xElideText )
+        lRetVal.setWidth( INT_MAX / 256 );
     return lRetVal;
 }
 
-static QSizeF doTextLayout( QTextLayout& lTextLayout, int lLineWidth )
+static QSizeF mDoTextLayout( QTextLayout& lTextLayout, int lLineWidth )
 {
     qreal height = 0;
     qreal widthUsed = 0;
@@ -49,24 +50,57 @@ static QSizeF doTextLayout( QTextLayout& lTextLayout, int lLineWidth )
         widthUsed = qMax( widthUsed, line.naturalTextWidth() );
     }
     lTextLayout.endLayout();
-    return QSizeF( widthUsed, height );
+    return QSizeF( std::min( widthUsed, 1.0*lLineWidth ), height );
 }
 
-static QRect calcDisplayRect( const QFont & lFont, QString lText, const QRect & xRect )
+
+static int mComputeMaxAllowedTextWidth( int xFullWidth, const QPixmap& xIdentityPM, const QList< QPixmap >& xStatusPMs )
+{
+    auto lRetVal = xFullWidth;
+    if ( !xIdentityPM.isNull() )
+        lRetVal -= (xIdentityPM.width() / xIdentityPM.devicePixelRatio()) + 4;
+    for ( int ii = 0; ii < xStatusPMs.count(); ++ii )
+        lRetVal -= (xStatusPMs[ ii ].width() / xStatusPMs[ ii ].devicePixelRatio()) + 4;
+    return lRetVal;
+}
+
+static std::pair< int, QString > mComputeTextWidth( const QFontMetrics & lFM, const QString & xText, const std::pair< bool, int >& xMaxWidth )
+{
+    auto lRetVal = lFM.boundingRect( xText );
+    if ( xMaxWidth.first && (lRetVal.width() > xMaxWidth.second) )
+        lRetVal.setWidth( xMaxWidth.second );
+    auto lElidedText = lFM.elidedText( xText, Qt::ElideRight, lRetVal.width() );
+    while ( (lElidedText != xText) && (!xMaxWidth.first || (lRetVal.width() < xMaxWidth.second)) )
+    {
+        lRetVal.setWidth( lRetVal.width() * 1.1 );
+        lElidedText = lFM.elidedText( xText, Qt::ElideRight, lRetVal.width() );
+    }
+    return std::make_pair( lRetVal.width(), lElidedText );
+}
+
+static std::pair< int, QString > mComputeTextWidth( QStyleOptionToolBox& lOption, const std::pair< bool, int >& xMaxWidth )
+{
+    return mComputeTextWidth( lOption.fontMetrics, lOption.text, xMaxWidth );
+}
+
+static std::pair< QRect, QString > mCalcDisplayText( const QFont & lFont, QString lText, bool xElide, const QRect & xRect )
 {
     QTextOption lTextOption;
-    lTextOption.setWrapMode( QTextOption::WordWrap );
+    lTextOption.setWrapMode( xElide ? QTextOption::NoWrap :QTextOption::WordWrap );
 
     QTextLayout lTextLayout;
     lTextLayout.setTextOption( lTextOption );
     lTextLayout.setFont( lFont );
     lTextLayout.setText( lText.replace( '\n', QChar::LineSeparator ) );
-    auto lFPSize = doTextLayout( lTextLayout, textLayoutBounds( xRect ).width() );
+    auto lFPSize = mDoTextLayout( lTextLayout, mTextLayoutBounds( xRect, xElide ).width() );
     const QSize lSize = QSize( std::ceil( lFPSize.width() ), std::ceil( lFPSize.height() ) );
     const int lTextMargin = QApplication::style()->pixelMetric( QStyle::PM_FocusFrameHMargin, nullptr ) + 1;
-    return QRect( 0, 0, lSize.width() + 2 * lTextMargin, lSize.height() );
+    auto lTextWidth =  mComputeTextWidth( QFontMetrics( lFont ), lText, std::make_pair( xElide, lSize.width() ) );
+    auto lRect = QRect( 0, 0, lTextWidth.first, lSize.height() );
+    return std::make_pair( lRect, lTextWidth.second );
 }
 
+class CFlowWidgetItemDelegate;
 class CFlowWidgetHeader : public QAbstractButton
 {
     Q_OBJECT
@@ -145,6 +179,7 @@ public:
         emit sigDoubleClicked();
     }
 
+    void mSetElideText( bool xElideText );
 Q_SIGNALS:
     void sigDoubleClicked();
 protected:
@@ -159,8 +194,6 @@ protected:
     void initStyleOption( QStyleOptionToolBox* opt ) const;
     void paintEvent( QPaintEvent* ) override;
 
-    int mComputeTextWidth( QStyleOptionToolBox& lOption, const std::pair< bool, int > & xMaxWidth ) const;
-
     void mCollectDisabledTreeWidgetItems( QTreeWidgetItem* xItem );
     void mCollectDisabledTreeWidgetItems();
     void mSetTreeWidgetItemsEnabled( QTreeWidgetItem* xItem, bool xEnabled );
@@ -170,7 +203,8 @@ private:
     CFlowWidgetItem* dContainer{ nullptr }; // not owned no delete
     QScrollArea* dScrollArea{ nullptr }; // child of the parent FlowWidget
     QTreeWidget* dTreeWidget{ nullptr }; // child of dScrollArea
-
+    CFlowWidgetItemDelegate * dDelegate{ nullptr };
+    bool dElideText{ false };
     bool dSelected{ false };
     std::pair< bool, std::unordered_map< QTreeWidgetItem *, bool > > dEnabled{ true, {} };
     int dIndexInPage{ -1 };
@@ -196,9 +230,15 @@ QIcon::State iconState( QStyle::State xState )
 class CFlowWidgetItemDelegate : public QItemDelegate
 {
 public:
-    CFlowWidgetItemDelegate( QObject * xParent ) :
-        QItemDelegate( xParent )
+    CFlowWidgetItemDelegate( bool xElide, QObject * xParent ) :
+        QItemDelegate( xParent ),
+        dElideText( xElide )
     {
+    }
+
+    void mSetElideText( bool xElide )
+    {
+        dElideText = xElide;
     }
 
     QRect mIconSizeHint( const QStyleOptionViewItem& xOption, const QModelIndex& xIndex ) const
@@ -243,24 +283,24 @@ public:
 
         auto lIdentityRect = mIconSizeHint( xOption, xIndex );
 
-        auto lDescRect = calcDisplayRect( xIndex, xOption );
+        auto lDescRect = mCalcDisplayRect( xIndex, xOption, dElideText, xIdentityPixmap, lPixmaps );
         QList< QRect > lStatusRects;
         for ( int ii = 0; ii < lPixmaps.count(); ++ii )
         {
-            auto lRect = calcDecorationRect( xOption );
+            auto lRect = mCalcDecorationRect( xOption, lPixmaps[ ii ].devicePixelRatio() );
             lStatusRects << lRect;
         }
 
-        doLayout( xOption, lDescRect, lIdentityRect, lStatusRects, true );
+        mDoLayout( xOption, lDescRect.first, lIdentityRect, lStatusRects, true );
 
-        QRect lOverAllRect = lIdentityRect | lDescRect;
+        QRect lOverAllRect = lIdentityRect | lDescRect.first;
         for( auto && ii : lStatusRects )
             lOverAllRect = lOverAllRect | ii;
 
         return lOverAllRect.size();
     }
 
-    virtual void paint( QPainter * xPainter, const QStyleOptionViewItem & xOption, const QModelIndex & xIndex ) const override
+    virtual void paint( QPainter * xPainter, const QStyleOptionViewItem& xOption, const QModelIndex & xIndex ) const override
     {
         if ( !xIndex.isValid() )
         {
@@ -268,7 +308,6 @@ public:
             return;
         }
 
-        auto lDescription = xIndex.data( Qt::DisplayRole ).toString();
         auto lTreeWidgetItem = static_cast<QTreeWidgetItem*>(xIndex.internalPointer());
         if ( !lTreeWidgetItem )
         {
@@ -291,18 +330,21 @@ public:
             lPixmaps << lPixMap;
         }
 
-        // order is IdentityIcon Text StatusIcons
-        QRect lIdentityRect = xIdentityPixmap.isNull() ? QRect() : calcDecorationRect( xOption );
+        QString lDescription;
+        QRect lDescRect;
+        std::tie( lDescRect, lDescription ) = mCalcDisplayRect( xIndex, xOption, dElideText, xIdentityPixmap, lPixmaps );
 
-        QRect lDescRect = calcDisplayRect( xIndex, xOption );
+        // order is IdentityIcon Text StatusIcons
+        QRect lIdentityRect = xIdentityPixmap.isNull() ? QRect() : mCalcDecorationRect( xOption, xIdentityPixmap.devicePixelRatio() );
+
         QList< QRect > lStatusRects;
         for( int ii = 0; ii < lPixmaps.count(); ++ii )
         {
-            auto lRect = calcDecorationRect( xOption );
+            auto lRect = mCalcDecorationRect( xOption, lPixmaps[ ii ].devicePixelRatio() );
             lStatusRects << lRect;
         }
 
-        doLayout( xOption, lDescRect, lIdentityRect, lStatusRects, false );
+        mDoLayout( xOption, lDescRect, lIdentityRect, lStatusRects, false );
 
         xPainter->save();
         drawBackground( xPainter, xOption, xIndex );
@@ -316,7 +358,7 @@ public:
         xPainter->restore();
     }
 
-    void doLayout( const QStyleOptionViewItem& xOption, QRect & xTextRect, QRect & xIdentityRect, QList< QRect > & xStatusRects, bool xHint ) const
+    void mDoLayout( const QStyleOptionViewItem& xOption, QRect & xTextRect, QRect & xIdentityRect, QList< QRect > & xStatusRects, bool xHint ) const
     {
         const auto lOrigTextWidth = xTextRect.width();
 
@@ -354,31 +396,40 @@ public:
         }
     }
 
-    QRect calcDecorationRect( const QStyleOptionViewItem& xOption ) const
+    QRect mCalcDecorationRect( const QStyleOptionViewItem& xOption, qreal xPixelRatio ) const
     {
         QRect rect;
 
         rect.setX( xOption.rect.x() + 2 );
-        rect.setWidth( xOption.decorationSize.width() );
+        rect.setWidth( xOption.decorationSize.width() / xPixelRatio );
 
-        rect.setY( xOption.rect.y() + (xOption.rect.height() - xOption.decorationSize.height() )/2 );
-        rect.setHeight( xOption.decorationSize.height() );
+        rect.setY( xOption.rect.y() + (xOption.rect.height() - xOption.decorationSize.height()/xPixelRatio )/2 );
+        rect.setHeight( xOption.decorationSize.height()/xPixelRatio );
         return rect;
     }
 
-    QRect calcDisplayRect( const QModelIndex & xIndex, const QStyleOptionViewItem& xOption ) const
+    std::pair< QRect, QString > mCalcDisplayRect( const QModelIndex & xIndex, const QStyleOptionViewItem& xOption, bool xElideText, const QPixmap & xPM, const QList< QPixmap > & xPMs ) const
     {
         auto xText = xIndex.data( Qt::DisplayRole );
         if ( !xIndex.isValid() || xText.isNull() )
-            return QRect();
+            return std::make_pair( QRect(), QString() );
+
+        auto lRect = xOption.rect;
+        if ( xElideText )
+        {
+            auto lMaxWidth = mComputeMaxAllowedTextWidth( xOption.rect.width(), xPM, xPMs );
+            lRect.setWidth( lMaxWidth );
+        }
 
         QString lText = xText.toString();
         const QVariant lFontVal = xIndex.data( Qt::FontRole );
         const QFont lFont = qvariant_cast<QFont>(lFontVal).resolve( xOption.font );
 
-        return ::calcDisplayRect( lFont, lText, xOption.rect );
+        return ::mCalcDisplayText( lFont, lText, dElideText, lRect );
     }
 
+private:
+    bool dElideText{ false };
 };
 
 class CFlowWidgetItemImpl
@@ -805,6 +856,15 @@ public:
         }
     }
 
+    void mSetElideText( bool xElideText )
+    {
+        if ( dHeader )
+        {
+            dHeader->mSetElideText( xElideText );
+        }
+    }
+
+
     CFlowWidgetItem* dContainer{ nullptr };
     CFlowWidgetItem* dParent{ nullptr };
     CFlowWidgetHeader* dHeader{ nullptr };
@@ -1054,6 +1114,8 @@ public:
     void mSetElideText( bool xElideText )
     {
         dElideText = xElideText;
+        for( auto && ii : dTopLevelItems )
+            ii->dImpl->mSetElideText( xElideText );
         dFlowWidget->repaint();
     }
     bool mElideText() const
@@ -1464,7 +1526,8 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
     setFocusPolicy( Qt::NoFocus );
 
     dTreeWidget = new QTreeWidget;
-    dTreeWidget->setItemDelegate( new CFlowWidgetItemDelegate( this ) );
+    dDelegate = new CFlowWidgetItemDelegate( xParent->mElideText(), this );
+    dTreeWidget->setItemDelegate( dDelegate );
     dTreeWidget->setObjectName( "flowwidgetheader_treewidget" );
     dTreeWidget->setExpandsOnDoubleClick( false );
     dTreeWidget->header()->setHidden( true );
@@ -1564,6 +1627,13 @@ CFlowWidgetItem* CFlowWidgetHeader::mFindFlowItem( QTreeWidgetItem* xItem ) cons
         return (*pos2).second;
 
     return nullptr;
+}
+
+void CFlowWidgetHeader::mSetElideText( bool xElideText )
+{
+    dDelegate->mSetElideText( xElideText );
+    dElideText = xElideText;
+    repaint();
 }
 
 CFlowWidget* CFlowWidgetHeader::mFlowWidget() const
@@ -1864,9 +1934,6 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
             lPixMaps.push_back( lPixmap );
     }
 
-
-    QRect tr, ir;
-    int ih = 0;
     if ( lSelected && style()->proxy()->styleHint( QStyle::SH_ToolBox_SelectedPageTitleBold, &lOption, this ) )
     {
         QFont f( lPainter->font() );
@@ -1874,71 +1941,51 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
         lPainter->setFont( f );
     }
     QRect cr = style()->subElementRect( QStyle::SE_ToolBoxTabContents, &lOption, this );
-    int lMaxWidth = cr.width();
-    if ( !lIdentityPixmap.isNull() )
-        lMaxWidth -= (lIdentityPixmap.width() / lIdentityPixmap.devicePixelRatio()) + 4;
-    for( int ii = 0; ii < lPixMaps.count(); ++ii )
-        lMaxWidth -= (lPixMaps[ ii ].width() / lIdentityPixmap.devicePixelRatio()) + 4;
+    int lMaxWidth = mComputeMaxAllowedTextWidth( cr.width(), lIdentityPixmap, lPixMaps );
 
-    auto lTextBoundWidth = mComputeTextWidth( lOption, std::make_pair( mFlowWidget()->dImpl->mElideText(), lMaxWidth - 4 ) );
+    auto lElidedText = mComputeTextWidth( lOption, std::make_pair( dElideText, lMaxWidth - 4 ) );
 
+    QRect lTextRect;
+    QRect lIdentyIconRect;
     if ( lIdentityPixmap.isNull() )
     {
-        tr = QRect( cr.left() + 4, cr.top(), lTextBoundWidth, cr.height() );
+        lTextRect = QRect( cr.left() + 4, cr.top(), lElidedText.first, cr.height() );
     }
     else
     {
-        int iw = ( lIdentityPixmap.width() / lIdentityPixmap.devicePixelRatio() + 4 );
-        ih = ( lIdentityPixmap.height() / lIdentityPixmap.devicePixelRatio() );
+        int lIconWidth = ( lIdentityPixmap.width() / lIdentityPixmap.devicePixelRatio() + 4 );
+        int lIconHeight = ( lIdentityPixmap.height() / lIdentityPixmap.devicePixelRatio() );
 
-        ir = QRect( cr.left() + 4, cr.top(), iw + 2, ih );
-        tr = QRect( ir.right(), cr.top(), lTextBoundWidth, cr.height() );
+        lIdentyIconRect = QRect( cr.left() + 4, cr.top(), lIconWidth + 2, lIconHeight );
+        lTextRect = QRect( lIdentyIconRect.right(), cr.top(), lElidedText.first, cr.height() );
+        lPainter->drawPixmap( lIdentyIconRect.left(), (lOption.rect.height() - lIdentyIconRect.height()) / 2, lIdentityPixmap );
     }
 
-    QString lElidedText = lOption.fontMetrics.elidedText( lOption.text, Qt::ElideRight, lTextBoundWidth );
-
-    if ( ih )
-        lPainter->drawPixmap( ir.left(), (lOption.rect.height() - ih) / 2, lIdentityPixmap );
-
-    int alignment = Qt::AlignLeft | Qt::AlignVCenter | Qt::TextShowMnemonic;
+    int lAlign = Qt::AlignLeft | Qt::AlignVCenter | Qt::TextShowMnemonic;
     if ( !style()->proxy()->styleHint( QStyle::SH_UnderlineShortcut, &lOption, this ) )
-        alignment |= Qt::TextHideMnemonic;
-    style()->proxy()->drawItemText( lPainter, tr, alignment, lOption.palette, lEnabled, lElidedText, QPalette::ButtonText );
+        lAlign |= Qt::TextHideMnemonic;
+    style()->proxy()->drawItemText( lPainter, lTextRect, lAlign, lOption.palette, lEnabled, lElidedText.second, QPalette::ButtonText );
 
-    auto x1 = std::max( tr.right(), ir.right() ) + 4;
+    auto x1 = std::max( lTextRect.right(), lIdentyIconRect.right() ) + 4;
     for ( int ii = 0; ii < lPixMaps.count(); ++ii )
     {
         auto y1 = lOption.rect.height();
-        auto ih = lPixMaps[ ii ].height()/lIdentityPixmap.devicePixelRatio();
+        auto lIconHeight = lPixMaps[ ii ].height()/lIdentityPixmap.devicePixelRatio();
 
-        lPainter->drawPixmap( x1, (y1 - ih) / 2, lPixMaps[ ii ] );
+        lPainter->drawPixmap( x1, (y1 - lIconHeight) / 2, lPixMaps[ ii ] );
         x1 += lPixMaps[ ii ].width() / lIdentityPixmap.devicePixelRatio() + 4;
     }
 
-    if ( !lElidedText.isEmpty() && lOption.state & QStyle::State_HasFocus )
+    if ( !lElidedText.second.isEmpty() && lOption.state & QStyle::State_HasFocus )
     {
-        QStyleOptionFocusRect opt;
-        opt.rect = tr;
-        opt.palette = lOption.palette;
-        opt.state = QStyle::State_None;
-        style()->proxy()->drawPrimitive( QStyle::PE_FrameFocusRect, &opt, lPainter, this );
+        QStyleOptionFocusRect lOption;
+        lOption.rect = lTextRect;
+        lOption.palette = lOption.palette;
+        lOption.state = QStyle::State_None;
+        style()->proxy()->drawPrimitive( QStyle::PE_FrameFocusRect, &lOption, lPainter, this );
     }
 
     lPainter->restore();
-}
-
-int CFlowWidgetHeader::mComputeTextWidth( QStyleOptionToolBox& lOption, const std::pair< bool, int > & xMaxWidth ) const
-{
-    auto lRetVal = lOption.fontMetrics.boundingRect( lOption.text );
-    if ( xMaxWidth.first && ( lRetVal.width() > xMaxWidth.second ) )
-        lRetVal.setWidth( xMaxWidth.second );
-    auto lElidedText = lOption.fontMetrics.elidedText( lOption.text, Qt::ElideRight, lRetVal.width() );
-    while ( ( lElidedText != lOption.text ) && ( !xMaxWidth.first || ( lRetVal.width() < xMaxWidth.second ) ) )
-    {
-        lRetVal.setWidth( lRetVal.width() * 1.1 );
-        lElidedText = lOption.fontMetrics.elidedText( lOption.text, Qt::ElideRight, lRetVal.width() );
-    }
-    return lRetVal.width();
 }
 
 CFlowWidget::CFlowWidget( QWidget* xParent, Qt::WindowFlags xFlags )
