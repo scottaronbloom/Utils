@@ -88,6 +88,9 @@ public:
     QList< std::tuple< int, QString, QIcon > > mGetRegisteredStatuses() const;
     std::pair< QString, QIcon > mGetStateStatus( int xState ) const;
 
+    void mSetElideText( bool xElide );
+    bool mElideText() const;
+
     virtual QString mDump( bool xCompacted ) const;
     virtual void mDump( QJsonObject& xTS ) const;
 protected Q_SLOTS:
