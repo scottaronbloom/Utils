@@ -19,10 +19,53 @@
 #include <QTextOption>
 #include <QTextLayout>
 #include <QSizeF>
-#include <QPixmapCache>
+#include <QToolTip>
+#include <QHelpEvent>
 
 using TFlowWidgetItems = std::vector< std::unique_ptr< CFlowWidgetItem > >;
 using TDataMap = std::map< int, QVariant >;
+
+// from QItemDelegatePrivate::textLayoutBounds
+static QRect textLayoutBounds( const QRect& xRect )
+{
+    auto lRetVal = xRect;
+    lRetVal.setWidth( INT_MAX / 256 );
+    return lRetVal;
+}
+
+static QSizeF doTextLayout( QTextLayout& lTextLayout, int lLineWidth )
+{
+    qreal height = 0;
+    qreal widthUsed = 0;
+    lTextLayout.beginLayout();
+    while ( true )
+    {
+        QTextLine line = lTextLayout.createLine();
+        if ( !line.isValid() )
+            break;
+        line.setLineWidth( lLineWidth );
+        line.setPosition( QPointF( 0, height ) );
+        height += line.height();
+        widthUsed = qMax( widthUsed, line.naturalTextWidth() );
+    }
+    lTextLayout.endLayout();
+    return QSizeF( widthUsed, height );
+}
+
+static QRect calcDisplayRect( const QFont & lFont, QString lText, const QRect & xRect )
+{
+    QTextOption lTextOption;
+    lTextOption.setWrapMode( QTextOption::WordWrap );
+
+    QTextLayout lTextLayout;
+    lTextLayout.setTextOption( lTextOption );
+    lTextLayout.setFont( lFont );
+    lTextLayout.setText( lText.replace( '\n', QChar::LineSeparator ) );
+    auto lFPSize = doTextLayout( lTextLayout, textLayoutBounds( xRect ).width() );
+    const QSize lSize = QSize( std::ceil( lFPSize.width() ), std::ceil( lFPSize.height() ) );
+    const int lTextMargin = QApplication::style()->pixelMetric( QStyle::PM_FocusFrameHMargin, nullptr ) + 1;
+    return QRect( 0, 0, lSize.width() + 2 * lTextMargin, lSize.height() );
+}
 
 class CFlowWidgetHeader : public QAbstractButton
 {
@@ -48,7 +91,6 @@ public:
     QIcon mIcon() const { return icon(); }
 
     void mSetToolTip( const QString& tooltip ) { return setToolTip( tooltip ); }
-    QString mToolTip() const { return toolTip(); }
 
     void mAddChild( CFlowWidgetItem* xChild ) { mInsertChild( -1, xChild ); }
     int mInsertChild( int xIndex, CFlowWidgetItem* xChild );
@@ -318,38 +360,6 @@ public:
         return rect;
     }
 
-
-    // from QItemDelegatePrivate::textLayoutBounds
-    QRect textLayoutBounds( const QStyleOptionViewItem& option ) const
-    {
-        QRect rect = option.rect;
-        const QWidget* w = option.widget;
-        QStyle* style = w ? w->style() : QApplication::style();
-        const int textMargin = style->pixelMetric( QStyle::PM_FocusFrameHMargin, nullptr, w ) + 1;
-        rect.setWidth( INT_MAX / 256 );
-
-        return rect;
-    }
-
-    QSizeF doTextLayout( QTextLayout & lTextLayout, int lLineWidth ) const
-    {
-        qreal height = 0;
-        qreal widthUsed = 0;
-        lTextLayout.beginLayout();
-        while ( true )
-        {
-            QTextLine line = lTextLayout.createLine();
-            if ( !line.isValid() )
-                break;
-            line.setLineWidth( lLineWidth );
-            line.setPosition( QPointF( 0, height ) );
-            height += line.height();
-            widthUsed = qMax( widthUsed, line.naturalTextWidth() );
-        }
-        lTextLayout.endLayout();
-        return QSizeF( widthUsed, height );
-    }
-
     QRect calcDisplayRect( const QModelIndex & xIndex, const QStyleOptionViewItem& xOption ) const
     {
         auto xText = xIndex.data( Qt::DisplayRole );
@@ -360,18 +370,9 @@ public:
         const QVariant lFontVal = xIndex.data( Qt::FontRole );
         const QFont lFont = qvariant_cast<QFont>(lFontVal).resolve( xOption.font );
 
-        QTextOption lTextOption;
-        lTextOption.setWrapMode( QTextOption::WordWrap );
-        
-        QTextLayout lTextLayout;
-        lTextLayout.setTextOption( lTextOption );
-        lTextLayout.setFont( lFont );
-        lTextLayout.setText( lText.replace( '\n', QChar::LineSeparator ) );
-        auto lFPSize = doTextLayout( lTextLayout, textLayoutBounds( xOption ).width() );
-        const QSize lSize = QSize( std::ceil( lFPSize.width() ), std::ceil( lFPSize.height() ) );
-        const int lTextMargin = QApplication::style()->pixelMetric( QStyle::PM_FocusFrameHMargin, nullptr ) + 1;
-        return QRect( 0, 0, lSize.width() + 2 * lTextMargin, lSize.height() );
+        return ::calcDisplayRect( lFont, lText, xOption.rect );
     }
+
 };
 
 class CFlowWidgetItemImpl
@@ -421,9 +422,20 @@ public:
             dTreeWidgetItem->setToolTip( 0, tip );
     }
 
-    QString mToolTip() const
+    QString mToolTip( bool xIncludeStateInfo ) const
     {
-        return dToolTip;
+        QStringList lRetVal;
+        if ( !dToolTip.isEmpty() )
+            lRetVal << dToolTip;
+        if ( xIncludeStateInfo )
+        {
+            auto lStates = mData( CFlowWidgetItem::eStateStatusRole ).value< QList< int > >();
+            for ( auto&& ii : lStates )
+            {
+                lRetVal << mFlowWidget()->mGetStateStatus( ii ).first;
+            }
+        }
+        return lRetVal.join( "\n" );
     }
 
     bool mIsExpanded() const
@@ -1010,6 +1022,16 @@ public:
         dStateStatusMap[ xState ] = std::make_pair( xDescription, xIcon );
     }
 
+    int mGetNextStatusID() const
+    {
+        auto lRetVal = CFlowWidget::EStates::eLastState + 1;
+        for( auto && ii : dStateStatusMap )
+        {
+            lRetVal = std::max( lRetVal, ii.first );
+        }
+        return lRetVal;
+    }
+
     std::pair< QString, QIcon > mGetStateStatus( int xState ) const
     {
         auto pos = dStateStatusMap.find( xState );
@@ -1165,7 +1187,7 @@ void CFlowWidgetItem::mSetToolTip( const QString& xToolTip )
 
 QString CFlowWidgetItem::mToolTip() const
 {
-    return dImpl->mToolTip();
+    return dImpl->mToolTip( false );
 }
 
 void CFlowWidgetItem::mSetIcon( const QIcon& xIcon )
@@ -1459,6 +1481,7 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
     dScrollArea->hide();
     dScrollArea->setFrameStyle( QFrame::NoFrame );
     dTreeWidget->installEventFilter( this );
+    dTreeWidget->viewport()->installEventFilter( this );
 }
 
 CFlowWidgetHeader::~CFlowWidgetHeader()
@@ -1468,13 +1491,30 @@ CFlowWidgetHeader::~CFlowWidgetHeader()
 
 bool CFlowWidgetHeader::eventFilter( QObject* xWatched, QEvent* xEvent )
 {
-    if ( xWatched == dTreeWidget )
+    if ( ( xWatched == dTreeWidget ) || ( xWatched == dTreeWidget->viewport() ) )
     {
         if ( xEvent->type() == QEvent::ToolTip )
         {
-            auto lHelpEvent = dynamic_cast<QHelpEvent*>(xEvent);
+            auto lHelpEvent = dynamic_cast< QHelpEvent * >( xEvent );
+            auto pos = lHelpEvent->pos();
+            if ( xWatched == dTreeWidget->viewport() )
+            {
+                pos = dTreeWidget->mapFromGlobal( lHelpEvent->globalPos() );
+            }
             auto xItem = dTreeWidget->itemAt( lHelpEvent->pos() );
-            emit mFlowWidget()->sigFlowWidgetItemHovered( mFindFlowItem( xItem ) );
+            auto xFlowItem = mFindFlowItem( xItem );
+
+            emit mFlowWidget()->sigFlowWidgetItemHovered( xFlowItem );
+
+            if ( xFlowItem )
+            {
+                auto lText = xFlowItem->dImpl->mToolTip( true );
+                if ( !lText.isEmpty() )
+                {
+                    QToolTip::showText( static_cast<QHelpEvent*>(xEvent)->globalPos(), lText, this, QRect(), toolTipDuration() );
+                    return true;
+                }
+            }
         }
     }
     return QAbstractButton::eventFilter( xWatched, xEvent );
@@ -1485,6 +1525,11 @@ bool CFlowWidgetHeader::event( QEvent* xEvent )
     if ( xEvent->type() == QEvent::ToolTip )
     {
         emit mFlowWidget()->sigFlowWidgetItemHovered( dContainer );
+        auto lText = dContainer->dImpl->mToolTip( true );
+        if ( lText.isEmpty() )
+            xEvent->ignore();
+        else
+            QToolTip::showText( static_cast<QHelpEvent*>(xEvent)->globalPos(), lText, this, QRect(), toolTipDuration() );
     }
     return QAbstractButton::event( xEvent );
 }
@@ -1502,28 +1547,6 @@ CFlowWidgetItem* CFlowWidgetHeader::mFindFlowItem( QTreeWidgetItem* xItem ) cons
         return (*pos2).second;
 
     return nullptr;
-}
-
-QSize CFlowWidgetHeader::sizeHint() const
-{
-    QSize iconSize( 8, 8 );
-    if ( !icon().isNull() )
-    {
-        int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
-        iconSize += QSize( icone + 2, icone );
-    }
-    QSize textSize = fontMetrics().size( Qt::TextShowMnemonic, text() ) + QSize( 0, 8 );
-
-    QSize total( iconSize.width() + textSize.width(), qMax( iconSize.height(), textSize.height() ) );
-    return total.expandedTo( QApplication::globalStrut() );
-}
-
-QSize CFlowWidgetHeader::minimumSizeHint() const
-{
-    if ( icon().isNull() )
-        return QSize();
-    int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
-    return QSize( icone + 8, icone + 8 );
 }
 
 CFlowWidget* CFlowWidgetHeader::mFlowWidget() const
@@ -1680,8 +1703,6 @@ void CFlowWidgetHeader::mSetVisible( bool xVisible, bool xExpandIfShow )
 {
     if ( isVisible() != xVisible )
     {
-        if ( !xVisible )
-            int xyz = 0;
         if ( dScrollArea )
         {
             if ( xVisible && !dScrollArea->isVisible() )
@@ -1772,13 +1793,116 @@ void CFlowWidgetHeader::mTakeFromLayout( QVBoxLayout* xLayout )
 
 }
 
+
+QSize CFlowWidgetHeader::sizeHint() const
+{
+    QSize iconSize( 8, 8 );
+    int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
+    if ( !icon().isNull() )
+    {
+        iconSize += QSize( icone + 2, icone );
+    }
+    QSize textSize = fontMetrics().size( Qt::TextShowMnemonic, text() ) + QSize( 0, 8 );
+
+    auto xStates = dContainer->mData( CFlowWidgetItem::ERoles::eStateStatusRole ).value< QList< int > >();
+    QSize total( iconSize.width() + textSize.width(), qMax( iconSize.height(), textSize.height() ) );
+
+    total.setWidth( total.width() + xStates.count() * (icone + 2) );
+
+    return total.expandedTo( QApplication::globalStrut() );
+}
+
+QSize CFlowWidgetHeader::minimumSizeHint() const
+{
+    auto xStates = dContainer->mData( CFlowWidgetItem::ERoles::eStateStatusRole ).value< QList< int > >();
+    if ( icon().isNull() && xStates.isEmpty() )
+        return QSize();
+    int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
+    int lCount = icon().isNull() ? 0 : 1;
+    lCount += xStates.count();
+    return QSize( lCount * (icone + 8), icone + 8 );
+}
+
 void CFlowWidgetHeader::paintEvent( QPaintEvent* )
 {
     QPainter paint( this );
-    QPainter* p = &paint;
-    QStyleOptionToolBox opt;
-    initStyleOption( &opt );
-    style()->drawControl( QStyle::CE_ToolBoxTab, &opt, p, mFlowWidget() );
+    QPainter* lPainter = &paint;
+    QStyleOptionToolBox lOption;
+    initStyleOption( &lOption );
+   
+    lPainter->save();
+    style()->drawControl( QStyle::CE_ToolBoxTabShape, &lOption, lPainter, mFlowWidget() );
+
+    bool enabled = lOption.state & QStyle::State_Enabled;
+    bool selected = lOption.state & QStyle::State_Selected;
+    int iconExtent = style()->proxy()->pixelMetric( QStyle::PM_SmallIconSize, &lOption, this );
+    QPixmap pm = lOption.icon.pixmap( this->window()->windowHandle(), QSize( iconExtent, iconExtent ), enabled ? QIcon::Normal : QIcon::Disabled );
+
+    auto xStateIcons = dContainer->mData( CFlowWidgetItem::ERoles::eStateIconsRole ).value< QList< QIcon > >();
+    QList< QPixmap > lPixMaps;
+    for( auto && ii : xStateIcons )
+    {
+        auto lPixmap = ii.pixmap( this->window()->windowHandle(), QSize( iconExtent, iconExtent ), enabled ? QIcon::Normal : QIcon::Disabled );
+        if ( !lPixmap.isNull() )
+            lPixMaps.push_back( lPixmap );
+    }
+
+
+    QRect tr, ir;
+    int ih = 0;
+    if ( selected && style()->proxy()->styleHint( QStyle::SH_ToolBox_SelectedPageTitleBold, &lOption, this ) )
+    {
+        QFont f( lPainter->font() );
+        f.setBold( true );
+        lPainter->setFont( f );
+    }
+    QRect cr = style()->subElementRect( QStyle::SE_ToolBoxTabContents, &lOption, this );
+    auto lTextRect = lOption.fontMetrics.boundingRect( lOption.text + "..." );
+
+    if ( pm.isNull() )
+    {
+        tr = QRect( cr.left(), cr.top(), lTextRect.width(), cr.height() );
+        tr.adjust( 4, 0, -8, 0 );
+    }
+    else
+    {
+        int iw = ( pm.width() / pm.devicePixelRatio() + 4 );
+        ih = ( pm.height() / pm.devicePixelRatio() );
+
+        ir = QRect( cr.left() + 4, cr.top(), iw + 2, ih );
+        tr = QRect( ir.right(), cr.top(), lTextRect.width() - 8, cr.height() );
+    }
+
+    QString txt = lOption.fontMetrics.elidedText( lOption.text, Qt::ElideRight, tr.width() );
+
+    if ( ih )
+        lPainter->drawPixmap( ir.left(), (lOption.rect.height() - ih) / 2, pm );
+
+    int alignment = Qt::AlignLeft | Qt::AlignVCenter | Qt::TextShowMnemonic;
+    if ( !style()->proxy()->styleHint( QStyle::SH_UnderlineShortcut, &lOption, this ) )
+        alignment |= Qt::TextHideMnemonic;
+    style()->proxy()->drawItemText( lPainter, tr, alignment, lOption.palette, enabled, txt, QPalette::ButtonText );
+
+    auto x1 = tr.right() + 4;
+    for ( int ii = 0; ii < lPixMaps.count(); ++ii )
+    {
+        auto y1 = lOption.rect.height();
+        auto ih = lPixMaps[ ii ].height()/pm.devicePixelRatio();
+
+        lPainter->drawPixmap( x1, (y1 - ih) / 2, lPixMaps[ ii ] );
+        x1 += lPixMaps[ ii ].width() / pm.devicePixelRatio() + 4;
+    }
+
+    if ( !txt.isEmpty() && lOption.state & QStyle::State_HasFocus )
+    {
+        QStyleOptionFocusRect opt;
+        opt.rect = tr;
+        opt.palette = lOption.palette;
+        opt.state = QStyle::State_None;
+        style()->proxy()->drawPrimitive( QStyle::PE_FrameFocusRect, &opt, lPainter, this );
+    }
+
+    lPainter->restore();
 }
 
 CFlowWidget::CFlowWidget( QWidget* xParent, Qt::WindowFlags xFlags )
@@ -2223,6 +2347,11 @@ CFlowWidgetItem* CFlowWidget::mSelectedItem() const
 void CFlowWidget::mRegisterStateStatus( int xState, const QString & xDescription, const QIcon& xIcon )
 {
     return dImpl->mRegisterStateStatus( xState, xDescription, xIcon, false );
+}
+
+int CFlowWidget::mGetNextStatusID() const
+{
+    return dImpl->mGetNextStatusID();
 }
 
 QList< std::tuple< int, QString, QIcon > > CFlowWidget::mGetRegisteredStatuses() const

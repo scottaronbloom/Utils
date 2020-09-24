@@ -84,6 +84,7 @@ public:
     virtual CFlowWidgetItem* mSelectedItem() const; // only one item is selectable at a time.
 
     void mRegisterStateStatus( int xState, const QString & xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
+    int mGetNextStatusID() const;
     QList< std::tuple< int, QString, QIcon > > mGetRegisteredStatuses() const;
     std::pair< QString, QIcon > mGetStateStatus( int xState ) const;
 

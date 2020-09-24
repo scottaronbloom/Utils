@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/FlowWidgetResources">
+        <file alias="Disabled.png">resources/Disabled.png</file>
+        <file alias="ReadyToRun.png">resources/ReadyToRun.png</file>
+        <file alias="Running.png">resources/Running.png</file>
+        <file alias="RunCompletedWithWarning.png">resources/RunCompletedWithWarning.png</file>
+        <file alias="RunCompletedWithError.png">resources/RunCompletedWithError.png</file>
+        <file alias="RunCompletedWithInfo.png">resources/RunCompletedWithInfo.png</file>
+        <file alias="RunPassed.png">resources/RunPassed.png</file>
+    </qresource>
+</RCC>
