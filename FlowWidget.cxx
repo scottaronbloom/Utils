@@ -224,13 +224,15 @@ public:
         auto xIdentityIcon = xIndex.data( Qt::DecorationRole ).value< QIcon >();
         auto xStateIcons = lTreeWidgetItem->data( 0, CFlowWidgetItem::ERoles::eStateIconsRole ).value< QList< QIcon > >();
 
-        auto xIdentityPixmap = xIdentityIcon.pixmap( xOption.decorationSize );
+        bool lEnabled = xOption.state & QStyle::State_Enabled;
+
+        auto xIdentityPixmap = xIdentityIcon.pixmap( xOption.decorationSize, lEnabled ? QIcon::Normal : QIcon::Disabled );
         QList< QPixmap > lPixmaps;
         for ( auto&& ii : xStateIcons )
         {
             if ( ii.isNull() )
                 continue;
-            auto lPixMap = ii.pixmap( xOption.decorationSize );
+            auto lPixMap = ii.pixmap( xOption.decorationSize, lEnabled ? QIcon::Normal : QIcon::Disabled );
             if ( lPixMap.isNull() )
                 continue;
             lPixmaps << lPixMap;
@@ -273,13 +275,14 @@ public:
         auto lIdentityIcon = xIndex.data( Qt::DecorationRole ).value< QIcon >();
         auto lStateIcons = lTreeWidgetItem->data( 0, CFlowWidgetItem::ERoles::eStateIconsRole ).value< QList< QIcon > >();
 
-        auto xIdentityPixmap = lIdentityIcon.pixmap( xOption.decorationSize );
+        bool lEnabled = xOption.state & QStyle::State_Enabled;
+        auto xIdentityPixmap = lIdentityIcon.pixmap( xOption.decorationSize, lEnabled ? QIcon::Normal : QIcon::Disabled );
         QList< QPixmap > lPixmaps;
         for( auto && ii : lStateIcons )
         {
             if ( ii.isNull() )
                 continue;
-            auto lPixMap = ii.pixmap( xOption.decorationSize );
+            auto lPixMap = ii.pixmap( xOption.decorationSize, lEnabled ? QIcon::Normal : QIcon::Disabled );
             if ( lPixMap.isNull() )
                 continue;
             lPixmaps << lPixMap;
