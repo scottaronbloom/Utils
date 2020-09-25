@@ -25,14 +25,22 @@
 #include <QDomElement>
 #include <QFileInfo>
 #include <QDir>
+#include <QScrollBar>
 
 using TFlowWidgetItems = std::vector< std::unique_ptr< CFlowWidgetItem > >;
 using TDataMap = std::map< int, QVariant >;
 
+static QString dumpRect( const QRect & xRect )
+{
+    QString lRetVal = QString( "QRect((%1,%2),(%3,%4) %5x%6)").arg( xRect.left() ).arg( xRect.top() ).arg( xRect.right() ).arg( xRect.bottom() ).arg( xRect.size().width() ).arg( xRect.size().height() );
+    return lRetVal;
+}
+
 // from QItemDelegatePrivate::textLayoutBounds
-static QRect mTextLayoutBounds( const QRect& xRect, bool xElideText )
+static QRect mTextLayoutBounds( const QRect& xRect, int lMargin, bool xElideText )
 {
     auto lRetVal = xRect;
+    lRetVal.adjust( lMargin, 0, -lMargin, 0 );
     if ( !xElideText )
         lRetVal.setWidth( INT_MAX / 256 );
     return lRetVal;
@@ -87,7 +95,7 @@ static std::pair< int, QString > mComputeTextWidth( QStyleOptionToolBox& lOption
     return mComputeTextWidth( lOption.fontMetrics, lOption.text, xMaxWidth );
 }
 
-static std::pair< QRect, QString > mCalcDisplayText( const QFont & lFont, QString lText, bool xElide, const QRect & xRect )
+static std::pair< QRect, QString > mCalcDisplayRect( const QFont & lFont, QString lText, bool xElide, const QRect & xRect )
 {
     QTextOption lTextOption;
     lTextOption.setWrapMode( xElide ? QTextOption::NoWrap :QTextOption::WordWrap );
@@ -96,9 +104,9 @@ static std::pair< QRect, QString > mCalcDisplayText( const QFont & lFont, QStrin
     lTextLayout.setTextOption( lTextOption );
     lTextLayout.setFont( lFont );
     lTextLayout.setText( lText.replace( '\n', QChar::LineSeparator ) );
-    auto lFPSize = mDoTextLayout( lTextLayout, mTextLayoutBounds( xRect, xElide ).width() );
-    const QSize lSize = QSize( std::ceil( lFPSize.width() ), std::ceil( lFPSize.height() ) );
     const int lTextMargin = QApplication::style()->pixelMetric( QStyle::PM_FocusFrameHMargin, nullptr ) + 1;
+    auto lFPSize = mDoTextLayout( lTextLayout, mTextLayoutBounds( xRect, lTextMargin, xElide ).width() );
+    const QSize lSize = QSize( std::ceil( lFPSize.width() ), std::ceil( lFPSize.height() ) );
     std::pair< int, QString > lTextWidth( lSize.width() + 2*lTextMargin, lText );
     if ( xElide )
         lTextWidth =  mComputeTextWidth( QFontMetrics( lFont ), lText, std::make_pair( xElide, lSize.width() ) );
@@ -128,6 +136,7 @@ class CFlowWidgetHeader : public QAbstractButton
 public:
     friend class CFlowWidgetImpl;
     friend class CFlowWidgetItemImpl;
+    friend class CFlowWidgetItemDelegate;
 
     CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* xParent );
     ~CFlowWidgetHeader();
@@ -370,12 +379,21 @@ public:
         mDoLayout( xOption, lDescRect, lIdentityRect, lStatusRects, false );
 
         xPainter->save();
+        if ( lDescRect.right() > xOption.rect.right() )
+        {
+            lDescRect.adjust( 0, 0, xOption.rect.right() - lDescRect.right(), 0 );
+        }
         drawBackground( xPainter, xOption, xIndex );
         drawDecoration( xPainter, xOption, lIdentityRect, xIdentityPixmap );
-        drawDisplay( xPainter, xOption, lDescRect, lDescription );
-        for( int ii = 0; ii < lStatusRects.count(); ++ii )
+        for ( int ii = 0; ii < lStatusRects.count(); ++ii )
         {
             drawDecoration( xPainter, xOption, lStatusRects[ ii ], lPixmaps[ ii ] );
+        }
+        if ( lDescRect.isValid() )
+        {
+            auto lOption = xOption;
+            lOption.textElideMode = Qt::TextElideMode::ElideNone;
+            drawDisplay( xPainter, lOption, lDescRect, lDescription );
         }
         drawFocus( xPainter, xOption, xOption.rect );
         xPainter->restore();
@@ -408,9 +426,10 @@ public:
             auto lCurr = xStatusRects[ ii ]; // x,y = 0;
             int x1 = 0;
             if ( ii == 0 )
-                x1 = xTextRect.right() + 2*lMargin;
+                x1 = std::max( xTextRect.right(), xIdentityRect.right() ) + 2 * lMargin;
             else
                 x1 = xStatusRects[ ii - 1 ].right() + 2*lMargin;
+            
             int y1 = xIdentityRect.isValid() ? xIdentityRect.top() : ( xTextRect.isValid() ? xTextRect.top() : 0 );
 
             lCurr.setRect( x1, y1, lCurr.width(), lCurr.height() );
@@ -448,7 +467,7 @@ public:
         const QVariant lFontVal = xIndex.data( Qt::FontRole );
         const QFont lFont = qvariant_cast<QFont>(lFontVal).resolve( xOption.font );
 
-        return ::mCalcDisplayText( lFont, lText, dElideText, lRect );
+        return ::mCalcDisplayRect( lFont, lText, dElideText, lRect );
     }
 
 private:
@@ -998,11 +1017,11 @@ public:
     void mSetCurrentTopLevelItem( CFlowWidgetItem* xItem, bool xMakeVisible = true )
     {
         if ( dCurrentTopLevelItem )
-            dCurrentTopLevelItem->mSetSelected( false );
+            dCurrentTopLevelItem->dImpl->mSetSelected( false );
 
         if ( xItem )
         {
-            xItem->mSetSelected( true );
+            xItem->dImpl->mSetSelected( true );
             if ( xMakeVisible )
                 xItem->mSetVisible( true, true );
         }
@@ -1435,7 +1454,7 @@ bool CFlowWidgetItem::mIsEnabled() const
 
 void CFlowWidgetItem::mSetSelected( bool xSelected )
 {
-    dImpl->mSetSelected( xSelected );
+    dImpl->mFlowWidget()->mSelectFlowItem( this, xSelected, true );
 }
 
 bool CFlowWidgetItem::mSelected() const
@@ -1500,7 +1519,10 @@ bool CFlowWidgetItemImpl::mSetData( int xRole, const QVariant& xData, bool xSetS
     }
 
     if ( !dTreeWidgetItem )
+    {
         dHeader->repaint();
+        dHeader->dTreeWidget->viewport()->update();
+    }
     return true;
 }
 
@@ -1634,6 +1656,7 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
     setFocusPolicy( Qt::NoFocus );
 
     dTreeWidget = new QTreeWidget;
+    dTreeWidget->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
     dDelegate = new CFlowWidgetItemDelegate( xParent->mElideText(), this );
     dTreeWidget->setItemDelegate( dDelegate );
     dTreeWidget->setObjectName( "flowwidgetheader_treewidget" );
@@ -1745,6 +1768,7 @@ void CFlowWidgetHeader::mSetElideText( bool xElideText )
     dDelegate->mSetElideText( xElideText );
     dElideText = xElideText;
     repaint();
+    dTreeWidget->viewport()->update();
 }
 
 CFlowWidget* CFlowWidgetHeader::mFlowWidget() const
@@ -1925,7 +1949,7 @@ void CFlowWidgetHeader::mSetVisible( bool xVisible, bool xExpandIfShow )
 
 bool CFlowWidgetHeader::mIsVisible() const
 {
-    return isVisible() /*&& ( dScrollArea && dScrollArea->isVisible() )*/;
+    return isVisible();
 }
 
 void CFlowWidgetHeader::mSetExpanded( bool xExpanded )
@@ -2149,8 +2173,12 @@ void CFlowWidget::mSelectFlowItem( CFlowWidgetItem* xItem, bool xSelect, bool xE
     {
         if ( xExpand )
             xItem->mSetExpanded( true );
-        xItem->mSetSelected( xSelect );
+        xItem->dImpl->mSetSelected( xSelect );
         xItem = xItem->mParentItem();
+    }
+    if ( lOrigItem->mIsTopLevelItem() )
+    {
+        dImpl->mSetCurrentTopLevelItem( lOrigItem );
     }
 }
 
@@ -2391,33 +2419,6 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
 
     auto lFlowItem = xItem.get();
     bool lCurrentChanged = false;
-    //if ( xIndex < 0 || xIndex >= static_cast<int>(dTopLevelItems.size()) )
-    //{
-    //    xIndex = static_cast<int>(dTopLevelItems.size());
-    //    dTopLevelItems.insert( dTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
-    //    lFlowItem->dImpl->dHeader->mAddToLayout( fTopLayout );
-    //    mRelayout();
-    //    if ( xIndex == 0 )
-    //    {
-    //        mSetCurrentTopLevelItem( xIndex );
-    //        lCurrentChanged = true;
-    //    }
-    //}
-    //else
-    //{
-    //    dTopLevelItems.insert( dTopLevelItems.cbegin() + xIndex, std::move( xItem ) );
-    //    mRelayout();
-    //    if ( dCurrentTopLevelItem )
-    //    {
-    //        int oldindex = mIndexOfTopLevelItem( dCurrentTopLevelItem );
-    //        if ( xIndex <= oldindex )
-    //        {
-    //            dCurrentTopLevelItem = nullptr; // trigger change
-    //            lCurrentChanged = true;
-    //            mSetCurrentTopLevelItem( oldindex );
-    //        }
-    //    }
-    //}
 
     if ( xIndex < 0 || xIndex >= static_cast<int>(dTopLevelItems.size()) )
         xIndex = static_cast<int>(dTopLevelItems.size());
@@ -2697,7 +2698,6 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QString& xFileNa
 
     if ( dTopLevelItems.size() )
         dTopLevelItems[ 0 ]->mSetSelected( true );
-
 
     return std::make_pair( true, QString() );
 }
