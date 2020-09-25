@@ -2586,6 +2586,7 @@ std::pair< bool, QString > CFlowWidget::mLoadFromXML( const QString & xFileName 
 std::pair< bool, QString > mFindIcon( const QString & xFileName )
 {
     auto lDir = QDir::currentPath();
+
     if ( QFileInfo::exists( xFileName ) )
         return std::make_pair( true, xFileName );
     lDir += "/xml/";
@@ -2594,6 +2595,10 @@ std::pair< bool, QString > mFindIcon( const QString & xFileName )
     lDir += "images/";
     if ( QFileInfo::exists( lDir + xFileName ) )
         return std::make_pair( true, lDir + xFileName );
+    lDir = QDir::currentPath() + "/images/";
+    if ( QFileInfo::exists( lDir + xFileName ) )
+        return std::make_pair( true, lDir + xFileName );
+
     return std::make_pair( false, xFileName );
 }
 
