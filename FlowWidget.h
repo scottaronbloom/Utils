@@ -94,7 +94,8 @@ public:
 
     virtual QString mDump( bool xCompacted ) const;
     virtual void mDump( QJsonObject& xTS ) const;
-    
+
+    void mSetFindIconFunc( const std::function< std::pair< bool, QString >( const QString& fileName ) > & lFindIcon );
 protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );

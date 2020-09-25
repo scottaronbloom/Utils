@@ -1183,6 +1183,8 @@ public:
         return dElideText;
     }
 
+    std::pair< bool, QString > mFindIcon( const QString& xFileName ) const;
+
     QVBoxLayout* fTopLayout{ nullptr };
     CFlowWidget* dFlowWidget{ nullptr };
 
@@ -1192,6 +1194,7 @@ public:
 
     std::unordered_map< int, std::pair< QString, QIcon > > dStateStatusMap;
     bool dElideText{ false };
+    std::function< std::pair< bool, QString >( const QString & fileName ) > dFindIcon;
 };
 
 CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon )
@@ -2578,13 +2581,21 @@ QString CFlowWidget::mDump( bool xCompacted ) const
     return lRetVal;
 }
 
+void CFlowWidget::mSetFindIconFunc( const std::function< std::pair< bool, QString >( const QString& fileName ) >& lFindIcon )
+{
+    dImpl->dFindIcon = lFindIcon;
+}
+
 std::pair< bool, QString > CFlowWidget::mLoadFromXML( const QString & xFileName )
 {
     return dImpl->mLoadFromXML( xFileName );
 }
 
-std::pair< bool, QString > mFindIcon( const QString & xFileName )
+std::pair< bool, QString > CFlowWidgetImpl::mFindIcon( const QString & xFileName ) const
 {
+    if ( dFindIcon )
+        return dFindIcon( xFileName );
+
     auto lDir = QDir::currentPath();
 
     if ( QFileInfo::exists( xFileName ) )
