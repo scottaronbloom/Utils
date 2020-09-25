@@ -21,6 +21,10 @@
 #include <QSizeF>
 #include <QToolTip>
 #include <QHelpEvent>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QFileInfo>
+#include <QDir>
 
 using TFlowWidgetItems = std::vector< std::unique_ptr< CFlowWidgetItem > >;
 using TDataMap = std::map< int, QVariant >;
@@ -95,9 +99,26 @@ static std::pair< QRect, QString > mCalcDisplayText( const QFont & lFont, QStrin
     auto lFPSize = mDoTextLayout( lTextLayout, mTextLayoutBounds( xRect, xElide ).width() );
     const QSize lSize = QSize( std::ceil( lFPSize.width() ), std::ceil( lFPSize.height() ) );
     const int lTextMargin = QApplication::style()->pixelMetric( QStyle::PM_FocusFrameHMargin, nullptr ) + 1;
-    auto lTextWidth =  mComputeTextWidth( QFontMetrics( lFont ), lText, std::make_pair( xElide, lSize.width() ) );
+    std::pair< int, QString > lTextWidth( lSize.width() + 2*lTextMargin, lText );
+    if ( xElide )
+        lTextWidth =  mComputeTextWidth( QFontMetrics( lFont ), lText, std::make_pair( xElide, lSize.width() ) );
     auto lRect = QRect( 0, 0, lTextWidth.first, lSize.height() );
     return std::make_pair( lRect, lTextWidth.second );
+}
+
+
+static void mExpandAll( QTreeWidgetItem * xItem )
+{
+    if ( !xItem )
+        return;
+    xItem->setExpanded( true );
+    for( int ii = 0; ii < xItem->childCount(); ++ii )
+    {
+        auto xChild = xItem->child( ii );
+        if ( !xChild )
+            return;
+        mExpandAll( xChild );
+    }
 }
 
 class CFlowWidgetItemDelegate;
@@ -106,6 +127,8 @@ class CFlowWidgetHeader : public QAbstractButton
     Q_OBJECT
 public:
     friend class CFlowWidgetImpl;
+    friend class CFlowWidgetItemImpl;
+
     CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* xParent );
     ~CFlowWidgetHeader();
 
@@ -439,6 +462,10 @@ public:
         dContainer( xContainer )
     {
     }
+    ~CFlowWidgetItemImpl()
+    {
+        delete dHeader;
+    }
 
     friend class CFlowWidget;
     void deleteLater()
@@ -450,11 +477,11 @@ public:
         delete this;
     }
 
-    void mSetStateID( int xStateID )
+    void mSetStepID( const QString & xStepID )
     {
-        dStateID = xStateID;
+        dStepID = xStepID;
     }
-    int mStateID() const { return dStateID; }
+    QString mStepID() const { return dStepID; }
     void mSetIcon( const QIcon& icon )
     {
         dIcon = icon;
@@ -473,26 +500,48 @@ public:
     void mSetToolTip( const QString& tip )
     {
         dToolTip = tip;
-        if ( dHeader )
-            dHeader->mSetToolTip( tip );
-        else if ( dTreeWidgetItem )
-            dTreeWidgetItem->setToolTip( 0, tip );
+        //if ( dHeader )
+        //    dHeader->mSetToolTip( tip );
+        //else if ( dTreeWidgetItem )
+        //    dTreeWidgetItem->setToolTip( 0, tip );
     }
 
-    QString mToolTip( bool xIncludeStateInfo ) const
+    QString mToolTip( bool xStoredDataOnly ) const
     {
+        if ( xStoredDataOnly )
+            return dToolTip;
+
         QStringList lRetVal;
-        if ( !dToolTip.isEmpty() )
+        if ( dToolTip.isEmpty() )
+            lRetVal << mText();
+        else
             lRetVal << dToolTip;
-        if ( xIncludeStateInfo )
+        auto lStates = mData( CFlowWidgetItem::eStateStatusRole ).value< QList< int > >();
+        for ( auto&& ii : lStates )
         {
-            auto lStates = mData( CFlowWidgetItem::eStateStatusRole ).value< QList< int > >();
-            for ( auto&& ii : lStates )
-            {
-                lRetVal << mFlowWidget()->mGetStateStatus( ii ).first;
-            }
+            lRetVal << mFlowWidget()->mGetStateStatus( ii ).first;
         }
         return lRetVal.join( "\n" );
+    }
+
+    void mSetUIClassName( const QString& xUIClassName )
+    {
+        mSetData( CFlowWidgetItem::ERoles::eUIClassNameRole, xUIClassName );
+    }
+
+    QString mUIClassName() const
+    {
+        return mData( CFlowWidgetItem::ERoles::eUIClassNameRole ).toString();
+    }
+
+    void mSetTclProcName( const QString& xTclProcName )
+    {
+        mSetData( CFlowWidgetItem::ERoles::eTclProcNameRole, xTclProcName );
+    }
+
+    QString mTclProcName() const
+    {
+        return mData( CFlowWidgetItem::ERoles::eTclProcNameRole ).toString();
     }
 
     bool mIsExpanded() const
@@ -804,6 +853,15 @@ public:
         return nullptr;
     }
 
+    void mExpandAll()
+    {
+        if ( dHeader )
+            dHeader->dTreeWidget->expandAll();
+        else if ( dTreeWidgetItem )
+        {
+            ::mExpandAll( dTreeWidgetItem );
+        }
+    }
     void mSetExpanded( bool xExpanded )
     {
         if ( dHeader )
@@ -825,7 +883,7 @@ public:
 
     void mDump( QJsonObject& xJSON, bool xRecursive ) const
     {
-        xJSON[ "StateID" ] = dStateID;
+        xJSON[ "StepID" ] = dStepID;
         xJSON[ "Text" ] = dText;
         xJSON[ "ToolTip" ] = dToolTip;
         xJSON[ "HasIcon" ] = !dIcon.isNull();
@@ -872,7 +930,7 @@ public:
 
     std::map< QTreeWidgetItem*, CFlowWidgetItem* > dChildItemMap;  // flowItems owned by dChildren
 
-    int dStateID{ -1 };
+    QString dStepID;
     QString dText;
     QString dToolTip;
     QIcon dIcon;
@@ -1111,6 +1169,8 @@ public:
         return dStateStatusMap.find( xState ) != dStateStatusMap.end();
     }
 
+    std::pair< bool, QString > mLoadFromXML( const QString & xfileName );
+    std::pair< bool, QString > mLoadFromXML( const QDomElement & xStepElement, CFlowWidgetItem * xParent ); // if nullptr then load it as a top level element
     void mSetElideText( bool xElideText )
     {
         dElideText = xElideText;
@@ -1134,57 +1194,78 @@ public:
     bool dElideText{ false };
 };
 
-CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon )
+CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon )
 {
     dImpl = std::make_unique< CFlowWidgetItemImpl >( this );
-    dImpl->mSetStateID( xStateID );
+    dImpl->mSetStepID( xStepID );
     dImpl->mSetText( xFlowName );
     dImpl->mSetIcon( xDescIcon );
 }
 
 CFlowWidgetItem::CFlowWidgetItem() :
-    CFlowWidgetItem( -1, QString(), QIcon() )
+    CFlowWidgetItem( QString(), QString(), QIcon() )
 {
 }
 
-CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QString& xFlowName, CFlowWidget* xParent ) :
-    CFlowWidgetItem( xStateID, xFlowName, QIcon(), xParent )
+CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, CFlowWidget* xParent ) :
+    CFlowWidgetItem( xStepID, xFlowName, QIcon(), xParent )
 {
 }
 
-CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QString& xFlowName, CFlowWidgetItem* xParent ) :
-    CFlowWidgetItem( xStateID, xFlowName, QIcon(), xParent )
+CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent ) :
+    CFlowWidgetItem( xStepID, xFlowName, QIcon(), xParent )
 {
 }
 
-CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QIcon& xDescIcon, CFlowWidget* xParent ) :
-    CFlowWidgetItem( xStateID, QString(), xDescIcon, xParent )
+CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidget* xParent ) :
+    CFlowWidgetItem( xStepID, QString(), xDescIcon, xParent )
 {
 }
 
-CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) :
-    CFlowWidgetItem( xStateID, QString(), xDescIcon, xParent )
+CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) :
+    CFlowWidgetItem( xStepID, QString(), xDescIcon, xParent )
 {
 }
 
-CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidget* xParent ) :
-    CFlowWidgetItem( xStateID, xFlowName, xDescIcon )
+CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidget* xParent ) :
+    CFlowWidgetItem( xStepID, xFlowName, xDescIcon )
 {
     if ( xParent )
         xParent->dImpl->mAddTopLevelItem( this );
 }
 
-CFlowWidgetItem::CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) :
-    CFlowWidgetItem( xStateID, xFlowName, xDescIcon )
+CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) :
+    CFlowWidgetItem( xStepID, xFlowName, xDescIcon )
 {
     dImpl->dParent = xParent;
     if ( xParent )
         xParent->mAddChild( this );
 }
 
+CFlowWidgetItem::CFlowWidgetItem( CFlowWidget * xParent ) :
+    CFlowWidgetItem()
+{
+    if ( xParent )
+        xParent->dImpl->mAddTopLevelItem( this );
+}
+
+CFlowWidgetItem::CFlowWidgetItem( CFlowWidgetItem* xParent ) :
+    CFlowWidgetItem()
+{
+    dImpl->dParent = xParent;
+    if ( xParent )
+        xParent->mAddChild( this );
+}
+
+CFlowWidgetItem::~CFlowWidgetItem()
+{
+    dImpl.reset( nullptr );
+}
+
 void CFlowWidgetItem::deleteLater()
 {
-    dImpl->deleteLater();
+    auto lPtr = dImpl.release();
+    lPtr->deleteLater();
     delete this;
 }
 
@@ -1266,7 +1347,7 @@ void CFlowWidgetItem::mSetToolTip( const QString& xToolTip )
 
 QString CFlowWidgetItem::mToolTip() const
 {
-    return dImpl->mToolTip( false );
+    return dImpl->mToolTip( true );
 }
 
 void CFlowWidgetItem::mSetIcon( const QIcon& xIcon )
@@ -1279,14 +1360,34 @@ QIcon CFlowWidgetItem::mIcon() const
     return dImpl->mIcon();
 }
 
-void CFlowWidgetItem::mSetStateID( int xStateID )
+void CFlowWidgetItem::mSetUIClassName( const QString& xUIClassName )
 {
-    return dImpl->mSetStateID( xStateID );
+    return dImpl->mSetUIClassName( xUIClassName );
 }
 
-int CFlowWidgetItem::mStateID() const
+QString CFlowWidgetItem::mUIClassName() const
 {
-    return dImpl->mStateID();
+    return dImpl->mUIClassName();
+}
+
+void CFlowWidgetItem::mSetTclProcName( const QString& xTclProcName )
+{
+    return dImpl->mSetTclProcName( xTclProcName );
+}
+
+QString CFlowWidgetItem::mTclProcName() const
+{
+    return dImpl->mTclProcName();
+}
+
+void CFlowWidgetItem::mSetStepID( const QString & xStepID )
+{
+    return dImpl->mSetStepID( xStepID );
+}
+
+QString CFlowWidgetItem::mStepID() const
+{
+    return dImpl->mStepID();
 }
 
 void CFlowWidgetItem::mSetHidden( bool xHidden )
@@ -1388,7 +1489,6 @@ bool CFlowWidgetItemImpl::mSetData( int xRole, const QVariant& xData, bool xSetS
         auto lStates = xData.value< QList< int > >();
         for ( auto ii : lStates )
         {
-            // what to do about the tool tips???
             auto lIcon = mFlowWidget()->dImpl->mGetStateStatus( ii ).second;
             if ( !lIcon.isNull() )
                 lIcons.push_back( lIcon );
@@ -1459,6 +1559,11 @@ bool CFlowWidgetItem::mRemoveStateStatus( int xStateStatus )
 QList< int > CFlowWidgetItem::mStateStatuses() const
 {
     return dImpl->mStateStatuses();
+}
+
+void CFlowWidgetItem::mExpandAll()
+{
+    return dImpl->mExpandAll();
 }
 
 void CFlowWidgetItem::mSetExpanded( bool xExpanded )
@@ -1588,7 +1693,7 @@ bool CFlowWidgetHeader::eventFilter( QObject* xWatched, QEvent* xEvent )
 
             if ( xFlowItem )
             {
-                auto lText = xFlowItem->dImpl->mToolTip( true );
+                auto lText = xFlowItem->dImpl->mToolTip( false );
                 if ( !lText.isEmpty() )
                 {
                     QToolTip::showText( static_cast<QHelpEvent*>(xEvent)->globalPos(), lText, this, QRect(), toolTipDuration() );
@@ -1605,11 +1710,14 @@ bool CFlowWidgetHeader::event( QEvent* xEvent )
     if ( xEvent->type() == QEvent::ToolTip )
     {
         emit mFlowWidget()->sigFlowWidgetItemHovered( dContainer );
-        auto lText = dContainer->dImpl->mToolTip( true );
+        auto lText = dContainer->dImpl->mToolTip( false );
         if ( lText.isEmpty() )
             xEvent->ignore();
         else
+        {
             QToolTip::showText( static_cast<QHelpEvent*>(xEvent)->globalPos(), lText, this, QRect(), toolTipDuration() );
+            xEvent->ignore();
+        }
     }
     return QAbstractButton::event( xEvent );
 }
@@ -2372,9 +2480,9 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, CFlowWidgetItem* xItem )
     return mInsertTopLevelItem( xIndex, std::move( lUniquePtr ) );
 }
 
-CFlowWidgetItem* CFlowWidget::mInsertTopLevelItem( int xIndex, int xStateID, const QString& xFlowName, const QIcon& xDescIcon )
+CFlowWidgetItem* CFlowWidget::mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon )
 {
-    auto lItem = new CFlowWidgetItem( xStateID, xFlowName, xDescIcon );
+    auto lItem = new CFlowWidgetItem( xStepID, xFlowName, xDescIcon );
     auto lRetVal = mInsertTopLevelItem( xIndex, lItem );
     return lRetVal.second ? lRetVal.first : nullptr;
 }
@@ -2405,9 +2513,9 @@ int CFlowWidgetImpl::mInsertItem( int xIndex, CFlowWidgetItem* xItem, CFlowWidge
     return mInsertItem( xIndex, std::move( lUniquePtr ), xParent );
 }
 
-CFlowWidgetItem* CFlowWidget::mInsertItem( int xIndex, int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent )
+CFlowWidgetItem* CFlowWidget::mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent )
 {
-    auto lItem = new CFlowWidgetItem( xStateID, xFlowName, xDescIcon ); // no parent the mInsertItem sets the parent
+    auto lItem = new CFlowWidgetItem( xStepID, xFlowName, xDescIcon ); // no parent the mInsertItem sets the parent
     dImpl->mInsertItem( xIndex, lItem, xParent );
     return lItem;
 }
@@ -2468,6 +2576,114 @@ QString CFlowWidget::mDump( bool xCompacted ) const
     mDump( lObject );
     auto lRetVal = QJsonDocument( lObject ).toJson( xCompacted ? QJsonDocument::Compact : QJsonDocument::Indented );
     return lRetVal;
+}
+
+std::pair< bool, QString > CFlowWidget::mLoadFromXML( const QString & xFileName )
+{
+    return dImpl->mLoadFromXML( xFileName );
+}
+
+std::pair< bool, QString > mFindIcon( const QString & xFileName )
+{
+    auto lDir = QDir::currentPath();
+    if ( QFileInfo::exists( xFileName ) )
+        return std::make_pair( true, xFileName );
+    lDir += "/xml/";
+    if ( QFileInfo::exists( lDir + xFileName ) )
+        return std::make_pair( true, lDir + xFileName );
+    lDir += "images/";
+    if ( QFileInfo::exists( lDir + xFileName ) )
+        return std::make_pair( true, lDir + xFileName );
+    return std::make_pair( false, xFileName );
+}
+
+
+std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xStepElement, CFlowWidgetItem* xParent ) // if nullptr then load it as a top level element
+{
+    if ( xStepElement.tagName() != "Step" )
+    {
+        return std::make_pair( false, CFlowWidget::tr( "Invalid Element in XML (%1,%2): Expected 'Step' found '%3'" ).arg( xStepElement.lineNumber() ).arg( xStepElement.columnNumber() ).arg( xStepElement.tagName() ) );
+    }
+
+    auto lIDEle   = xStepElement.firstChildElement( "id" );
+    auto lNameEle = xStepElement.firstChildElement( "name" );
+    auto lUIEle   = xStepElement.firstChildElement( "ui" ); // can be null
+    auto lTclProEle = xStepElement.firstChildElement( "tclproc" ); // can be null
+    auto lIconEle = xStepElement.firstChildElement( "icon" ); // can be null error if non-null and file does not exist
+    if ( lIDEle.isNull() )
+        return std::make_pair( false, CFlowWidget::tr( "Invalid XML (%1,%2): Missing 'id' Element" ).arg( xStepElement.lineNumber() ).arg( xStepElement.columnNumber() ) );
+    if ( lNameEle.isNull() )
+        return std::make_pair( false, CFlowWidget::tr( "Invalid XML (%1,%2): Missing 'name' Element" ).arg( xStepElement.lineNumber() ).arg( xStepElement.columnNumber() ) );
+
+    CFlowWidgetItem * xCurrItem = xParent ? new CFlowWidgetItem( xParent ) : new CFlowWidgetItem( dFlowWidget );
+    xCurrItem->mSetStepID( lIDEle.text() );
+    xCurrItem->mSetText( lNameEle.text() );
+    auto lFileName = mFindIcon( lIconEle.text() );
+    if ( !lFileName.first )
+    {
+        return std::make_pair( false, CFlowWidget::tr( "Invalid Element in XML (%1,%2): Icon file '%3' not found" ).arg( lIconEle.lineNumber() ).arg( lIconEle.columnNumber() ).arg( lIconEle.text() ) );
+    }
+    xCurrItem->mSetIcon( QIcon( lFileName.second ) );
+    if ( !lUIEle.isNull() )
+        xCurrItem->mSetUIClassName( lUIEle.text() );
+    if ( !lTclProEle.isNull() )
+        xCurrItem->mSetTclProcName( lTclProEle.text() );
+
+
+    auto lChildStepEle = xStepElement.firstChildElement( "Step" ); // can be null
+    for( ; !lChildStepEle.isNull(); lChildStepEle = lChildStepEle.nextSiblingElement( "Step" ) )
+    {
+        auto lCurr = mLoadFromXML( lChildStepEle, xCurrItem );
+        if ( !lCurr.first )
+            return lCurr;
+    }
+    return std::make_pair( true, QString() );
+}
+
+std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QString& xFileName )
+{
+    QFile lFile( xFileName );
+    if ( !lFile.open( QFile::ReadOnly | QFile::Text ) )
+    {
+        return std::make_pair( false, CFlowWidget::tr( "Could not open file '%1' for reading" ).arg( xFileName ) );
+    }
+
+    QDomDocument lDoc;
+    QString lErrorString;
+    int lErrorLine;
+    int lErrorColumn;
+    if ( !lDoc.setContent( &lFile, false, &lErrorString, &lErrorLine, &lErrorColumn ) )
+    {
+        return std::make_pair( false, CFlowWidget::tr( "Error parsing XML file (%1,%2): %3" ).arg( lErrorLine ).arg( lErrorColumn ).arg( lErrorString ) );
+    }
+
+    mClear();
+
+    auto lRoot = lDoc.documentElement();
+    auto lTopStepsEle = lRoot.firstChildElement( "Steps" );
+    if ( lTopStepsEle.isNull() )
+    {
+        return std::make_pair( false, CFlowWidget::tr( "Invalid XML (%1,%2): Missing 'Steps' element'" ).arg( lRoot.lineNumber() ).arg( lRoot.columnNumber() ) );
+    }
+
+    for( auto lChild = lTopStepsEle.firstChildElement( "Step" ); !lChild.isNull(); lChild = lChild.nextSiblingElement( "Step" ) )
+    {
+        auto lCurr = mLoadFromXML( lChild.toElement(), nullptr );
+        if ( !lCurr.first )
+        {
+            mClear();
+            return lCurr;
+        }
+    }
+
+    for( auto && ii : dTopLevelItems )
+        ii->mExpandAll();
+
+    if ( dTopLevelItems.size() )
+        dTopLevelItems[ 0 ]->mSetSelected( true );
+
+
+    return std::make_pair( true, QString() );
 }
 
 #include "FlowWidget.moc"

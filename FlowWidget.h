@@ -47,26 +47,27 @@ public:
 
     explicit CFlowWidget( QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags() );
 
+    virtual std::pair< bool, QString > mLoadFromXML( const QString & xFileName );
     // The returned CFLowWidgetItems are OWNED by the flow widget, and should not be deleted by the user without removing them from thw CFlowWidget or parent CFlowWidgetItem first
-    virtual CFlowWidgetItem* mAddTopLevelItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon ) { return mInsertTopLevelItem( -1, xStateID, xFlowName, xDescIcon ); }
-    virtual CFlowWidgetItem* mAddTopLevelItem( int xStateID, const QString& xFlowName ) { return mAddTopLevelItem( xStateID, xFlowName, QIcon() ); }
-    virtual CFlowWidgetItem* mAddTopLevelItem( int xStateID, const QIcon& xDescIcon ) { return mAddTopLevelItem( xStateID, QString(), xDescIcon ); }
+    virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon ) { return mInsertTopLevelItem( -1, xStepID, xFlowName, xDescIcon ); }
+    virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QString& xFlowName ) { return mAddTopLevelItem( xStepID, xFlowName, QIcon() ); }
+    virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QIcon& xDescIcon ) { return mAddTopLevelItem( xStepID, QString(), xDescIcon ); }
 
-    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, int xStateID, const QString& xFlowName, const QIcon& xDescIcon );
-    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, int xStateID, const QString& xFlowName ) { return mInsertTopLevelItem( xIndex, xStateID, xFlowName, QIcon() ); }
-    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, int xStateID, const QIcon& xDescIcon ) { return mInsertTopLevelItem( xIndex, xStateID, QString(), xDescIcon ); }
+    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon );
+    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName ) { return mInsertTopLevelItem( xIndex, xStepID, xFlowName, QIcon() ); }
+    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QIcon& xDescIcon ) { return mInsertTopLevelItem( xIndex, xStepID, QString(), xDescIcon ); }
 
     virtual std::pair< CFlowWidgetItem*, bool > mAddTopLevelItem( CFlowWidgetItem* xItem ) { return mInsertTopLevelItem( -1, xItem ); }
     virtual std::pair< CFlowWidgetItem*, bool > mInsertTopLevelItem( int xIndex, CFlowWidgetItem* xItem );
     virtual std::pair< CFlowWidgetItem*, bool > mInsertTopLevelItem( CFlowWidgetItem* xPeer, CFlowWidgetItem* xItem, bool xBefore );
 
-    virtual CFlowWidgetItem* mAddItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStateID, xFlowName, xDescIcon, xParent ); }
-    virtual CFlowWidgetItem* mAddItem( int xStateID, const QString& xFlowName, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStateID, xFlowName, QIcon(), xParent ); }
-    virtual CFlowWidgetItem* mAddItem( int xStateID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStateID, QString(), xDescIcon, xParent ); }
+    virtual CFlowWidgetItem* mAddItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, xFlowName, xDescIcon, xParent ); }
+    virtual CFlowWidgetItem* mAddItem( const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, xFlowName, QIcon(), xParent ); }
+    virtual CFlowWidgetItem* mAddItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, QString(), xDescIcon, xParent ); }
 
-    virtual CFlowWidgetItem* mInsertItem( int xIndex, int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
-    virtual CFlowWidgetItem* mInsertItem( int xIndex, int xStateID, const QString& xFlowName, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStateID, xFlowName, QIcon(), xParent ); }
-    virtual CFlowWidgetItem* mInsertItem( int xIndex, int xStateID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStateID, QString(), xDescIcon, xParent ); }
+    virtual CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+    virtual CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStepID, xFlowName, QIcon(), xParent ); }
+    virtual CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStepID, QString(), xDescIcon, xParent ); }
 
     virtual int mTopLevelItemCount() const;
     virtual CFlowWidgetItem* mGetTopLevelItem( int xIndex ) const;
@@ -93,6 +94,7 @@ public:
 
     virtual QString mDump( bool xCompacted ) const;
     virtual void mDump( QJsonObject& xTS ) const;
+    
 protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );
@@ -132,18 +134,24 @@ public:
     enum ERoles
     {
         eStateStatusRole = Qt::UserRole + 1,  // returns the states
-        eStateIconsRole                       // returns he icons
+        eStateIconsRole,                       // returns he icons
+        eUIClassNameRole,
+        eTclProcNameRole
     };
 
     CFlowWidgetItem();
-    CFlowWidgetItem( int xStateID, const QString& xFlowName, CFlowWidget* xParent );
-    CFlowWidgetItem( int xStateID, const QString& xFlowName, CFlowWidgetItem* xParent );
+    CFlowWidgetItem( CFlowWidgetItem * xParent );
+    CFlowWidgetItem( CFlowWidget * xParent );
 
-    CFlowWidgetItem( int xStateID, const QIcon& xDescIcon, CFlowWidget* xParent );
-    CFlowWidgetItem( int xStateID, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, CFlowWidget* xParent );
+    CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
 
-    CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidget* xParent );
-    CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+    CFlowWidgetItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidget* xParent );
+    CFlowWidgetItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+
+    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidget* xParent );
+    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+    ~CFlowWidgetItem();
 
     void deleteLater();
 
@@ -171,11 +179,17 @@ public:
     void mSetIcon( const QIcon& xIcon );
     QIcon mIcon() const;
 
-    void mSetStateID( int xStateID );
-    int mStateID() const;
+    void mSetStepID( const QString & xStepID );
+    QString mStepID() const;
 
     void mSetToolTip( const QString& xToolTip );
     QString mToolTip() const;
+
+    void mSetUIClassName( const QString& xUIClassName );
+    QString mUIClassName() const;
+
+    void mSetTclProcName( const QString& xTclProcName );
+    QString mTclProcName() const;
 
     // order is kept of statuses, if you set via a list and only the order is changed, the item is considered changed
     bool mSetStateStatus( int xStateStatus ); // returns true if state changed if none is sent it, it clears all
@@ -196,6 +210,7 @@ public:
     void mSetEnabled( bool xEnabled );
     bool mIsEnabled() const;
 
+    void mExpandAll();
     void mSetExpanded( bool xExpanded );
     bool mIsExpanded() const;
 
@@ -210,7 +225,7 @@ public:
     void mDump( QJsonObject& xJSON, bool xRecursive ) const;
 
 private:
-    CFlowWidgetItem( int xStateID, const QString& xFlowName, const QIcon& xDescIcon );
+    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon );
     std::unique_ptr< CFlowWidgetItemImpl > dImpl;
 };
 Q_DECLARE_METATYPE( CFlowWidgetItem* );

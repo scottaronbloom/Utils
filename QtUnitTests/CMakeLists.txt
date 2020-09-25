@@ -48,6 +48,7 @@ set_target_properties( SABUtils_TestFlowWidget PROPERTIES FOLDER UnitTests )
 target_link_libraries( SABUtils_TestFlowWidget 
                  Qt5::Widgets
                  Qt5::Core
+                 Qt5::Xml
                  Qt5::Test
                  SABUtils
           )

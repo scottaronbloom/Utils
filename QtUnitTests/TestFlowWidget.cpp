@@ -28,26 +28,26 @@ private Q_SLOTS:
 
         int stateID = 0;
 
-        dFlowItem1 = dFlowWidget->mAddTopLevelItem( stateID++, QIcon( ":/Entity.png" ) );
+        dFlowItem1 = dFlowWidget->mAddTopLevelItem( QString( "State_%1" ).arg( stateID++ ), QIcon( ":/Entity.png" ) );
         dFlowItem1->mSetText( "FlowItem 1" );
 
-        dFlowItem11 = new CFlowWidgetItem( stateID++, QIcon( ":/Entity.png" ), dFlowItem1 );
+        dFlowItem11 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), QIcon( ":/Entity.png" ), dFlowItem1 );
         dFlowItem11->mSetText( "SubFlowItem 1-1" );
-        dFlowItem112 = new CFlowWidgetItem( stateID++, "SubFlowItem 1-1-2", QIcon( ":/Entity.png" ), dFlowItem11 );
-        dFlowItem12 = new CFlowWidgetItem( stateID++, "SubFlowItem 1-2", dFlowItem1 );
+        dFlowItem112 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 1-1-2", QIcon( ":/Entity.png" ), dFlowItem11 );
+        dFlowItem12 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 1-2", dFlowItem1 );
 
-        dFlowItem2 = new CFlowWidgetItem( stateID++, QIcon( ":/Entity.png" ), dFlowWidget );
+        dFlowItem2 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), QIcon( ":/Entity.png" ), dFlowWidget );
         dFlowItem2->mSetText( "FlowItem 2" );
-        dFlowItem21 = new CFlowWidgetItem( stateID++, "SubFlowItem 2-1", dFlowItem2 );
-        dFlowItem22 = dFlowWidget->mAddItem( stateID++, "SubFlowItem 2-2", dFlowItem2 );
-        dFlowItem221 = new CFlowWidgetItem( stateID++, "SubFlowItem 2-2-1", QIcon( ":/Entity.png" ), dFlowItem22 );
-        dFlowItem222 = new CFlowWidgetItem( stateID++, "SubFlowItem 2-2-2", dFlowItem22 );
+        dFlowItem21 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 2-1", dFlowItem2 );
+        dFlowItem22 = dFlowWidget->mAddItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 2-2", dFlowItem2 );
+        dFlowItem221 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 2-2-1", QIcon( ":/Entity.png" ), dFlowItem22 );
+        dFlowItem222 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 2-2-2", dFlowItem22 );
         dFlowItem222->mSetIcon( QIcon( ":/Entity.png" ) );
 
-        dFlowItem3 = new CFlowWidgetItem( stateID++, "FlowItem 3", dFlowWidget );
-        dFlowItem31 = new CFlowWidgetItem( stateID++, "SubFlowItem 3-1", dFlowItem3 );
-        dFlowItem32 = new CFlowWidgetItem( stateID++, "SubFlowItem 3-2", dFlowItem3 );
-        dFlowItem321 = new CFlowWidgetItem( stateID++, "SubFlowItem 3-2-1", QIcon( ":/Entity.png" ), dFlowItem32 );
+        dFlowItem3 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "FlowItem 3", dFlowWidget );
+        dFlowItem31 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 3-1", dFlowItem3 );
+        dFlowItem32 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 3-2", dFlowItem3 );
+        dFlowItem321 = new CFlowWidgetItem( QString( "State_%1" ).arg( stateID++ ), "SubFlowItem 3-2-1", QIcon( ":/Entity.png" ), dFlowItem32 );
     }
 
     void cleanupTestCase()
