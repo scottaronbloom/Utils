@@ -26,15 +26,18 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QScrollBar>
+#include <cmath>
 
 using TFlowWidgetItems = std::vector< std::unique_ptr< CFlowWidgetItem > >;
 using TDataMap = std::map< int, QVariant >;
 
+#ifdef _DEBUG
 static QString dumpRect( const QRect & xRect )
 {
     QString lRetVal = QString( "QRect((%1,%2),(%3,%4) %5x%6)").arg( xRect.left() ).arg( xRect.top() ).arg( xRect.right() ).arg( xRect.bottom() ).arg( xRect.size().width() ).arg( xRect.size().height() );
     return lRetVal;
 }
+#endif
 
 // from QItemDelegatePrivate::textLayoutBounds
 static QRect mTextLayoutBounds( const QRect& xRect, int lMargin, bool xElideText )
@@ -921,7 +924,6 @@ public:
         if ( xRecursive )
         {
             QJsonArray lChildren;
-            int childNum = 0;
             for ( auto&& ii : dChildren )
             {
                 QJsonObject lCurr;
@@ -960,9 +962,9 @@ public:
 class CFlowWidgetImpl
 {
 public:
-    inline CFlowWidgetImpl( CFlowWidget* parent )
-        : dCurrentTopLevelItem( nullptr ),
-        dFlowWidget( parent )
+    inline CFlowWidgetImpl( CFlowWidget* parent ) :
+        dFlowWidget( parent ),
+        dCurrentTopLevelItem( nullptr )
     {
         mInitDefaultMap();
     }
@@ -1218,7 +1220,7 @@ public:
 
 CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon )
 {
-    dImpl = std::make_unique< CFlowWidgetItemImpl >( this );
+    dImpl = new CFlowWidgetItemImpl( this );
     dImpl->mSetStepID( xStepID );
     dImpl->mSetText( xFlowName );
     dImpl->mSetIcon( xDescIcon );
@@ -1281,13 +1283,15 @@ CFlowWidgetItem::CFlowWidgetItem( CFlowWidgetItem* xParent ) :
 
 CFlowWidgetItem::~CFlowWidgetItem()
 {
-    dImpl.reset( nullptr );
+    delete dImpl;
+    dImpl = nullptr;
 }
 
 void CFlowWidgetItem::deleteLater()
 {
-    auto lPtr = dImpl.release();
+    auto lPtr = dImpl;
     lPtr->deleteLater();
+    dImpl = nullptr;
     delete this;
 }
 
@@ -1844,6 +1848,7 @@ CFlowWidgetItem* CFlowWidgetHeader::mTakeChild( CFlowWidgetItem* xItem )
         if ( pos != dTopItemMap.end() )
             dTopItemMap.erase( pos );
         auto lItem = std::move( dTopItems[ lIndex ] );
+        (void)lItem;
 
         return xItem;
     }
@@ -2126,9 +2131,15 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
 CFlowWidget::CFlowWidget( QWidget* xParent, Qt::WindowFlags xFlags )
     : QFrame( xParent, xFlags )
 {
-    dImpl = std::make_unique< CFlowWidgetImpl >( this );
+    dImpl = new CFlowWidgetImpl( this );
     dImpl->mRelayout();
     setBackgroundRole( QPalette::Button );
+}
+
+CFlowWidget::~CFlowWidget()
+{
+    delete dImpl;
+    dImpl = nullptr;
 }
 
 int CFlowWidget::mTopLevelItemCount() const

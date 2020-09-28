@@ -14,6 +14,7 @@ class QVBoxLayout;
 class QStyleOptionToolBox;
 class QJsonObject;
 
+class CFlowWidgetItem;
 class CFlowWidgetItemImpl;
 class CFlowWidgetImpl;
 class CFlowWidgetHeaderImpl;
@@ -44,6 +45,7 @@ public:
 
     CFlowWidget& operator=( const CFlowWidget& rhs ) = delete;
     CFlowWidget( const CFlowWidget& rhs ) = delete;
+    ~CFlowWidget();
 
     explicit CFlowWidget( QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags() );
 
@@ -113,7 +115,7 @@ protected:
 protected:
     virtual void mSetCurrentItemExpanded( bool xExpanded );
     CFlowWidgetItem* mCurrentTopLevelItem() const;
-    std::unique_ptr< CFlowWidgetImpl > dImpl;
+    CFlowWidgetImpl * dImpl{nullptr};
 };
 Q_DECLARE_METATYPE( CFlowWidget::EStates );
 
@@ -227,7 +229,7 @@ public:
 
 private:
     CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon );
-    std::unique_ptr< CFlowWidgetItemImpl > dImpl;
+    CFlowWidgetItemImpl * dImpl{nullptr};
 };
 Q_DECLARE_METATYPE( CFlowWidgetItem* );
 
