@@ -22,6 +22,7 @@
 
 #ifndef __SPINBOX64U_H
 #define __SPINBOX64U_H
+#include "SpinBox64_StepType.h"
 #include <QAbstractSpinBox>
 #include <QString>
 #include <QSize>

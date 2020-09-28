@@ -291,6 +291,7 @@ namespace
         EXPECT_EQ( "    -14(=-12), -22(=-18), 24(=20), 30(=24), 36(=30)\n    44(=36), 50(=40), 52(=42)", NUtils::getNumberListString( numbers, 8 ) );
     }
 
+#if __cplusplus > 201703L
     TEST( TestUtils, findLargestIndexInBitSet )
     {
         EXPECT_EQ( -99, NUtils::findLargestIndexInBitSet( std::bitset< 16 >() ).value_or( -99 ) );
@@ -337,6 +338,7 @@ namespace
         EXPECT_EQ( std::vector< int >( { 3, 4, 5, 6, 7 } ), combinations[ ii++ ] );
         EXPECT_EQ( 21, ii );
     }
+#endif
 
     TEST( TestUtils, TestCartiseanProduct )
     {
@@ -487,6 +489,7 @@ namespace
         EXPECT_EQ( std::vector< int >( { 1, 3, 5, 7, 10 } ), products[ ii++ ] );
     }
 
+#if __cplusplus > 201703L
     TEST( TestUtils, TestCartiseanSquare )
     {
         auto arr = std::vector< int >( { 0, 1, 2, 3 } );
@@ -519,6 +522,7 @@ namespace
         ii = 0;
         EXPECT_EQ( std::vector< int >( { 0, 1, 2, 3 } ), products[ ii++ ] );
     }
+#endif
 
 #ifdef WIN32
     TEST( TestUtils, TestWordExp )
@@ -561,7 +565,7 @@ namespace
     TEST( TestUtils, TestWordExp )
     {
         bool aOK = false;
-        EXPECT_EQ( "/home/scott", CWordExp::getHomeDir( "scott", &aOK ) );
+        EXPECT_EQ( QString( "/home/scott" ), CWordExp::getHomeDir( "scott", &aOK ) );
         EXPECT_TRUE( aOK );
         EXPECT_EQ( "", CWordExp::getHomeDir( "unknown", &aOK ) );
         EXPECT_FALSE( aOK );
@@ -689,8 +693,13 @@ namespace
         EXPECT_EQ( "${HOME}/foo/bar", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME" }, true ) );
         EXPECT_EQ( "${HOME}/foo/${BAR}", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME", "BAR" }, true ) );
 
+#ifdef WIN32
         EXPECT_EQ( "%HOME%/foo/bar", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME" } ) );
         EXPECT_EQ( "%HOME%/foo/%BAR%", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME", "BAR" } ) );
+#else
+        EXPECT_EQ( "${HOME}/foo/bar", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME" } ) );
+        EXPECT_EQ( "${HOME}/foo/${BAR}", NFileUtils::gSoftenPath( "/home/sbloom/foo/bar", { "HOME", "BAR" } ) );
+#endif
     }
 }
 

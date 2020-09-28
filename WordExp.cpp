@@ -165,11 +165,12 @@ QString CWordExp::getHomeDir( const QString & userName, bool * aOK )
         return QString();
 
     struct passwd pwd;
-    struct passwd * result;
+    struct passwd * result = &pwd;
     int s = getpwnam_r( qPrintable( userName ), &pwd, buf, bufSize, &result );
     if ( ( s != 0 ) || ( result == nullptr ) )
     {
         free( buf );
+        perror( "getpwnam_r" );
         return QString();
     }
     QString retVal = pwd.pw_dir;

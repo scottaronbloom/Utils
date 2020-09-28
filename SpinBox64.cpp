@@ -76,7 +76,7 @@ public:
     mutable QString fCachedLongestAllowedString;
 
     bool fWrapping{ false };
-    QAbstractSpinBox::StepType fStepType{ QAbstractSpinBox::StepType::DefaultStepType };
+    StepType fStepType{ StepType::DefaultStepType };
     bool fIgnoreCursorPositionChanged{ false };
 
     CSpinBox64 * fParent{ nullptr };
@@ -574,7 +574,7 @@ void CSpinBox64::stepBy( int steps )
     qlonglong singleStep = fImpl->fSingleStep;
     switch ( stepType() )
     {
-        case QAbstractSpinBox::StepType::AdaptiveDecimalStepType:
+        case StepTypeDef::AdaptiveDecimalStepType:
             singleStep = fImpl->calculateAdaptiveDecimalStep( steps ).toLongLong();
             break;
         default:
@@ -639,12 +639,12 @@ void CSpinBox64::setRange( qlonglong min, qlonglong max )
     fImpl->setRange( min, max );
 }
 
-void CSpinBox64::setStepType( QAbstractSpinBox::StepType stepType )
+void CSpinBox64::setStepType( StepTypeDef stepType )
 {
     fImpl->fStepType = stepType;
 }
 
-QAbstractSpinBox::StepType CSpinBox64::stepType() const
+StepTypeDef CSpinBox64::stepType() const
 {
     return fImpl->fStepType;
 }

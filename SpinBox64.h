@@ -23,16 +23,14 @@
 #ifndef __SPINBOX64_H
 #define __SPINBOX64_H
 #include <QAbstractSpinBox>
-#include <QString>
-#include <QSize>
-
-#include <cinttypes>
+#include "SpinBox64_StepType.h"
 
 class CSpinBox64Impl;
 class CSpinBox64 : public QAbstractSpinBox
 {
     friend class CSpinBox64Impl;
-    Q_OBJECT;
+    Q_ENUM(StepType)
+Q_OBJECT;
     Q_PROPERTY( bool wrapping READ wrapping WRITE setWrapping )
     Q_PROPERTY( QString suffix READ suffix WRITE setSuffix )
     Q_PROPERTY( QString prefix READ prefix WRITE setPrefix )
