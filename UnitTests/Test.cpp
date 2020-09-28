@@ -561,7 +561,7 @@ namespace
         EXPECT_EQ( 66, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
         EXPECT_TRUE( aOK );
     }
-#else
+#elif DONTTEST
     TEST( TestUtils, TestWordExp )
     {
         bool aOK = false;
