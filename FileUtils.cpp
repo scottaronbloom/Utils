@@ -24,6 +24,7 @@
 #include "FileUtils.h"
 #include "StringUtils.h"
 
+#include <Qt>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -56,7 +57,6 @@
 #include <wordexp.h>
 #include <sys/stat.h>
 #endif
-
 
 #include <map>
 #include <cctype>
@@ -140,12 +140,12 @@ bool fileCompare( const std::string & pattern, const std::string & filename, boo
         return false;
 
     QString qPattern = QString::fromStdString( pattern );
-    auto patternList = qPattern.split( QRegularExpression( "[\\\\/]" ), QString::SkipEmptyParts );
+    auto patternList = qPattern.split( QRegularExpression( "[\\\\/]" ), TSkipEmptyParts );
     if ( patternList.isEmpty() )
         return false;
 
     QString qFileName = QString::fromStdString( filename );
-    auto fileNameList = qFileName.split( QRegularExpression( "[\\\\/]" ), QString::SkipEmptyParts );
+    auto fileNameList = qFileName.split( QRegularExpression( "[\\\\/]" ), TSkipEmptyParts );
     if ( fileNameList.isEmpty() )
         return false;
 
@@ -385,11 +385,11 @@ QString getRelativePath( const QDir & absDir, const QString & path )
 
     QString result;
 #if defined(Q_OS_WIN)
-    QStringList dirElts = dir.split( QLatin1Char( '/' ), QString::SkipEmptyParts );
-    QStringList fileElts = file.split( QLatin1Char( '/' ), QString::SkipEmptyParts );
+    QStringList dirElts = dir.split( QLatin1Char( '/' ), TSkipEmptyParts );
+    QStringList fileElts = file.split( QLatin1Char( '/' ), TSkipEmptyParts );
 #else
-    QVector<QStringRef> dirElts = dir.splitRef( QLatin1Char( '/' ), QString::SkipEmptyParts );
-    QVector<QStringRef> fileElts = file.splitRef( QLatin1Char( '/' ), QString::SkipEmptyParts );
+    QVector<QStringRef> dirElts = dir.splitRef( QLatin1Char( '/' ), TSkipEmptyParts );
+    QVector<QStringRef> fileElts = file.splitRef( QLatin1Char( '/' ), TSkipEmptyParts );
 #endif
     int ii = 0;
     while ( ii < dirElts.size() && ii < fileElts.size() &&
