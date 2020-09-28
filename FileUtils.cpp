@@ -140,12 +140,12 @@ bool fileCompare( const std::string & pattern, const std::string & filename, boo
         return false;
 
     QString qPattern = QString::fromStdString( pattern );
-    auto patternList = qPattern.split( QRegularExpression( "[\\\\/]" ), Qt::SkipEmptyParts );
+    auto patternList = qPattern.split( QRegularExpression( "[\\\\/]" ), QString::SkipEmptyParts );
     if ( patternList.isEmpty() )
         return false;
 
     QString qFileName = QString::fromStdString( filename );
-    auto fileNameList = qFileName.split( QRegularExpression( "[\\\\/]" ), Qt::SkipEmptyParts );
+    auto fileNameList = qFileName.split( QRegularExpression( "[\\\\/]" ), QString::SkipEmptyParts );
     if ( fileNameList.isEmpty() )
         return false;
 
@@ -343,6 +343,8 @@ QString gSoftenPath( const QString & xFileName, const std::set< QString > & xEnv
 #ifdef Q_OS_WIN
             if ( !forceUnix )
                 lVarName = QString( "%%1%");
+#else  
+            (void)forceUnix;
 #endif
             lVarName = lVarName.arg( ii );
             lRetVal.replace( pos, lValue.length(), lVarName );
@@ -383,11 +385,11 @@ QString getRelativePath( const QDir & absDir, const QString & path )
 
     QString result;
 #if defined(Q_OS_WIN)
-    QStringList dirElts = dir.split( QLatin1Char( '/' ), Qt::SkipEmptyParts );
-    QStringList fileElts = file.split( QLatin1Char( '/' ), Qt::SkipEmptyParts );
+    QStringList dirElts = dir.split( QLatin1Char( '/' ), QString::SkipEmptyParts );
+    QStringList fileElts = file.split( QLatin1Char( '/' ), QString::SkipEmptyParts );
 #else
-    QVector<QStringRef> dirElts = dir.splitRef( QLatin1Char( '/' ), Qt::SkipEmptyParts );
-    QVector<QStringRef> fileElts = file.splitRef( QLatin1Char( '/' ), Qt::SkipEmptyParts );
+    QVector<QStringRef> dirElts = dir.splitRef( QLatin1Char( '/' ), QString::SkipEmptyParts );
+    QVector<QStringRef> fileElts = file.splitRef( QLatin1Char( '/' ), QString::SkipEmptyParts );
 #endif
     int ii = 0;
     while ( ii < dirElts.size() && ii < fileElts.size() &&
@@ -961,7 +963,6 @@ QStringList dumpResources( const QDir & resourceDir, bool ignoreInternal )
 
     auto tmp = resourceDir.absolutePath();
     QDirIterator it( resourceDir.absolutePath(), QStringList() << "*" << "*.*", QDir::NoDotAndDotDot | QDir::AllEntries );
-    bool aOK = true;
     while ( it.hasNext() )
     {
         QString path = it.next();
