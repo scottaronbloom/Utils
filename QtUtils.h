@@ -30,7 +30,9 @@ class QXmlStreamReader;
 class QXmlStreamWriter;
 class QAbstractItemModel;
 class QSettings;
+#ifdef QT_XMLPATTERS_LIB
 class QXmlQuery;
+#endif
 #include <functional>
 
 #include <QDateTime>
@@ -58,6 +60,7 @@ namespace NQtUtils
     QString allFilesFilter();
     QString defaultFileDialogDir();
 
+#ifdef QT_XMLPATTERS_LIB
     QString getString( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     QStringList getStringList( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     std::set< QString > getStringSet( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
@@ -67,7 +70,7 @@ namespace NQtUtils
     std::list< std::pair< QString, QString > > getStringPairs( QXmlQuery & query, const QString & queryString1, const QString & queryString2, bool * aOK = nullptr );
     std::list< std::list< QString > > getStrings( QXmlQuery & query, const QStringList & xmlPaths, bool * aOK = nullptr );
     QString getFile( QXmlQuery & query, const QDir & relToDir, const QString & queryString, bool * aOK = nullptr );
-
+#endif
 
     int getInt( const QString & str, bool * aOK );
     int getInt( const QStringRef & str, bool * aOK );

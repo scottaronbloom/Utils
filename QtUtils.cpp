@@ -33,7 +33,9 @@
 #include <QSize>
 #include <QPoint>
 #include <QColor>
+#ifdef QT_XMLPATTERS_LIB
 #include <QXmlQuery>
+#endif
 
 namespace NQtUtils
 {
@@ -57,6 +59,7 @@ namespace NQtUtils
         return retVal;
     }
 
+#ifdef QT_XMLPATTERS_LIB
     QString getString( QXmlQuery & query, const QString & queryString, bool * aOK /*= nullptr */ )
     {
         query.setQuery( queryString );
@@ -188,6 +191,19 @@ namespace NQtUtils
             *aOK = true;
         return retVal;
     }
+
+QString getFile( QXmlQuery & query, const QDir & relToDir, const QString & queryString, bool * aOK /*= nullptr */ )
+{
+    bool localAOK = false;
+    auto path = getString( query, queryString, &localAOK );
+    if ( aOK )
+        *aOK = localAOK;
+    if ( !localAOK )
+        return QString();
+
+    return getFile( relToDir, path );
+}
+#endif
 
 int getInt( const QStringRef & str, bool * aOK )
 {
@@ -343,18 +359,6 @@ QString getFile( const QDir & relToDir, const QString & file )
             retVal = NFileUtils::canonicalFilePath( retVal );
     }
     return retVal;
-}
-
-QString getFile( QXmlQuery & query, const QDir & relToDir, const QString & queryString, bool * aOK /*= nullptr */ )
-{
-    bool localAOK = false;
-    auto path = getString( query, queryString, &localAOK );
-    if ( aOK )
-        *aOK = localAOK;
-    if ( !localAOK )
-        return QString();
-
-    return getFile( relToDir, path );
 }
 
 QDateTime getDateTime( const QString & dateString )
