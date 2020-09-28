@@ -30,12 +30,14 @@
 #include <list>
 #include <utility>
 #include <vector>
-#include <optional>
 #include <bitset>
 #include <functional>
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#if __cplusplus > 201703L
+#include <optional>
+#endif
 
 template< typename T >
 std::ostream& operator<<( std::ostream& oss, const std::vector< T >& values )
@@ -182,6 +184,7 @@ std::string getNumberListString( const T & numbers, int base )
     return oss.str();
 }
 
+#if __cplusplus > 201703L
 template <size_t N>
 constexpr std::optional<size_t> findLargestIndexInBitSet( const std::bitset<N> & set )
 {
@@ -214,7 +217,7 @@ constexpr std::optional<size_t> findSmallestIndexInBitSet( const std::bitset<N>&
     }
     return std::nullopt;
 }
-
+#endif
 template< typename T >
 void combinationUtil( const std::vector< T >& arr, std::vector< T >& data,
                       size_t start, size_t end,
@@ -243,6 +246,7 @@ void combinationUtil( const std::vector< T >& arr, std::vector< T >& data,
     }
 }
 
+#if __cplusplus > 201703L
 template< typename T >
 void allCombinations( const std::vector< T >& arr, size_t r, const std::function< void( const std::vector< T > & sub ) >& func )
 {
@@ -268,6 +272,7 @@ std::vector< std::vector< T > > allCombinations( const std::vector< T >& arr, si
                                     } );
     return combinations;
 }
+#endif
 
 long double factorial( int64_t num );
 uint64_t numCombinations( int64_t numPossible, int64_t numSelections );
