@@ -574,7 +574,7 @@ void CSpinBox64::stepBy( int steps )
     qlonglong singleStep = fImpl->fSingleStep;
     switch ( stepType() )
     {
-        case StepTypeDef::AdaptiveDecimalStepType:
+        case StepType::AdaptiveDecimalStepType:
             singleStep = fImpl->calculateAdaptiveDecimalStep( steps ).toLongLong();
             break;
         default:
@@ -639,12 +639,12 @@ void CSpinBox64::setRange( qlonglong min, qlonglong max )
     fImpl->setRange( min, max );
 }
 
-void CSpinBox64::setStepType( StepTypeDef stepType )
+void CSpinBox64::setStepType( StepType stepType )
 {
     fImpl->fStepType = stepType;
 }
 
-StepTypeDef CSpinBox64::stepType() const
+StepType CSpinBox64::stepType() const
 {
     return fImpl->fStepType;
 }

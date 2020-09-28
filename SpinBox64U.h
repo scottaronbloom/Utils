@@ -31,7 +31,10 @@ class CSpinBox64UImpl;
 class CSpinBox64U : public QAbstractSpinBox
 {
     friend class CSpinBox64UImpl;
-    Q_OBJECT;
+#if (QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 ))
+    Q_ENUM( StepType )
+#endif
+Q_OBJECT;
     Q_PROPERTY( bool wrapping READ wrapping WRITE setWrapping )
     Q_PROPERTY( QString suffix READ suffix WRITE setSuffix )
     Q_PROPERTY( QString prefix READ prefix WRITE setPrefix )

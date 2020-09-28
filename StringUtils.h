@@ -40,6 +40,14 @@
 
 namespace NStringUtils
 {
+#if (QT_VERSION < QT_VERSION_CHECK( 5, 15, 0 ))
+#define TSkipEmptyParts QString::SkipEmptyParts
+#define TKeepEmptyParts QString::KeepEmptyParts
+#else
+#define TSkipEmptyParts Qt::SkipEmptyParts
+#define TKeepEmptyParts Qt::KeepEmptyParts
+#endif
+
     static const std::size_t sMAXLINE{2048};
     inline bool isWhiteSpace( char ch ){ return ( ch == ' ' ) || ( ch == '\t' ); }
     inline bool isWhiteSpace( const char * s ){ return s && isWhiteSpace( *s ); }

@@ -558,7 +558,7 @@ namespace
         EXPECT_EQ( "C:\\Users\\scott\\source\\sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
 
         CWordExp wordExp1( "e:/*/*/sb/*" );
-        EXPECT_EQ( 66, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
+        EXPECT_GE( 64, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
         EXPECT_TRUE( aOK );
     }
 #else

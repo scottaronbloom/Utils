@@ -53,6 +53,7 @@ set(project_H
     FileUtils.h
     FromString.h
     MD5.h
+    SpinBox64_StepType.h
     QtUtils.h
     EnumUtils.h
     StringComparisonClasses.h
