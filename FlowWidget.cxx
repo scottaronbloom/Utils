@@ -1191,7 +1191,7 @@ public:
     }
 
     std::pair< bool, QString > mLoadFromXML( const QString & xfileName );
-    std::pair< bool, QString > mLoadFromXML( const QDomElement & xStepElement, CFlowWidgetItem * xParent ); // if nullptr then load it as a top level element
+    std::pair< bool, QString > mLoadFromXML( const QDomElement & xStepElement, const QDir& xRelToDir, CFlowWidgetItem * xParent ); // if nullptr then load it as a top level element
     void mSetElideText( bool xElideText )
     {
         dElideText = xElideText;
@@ -1204,7 +1204,7 @@ public:
         return dElideText;
     }
 
-    std::pair< bool, QString > mFindIcon( const QString& xFileName ) const;
+    std::pair<bool, QString> mFindIcon( const QDir& lDir, const QString& xFileName ) const;
 
     QVBoxLayout* fTopLayout{ nullptr };
     CFlowWidget* dFlowWidget{ nullptr };
@@ -1215,7 +1215,7 @@ public:
 
     std::unordered_map< int, std::pair< QString, QIcon > > dStateStatusMap;
     bool dElideText{ false };
-    std::function< std::pair< bool, QString >( const QString & fileName ) > dFindIcon;
+    std::function< std::pair< bool, QString >( const QDir& xRelToDir, const QString& xFileName ) > dFindIcon;
 };
 
 CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon )
@@ -2593,7 +2593,7 @@ QString CFlowWidget::mDump( bool xCompacted ) const
     return lRetVal;
 }
 
-void CFlowWidget::mSetFindIconFunc( const std::function< std::pair< bool, QString >( const QString& fileName ) >& lFindIcon )
+void CFlowWidget::mSetFindIconFunc( const std::function< std::pair< bool, QString >( const QDir& xRelToDir, const QString& xFileName ) >& lFindIcon )
 {
     dImpl->dFindIcon = lFindIcon;
 }
@@ -2603,30 +2603,28 @@ std::pair< bool, QString > CFlowWidget::mLoadFromXML( const QString & xFileName 
     return dImpl->mLoadFromXML( xFileName );
 }
 
-std::pair< bool, QString > CFlowWidgetImpl::mFindIcon( const QString & xFileName ) const
+std::pair< bool, QString > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, const QString & xFileName ) const
 {
+    std::pair< bool, QString > lRetVal = { false, QString() };
+
     if ( dFindIcon )
-        return dFindIcon( xFileName );
+        lRetVal = dFindIcon( xRelToDir, xFileName );
+    
+    if ( lRetVal.first )
+        return lRetVal;
 
-    auto lDir = QDir::currentPath();
+    if ( QFileInfo::exists( xRelToDir.absoluteFilePath( xFileName ) ) )
+        return std::make_pair( true, xRelToDir.absoluteFilePath( xFileName ) );
 
-    if ( QFileInfo::exists( xFileName ) )
-        return std::make_pair( true, xFileName );
-    lDir += "/xml/";
-    if ( QFileInfo::exists( lDir + xFileName ) )
-        return std::make_pair( true, lDir + xFileName );
-    lDir += "images/";
-    if ( QFileInfo::exists( lDir + xFileName ) )
-        return std::make_pair( true, lDir + xFileName );
-    lDir = QDir::currentPath() + "/images/";
-    if ( QFileInfo::exists( lDir + xFileName ) )
-        return std::make_pair( true, lDir + xFileName );
+    if ( QFileInfo::exists( QDir::current().absoluteFilePath( xFileName ) ) )
+        return std::make_pair( true, QDir::current().absoluteFilePath( xFileName ) );
 
-    return std::make_pair( false, xFileName );
+    return lRetVal;
 }
 
 
-std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xStepElement, CFlowWidgetItem* xParent ) // if nullptr then load it as a top level element
+
+std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xStepElement, const QDir & xRelToDir, CFlowWidgetItem* xParent ) // if nullptr then load it as a top level element
 {
     if ( xStepElement.tagName() != "Step" )
     {
@@ -2646,7 +2644,7 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xSt
     CFlowWidgetItem * xCurrItem = xParent ? new CFlowWidgetItem( xParent ) : new CFlowWidgetItem( dFlowWidget );
     xCurrItem->mSetStepID( lIDEle.text() );
     xCurrItem->mSetText( lNameEle.text() );
-    auto lFileName = mFindIcon( lIconEle.text() );
+    auto lFileName = mFindIcon( xRelToDir, lIconEle.text() );
     if ( !lFileName.first )
     {
         return std::make_pair( false, CFlowWidget::tr( "Invalid Element in XML (%1,%2): Icon file '%3' not found" ).arg( lIconEle.lineNumber() ).arg( lIconEle.columnNumber() ).arg( lIconEle.text() ) );
@@ -2661,7 +2659,7 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xSt
     auto lChildStepEle = xStepElement.firstChildElement( "Step" ); // can be null
     for( ; !lChildStepEle.isNull(); lChildStepEle = lChildStepEle.nextSiblingElement( "Step" ) )
     {
-        auto lCurr = mLoadFromXML( lChildStepEle, xCurrItem );
+        auto lCurr = mLoadFromXML( lChildStepEle, xRelToDir, xCurrItem );
         if ( !lCurr.first )
             return lCurr;
     }
@@ -2694,9 +2692,10 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QString& xFileNa
         return std::make_pair( false, CFlowWidget::tr( "Invalid XML (%1,%2): Missing 'Steps' element'" ).arg( lRoot.lineNumber() ).arg( lRoot.columnNumber() ) );
     }
 
+    auto lRelToDir = QFileInfo( xFileName ).absoluteDir();
     for( auto lChild = lTopStepsEle.firstChildElement( "Step" ); !lChild.isNull(); lChild = lChild.nextSiblingElement( "Step" ) )
     {
-        auto lCurr = mLoadFromXML( lChild.toElement(), nullptr );
+        auto lCurr = mLoadFromXML( lChild.toElement(), lRelToDir, nullptr );
         if ( !lCurr.first )
         {
             mClear();
