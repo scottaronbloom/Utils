@@ -2,10 +2,7 @@
 #define __FLOWWIDGET_H
 
 #include <QFrame>
-#include <QIcon>
-#include <QAbstractButton>
 #include <memory>
-#include <map>
 
 class QScrollArea;
 class CFlowWidget;
@@ -102,11 +99,14 @@ public:
 protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );
-Q_SIGNALS:
+Q_SIGNALS: 
+    // item information signals (changed and inserted) are sent out even if the item is disabled
     void sigFlowWidgetItemChanged( CFlowWidgetItem * xItem ); // data changed
-    void sigFlowWidgetItemInserted( CFlowWidgetItem* xItem );
+    void sigFlowWidgetItemInserted( CFlowWidgetItem* xItem ); // item was inserted into the flow widget
+
+    // item based selection signals are NOT sent out if the item is disabled
     void sigFlowWidgetItemSelected( CFlowWidgetItem* xItem, bool xSelected ); // can be null if all items removed 
-    void sigFlowWidgetItemDoubleClicked( CFlowWidgetItem* xItem );
+    void sigFlowWidgetItemDoubleClicked( CFlowWidgetItem* xItem );            // often will follow a Selected signal (single click is the same as selected) 
     void sigFlowWidgetItemHovered( CFlowWidgetItem* xItem ); // can be null if hovered over a non item
 protected:
     bool event( QEvent* e ) override;
@@ -126,7 +126,6 @@ Q_DECLARE_METATYPE( CFlowWidget::EStates );
 //    there are 7 predefined states with associated pre-defined icons, as part of the initialization of the CFlowWidget itself, the client can add new flow states (int value and icon) to the system
 
 // note, you do not own the memory for the CFlowWidgetItem once its added to a parent FlowWidget or FlowWidgetItem
-
 class CFlowWidgetItem
 {
 public:
