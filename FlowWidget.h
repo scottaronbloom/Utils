@@ -50,11 +50,11 @@ public:
     virtual std::pair< bool, QString > mLoadFromXML( const QString & xFileName );
     // The returned CFLowWidgetItems are OWNED by the flow widget, and should not be deleted by the user without removing them from thw CFlowWidget or parent CFlowWidgetItem first
     virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon ) { return mInsertTopLevelItem( -1, xStepID, xFlowName, xDescIcon ); }
-    virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QString& xFlowName ) { return mAddTopLevelItem( xStepID, xFlowName, QIcon() ); }
-    virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QIcon& xDescIcon ) { return mAddTopLevelItem( xStepID, QString(), xDescIcon ); }
+    virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QString& xFlowName );
+    virtual CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QIcon& xDescIcon );
 
     virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon );
-    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName ) { return mInsertTopLevelItem( xIndex, xStepID, xFlowName, QIcon() ); }
+    virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName );
     virtual CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QIcon& xDescIcon ) { return mInsertTopLevelItem( xIndex, xStepID, QString(), xDescIcon ); }
 
     virtual std::pair< CFlowWidgetItem*, bool > mAddTopLevelItem( CFlowWidgetItem* xItem ) { return mInsertTopLevelItem( -1, xItem ); }
@@ -62,11 +62,11 @@ public:
     virtual std::pair< CFlowWidgetItem*, bool > mInsertTopLevelItem( CFlowWidgetItem* xPeer, CFlowWidgetItem* xItem, bool xBefore );
 
     virtual CFlowWidgetItem* mAddItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, xFlowName, xDescIcon, xParent ); }
-    virtual CFlowWidgetItem* mAddItem( const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, xFlowName, QIcon(), xParent ); }
+    virtual CFlowWidgetItem* mAddItem( const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
     virtual CFlowWidgetItem* mAddItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, QString(), xDescIcon, xParent ); }
 
     virtual CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
-    virtual CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStepID, xFlowName, QIcon(), xParent ); }
+    virtual CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
     virtual CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStepID, QString(), xDescIcon, xParent ); }
 
     virtual int mTopLevelItemCount() const;

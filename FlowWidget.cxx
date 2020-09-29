@@ -627,16 +627,27 @@ public:
         if ( !xChild )
             return nullptr;
 
-        if ( dHeader )
+        for( auto ii = dChildItemMap.begin(); ii != dChildItemMap.end(); ++ii )
         {
-            return dHeader->mTakeChild( xChild );
+            if ( (*ii).second == xChild )
+            {
+                dChildItemMap.erase( ii );
+                break;
+            }
         }
-        else if ( dTreeWidgetItem )
+
+        for( auto ii = dChildren.begin(); ii != dChildren.end(); ++ii )
         {
-            dTreeWidgetItem->takeChild( dTreeWidgetItem->indexOfChild( xChild->dImpl->dTreeWidgetItem ) );
-            return xChild;
+            if ( (*ii).get() == xChild )
+            {
+                (*ii).release();
+                dChildren.erase( ii );
+                break;
+            }
         }
-        return nullptr;
+
+        xChild->dImpl->dParent = nullptr;
+        return xChild;
     }
 
     int mCreateTreeWidgetItem( int xIndex )
@@ -1039,7 +1050,8 @@ public:
         {
             dCurrentTopLevelItem = xItem;
             dFlowWidget->dImpl->mUpdateTabs();
-            emit dFlowWidget->sigFlowWidgetItemSelected( xItem, true );
+            if ( !xItem || !xItem->mIsDisabled() )
+                emit dFlowWidget->sigFlowWidgetItemSelected( xItem, true );
         }
     }
 
@@ -1681,14 +1693,16 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
              [this]()
     {
         auto lSelected = mSelectedItem();
-        mFlowWidget()->sigFlowWidgetItemDoubleClicked( lSelected );
+        if ( lSelected && !lSelected->mIsDisabled() )
+            mFlowWidget()->sigFlowWidgetItemDoubleClicked( lSelected );
     }
     );
     connect( dTreeWidget, &QTreeWidget::itemSelectionChanged,
              [this]()
     {
         auto lSelected = mSelectedItem();
-        mFlowWidget()->sigFlowWidgetItemSelected( lSelected, true );
+        if ( !lSelected || !lSelected->mIsDisabled() )
+            mFlowWidget()->sigFlowWidgetItemSelected( lSelected, true );
     }
     );
 
@@ -1722,7 +1736,8 @@ bool CFlowWidgetHeader::eventFilter( QObject* xWatched, QEvent* xEvent )
             auto xItem = dTreeWidget->itemAt( lHelpEvent->pos() );
             auto xFlowItem = mFindFlowItem( xItem );
 
-            emit mFlowWidget()->sigFlowWidgetItemHovered( xFlowItem );
+            if( !xFlowItem || !xFlowItem->mIsDisabled() )
+                emit mFlowWidget()->sigFlowWidgetItemHovered( xFlowItem );
 
             if ( xFlowItem )
             {
@@ -1742,7 +1757,8 @@ bool CFlowWidgetHeader::event( QEvent* xEvent )
 {
     if ( xEvent->type() == QEvent::ToolTip )
     {
-        emit mFlowWidget()->sigFlowWidgetItemHovered( dContainer );
+        if ( !dContainer->mIsDisabled() )
+            emit mFlowWidget()->sigFlowWidgetItemHovered( dContainer );
         auto lText = dContainer->dImpl->mToolTip( false );
         if ( lText.isEmpty() )
             xEvent->ignore();
@@ -1852,16 +1868,19 @@ CFlowWidgetItem* CFlowWidgetHeader::mTakeChild( CFlowWidgetItem* xItem )
             dTopItemMap.erase( pos );
         auto lItem = std::move( dTopItems[ lIndex ] );
         (void)lItem;
-
+        lItem->dImpl->dParent = nullptr;
         return xItem;
     }
-    else
+    else 
     {
-        auto lParent = xItem->mParentItem();
+        auto lParent = xItem->dImpl->dParent->dImpl;
         if ( !lParent )
             return nullptr;
-        return lParent->dImpl->mTakeChild( xItem );
+        lParent->mTakeChild( xItem );
+        xItem->dImpl->dParent = nullptr;
+        return xItem;
     }
+    return nullptr;
 }
 
 int CFlowWidgetHeader::mChildCount() const
@@ -1973,7 +1992,8 @@ void CFlowWidgetHeader::mSetExpanded( bool xExpanded )
         auto lCurrSelected = dTreeWidget->selectedItems();
         for( auto && ii : lCurrSelected )
             ii->setSelected( false );
-        emit mFlowWidget()->sigFlowWidgetItemSelected( dContainer, dSelected );
+        if ( !dContainer || !dContainer->mIsDisabled() )
+            emit mFlowWidget()->sigFlowWidgetItemSelected( dContainer, dSelected );
     }
 }
 
@@ -2247,6 +2267,7 @@ CFlowWidgetItem* CFlowWidgetImpl::mRemoveFromTopLevelItems( CFlowWidgetItem* xIt
     if ( lRetVal.empty() )
         return nullptr;
     auto lRetValItem = *lRetVal.begin();
+    lRetValItem->dImpl->dParent = nullptr; // should alread be null
     return lRetValItem;
 }
 
@@ -2275,7 +2296,8 @@ CFlowWidgetItem* CFlowWidgetImpl::mTakeItem( CFlowWidgetItem* xItem )
     {
         auto lNewIndex = mFindReplacementHeader( lTopLevelIndex ? (lTopLevelIndex - 1) : 0, true );
         mSetCurrentTopLevelItem( lNewIndex );
-        emit dFlowWidget->sigFlowWidgetItemSelected( xItem, false );
+        if ( !xItem || !xItem->mIsDisabled() )
+            emit dFlowWidget->sigFlowWidgetItemSelected( xItem, false );
     }
 
     return lRetVal;
@@ -2461,8 +2483,11 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
         auto lIndex = mIndexOfTopLevelItem( lFlowItem );
         if ( (lIndex < 0) || (lIndex >= static_cast<int>(dTopLevelItems.size())) )
             return;
-        dFlowWidget->dImpl->mSetCurrentTopLevelItem( dTopLevelItems[ lIndex ].get() );
-        dFlowWidget->sigFlowWidgetItemSelected( dTopLevelItems[ lIndex ].get(), true );
+
+        auto lItem = dTopLevelItems[ lIndex ].get();
+        dFlowWidget->dImpl->mSetCurrentTopLevelItem( lItem );
+        if ( !lItem || !lItem->mIsDisabled() )
+            dFlowWidget->sigFlowWidgetItemSelected( lItem, true );
     } );
 
     QObject::connect( lFlowItem->dImpl->dHeader, &CFlowWidgetHeader::sigDoubleClicked,
@@ -2471,8 +2496,11 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
         auto lIndex = mIndexOfTopLevelItem( lFlowItem );
         if ( (lIndex < 0) || (lIndex >= static_cast<int>(dTopLevelItems.size())) )
             return;
-        dFlowWidget->dImpl->mSetCurrentTopLevelItem( dTopLevelItems[ lIndex ].get() );
-        dFlowWidget->sigFlowWidgetItemDoubleClicked( dTopLevelItems[ lIndex ].get() );
+
+        auto lItem = dTopLevelItems[ lIndex ].get();
+        dFlowWidget->dImpl->mSetCurrentTopLevelItem( lItem );
+        if ( lItem && !lItem->mIsDisabled() )
+            dFlowWidget->sigFlowWidgetItemDoubleClicked( lItem );
     } );
 
     lFlowItem->dImpl->dHeader->mSetVisible( true, lCurrentChanged );
@@ -2525,10 +2553,30 @@ std::pair< CFlowWidgetItem*, bool > CFlowWidget::mInsertTopLevelItem( int xIndex
     return std::make_pair( xItem, true );
 }
 
+CFlowWidgetItem* CFlowWidget::mInsertTopLevelItem( int xIndex, const QString& xStepID, const QString& xFlowName )
+{
+    return mInsertTopLevelItem( xIndex, xStepID, xFlowName, QIcon() );
+}
+
+CFlowWidgetItem* CFlowWidget::mAddTopLevelItem( const QString& xStepID, const QString& xFlowName )
+{
+    return mAddTopLevelItem( xStepID, xFlowName, QIcon() );
+}
+
+CFlowWidgetItem* CFlowWidget::mAddTopLevelItem( const QString& xStepID, const QIcon& xDescIcon )
+{
+    return mAddTopLevelItem( xStepID, QString(), xDescIcon );
+}
+
 int CFlowWidgetImpl::mInsertItem( int xIndex, CFlowWidgetItem* xItem, CFlowWidgetItem* xParent )
 {
     auto lUniquePtr = std::unique_ptr< CFlowWidgetItem >( xItem );
     return mInsertItem( xIndex, std::move( lUniquePtr ), xParent );
+}
+
+CFlowWidgetItem* CFlowWidget::mAddItem( const QString& xStepID, const QString& xFlowName, CFlowWidgetItem* xParent )
+{
+    return mInsertItem( -1, xStepID, xFlowName, QIcon(), xParent );
 }
 
 CFlowWidgetItem* CFlowWidget::mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent )
@@ -2536,6 +2584,11 @@ CFlowWidgetItem* CFlowWidget::mInsertItem( int xIndex, const QString & xStepID, 
     auto lItem = new CFlowWidgetItem( xStepID, xFlowName, xDescIcon ); // no parent the mInsertItem sets the parent
     dImpl->mInsertItem( xIndex, lItem, xParent );
     return lItem;
+}
+
+CFlowWidgetItem* CFlowWidget::mInsertItem( int xIndex, const QString& xStepID, const QString& xFlowName, CFlowWidgetItem* xParent )
+{
+    return mInsertItem( xIndex, xStepID, xFlowName, QIcon(), xParent );
 }
 
 CFlowWidgetItem* CFlowWidget::mCurrentTopLevelItem() const
