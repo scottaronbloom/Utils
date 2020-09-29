@@ -546,24 +546,32 @@ public:
         return lRetVal.join( "\n" );
     }
 
-    void mSetUIClassName( const QString& xUIClassName )
+    void mSetAttribute( const QString& xAttributeName, const QString& xValue )
     {
-        mSetData( CFlowWidgetItem::ERoles::eUIClassNameRole, xUIClassName );
+        auto lCurrentAttributes = mData( CFlowWidgetItem::eAttributesRole ).toMap();
+        lCurrentAttributes.insert( xAttributeName, xValue );
+        mSetData( CFlowWidgetItem::eAttributesRole, lCurrentAttributes );
     }
 
-    QString mUIClassName() const
+    QString mGetAttribute( const QString& xAttributeName ) const
     {
-        return mData( CFlowWidgetItem::ERoles::eUIClassNameRole ).toString();
+        auto lCurrentAttributes = mData( CFlowWidgetItem::eAttributesRole ).toMap();
+        auto pos = lCurrentAttributes.find( xAttributeName );
+        if ( pos == lCurrentAttributes.end() )
+            return QString();
+        return pos.value().toString();
     }
 
-    void mSetTclProcName( const QString& xTclProcName )
+    std::list< std::pair< QString, QString > > mGetAttributes() const
     {
-        mSetData( CFlowWidgetItem::ERoles::eTclProcNameRole, xTclProcName );
-    }
+        auto lCurrentAttributes = mData( CFlowWidgetItem::eAttributesRole ).toMap();
 
-    QString mTclProcName() const
-    {
-        return mData( CFlowWidgetItem::ERoles::eTclProcNameRole ).toString();
+        std::list< std::pair< QString, QString > > lRetVal;
+        for( auto ii = lCurrentAttributes.begin(); ii != lCurrentAttributes.end(); ++ii )
+        {
+            lRetVal.push_back( std::make_pair( ii.key(), ii.value().toString() ) );
+        }
+        return lRetVal;
     }
 
     bool mIsExpanded() const
@@ -1386,24 +1394,19 @@ QIcon CFlowWidgetItem::mIcon() const
     return dImpl->mIcon();
 }
 
-void CFlowWidgetItem::mSetUIClassName( const QString& xUIClassName )
+void CFlowWidgetItem::mSetAttribute( const QString& xAttributeName, const QString& xValue )
 {
-    return dImpl->mSetUIClassName( xUIClassName );
+    return dImpl->mSetAttribute( xAttributeName, xValue );
 }
 
-QString CFlowWidgetItem::mUIClassName() const
+QString CFlowWidgetItem::mGetAttribute( const QString& xAttributeName ) const
 {
-    return dImpl->mUIClassName();
+    return dImpl->mGetAttribute( xAttributeName );
 }
 
-void CFlowWidgetItem::mSetTclProcName( const QString& xTclProcName )
+std::list< std::pair< QString, QString > > CFlowWidgetItem::mGetAttributes() const
 {
-    return dImpl->mSetTclProcName( xTclProcName );
-}
-
-QString CFlowWidgetItem::mTclProcName() const
-{
-    return dImpl->mTclProcName();
+    return dImpl->mGetAttributes();
 }
 
 void CFlowWidgetItem::mSetStepID( const QString & xStepID )
@@ -2633,33 +2636,39 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xSt
 
     auto lIDEle   = xStepElement.firstChildElement( "id" );
     auto lNameEle = xStepElement.firstChildElement( "name" );
-    auto lUIEle   = xStepElement.firstChildElement( "ui" ); // can be null
-    auto lTclProEle = xStepElement.firstChildElement( "tclproc" ); // can be null
     auto lIconEle = xStepElement.firstChildElement( "icon" ); // can be null error if non-null and file does not exist
     if ( lIDEle.isNull() )
         return std::make_pair( false, CFlowWidget::tr( "Invalid XML (%1,%2): Missing 'id' Element" ).arg( xStepElement.lineNumber() ).arg( xStepElement.columnNumber() ) );
     if ( lNameEle.isNull() )
         return std::make_pair( false, CFlowWidget::tr( "Invalid XML (%1,%2): Missing 'name' Element" ).arg( xStepElement.lineNumber() ).arg( xStepElement.columnNumber() ) );
 
-    CFlowWidgetItem * xCurrItem = xParent ? new CFlowWidgetItem( xParent ) : new CFlowWidgetItem( dFlowWidget );
+    CFlowWidgetItem* xCurrItem = xParent ? new CFlowWidgetItem( xParent ) : new CFlowWidgetItem( dFlowWidget );
     xCurrItem->mSetStepID( lIDEle.text() );
     xCurrItem->mSetText( lNameEle.text() );
-    auto lFileName = mFindIcon( xRelToDir, lIconEle.text() );
-    if ( !lFileName.first )
+
+    auto lIconFileName = mFindIcon( xRelToDir, lIconEle.text() );
+    if ( !lIconFileName.first )
     {
         return std::make_pair( false, CFlowWidget::tr( "Invalid Element in XML (%1,%2): Icon file '%3' not found" ).arg( lIconEle.lineNumber() ).arg( lIconEle.columnNumber() ).arg( lIconEle.text() ) );
     }
-    xCurrItem->mSetIcon( QIcon( lFileName.second ) );
-    if ( !lUIEle.isNull() )
-        xCurrItem->mSetUIClassName( lUIEle.text() );
-    if ( !lTclProEle.isNull() )
-        xCurrItem->mSetTclProcName( lTclProEle.text() );
+    xCurrItem->mSetIcon( QIcon( lIconFileName.second ) );
 
-
-    auto lChildStepEle = xStepElement.firstChildElement( "Step" ); // can be null
-    for( ; !lChildStepEle.isNull(); lChildStepEle = lChildStepEle.nextSiblingElement( "Step" ) )
+    for( auto ii = xStepElement.firstChildElement(); !ii.isNull(); ii = ii.nextSiblingElement() )
     {
-        auto lCurr = mLoadFromXML( lChildStepEle, xRelToDir, xCurrItem );
+        auto lTagName = ii.tagName();
+        if ( ( lTagName == "name" ) ||
+             ( lTagName == "icon" ) ||
+             ( lTagName == "id" ) ||
+             ( lTagName == "Step" ) )
+            continue;
+
+        auto lValue = ii.text();
+        xCurrItem->mSetAttribute( lTagName, lValue );
+    }
+
+    for( auto ii = xStepElement.firstChildElement( "Step" ); !ii.isNull(); ii = ii.nextSiblingElement( "Step" ) )
+    {
+        auto lCurr = mLoadFromXML( ii, xRelToDir, xCurrItem );
         if ( !lCurr.first )
             return lCurr;
     }

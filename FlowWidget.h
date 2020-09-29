@@ -138,9 +138,8 @@ public:
     enum ERoles
     {
         eStateStatusRole = Qt::UserRole + 1,  // returns the states
-        eStateIconsRole,                       // returns he icons
-        eUIClassNameRole,
-        eTclProcNameRole
+        eStateIconsRole,                      // returns he icons
+        eAttributesRole
     };
 
     CFlowWidgetItem();
@@ -189,11 +188,9 @@ public:
     void mSetToolTip( const QString& xToolTip );
     QString mToolTip() const;
 
-    void mSetUIClassName( const QString& xUIClassName );
-    QString mUIClassName() const;
-
-    void mSetTclProcName( const QString& xTclProcName );
-    QString mTclProcName() const;
+    void mSetAttribute( const QString & xAttributeName, const QString & xValue );
+    QString mGetAttribute( const QString & xAttributeName ) const;
+    std::list< std::pair< QString, QString > > mGetAttributes() const;
 
     // order is kept of statuses, if you set via a list and only the order is changed, the item is considered changed
     bool mSetStateStatus( int xStateStatus ); // returns true if state changed if none is sent it, it clears all
