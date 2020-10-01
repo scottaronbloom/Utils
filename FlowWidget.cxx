@@ -1067,7 +1067,7 @@ public:
 
     CFlowWidgetItem* mGetTopLevelItem( int xIndex ) const
     {
-        if ( (xIndex < 0) || (xIndex >= dTopLevelItems.size()) )
+        if ( (xIndex < 0) || (xIndex >= static_cast< int >( dTopLevelItems.size() ) ) )
             return nullptr;
         return dTopLevelItems[ xIndex ].get();
     }
@@ -2774,4 +2774,4 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QString& xFileNa
     return std::make_pair( true, QString() );
 }
 
-#include "FlowWidget.moc"
+#include "FlowWidget.moc.h"

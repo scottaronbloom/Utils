@@ -502,5 +502,5 @@ private:
 };
 
 QTEST_MAIN( CTestFlowWidget );
-#include "TestFlowWidget.moc"
+#include "TestFlowWidget.moc.h"
 

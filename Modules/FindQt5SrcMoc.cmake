@@ -56,7 +56,7 @@ FUNCTION(SAB_WRAP_SRCMOC outfiles)
 
     foreach( it ${src_moc_files} )
         get_filename_component(it ${it} ABSOLUTE)
-        sab_qt5_make_output_file( ${it} "" moc outfile)
+        sab_qt5_make_output_file( ${it} "" moc.h outfile)
 
         QT5_GENERATE_MOC( ${it} ${outfile} )
         set_property(SOURCE ${outfile} PROPERTY HEADER_FILE_ONLY ON)
