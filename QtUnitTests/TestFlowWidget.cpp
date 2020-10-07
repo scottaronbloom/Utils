@@ -279,8 +279,8 @@ private Q_SLOTS:
         QVERIFY( !dFlowItem1->mIsEnabled() );
         QVERIFY( !dFlowItem11->mIsEnabled() );
 
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eDisabled );
-        QCOMPARE( dFlowItem11->mStateStatuses().front(), CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem11->mStateStatuses( true ).front(), CFlowWidget::EStates::eDisabled );
 
         dFlowItem1->mSetEnabled( false );
         dFlowItem11->mSetEnabled( false );
@@ -291,8 +291,8 @@ private Q_SLOTS:
         QVERIFY( !dFlowItem1->mIsEnabled() );
         QVERIFY( !dFlowItem11->mIsEnabled() );
 
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eDisabled );
-        QCOMPARE( dFlowItem11->mStateStatuses().front(), CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem11->mStateStatuses( true ).front(), CFlowWidget::EStates::eDisabled );
 
         dFlowItem1->mSetEnabled( true );
         dFlowItem11->mSetEnabled( true );
@@ -303,8 +303,8 @@ private Q_SLOTS:
         QVERIFY( dFlowItem1->mIsEnabled() );
         QVERIFY( dFlowItem11->mIsEnabled() );
 
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eNone );
-        QCOMPARE( dFlowItem11->mStateStatuses().front(), CFlowWidget::EStates::eNone );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
+        QCOMPARE( dFlowItem11->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
 
         dFlowItem1->mSetDisabled( false );
         dFlowItem11->mSetDisabled( false );
@@ -315,8 +315,8 @@ private Q_SLOTS:
         QVERIFY( dFlowItem1->mIsEnabled() );
         QVERIFY( dFlowItem11->mIsEnabled() );
 
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eNone );
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eNone );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
     }
 
     void testSetGetData()
@@ -378,22 +378,22 @@ private Q_SLOTS:
         dFlowItem32->mSetStateStatus( CFlowWidget::EStates::eReadyToRun );
         dFlowItem321->mSetStateStatus( CFlowWidget::EStates::eRunCompletedWithError );
 
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eDisabled );
-        QCOMPARE( dFlowItem2->mStateStatuses().front(), CFlowWidget::EStates::eReadyToRun );
-        QCOMPARE( dFlowItem3->mStateStatuses().front(), CFlowWidget::EStates::eRunCompletedWithError );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem2->mStateStatuses( true ).front(), CFlowWidget::EStates::eReadyToRun );
+        QCOMPARE( dFlowItem3->mStateStatuses( true ).front(), CFlowWidget::EStates::eRunCompletedWithError );
 
-        QCOMPARE( dFlowItem11->mStateStatuses().front(), CFlowWidget::EStates::eRunCompletedWithWarning );
-        QCOMPARE( dFlowItem112->mStateStatuses().front(), CFlowWidget::EStates::eRunCompletedWithInfo );
-        QCOMPARE( dFlowItem12->mStateStatuses().front(), CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem11->mStateStatuses( true ).front(), CFlowWidget::EStates::eRunCompletedWithWarning );
+        QCOMPARE( dFlowItem112->mStateStatuses( true ).front(), CFlowWidget::EStates::eRunCompletedWithInfo );
+        QCOMPARE( dFlowItem12->mStateStatuses( true ).front(), CFlowWidget::EStates::eDisabled );
 
-        QCOMPARE( dFlowItem21->mStateStatuses().front(), CFlowWidget::EStates::eReadyToRun );
-        QCOMPARE( dFlowItem22->mStateStatuses().front(), CFlowWidget::EStates::eRunCompletedWithError );
-        QCOMPARE( dFlowItem221->mStateStatuses().front(), CFlowWidget::EStates::eRunCompletedWithWarning );
-        QCOMPARE( dFlowItem222->mStateStatuses().front(), CFlowWidget::EStates::eRunCompletedWithInfo );
+        QCOMPARE( dFlowItem21->mStateStatuses( true ).front(), CFlowWidget::EStates::eReadyToRun );
+        QCOMPARE( dFlowItem22->mStateStatuses( true ).front(), CFlowWidget::EStates::eRunCompletedWithError );
+        QCOMPARE( dFlowItem221->mStateStatuses( true ).front(), CFlowWidget::EStates::eRunCompletedWithWarning );
+        QCOMPARE( dFlowItem222->mStateStatuses( true ).front(), CFlowWidget::EStates::eRunCompletedWithInfo );
 
-        QCOMPARE( dFlowItem31->mStateStatuses().front(), CFlowWidget::EStates::eDisabled );
-        QCOMPARE( dFlowItem32->mStateStatuses() .front(), CFlowWidget::EStates::eReadyToRun );
-        QCOMPARE( dFlowItem321->mStateStatuses().front(), CFlowWidget::EStates::eRunCompletedWithError );
+        QCOMPARE( dFlowItem31->mStateStatuses( true ).front(), CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem32->mStateStatuses( true ) .front(), CFlowWidget::EStates::eReadyToRun );
+        QCOMPARE( dFlowItem321->mStateStatuses( true ).front(), CFlowWidget::EStates::eRunCompletedWithError );
 
         QVERIFY( dFlowItem1->mIsDisabled() );
         QVERIFY( !dFlowItem2->mIsDisabled() );
@@ -415,7 +415,7 @@ private Q_SLOTS:
 
     void testSetGetMultiStateStatus()
     {
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eNone );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
 
         QCOMPARE( true, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eDisabled ) );
         QCOMPARE( true, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ) );
@@ -424,14 +424,14 @@ private Q_SLOTS:
         QCOMPARE( false, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ) );
         QCOMPARE( false, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eRunPassed ) );
 
-        QCOMPARE( dFlowItem1->mStateStatuses().size(), 3 );
-        QCOMPARE( dFlowItem1->mStateStatuses()[ 0 ], CFlowWidget::EStates::eDisabled );
-        QCOMPARE( dFlowItem1->mStateStatuses()[ 1 ], CFlowWidget::EStates::eReadyToRun );
-        QCOMPARE( dFlowItem1->mStateStatuses()[ 2 ], CFlowWidget::EStates::eRunPassed );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).size(), 3 );
+        QCOMPARE( dFlowItem1->mStateStatuses( true )[ 0 ], CFlowWidget::EStates::eDisabled );
+        QCOMPARE( dFlowItem1->mStateStatuses( true )[ 1 ], CFlowWidget::EStates::eReadyToRun );
+        QCOMPARE( dFlowItem1->mStateStatuses( true )[ 2 ], CFlowWidget::EStates::eRunPassed );
 
         QCOMPARE( true, dFlowItem1->mSetStateStatus( CFlowWidget::EStates::eNone ) );
-        QCOMPARE( dFlowItem1->mStateStatuses().size(), 1 );
-        QCOMPARE( dFlowItem1->mStateStatuses().front(), CFlowWidget::EStates::eNone );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).size(), 1 );
+        QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
 
         QCOMPARE( true, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithWarning ) );
         QCOMPARE( true, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ) );
@@ -442,8 +442,8 @@ private Q_SLOTS:
         QCOMPARE( false, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithInfo ) );
 
         QCOMPARE( true, dFlowItem11->mSetStateStatus( CFlowWidget::EStates::eNone ) );
-        QCOMPARE( dFlowItem11->mStateStatuses().size(), 1 );
-        QCOMPARE( dFlowItem11->mStateStatuses().front(), CFlowWidget::EStates::eNone );
+        QCOMPARE( dFlowItem11->mStateStatuses( true ).size(), 1 );
+        QCOMPARE( dFlowItem11->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
     }
 
     void testSetStateStatusValid() // check it returns false if not registered true otherwise

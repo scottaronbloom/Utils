@@ -84,22 +84,28 @@ public:
 
     virtual CFlowWidgetItem* mSelectedItem() const; // only one item is selectable at a time.
 
-    void mRegisterStateStatus( int xState, const QString & xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
-    int mGetNextStatusID() const;
-    QList< std::tuple< int, QString, QIcon > > mGetRegisteredStatuses() const;
-    std::pair< QString, QIcon > mGetStateStatus( int xState ) const;
+    virtual void mRegisterStateStatus( int xState, const QString & xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
+    virtual int mGetNextStatusID() const;
+    virtual QList< std::tuple< int, QString, QIcon > > mGetRegisteredStatuses() const;
+    virtual std::pair< QString, QIcon > mGetStateStatus( int xState ) const;
 
-    void mSetElideText( bool xElide );
-    bool mElideText() const;
+    virtual void mSetElideText( bool xElide );
+    virtual bool mElideText() const;
 
     virtual QString mDump( bool xCompacted ) const;
     virtual void mDump( QJsonObject& xTS ) const;
 
-    void mSetFindIconFunc( const std::function< std::pair< bool, QString >( const QDir& xRelToDir, const QString& xFileName ) > & lFindIcon );
+    void mSetFindIconFunc( const std::function< std::pair< bool, QString >( const QDir & xRelToDir, const QString & xFileName ) > & lFindIcon );
+
+    virtual bool mSummarizeStatus() const;
+    virtual void mSetSummarizeStatus( bool xSummarizeStatus );
+
+    virtual bool mAlignStatus() const;
+    virtual void mSetAlignStatus( bool xAlignStatus );
 protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );
-Q_SIGNALS: 
+Q_SIGNALS:
     // item information signals (changed and inserted) are sent out even if the item is disabled
     void sigFlowWidgetItemChanged( CFlowWidgetItem * xItem ); // data changed
     void sigFlowWidgetItemInserted( CFlowWidgetItem* xItem ); // item was inserted into the flow widget
@@ -196,7 +202,7 @@ public:
     bool mSetStateStatus( const QList< int > & xStateStatuses ); // returns true if state changed, if none is the only item sent in, it clears, if individual it is ignored
     bool mAddStateStatus( int xStateStatus ); // returns true if state add, false if already set, none is sent in, its ignored
     bool mRemoveStateStatus( int xStateStatus ); // returns true if state removed, false if already set
-    QList< int > mStateStatuses() const; // guaranteed to never be empty, eNone is always returned if needed
+    QList< int > mStateStatuses( bool xLocalOnly ) const; // guaranteed to never be empty, eNone is always returned if needed
 
     void mSetHidden( bool xHidden );
     bool mIsHidden() const;
