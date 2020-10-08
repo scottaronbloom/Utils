@@ -79,23 +79,28 @@ static int mComputeMaxAllowedTextWidth( int xFullWidth, const QPixmap& xIdentity
     return lRetVal;
 }
 
-static std::pair< int, QString > mComputeTextWidth( const QFontMetrics & lFM, const QString & xText, const std::pair< bool, int >& xMaxWidth )
+static std::pair< int, QString > mComputeTextWidth( const QFontMetrics & lFM, const QString & xText, const std::pair< bool, int > & xMinWidth, const std::pair< bool, int >& xMaxWidth )
 {
     auto lRetVal = lFM.boundingRect( xText );
     if ( xMaxWidth.first && (lRetVal.width() > xMaxWidth.second) )
         lRetVal.setWidth( xMaxWidth.second );
+    if ( xMinWidth.first && (lRetVal.width() < xMinWidth.second ) )
+        lRetVal.setWidth( xMinWidth.second );
+
     auto lElidedText = lFM.elidedText( xText, Qt::ElideRight, lRetVal.width() );
-    while ( (lElidedText != xText) && (!xMaxWidth.first || (lRetVal.width() < xMaxWidth.second)) )
+    while ( (lElidedText != xText) && 
+            (!xMaxWidth.first || (lRetVal.width() < xMaxWidth.second)) )
     {
         lRetVal.setWidth( lRetVal.width() * 1.1 );
         lElidedText = lFM.elidedText( xText, Qt::ElideRight, lRetVal.width() );
     }
+
     return std::make_pair( lRetVal.width(), lElidedText );
 }
 
-static std::pair< int, QString > mComputeTextWidth( QStyleOptionToolBox& lOption, const std::pair< bool, int >& xMaxWidth )
+static std::pair< int, QString > mComputeTextWidth( QStyleOptionToolBox& lOption, const std::pair< bool, int > & xMinWidth, const std::pair< bool, int >& xMaxWidth )
 {
-    return mComputeTextWidth( lOption.fontMetrics, lOption.text, xMaxWidth );
+    return mComputeTextWidth( lOption.fontMetrics, lOption.text, xMinWidth, xMaxWidth );
 }
 
 static std::pair< QRect, QString > mCalcDisplayRect( const QFont & lFont, QString lText, bool xElide, const QRect & xRect )
@@ -112,7 +117,7 @@ static std::pair< QRect, QString > mCalcDisplayRect( const QFont & lFont, QStrin
     const QSize lSize = QSize( std::ceil( lFPSize.width() ), std::ceil( lFPSize.height() ) );
     std::pair< int, QString > lTextWidth( lSize.width() + 2*lTextMargin, lText );
     if ( xElide )
-        lTextWidth =  mComputeTextWidth( QFontMetrics( lFont ), lText, std::make_pair( xElide, lSize.width() ) );
+        lTextWidth =  mComputeTextWidth( QFontMetrics( lFont ), lText, std::make_pair( false, 0 ), std::make_pair( xElide, lSize.width() ) );
     auto lRect = QRect( 0, 0, lTextWidth.first, lSize.height() );
     return std::make_pair( lRect, lTextWidth.second );
 }
@@ -225,6 +230,7 @@ public:
         dTreeWidget->header()->setStretchLastSection( true );
     }
        
+    QSize mGetTextSize() const; // include identity icon and text
 Q_SIGNALS:
     void sigDoubleClicked();
 protected:
@@ -524,6 +530,7 @@ public:
     friend class CFlowWidget;
     void deleteLater()
     {
+        mSetHeaderWidthNeedsUpdate();
         if ( dHeader )
             dHeader->deleteLater();
         else if ( dTreeWidgetItem )
@@ -544,6 +551,7 @@ public:
             dHeader->mSetIcon( icon );
         else if ( dTreeWidgetItem )
             dTreeWidgetItem->setIcon( 0, icon );
+        mSetHeaderWidthNeedsUpdate();
     }
 
     QIcon mIcon() const
@@ -805,6 +813,7 @@ public:
             dHeader->mSetText( text );
         else if ( dTreeWidgetItem )
             dTreeWidgetItem->setText( 0, text );
+        mSetHeaderWidthNeedsUpdate();
     }
 
     QString mText() const
@@ -825,7 +834,7 @@ public:
         return lParentText;
     }
 
-    void mSetVisible( bool xVisible, bool xExpandIfShow ) const
+    void mSetVisible( bool xVisible, bool xExpandIfShow )
     {
         if ( dHeader )
             dHeader->mSetVisible( xVisible, xExpandIfShow );
@@ -835,6 +844,7 @@ public:
             if ( xVisible && xExpandIfShow )
                 dTreeWidgetItem->setExpanded( true );
         }
+        mSetHeaderWidthNeedsUpdate();
     }
 
     bool mIsVisible() const
@@ -1057,6 +1067,14 @@ public:
             dHeader->mSetAlignStatus( xAlignStatus );
         }
         dAlignStatus = xAlignStatus;
+    }
+    
+    void mSetHeaderWidthNeedsUpdate();
+    int mGetHeaderTextWidth() const
+    {
+        if ( !dHeader )
+            return 0;
+        return dHeader->mGetTextSize().width();
     }
 
     CFlowWidgetItem* dContainer{ nullptr };
@@ -1358,6 +1376,24 @@ public:
         return dElideText;
     }
 
+    void mSetHeaderWidthNeedsUpdate()
+    {
+        dHeaderTextWidth = -1;
+        dFlowWidget->repaint();
+        dFlowWidget->update();
+    }
+
+    int mGetHeaderTextWidth() const
+    {
+        if ( dHeaderTextWidth == -1 )
+        {
+            for( auto && ii : dTopLevelItems )
+            {
+                dHeaderTextWidth = std::max( dHeaderTextWidth, ii->dImpl->mGetHeaderTextWidth() );
+            }
+        }
+        return dHeaderTextWidth;
+    }
     std::pair<bool, QString> mFindIcon( const QDir& lDir, const QString& xFileName ) const;
 
     QVBoxLayout* fTopLayout{ nullptr };
@@ -1372,6 +1408,7 @@ public:
     bool dSummarizeStatus{ false };
     bool dAlignStatus{ false };
     std::function< std::pair< bool, QString >( const QDir& xRelToDir, const QString& xFileName ) > dFindIcon;
+    mutable int dHeaderTextWidth{-1};
 };
 
 CFlowWidgetItem::CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon )
@@ -1725,6 +1762,16 @@ void CFlowWidgetItemImpl::mRemoveWidgets()
         delete dTreeWidgetItem;
         dTreeWidgetItem = nullptr;
     }
+}
+
+void CFlowWidgetItemImpl::mSetHeaderWidthNeedsUpdate()
+{
+    if ( !dHeader )
+        return;
+    auto lFlowWidget = dContainer->mGetFlowWidget();
+    if ( !lFlowWidget )
+        return;
+    lFlowWidget->dImpl->mSetHeaderWidthNeedsUpdate();
 }
 
 bool CFlowWidgetItem::mIsTopLevelItem() const
@@ -2231,8 +2278,7 @@ void CFlowWidgetHeader::mTakeFromLayout( QVBoxLayout* xLayout )
 
 }
 
-
-QSize CFlowWidgetHeader::sizeHint() const
+QSize CFlowWidgetHeader::mGetTextSize() const
 {
     QSize iconSize( 8, 8 );
     int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
@@ -2242,12 +2288,22 @@ QSize CFlowWidgetHeader::sizeHint() const
     }
     QSize textSize = fontMetrics().size( Qt::TextShowMnemonic, text() ) + QSize( 0, 8 );
 
-    auto xStates = dContainer->mData( CFlowWidgetItem::ERoles::eStateStatusRole ).value< QList< int > >();
     QSize total( iconSize.width() + textSize.width(), qMax( iconSize.height(), textSize.height() ) );
 
-    total.setWidth( total.width() + xStates.count() * (icone + 2) );
-
     return total.expandedTo( QApplication::globalStrut() );
+}
+
+
+QSize CFlowWidgetHeader::sizeHint() const
+{
+    auto lTotal = mGetTextSize();
+    
+    int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
+    auto xStates = dContainer->mData( CFlowWidgetItem::ERoles::eStateStatusRole ).value< QList< int > >();
+    
+    lTotal.setWidth( lTotal.width() + xStates.count() * (icone + 2) );
+
+    return lTotal.expandedTo( QApplication::globalStrut() );
 }
 
 QSize CFlowWidgetHeader::minimumSizeHint() const
@@ -2292,9 +2348,11 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
         lPainter->setFont( f );
     }
     QRect cr = style()->subElementRect( QStyle::SE_ToolBoxTabContents, &lOption, this );
+    auto lHeaderTextMaxWidth = dAlignStatus ? mFlowWidget()->dImpl->mGetHeaderTextWidth() : -1;
+ 
     int lMaxWidth = mComputeMaxAllowedTextWidth( cr.width(), lIdentityPixmap, lPixMaps );
 
-    auto lElidedText = mComputeTextWidth( lOption, std::make_pair( dElideText, lMaxWidth - 4 ) );
+    auto lElidedText = mComputeTextWidth( lOption, std::make_pair( true, lHeaderTextMaxWidth ), std::make_pair( dElideText, lMaxWidth - 4 ) );
 
     QRect lTextRect;
     QRect lIdentyIconRect;
