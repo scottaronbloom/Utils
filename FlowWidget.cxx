@@ -217,6 +217,14 @@ public:
     void mSetElideText( bool xElideText );
     void mSetSummarizeStatus( bool xSummarizeStatus );
     void mSetAlignStatus( bool xAlignStatus );
+
+    void mAutoSizeColumns()
+    {
+        dTreeWidget->header()->setStretchLastSection( false );
+        dTreeWidget->resizeColumnToContents( 0 );
+        dTreeWidget->header()->setStretchLastSection( true );
+    }
+       
 Q_SIGNALS:
     void sigDoubleClicked();
 protected:
@@ -329,14 +337,17 @@ public:
             lPixmaps << lPixMap;
         }
 
-        auto lIdentityRect = mIconSizeHint( xOption, xIndex );
+        auto lIdentityRect = ( xIndex.column() == 0 ) ? mIconSizeHint( xOption, xIndex ) : QRect();
+        auto lDescRect = (xIndex.column() == 0 ) ? mCalcDisplayRect( xIndex, xOption, dElideText, xIdentityPixmap, lPixmaps ) : std::make_pair( QRect(), QString() );
 
-        auto lDescRect = mCalcDisplayRect( xIndex, xOption, dElideText, xIdentityPixmap, lPixmaps );
         QList< QRect > lStatusRects;
-        for ( int ii = 0; ii < lPixmaps.count(); ++ii )
+        if ( !dAlignStatus || ( xIndex.column() == 1 ) )
         {
-            auto lRect = mCalcDecorationRect( xOption, lPixmaps[ ii ].devicePixelRatio() );
-            lStatusRects << lRect;
+            for ( int ii = 0; ii < lPixmaps.count(); ++ii )
+            {
+                auto lRect = mCalcDecorationRect( xOption, lPixmaps[ ii ].devicePixelRatio() );
+                lStatusRects << lRect;
+            }
         }
 
         mDoLayout( xOption, lDescRect.first, lIdentityRect, lStatusRects, true );
@@ -379,18 +390,22 @@ public:
             lPixmaps << lPixMap;
         }
 
+        QString text = xIndex.model()->index( xIndex.row(), 0, xIndex.parent() ).data().toString();
         QString lDescription;
         QRect lDescRect;
-        std::tie( lDescRect, lDescription ) = mCalcDisplayRect( xIndex, xOption, dElideText, xIdentityPixmap, lPixmaps );
+        std::tie( lDescRect, lDescription ) = (xIndex.column() == 0) ? mCalcDisplayRect( xIndex, xOption, dElideText, xIdentityPixmap, lPixmaps ) : std::make_pair( QRect(), QString() );
 
         // order is IdentityIcon Text StatusIcons
-        QRect lIdentityRect = xIdentityPixmap.isNull() ? QRect() : mCalcDecorationRect( xOption, xIdentityPixmap.devicePixelRatio() );
+        QRect lIdentityRect = (xIndex.column() == 0) ? ( xIdentityPixmap.isNull() ? QRect() : mCalcDecorationRect( xOption, xIdentityPixmap.devicePixelRatio() ) ) : QRect();
 
         QList< QRect > lStatusRects;
-        for( int ii = 0; ii < lPixmaps.count(); ++ii )
+        if ( !dAlignStatus || ( xIndex.column() == 1 ) )
         {
-            auto lRect = mCalcDecorationRect( xOption, lPixmaps[ ii ].devicePixelRatio() );
-            lStatusRects << lRect;
+            for ( int ii = 0; ii < lPixmaps.count(); ++ii )
+            {
+                auto lRect = mCalcDecorationRect( xOption, lPixmaps[ ii ].devicePixelRatio() );
+                lStatusRects << lRect;
+            }
         }
 
         mDoLayout( xOption, lDescRect, lIdentityRect, lStatusRects, false );
@@ -412,6 +427,7 @@ public:
             lOption.textElideMode = Qt::TextElideMode::ElideNone;
             drawDisplay( xPainter, lOption, lDescRect, lDescription );
         }
+
         drawFocus( xPainter, xOption, xOption.rect );
         xPainter->restore();
     }
@@ -447,7 +463,7 @@ public:
             else
                 x1 = xStatusRects[ ii - 1 ].right() + 2*lMargin;
             
-            int y1 = xIdentityRect.isValid() ? xIdentityRect.top() : ( xTextRect.isValid() ? xTextRect.top() : 0 );
+            int y1 = xIdentityRect.isValid() ? xIdentityRect.top() : ( xTextRect.isValid() ? xTextRect.top() : ( xOption.rect.isValid() ? xOption.rect.top() : 0 ) );
 
             lCurr.setRect( x1, y1, lCurr.width(), lCurr.height() );
 
@@ -662,12 +678,20 @@ public:
         return xChild;
     }
 
+    CFlowWidgetHeader * mGetHeader() const
+    {
+        if ( dContainer->dImpl->dHeader )
+            return dContainer->dImpl->dHeader;
+        if ( dParent )
+            return dParent->dImpl->mGetHeader();
+        return nullptr;
+    }
     int mCreateTreeWidgetItem( int xIndex )
     {
         if ( !dParent || !dParent->dImpl )
             return -1;
 
-        auto lTreeWidgetItem = new QTreeWidgetItem( QStringList() << mText() );
+        auto lTreeWidgetItem = new QTreeWidgetItem( QStringList() << mText() << QString() );
         lTreeWidgetItem->setIcon( 0, mIcon() );
         dTreeWidgetItem = lTreeWidgetItem;
 
@@ -691,6 +715,10 @@ public:
             auto && lChild = dChildren[ ii ];
             lChild->dImpl->mCreateTreeWidgetItem( ii );
         }
+
+        auto lHeader = mGetHeader();
+        if ( lHeader )
+            lHeader->mAutoSizeColumns();
         return lRetVal;
     }
 
@@ -1628,6 +1656,12 @@ void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent )
 
     if ( xUpdateParent && dParent )
         dParent->dImpl->mUpdateStateStatusIconRole( xUpdateParent );
+    if ( !dParent )
+    {
+        auto lHeader = mGetHeader();
+        if ( lHeader )
+            lHeader->mAutoSizeColumns();
+    }
 }
 
 bool CFlowWidgetItemImpl::mSetData( int xRole, const QVariant& xData, bool xSetState /*= true */ )
@@ -1788,13 +1822,22 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
     QAbstractButton( xParent ),
     dContainer( xContainer )
 {
+    dElideText = xParent->dImpl->dElideText;
+    dSummarizeStatus = xParent->dImpl->dSummarizeStatus;
+    dAlignStatus = xParent->dImpl->dAlignStatus;
+
     setBackgroundRole( QPalette::Window );
     setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Minimum );
     setFocusPolicy( Qt::NoFocus );
 
     dTreeWidget = new QTreeWidget;
+    dTreeWidget->header()->setStretchLastSection( true );
+    dTreeWidget->setAllColumnsShowFocus( true );
+    dTreeWidget->setColumnCount( dAlignStatus ? 2 : 1 );
     dTreeWidget->setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy::ScrollBarAlwaysOff );
-    dDelegate = new CFlowWidgetItemDelegate( this );
+    dTreeWidget->setSelectionMode( QAbstractItemView::SingleSelection );
+    dTreeWidget->setSelectionBehavior( QAbstractItemView::SelectRows );
+    dDelegate = new CFlowWidgetItemDelegate( dTreeWidget );
     dDelegate->mSetElideText( xParent->mElideText() );
     dTreeWidget->setItemDelegate( dDelegate );
     dTreeWidget->setObjectName( "flowwidgetheader_treewidget" );
@@ -1925,6 +1968,9 @@ void CFlowWidgetHeader::mSetAlignStatus( bool xAlignStatus )
 {
     dDelegate->mSetAlignStatus( xAlignStatus );
     dAlignStatus = xAlignStatus;
+    dTreeWidget->setColumnCount( xAlignStatus ? 2 : 1 );
+    mAutoSizeColumns();
+
     repaint();
     dTreeWidget->viewport()->update();
 }
