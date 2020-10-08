@@ -1970,6 +1970,12 @@ void CFlowWidgetHeader::mSetAlignStatus( bool xAlignStatus )
     dAlignStatus = xAlignStatus;
     dTreeWidget->setColumnCount( xAlignStatus ? 2 : 1 );
     mAutoSizeColumns();
+    auto lSelectedItems = dTreeWidget->selectedItems();
+    for( auto && ii : lSelectedItems )
+    {
+        ii->setSelected( false );
+        ii->setSelected( true );
+    }
 
     repaint();
     dTreeWidget->viewport()->update();
