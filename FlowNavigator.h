@@ -1,9 +1,17 @@
 #ifndef _FLOWNAVIGATOR_
 #define _FLOWNAVIGATOR_
 
+#ifndef NON_VIS_BUILD
 #include "basicWindow.h"
 #include "windowsExports.h"
+#else
+#define WINDOWS_DECLSPEC 
+#define WINDOWS_QDECLSPEC
+#endif
+
+
 #include <QFrame>
+#include <QIcon>
 #include <memory>
 
 class QScrollArea;
@@ -37,6 +45,7 @@ struct WINDOWS_QDECLSPEC SRegisteredStatusInfo
     bool dIsInternal{false};
 };
 
+#ifndef NON_VIS_BUILD
 // The Flow Navigator system is currently under LFK VIS_2021_1_BETA as well as the environmental variable ENABLE_FLOWNAV
 // if enabled the window "flownavigator" is enabled and be opened via "view flownavigator"
 // view flownavigator takes in two optional parameters
@@ -77,6 +86,7 @@ protected:
     CFlowWidget * dFlowWidget{nullptr}; // memory is owned by basicWindow
     static std::function< CFlowWidget *() > dInitFunction;
 };
+#endif
 
 class WINDOWS_QDECLSPEC CFlowWidget : public QFrame
 {

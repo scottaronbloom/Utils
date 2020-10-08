@@ -80,6 +80,9 @@ add_library(SABUtils STATIC
     ${_CMAKE_FILES}
     ${_CMAKE_MODULE_FILES}
 )
+
+add_definitions( -DNON_VIS_BUILD=1 )
+set(SAB_MOC_OPTIONS -D NON_VIS_BUILD=1)
 set_target_properties( SABUtils PROPERTIES FOLDER Libs )
 add_subdirectory(UnitTests)
 add_subdirectory(QtUnitTests)
