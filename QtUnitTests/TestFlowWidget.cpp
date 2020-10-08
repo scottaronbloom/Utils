@@ -1,4 +1,4 @@
-#include "../FlowWidget.h"
+#include "../FlowNavigator.h"
 #include <QApplication>
 #include <QtTest>
 inline void initResources() { Q_INIT_RESOURCE( application ); }
@@ -455,8 +455,8 @@ private Q_SLOTS:
         QCOMPARE( false, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( eMyState ) );
         dFlowWidget->mRegisterStateStatus( eMyState, "MyState", QIcon( ":/Entity.png" ) );
 
-        QCOMPARE( "MyState", dFlowWidget->mGetStateStatus( eMyState ).first );
-        QCOMPARE( true, !dFlowWidget->mGetStateStatus( eMyState ).second.isNull() );
+        QCOMPARE( "MyState", dFlowWidget->mGetStateStatus( eMyState ).dStateDesc );
+        QCOMPARE( true, !dFlowWidget->mGetStateStatus( eMyState ).dIcon.isNull() );
     }
 
     void testDump()

@@ -68,7 +68,6 @@ set(qtproject_UIS
 
 
 set(qtproject_QRC
-    FlowWidget.qrc
     FlowNavigator.qrc
 )
 

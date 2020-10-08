@@ -43,6 +43,7 @@ add_executable( SABUtils_TestFlowWidget
                  ${_CMAKE_FILES}
                  ${_CMAKE_MODULE_FILES}
           )
+add_definitions( -DNON_VIS_BUILD=1 )
 set_target_properties( SABUtils_TestFlowWidget PROPERTIES FOLDER UnitTests )
           
 target_link_libraries( SABUtils_TestFlowWidget 
