@@ -37,11 +37,11 @@ set(qtproject_SRCS
 )
 
 set(qtproject_CPPMOC_SRCS
-    FlowWidget.cxx
+    FlowNavigator.cxx
 )
 
 set(qtproject_H
-    FlowWidget.h
+    FlowNavigator.h
     SpinBox64.h
     SpinBox64U.h
     ScrollMessageBox.h
