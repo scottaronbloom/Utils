@@ -146,12 +146,6 @@ public:
 
     virtual CFlowWidgetItem* mSelectedItem() const; // only one item is selectable at a time.
 
-    void mSetSummarizeStatus( bool xSummarizeStatus );
-    bool mSummarizeStatus() const;
-
-    void mSetAlignStatus( bool xAlignStatus );
-    bool mAlignStatus() const;
-
     virtual void mRegisterStateStatus( int xStateID, const QString & xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
     virtual int mGetNextStatusID() const;
     virtual QList< SRegisteredStatusInfo > mGetRegisteredStatuses() const; 

@@ -863,6 +863,16 @@ public:
         return dChildren[ xIndex ].get();
     }
 
+    CFlowWidgetItem* mGetChild( const QString & xStepID ) const
+    {
+        for( auto && ii : dChildren )
+        {
+            if ( ii->mStepID() == xStepID )
+                return ii.get();
+        }
+        return nullptr;
+    }
+
     void mUpdateStateStatusIconRole( bool xUpdateParents );
     bool mSetData( int xRole, const QVariant& xData, bool xSetState = true );
 
@@ -1202,6 +1212,8 @@ public:
     {
         mInitDefaultMap();
     }
+
+    virtual ~CFlowWidgetImpl(){}
 
     void mInitDefaultMap()
     {
@@ -1806,7 +1818,7 @@ void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent )
     QList< QIcon > lIcons;
     for ( auto ii : lStates )
     {
-        auto lIcon = mFlowWidget()->dImpl->mGetStateStatus( ii ).second;
+        auto lIcon = mFlowWidget()->dImpl->mGetStateStatus( ii ).dIcon;
         if ( !lIcon.isNull() )
             lIcons.push_back( lIcon );
     }
@@ -2981,7 +2993,7 @@ CFlowWidgetItem* CFlowWidget::mSelectedItem() const
 
 void CFlowWidget::mRegisterStateStatus( int xState, const QString & xDescription, const QIcon& xIcon )
 {
-    return dImpl->mRegisterStateStatus( xState, xDescription, xIcon, false );
+    return dImpl->mRegisterStateStatus( xState, xDescription, xIcon, false, false );
 }
 
 int CFlowWidget::mGetNextStatusID() const
@@ -3047,7 +3059,7 @@ bool CFlowWidget::mAlignStatus() const
     return dImpl->mAlignStatus();
 }
 
-std::pair< bool, QString > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, const QString & xFileName ) const
+std::pair< bool, QIcon > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, const QString & xFileName ) const
 {
     auto lRetVal = std::make_pair( false, QIcon() );
 
