@@ -48,6 +48,8 @@ QObject * CFlowNavigator::mCreateWindow( int xId, const QStringList & xArgs )
 
     QString lFileName;
     bool lInit = false;
+    bool lAlignStatus = false;
+    bool lSummarizeStatus = false;
     for( int ii = 0; ii < xArgs.count(); ++ii )
     {
         if ( xArgs[ ii ] == "-xml" )
@@ -62,6 +64,14 @@ QObject * CFlowNavigator::mCreateWindow( int xId, const QStringList & xArgs )
         {
             lInit = true;
         }
+        else if ( xArgs[ ii ] == "-align_status" )
+        {
+        	lAlignStatus = true;
+        }
+        else if ( xArgs[ ii ] == "-summarize_status" )
+        {
+        	lSummarizeStatus = true;
+        }
     }
 
     if ( !lInit && !hApp->mGetStartupComplete() && lFileName.isEmpty() )
@@ -70,6 +80,8 @@ QObject * CFlowNavigator::mCreateWindow( int xId, const QStringList & xArgs )
     auto lRetVal = new CFlowNavigator;
     if ( !lFileName.isEmpty() )
         lRetVal->mGetFlowWidget()->mLoadFromXML( lFileName );
+    lRetVal->mGetFlowWidget()->mSetSummarizeStatus( lSummarizeStatus );
+    lRetVal->mGetFlowWidget()->mSetAlignStatus( lAlignStatus );
 
     return lRetVal;
 }
@@ -873,7 +885,15 @@ public:
         return nullptr;
     }
 
+    void mClearStateStatusIconRole( bool xUpdateParents );
     void mUpdateStateStatusIconRole( bool xUpdateParents );
+    void mClearData( int xRole )
+    {
+    	auto pos = dData.find( xRole );
+    	if ( pos != dData.end() )
+    		dData.erase( pos );
+    }
+
     bool mSetData( int xRole, const QVariant& xData, bool xSetState = true );
 
     QVariant mData( int xRole, bool xLocalOnly ) const
@@ -910,8 +930,12 @@ public:
         }
 
         auto pos = dData.find( xRole );
-        if ( pos != dData.end() )
-            return (*pos).second;
+        if ( ( xRole == CFlowWidgetItem::eStateStatusRole ) && ( pos == dData.end() ) )
+        {
+            auto lNonConst = const_cast< CFlowWidgetItemImpl * >( this );
+        	lNonConst->mUpdateStateStatusIconRole( false );
+        	pos = dData.find( xRole );
+        }
 
         return QVariant();
     }
@@ -1810,9 +1834,20 @@ void CFlowWidgetItemImpl::mClearWidgets( bool xClearCurrent )
     }
 }
 
-void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent ) 
+void CFlowWidgetItemImpl::mClearStateStatusIconRole( bool xUpdateParent )
 {
-    auto lData = mData( CFlowWidgetItem::eStateStatusRole, false );
+//	mClearData( CFlowWidgetItem::eStateIconsRole );
+    if ( xUpdateParent && dParent )
+        dParent->dImpl->mClearStateStatusIconRole( xUpdateParent );
+}
+
+void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent )
+{
+    auto pos = dData.find( CFlowWidgetItem::eStateStatusRole );
+    QVariant lData;
+    if ( pos != dData.end() )
+        lData = (*pos).second;
+
     auto lStates = lData.value< QList< int > >();
 
     QList< QIcon > lIcons;
@@ -1822,7 +1857,8 @@ void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent )
         if ( !lIcon.isNull() )
             lIcons.push_back( lIcon );
     }
-    mSetData( CFlowWidgetItem::eStateIconsRole, QVariant::fromValue< QList< QIcon > >( lIcons ) );
+
+    //mSetData( CFlowWidgetItem::eStateIconsRole, QVariant::fromValue< QList< QIcon > >( lIcons ) );
 
     if ( xUpdateParent && dParent )
         dParent->dImpl->mUpdateStateStatusIconRole( xUpdateParent );
@@ -1858,7 +1894,7 @@ bool CFlowWidgetItemImpl::mSetData( int xRole, const QVariant& xData, bool xSetS
 
     if ( xRole == CFlowWidgetItem::eStateStatusRole )
     {
-        mUpdateStateStatusIconRole( true );
+    	mClearStateStatusIconRole( true );
     }
 
     if ( !dTreeWidgetItem )
@@ -2466,14 +2502,14 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
     int lIconExtent = style()->proxy()->pixelMetric( QStyle::PM_SmallIconSize, &lOption, this );
     QPixmap lIdentityPixmap = lOption.icon.pixmap( this->window()->windowHandle(), QSize( lIconExtent, lIconExtent ), lEnabled ? QIcon::Normal : QIcon::Disabled );
 
-    auto xStateIcons = dContainer->mData( CFlowWidgetItem::ERoles::eStateIconsRole ).value< QList< QIcon > >();
+    //auto xStateIcons = dContainer->mData( CFlowWidgetItem::ERoles::eStateIconsRole ).value< QList< QIcon > >();
     QList< QPixmap > lPixMaps;
-    for( auto && ii : xStateIcons )
-    {
-        auto lPixmap = ii.pixmap( this->window()->windowHandle(), QSize( lIconExtent, lIconExtent ), lEnabled ? QIcon::Normal : QIcon::Disabled );
-        if ( !lPixmap.isNull() )
-            lPixMaps.push_back( lPixmap );
-    }
+//    for( auto && ii : xStateIcons )
+//    {
+//        auto lPixmap = ii.pixmap( this->window()->windowHandle(), QSize( lIconExtent, lIconExtent ), lEnabled ? QIcon::Normal : QIcon::Disabled );
+//        if ( !lPixmap.isNull() )
+//            lPixMaps.push_back( lPixmap );
+//    }
 
     if ( lSelected && style()->proxy()->styleHint( QStyle::SH_ToolBox_SelectedPageTitleBold, &lOption, this ) )
     {
@@ -3063,9 +3099,12 @@ std::pair< bool, QIcon > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, cons
 {
     auto lRetVal = std::make_pair( false, QIcon() );
 
-    auto lIconFromMgr = hIcon->mGetIconDef( xFileName, QString(), QString() );
-    if ( lIconFromMgr )
-        return std::make_pair( true, *lIconFromMgr->mGetIcon() );
+    if ( !xFileName.startsWith( ":" ) )
+    {
+        auto lIconFromMgr = hIcon->mGetIconDef( xFileName, QString(), QString() );
+        if ( lIconFromMgr )
+            return std::make_pair( true, *lIconFromMgr->mGetIcon() );
+    }
     if ( QFileInfo::exists( xRelToDir.absoluteFilePath( xFileName ) ) )
         return std::make_pair( true, QIcon( xRelToDir.absoluteFilePath( xFileName ) ) );
 
