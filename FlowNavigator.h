@@ -152,17 +152,22 @@ public:
     void mSetAlignStatus( bool xAlignStatus );
     bool mAlignStatus() const;
 
-    void mRegisterStateStatus( int xStateID, const QString & xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
-    int mGetNextStatusID() const;
-    QList< SRegisteredStatusInfo > mGetRegisteredStatuses() const; 
-    SRegisteredStatusInfo mGetStateStatus( int xState ) const; 
+    virtual void mRegisterStateStatus( int xStateID, const QString & xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
+    virtual int mGetNextStatusID() const;
+    virtual QList< SRegisteredStatusInfo > mGetRegisteredStatuses() const; 
+    virtual SRegisteredStatusInfo mGetStateStatus( int xState ) const; 
 
-    void mSetElideText( bool xElide );
-    bool mElideText() const;
+    virtual void mSetElideText( bool xElide );
+    virtual bool mElideText() const;
+
+    virtual bool mSummarizeStatus() const;
+    virtual void mSetSummarizeStatus( bool xSummarizeStatus );
+
+    virtual bool mAlignStatus() const;
+    virtual void mSetAlignStatus( bool xAlignStatus );
 
     virtual QString mDump( bool xCompacted ) const;
     virtual void mDump( QJsonObject& xTS ) const;
-
 protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );
@@ -264,7 +269,7 @@ public:
     bool mSetStateStatus( const QList< int > & xStateStatuses ); // returns true if state changed, if none is the only item sent in, it clears, if individual it is ignored
     bool mAddStateStatus( int xStateStatus ); // returns true if state add, false if already set, none is sent in, its ignored
     bool mRemoveStateStatus( int xStateStatus ); // returns true if state removed, false if already set
-    QList< int > mStateStatuses() const; // guaranteed to never be empty, eNone is always returned if needed
+    QList< int > mStateStatuses( bool xLocalOnly ) const; // guaranteed to never be empty, eNone is always returned if needed
 
     void mSetHidden( bool xHidden );
     bool mIsHidden() const;

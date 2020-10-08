@@ -694,6 +694,7 @@ public:
             return dParent->dImpl->mGetHeader();
         return nullptr;
     }
+
     int mCreateTreeWidgetItem( int xIndex )
     {
         if ( !dParent || !dParent->dImpl )
@@ -1047,7 +1048,6 @@ public:
 
     void mSetSummarizeStatus( bool xSummarizeStatus )
     {
-        QString lName = mFullText( '.' );
         if ( dHeader )
         {
             dHeader->mSetSummarizeStatus( xSummarizeStatus );
@@ -1371,6 +1371,7 @@ public:
             dFlowWidget->repaint();
         }
     }
+
     bool mElideText() const
     {
         return dElideText;
@@ -1711,7 +1712,9 @@ bool CFlowWidgetItemImpl::mSetData( int xRole, const QVariant& xData, bool xSetS
     if ( dTreeWidgetItem )
         dTreeWidgetItem->setData( 0, xRole, xData );
 
-    dData.erase( xRole );
+    auto pos = dData.find( xRole );
+    if ( pos != dData.end() )
+        dData.erase( pos );
     dData[ xRole ] = xData;
     if ( !dTreeWidgetItem )
         emit mFlowWidget()->sigFlowWidgetItemChanged( dContainer );
@@ -1863,6 +1866,7 @@ void CFlowWidgetImpl::mUpdateTabs()
         lAfter = lHeader == lLastButton;
         ++lIndex;
     }
+    (void)lAfter;
 }
 
 CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* xParent ) :
@@ -2027,7 +2031,6 @@ void CFlowWidgetHeader::mSetAlignStatus( bool xAlignStatus )
     repaint();
     dTreeWidget->viewport()->update();
 }
-
 
 CFlowWidget* CFlowWidgetHeader::mFlowWidget() const
 {
@@ -2292,7 +2295,6 @@ QSize CFlowWidgetHeader::mGetTextSize() const
 
     return total.expandedTo( QApplication::globalStrut() );
 }
-
 
 QSize CFlowWidgetHeader::sizeHint() const
 {
@@ -2927,7 +2929,7 @@ bool CFlowWidget::mAlignStatus() const
 
 std::pair< bool, QString > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, const QString & xFileName ) const
 {
-    std::pair< bool, QString > lRetVal = { false, QString() };
+    auto lRetVal = std::make_pair( false, QString() );
 
     if ( dFindIcon )
         lRetVal = dFindIcon( xRelToDir, xFileName );
@@ -2943,8 +2945,6 @@ std::pair< bool, QString > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, co
 
     return lRetVal;
 }
-
-
 
 std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xStepElement, const QDir & xRelToDir, CFlowWidgetItem* xParent ) // if nullptr then load it as a top level element
 {
