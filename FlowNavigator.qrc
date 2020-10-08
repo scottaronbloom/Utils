@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/FlowNavigatorResources">
+        <file alias="readyToRun.svg">resources/readyToRun.svg</file>
+        <file alias="running.svg">resources/running.svg</file>
+        <file alias="runCompletedWithWarning.svg">resources/runCompletedWithWarning.svg</file>
+        <file alias="runCompletedWithError.svg">resources/runCompletedWithError.svg</file>
+        <file alias="runCompletedWithInfo.svg">resources/runCompletedWithInfo.svg</file>
+        <file alias="runPassed.svg">resources/runPassed.svg</file>
+    </qresource>
+</RCC>

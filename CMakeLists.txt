@@ -60,6 +60,7 @@ endif()
 project( SABUtils )
 
 AddQtIncludes()
+set(SAB_MOC_OPTIONS "-DNON_VIS_BUILD=1")
 
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
@@ -82,7 +83,6 @@ add_library(SABUtils STATIC
 )
 
 add_definitions( -DNON_VIS_BUILD=1 )
-set(SAB_MOC_OPTIONS -D NON_VIS_BUILD=1)
 set_target_properties( SABUtils PROPERTIES FOLDER Libs )
 add_subdirectory(UnitTests)
 add_subdirectory(QtUnitTests)

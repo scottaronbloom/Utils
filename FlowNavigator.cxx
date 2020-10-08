@@ -1,10 +1,11 @@
 // #undef QT_NO_DEBUG_OUTPUT
 #include "FlowNavigator.h"
+#ifndef NON_VIS_BUILD
 #include "windowMgr.h"
 
 #include "vis_lfk.h"
 #include "visIconMgr.h"
-
+#endif
 
 #include <QAbstractButton>
 #include <QStyleOptionToolBox>
@@ -36,6 +37,7 @@
 #include <algorithm>
 
 
+#ifndef NON_VIS_BUILD
 std::function< CFlowWidget*() > CFlowNavigator::dInitFunction;
 void CFlowNavigator::mSetInitFunction( const std::function< CFlowWidget*() > & xFunction )
 {
@@ -137,7 +139,8 @@ CFlowNavigator::CFlowNavigator() :
 CFlowNavigator::~CFlowNavigator()
 {
 }
-    
+#endif
+
 using TFlowWidgetItems = std::vector< std::unique_ptr< CFlowWidgetItem > >;
 using TDataMap = std::map< int, QVariant >;
 
@@ -3099,12 +3102,14 @@ std::pair< bool, QIcon > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, cons
 {
     auto lRetVal = std::make_pair( false, QIcon() );
 
+#ifndef NON_VIS_BUILD
     if ( !xFileName.startsWith( ":" ) )
     {
         auto lIconFromMgr = hIcon->mGetIconDef( xFileName, QString(), QString() );
         if ( lIconFromMgr )
             return std::make_pair( true, *lIconFromMgr->mGetIcon() );
     }
+#endif
     if ( QFileInfo::exists( xRelToDir.absoluteFilePath( xFileName ) ) )
         return std::make_pair( true, QIcon( xRelToDir.absoluteFilePath( xFileName ) ) );
 

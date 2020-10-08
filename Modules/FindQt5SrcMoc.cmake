@@ -47,18 +47,36 @@ macro(SAB_QT5_MAKE_OUTPUT_FILE infile prefix ext outfile )
     set(${outfile} ${outpath}/${prefix}${_outfile}.${ext})
 endmacro()
 
+function(SAB_qt5_generate_moc infile outfile moc_options )
+    set(_QT5_INTERNAL_SCOPE ON)
+
+    # get include dirs and flags
+    qt5_get_moc_flags(moc_flags)
+    get_filename_component(abs_infile ${infile} ABSOLUTE)
+    set(_outfile "${outfile}")
+    if(NOT IS_ABSOLUTE "${outfile}")
+        set(_outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfile}")
+    endif()
+    if ("x${ARGV2}" STREQUAL "xTARGET")
+        set(moc_target ${ARGV3})
+    endif()
+    qt5_create_moc_command(${abs_infile} ${_outfile} "${moc_flags}" "${moc_options}" "${moc_target}" "")
+endfunction()
+
 FUNCTION(SAB_WRAP_SRCMOC outfiles)
 
     set( options )
+    set( multiValueArgs OPTIONS )
 
-    cmake_parse_arguments( _SAB_WRAP_SRCMOC "${options}" "" "" ${ARGN} )
+    cmake_parse_arguments( _SAB_WRAP_SRCMOC "${options}" "" "${multiValueArgs}" ${ARGN} )
     set( src_moc_files ${_SAB_WRAP_SRCMOC_UNPARSED_ARGUMENTS} )
+    set( moc_options ${_SAB_WRAP_SRCMOC_OPTIONS} )
 
     foreach( it ${src_moc_files} )
         get_filename_component(it ${it} ABSOLUTE)
         sab_qt5_make_output_file( ${it} "" moc.h outfile)
 
-        QT5_GENERATE_MOC( ${it} ${outfile} )
+        SAB_QT5_GENERATE_MOC( ${it} ${outfile} ${moc_options})
         set_property(SOURCE ${outfile} PROPERTY HEADER_FILE_ONLY ON)
         list(APPEND ${outfiles} ${outfile})
     endforeach()
