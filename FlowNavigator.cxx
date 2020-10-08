@@ -908,7 +908,7 @@ public:
         return nullptr;
     }
 
-    void mClearStateStatusIconRole( bool xUpdateParents );
+    void mClearStateStatusIconRole( bool xUpdateParents, bool xUpdateChildren );
     void mUpdateStateStatusIconRole( bool xUpdateParents );
     void mClearData( int xRole )
     {
@@ -940,39 +940,7 @@ public:
         return QVariant();
     }
 
-    QVariant mGetStateStatusRoleRecursive() const
-    {
-        auto pos = dData.find( CFlowWidgetItem::eStateStatusRole );
-        if ( pos != dData.end() )
-        {
-            auto lAsList = (*pos).second.value< QList< int > >();
-            if ( !lAsList.isEmpty() ) // if some one cleared it out
-            {
-                if ( (lAsList.count() != 1) || (lAsList[ 0 ] != CFlowWidget::EStates::eNone) )
-                    return (*pos).second;
-            }
-        }
-        if ( !dSummarizeStatus )
-            return QVariant();
-        
-        QList< int > lRetVal;
-        for ( int ii = 0; ii < mChildCount(); ++ii )
-        {
-            auto lChild = mGetChild( ii );
-            if ( lChild )
-            {
-                auto lChildStates = lChild->dImpl->mGetStateStatusRoleRecursive().value< QList< int > >();
-                for ( int ii = 0; ii < lChildStates.count(); ++ii )
-                {
-                    if ( lChildStates[ ii ] == CFlowWidget::EStates::eNone )
-                        continue;
-                    if ( lRetVal.indexOf( lChildStates[ ii ] ) == -1 )
-                        lRetVal.push_back( lChildStates[ ii ] );
-                }
-            }
-        }
-        return QVariant::fromValue< QList< int > >( lRetVal );
-    }
+    QVariant mGetStateStatusRoleRecursive() const;
 
     void mSetText( const QString& text )
     {
@@ -1227,7 +1195,7 @@ public:
         {
             ii->dImpl->mSetSummarizeStatus( xSummarizeStatus );
         }
-        mClearStateStatusIconRole( false );
+        mClearStateStatusIconRole( false, false );
     }
 
     void mSetAlignStatus( bool xAlignStatus )
@@ -1245,6 +1213,14 @@ public:
         if ( !dHeader )
             return 0;
         return dHeader->mGetTextSize().width();
+    }
+
+    void mForceRepaint()
+    {
+        if ( dHeader )
+            dHeader->mForceRepaint();
+        else if ( dTreeWidgetItem )
+            dTreeWidgetItem->treeWidget()->viewport()->update();
     }
 
     CFlowWidgetItem* dContainer{ nullptr };
@@ -1586,6 +1562,21 @@ public:
         return dHeaderTextWidth;
     }
     std::pair<bool, QIcon> mFindIcon( const QDir& lDir, const QString& xFileName ) const;
+    void mSetMergeStatesFunction( const std::function< QList< int >( CFlowWidgetItem* xParent, const QList< int >& lParentLocalStates, const QList< QList< int > >& xChildStates ) >& xMergeStatesFunc )
+    {
+        dMergeStatesFunc = xMergeStatesFunc;
+        for( auto && ii : dTopLevelItems )
+        {
+            ii->dImpl->mForceRepaint();
+        }
+        for( auto && ii : dTopLevelItems )
+        {
+            ii->dImpl->mClearStateStatusIconRole( false, true );
+        }
+
+        dFlowWidget->repaint();
+    }
+
 
     QVBoxLayout* fTopLayout{ nullptr };
     CFlowWidget* dFlowWidget{ nullptr };
@@ -1599,6 +1590,7 @@ public:
     bool dSummarizeStatus{ false };
     bool dAlignStatus{ false };
     mutable int dHeaderTextWidth{ -1 };
+    std::function< QList< int >( CFlowWidgetItem * xParent, const QList< int > & lParentLocalStates, const QList< QList< int > > & xChildStates ) > dMergeStatesFunc;
 };
 
 CFlowWidgetItem::CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon )
@@ -1872,12 +1864,20 @@ void CFlowWidgetItemImpl::mClearWidgets( bool xClearCurrent )
     }
 }
 
-void CFlowWidgetItemImpl::mClearStateStatusIconRole( bool xUpdateParent )
+void CFlowWidgetItemImpl::mClearStateStatusIconRole( bool xUpdateParent, bool xUpdateChildren )
 {
     dIconsNeedComputing = true;
     mClearData( CFlowWidgetItem::eStateIconsRole );
     if ( xUpdateParent && dParent )
-        dParent->dImpl->mClearStateStatusIconRole( xUpdateParent );
+        dParent->dImpl->mClearStateStatusIconRole( xUpdateParent, false );
+    if ( xUpdateChildren )
+    {
+        for ( auto&& ii : dChildren )
+        {
+            ii->dImpl->mClearStateStatusIconRole( false, xUpdateChildren );
+        }
+    }
+
 }
 
 void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent )
@@ -1932,10 +1932,52 @@ bool CFlowWidgetItemImpl::mSetData( int xRole, const QVariant& xData, bool xSetS
 
     if ( xRole == CFlowWidgetItem::eStateStatusRole )
     {
-        mClearStateStatusIconRole( true );
+        mClearStateStatusIconRole( true, false );
     }
 
     return true;
+}
+
+QVariant CFlowWidgetItemImpl::mGetStateStatusRoleRecursive() const
+{
+    auto lMyValue = mData( CFlowWidgetItem::eStateStatusRole, true );
+    auto lAsList = lMyValue.value< QList< int > >();
+    lAsList.removeAll( CFlowWidget::EStates::eNone );
+
+    if ( !lAsList.isEmpty() || !dSummarizeStatus )
+        return lMyValue;
+
+    QList< QList< int > > lChildStates;
+    for ( int ii = 0; ii < mChildCount(); ++ii )
+    {
+        auto lChild = mGetChild( ii );
+        if ( lChild )
+        {
+            auto lCurrChildStates = lChild->dImpl->mGetStateStatusRoleRecursive().value< QList< int > >();
+            lChildStates << lCurrChildStates;
+        }
+    }
+
+    QList< int > lRetVal;
+    if ( mFlowWidget()->dImpl->dMergeStatesFunc )
+    {
+        lRetVal = mFlowWidget()->dImpl->dMergeStatesFunc( dContainer, lAsList, lChildStates );
+    }
+    else
+    {
+        for ( int ii = 0; ii < lChildStates.count(); ++ii )
+        {
+            auto lCurrChildStates = lChildStates[ ii ];
+            for ( int ii = 0; ii < lCurrChildStates.count(); ++ii )
+            {
+                if ( lCurrChildStates[ ii ] == CFlowWidget::EStates::eNone )
+                    continue;
+                if ( lRetVal.indexOf( lCurrChildStates[ ii ] ) == -1 )
+                    lRetVal.push_back( lCurrChildStates[ ii ] );
+            }
+        }
+    }
+    return QVariant::fromValue< QList< int > >( lRetVal );
 }
 
 bool CFlowWidgetItemImpl::mSetStateStatus( QList< int > xStateStatuses )
@@ -3254,6 +3296,11 @@ QVariant CFlowWidgetTreeWidgetItem::data( int xColumn, int xRole ) const
     if ( retVal.isValid() )
         return retVal;
     return QTreeWidgetItem::data( xColumn, xRole );
+}
+
+void CFlowWidget::mSetMergeStatesFunction( const std::function< QList< int >( CFlowWidgetItem* xParent, const QList< int >& lParentLocalStates, const QList< QList< int > >& xChildStates ) >& xMergeStatesFunc )
+{
+    dImpl->mSetMergeStatesFunction( xMergeStatesFunc );
 }
 
 

@@ -12,6 +12,7 @@
 
 #include <QFrame>
 #include <QIcon>
+#include <functional>
 #include <memory>
 
 class QScrollArea;
@@ -172,6 +173,9 @@ public:
 
     virtual QString mDump( bool xCompacted ) const;
     virtual void mDump( QJsonObject& xTS ) const;
+
+    virtual void mSetMergeStatesFunction( const std::function< QList< int >( CFlowWidgetItem* xParent, const QList< int >& lParentLocalStates, const QList< QList< int > >& xChildStates ) > & xMergeStatesFunc );
+
 protected Q_SLOTS:
     virtual void slotOpenTopLevelItem( int xIndex );
     virtual void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );
