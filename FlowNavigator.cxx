@@ -1,4 +1,3 @@
-// #undef QT_NO_DEBUG_OUTPUT
 #include "FlowNavigator.h"
 #ifndef NON_VIS_BUILD
 #include "windowMgr.h"

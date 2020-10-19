@@ -1,4 +1,3 @@
-#undef QT_NO_DEBUG_OUTPUT
 // The MIT License( MIT )
 //
 // Copyright( c ) 2020 Scott Aron Bloom
