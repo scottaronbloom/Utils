@@ -155,7 +155,12 @@ ELSE()
     set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -DQT_DEBUG")
     set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -fPIC")
 ENDIF()
-add_definitions( -DQT_NO_DEBUG_OUTPUT )
+
+add_compile_options(
+    "$<$<CONFIG:Release>:-DQT_NO_DEBUG_OUTPUT>" 
+    "$<$<CONFIG:RelWithDebInfo>:-DQT_NO_DEBUG_OUTPUT>" 
+    "$<$<CONFIG:MinSizeRel>:-DQT_NO_DEBUG_OUTPUT>" 
+    )
 add_definitions( -DQT_STRICT_ITERATORS )
 add_definitions( -DQT_CC_WARNINGS -DQT_NO_WARNINGS )
 IF(WIN32)
