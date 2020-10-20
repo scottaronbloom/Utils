@@ -1,3 +1,4 @@
+// #undef QT_NO_DEBUG_OUTPUT
 #include "FlowNavigator.h"
 #ifndef NON_VIS_BUILD
 #include "windowMgr.h"
@@ -48,9 +49,6 @@ QObject* CFlowNavigator::mCreateWindow( int xId, const QStringList& xArgs )
     // vxcClient::get()->mReport( QString("CFlowNavigator::mCreateWindow: {%1}" ).arg( xArgs.join( " " ) ) );
 
     QString lFileName;
-    bool lInit = false;
-    bool lAlignStatus = false;
-    bool lSummarizeStatus = false;
     for ( int ii = 0; ii < xArgs.count(); ++ii )
     {
         if ( xArgs[ ii ] == "-xml" )
@@ -61,28 +59,17 @@ QObject* CFlowNavigator::mCreateWindow( int xId, const QStringList& xArgs )
                 lFileName = xArgs[ ii ];
             }
         }
-        else if ( xArgs[ ii ] == "-init" )
-        {
-            lInit = true;
-        }
-        else if ( xArgs[ ii ] == "-align_status" )
-        {
-            lAlignStatus = true;
-        }
-        else if ( xArgs[ ii ] == "-summarize_status" )
-        {
-            lSummarizeStatus = true;
-        }
     }
-
-    if ( !lInit && !hApp->mGetStartupComplete() && lFileName.isEmpty() )
-        return nullptr;
 
     auto lRetVal = new CFlowNavigator;
     if ( !lFileName.isEmpty() )
-        lRetVal->mGetFlowWidget()->mLoadFromXML( lFileName );
-    lRetVal->mGetFlowWidget()->mSetSummarizeStatus( lSummarizeStatus );
-    lRetVal->mGetFlowWidget()->mSetAlignStatus( lAlignStatus );
+    {
+        auto lAOK = lRetVal->mGetFlowWidget()->mLoadFromXML( lFileName );
+        if ( !lAOK.first )
+            vxcClient::get()->mReport( QString("Error loading Flow Navigator XML: $1" ).arg( lAOK.second ) );
+        delete lRetVal;
+        lRetVal = nullptr;
+    }
 
     return lRetVal;
 }
@@ -90,6 +77,43 @@ QObject* CFlowNavigator::mCreateWindow( int xId, const QStringList& xArgs )
 static void sPrintLFKMessage( const char* xMsg )
 {
     fprintf( stderr, "LFK: %s\n", xMsg );
+}
+
+bool CFlowNavigator::mWrite(QDomDocument& xDocument,QDomElement& xElement)
+{
+	xElement.setAttribute( "XMLFileName", dFlowWidget->mGetXMLFileName() );
+	xElement.setAttribute( "AlignStatus", dFlowWidget->mAlignStatus() ? 1 : 0 );
+	xElement.setAttribute( "SummarizeStatus", dFlowWidget->mSummarizeStatus() ? 1 : 0 );
+	xElement.setAttribute( "ElideText", dFlowWidget->mElideText() ? 1 : 0 );
+
+	return true;
+}
+
+bool CFlowNavigator::mRead(QDomElement& xElement)
+{
+	if ( xElement.hasAttribute( "XMLFileName" ) )
+	{
+		auto lXMLFile = xElement.attribute( "XMLFileName" );
+		if ( !lXMLFile.isEmpty() && QFileInfo( lXMLFile ).exists() )
+			dFlowWidget->mLoadFromXML( lXMLFile );
+	}
+	if ( xElement.hasAttribute( "AlignStatus" ) )
+	{
+		auto lValue = xElement.attribute( "AlignStatus" ).toInt() != 0;
+		dFlowWidget->mSetAlignStatus( lValue );
+	}
+	if ( xElement.hasAttribute( "SummarizeStatus" ) )
+	{
+		auto lValue = xElement.attribute( "SummarizeStatus" ).toInt() != 0;
+		dFlowWidget->mSetSummarizeStatus( lValue );
+	}
+	if ( xElement.hasAttribute( "ElideText" ) )
+	{
+		auto lValue = xElement.attribute( "ElideText" ).toInt() != 0;
+		dFlowWidget->mSetElideText( lValue );
+	}
+
+	return true;
 }
 
 bool CFlowNavigator::mIsEnabled()
@@ -151,6 +175,23 @@ static QString dumpRect( const QRect& xRect )
 }
 #endif
 
+CFlowWidgetItem * mFindItem( const TFlowWidgetItems & xChildren, const QStringList & xPath )
+{
+	if ( xPath.isEmpty() )
+		return nullptr;
+	for( auto && ii : xChildren )
+	{
+		if ( ii->mText() == xPath[ 0 ] )
+		{
+			if ( xPath.length() == 1 )
+				return ii.get();
+
+			return ii->mFindItem( xPath.mid( 1 ) );
+		}
+	}
+	return nullptr;
+}
+
 // from QItemDelegatePrivate::textLayoutBounds
 static QRect mTextLayoutBounds( const QRect& xRect, int lMargin, bool xElideText )
 {
@@ -191,15 +232,15 @@ static int mComputeMaxAllowedTextWidth( int xFullWidth, const QPixmap& xIdentity
     return lRetVal;
 }
 
-static std::pair< int, QString > mComputeTextWidth( const QFontMetrics& lFM, const QString& xText, const std::pair< bool, int >& xMinWidth, const std::pair< bool, int >& xMaxWidth )
+static std::pair< int, QString > mComputeTextWidth( QSize lRetVal, const QFontMetrics& lFM, const QString& xText, const std::pair< bool, int >& xMinWidth, const std::pair< bool, int >& xMaxWidth )
 {
-    auto lRetVal = lFM.boundingRect( xText );
-    if ( xMaxWidth.first && (lRetVal.width() > xMaxWidth.second) )
+	if ( xMaxWidth.first && (lRetVal.width() > xMaxWidth.second) )
         lRetVal.setWidth( xMaxWidth.second );
     if ( xMinWidth.first && (lRetVal.width() < xMinWidth.second) )
         lRetVal.setWidth( xMinWidth.second );
 
     auto lElidedText = lFM.elidedText( xText, Qt::ElideRight, lRetVal.width() );
+
     while ( (lElidedText != xText) &&
             (!xMaxWidth.first || (lRetVal.width() < xMaxWidth.second)) )
     {
@@ -210,9 +251,10 @@ static std::pair< int, QString > mComputeTextWidth( const QFontMetrics& lFM, con
     return std::make_pair( lRetVal.width(), lElidedText );
 }
 
-static std::pair< int, QString > mComputeTextWidth( QStyleOptionToolBox& lOption, const std::pair< bool, int >& xMinWidth, const std::pair< bool, int >& xMaxWidth )
+static std::pair< int, QString > mComputeTextWidth( const QFontMetrics& lFM, const QString& xText, const std::pair< bool, int >& xMinWidth, const std::pair< bool, int >& xMaxWidth )
 {
-    return mComputeTextWidth( lOption.fontMetrics, lOption.text, xMinWidth, xMaxWidth );
+    auto lRetVal = lFM.boundingRect( xText );
+    return mComputeTextWidth( lRetVal.size(), lFM, xText, xMinWidth, xMaxWidth );
 }
 
 static std::pair< QRect, QString > mCalcDisplayRect( const QFont& lFont, QString lText, bool xElide, const QRect& xRect )
@@ -312,7 +354,7 @@ public:
     void mSetEnabled( bool xEnabled );
     bool mIsEnabled() const { return dEnabled.first && isEnabled(); }
 
-    bool mSelected() const;
+    bool mIsSelected() const;
     void mSetSelected( bool b ) { mSetExpanded( b ); }
 
     void mSetExpanded( bool xExpanded );
@@ -363,7 +405,8 @@ public:
         repaint();
         dTreeWidget->viewport()->update();
     }
-    QSize mGetTextSize() const; // include identity icon and text
+    QSize mGetHeaderSize( bool xIncludeBoldOnSelect ) const; // include identity icon and text
+    QSize mGetTextSize( bool xIncludeBoldOnSelect ) const; // text only
 Q_SIGNALS:
     void sigDoubleClicked();
 protected:
@@ -717,9 +760,34 @@ public:
 
     void mSetAttribute( const QString& xAttributeName, const QString& xValue )
     {
-        auto lCurrentAttributes = mData( CFlowWidgetItem::eAttributesRole, true ).toMap();
-        lCurrentAttributes.insert( xAttributeName, xValue );
-        mSetData( CFlowWidgetItem::eAttributesRole, lCurrentAttributes );
+        auto lAttributes = mData( CFlowWidgetItem::eAttributesRole, true ).toMap();
+        lAttributes.insert( xAttributeName, xValue );
+        auto lVariant = lAttributes.count() ? lAttributes : QVariant();
+        mSetData( CFlowWidgetItem::eAttributesRole, lVariant );
+    }
+
+    void mSetAttributes( const std::list< std::pair< QString, QString > > & xAttributes )
+    {
+    	QMap< QString, QVariant > lAttributes;
+    	for( auto && ii : xAttributes )
+    	{
+    		lAttributes[ ii.first ] = ii.second;
+    	}
+
+        auto lVariant = lAttributes.count() ? lAttributes : QVariant();
+        mSetData( CFlowWidgetItem::eAttributesRole, lVariant );
+    }
+
+    void mAddAttributes( const std::list< std::pair< QString, QString > > & xAttributes )
+    {
+        auto lAttributes = mData( CFlowWidgetItem::eAttributesRole, true ).toMap();
+    	for( auto && ii : xAttributes )
+    	{
+    		lAttributes[ ii.first ] = ii.second;
+    	}
+
+        auto lVariant = lAttributes.count() ? lAttributes : QVariant();
+        mSetData( CFlowWidgetItem::eAttributesRole, lVariant );
     }
 
     QString mGetAttribute( const QString& xAttributeName ) const
@@ -911,9 +979,9 @@ public:
     void mUpdateStateStatusIconRole( bool xUpdateParents );
     void mClearData( int xRole )
     {
-        auto pos = dData.find( xRole );
-        if ( pos != dData.end() )
-            dData.erase( pos );
+        auto pos = dVariantData.find( xRole );
+        if ( pos != dVariantData.end() )
+        	dVariantData.erase( pos );
     }
 
     bool mSetData( int xRole, const QVariant& xData, bool xSetState = true );
@@ -925,15 +993,15 @@ public:
             return mGetStateStatusRoleRecursive();
         }
 
-        auto pos = dData.find( xRole );
-        if ( (xRole == CFlowWidgetItem::eStateIconsRole) && dIconsNeedComputing && (pos == dData.end()) )
+        auto pos = dVariantData.find( xRole );
+        if ( (xRole == CFlowWidgetItem::eStateIconsRole) && dIconsNeedComputing && (pos == dVariantData.end()) )
         {
             auto lNonConst = const_cast<CFlowWidgetItemImpl*>(this);
             lNonConst->mUpdateStateStatusIconRole( false );
-            pos = dData.find( xRole );
+            pos = dVariantData.find( xRole );
         }
 
-        if ( pos != dData.end() )
+        if ( pos != dVariantData.end() )
             return (*pos).second;
 
         return QVariant();
@@ -941,15 +1009,7 @@ public:
 
     QVariant mGetStateStatusRoleRecursive() const;
 
-    void mSetText( const QString& text )
-    {
-        dText = text;
-        if ( dHeader )
-            dHeader->mSetText( text );
-        else if ( dTreeWidgetItem )
-            dTreeWidgetItem->setText( 0, text );
-        mSetHeaderWidthNeedsUpdate();
-    }
+    void mSetText( const QString& text );
 
     QString mText() const
     {
@@ -991,7 +1051,9 @@ public:
         return false;
     }
 
-    bool mSetStateStatus( QList< int > xStateStatus );
+    bool mSetStateStatuses( const QStringList & xStateStatuses, bool & aOK );
+    bool mAddStateStatuses( const QStringList & xStateStatuses, bool & aOK );
+    bool mSetStateStatuses( QList< int > xStateStatus );
 
     bool mAddStateStatus( int xStateStatus )
     {
@@ -1001,7 +1063,7 @@ public:
         if ( lStates.indexOf( xStateStatus ) == -1 )
         {
             lStates.push_back( xStateStatus );
-            return mSetStateStatus( lStates );
+            return mSetStateStatuses( lStates );
         }
         else
             return false;
@@ -1014,7 +1076,7 @@ public:
 
         auto lStates = mData( CFlowWidgetItem::eStateStatusRole, true ).value< QList< int > >();
         if ( lStates.removeAll( xStateStatus ) )
-            return mSetStateStatus( lStates );
+            return mSetStateStatuses( lStates );
         else
             return false;
     }
@@ -1027,6 +1089,15 @@ public:
             lStates.push_back( CFlowWidget::eNone );
         }
         return lStates;
+    }
+
+    QStringList mStateStatusStrings( bool xLocalOnly ) const
+    {
+    	auto lStates = mStateStatuses( xLocalOnly );
+    	QStringList lRetVal;
+    	for( auto && ii : lStates )
+    		lRetVal << mFlowWidget()->mGetStateStatus( ii ).dStateDesc;
+    	return lRetVal;
     }
 
     static bool mIsStateDisabled( const QList< int >& xStates )
@@ -1093,11 +1164,11 @@ public:
         }
     }
 
-    bool mSelected() const
+    bool mIsSelected() const
     {
         if ( dHeader )
         {
-            dHeader->mSelected();
+            dHeader->mIsSelected();
         }
         else if ( dTreeWidgetItem )
         {
@@ -1143,23 +1214,28 @@ public:
         dHeader->mAddChildren( dChildren );
     }
 
-    void mDump( QJsonObject& xJSON, bool xRecursive ) const
+    void mDump( QJsonObject& xJSON, bool xBrief, bool xRecursive ) const
     {
         xJSON[ "StepID" ] = dStepID;
         xJSON[ "Text" ] = dText;
-        xJSON[ "ToolTip" ] = dToolTip;
-        xJSON[ "HasIcon" ] = !dIcon.isNull();
-        xJSON[ "Disabled" ] = mIsDisabled();
-        xJSON[ "Visible" ] = mIsVisible();
-        QJsonArray lDataArray;
-        for ( auto&& ii : dData )
+        if ( !xBrief )
         {
-            QJsonObject lCurr;
-            lCurr[ QString::number( ii.first ) ] = ii.second.toString();
-            lDataArray.push_back( lCurr );
+			xJSON[ "ToolTip" ] = dToolTip;
+			xJSON[ "HasIcon" ] = !dIcon.isNull();
+			xJSON[ "Disabled" ] = mIsDisabled();
+			xJSON[ "Visible" ] = mIsVisible();
+			xJSON[ "Expanded" ] = mIsExpanded();
+			xJSON[ "Selected" ] = mIsSelected();
+			QJsonArray lDataArray;
+			for ( auto&& ii : dVariantData )
+			{
+				QJsonObject lCurr;
+				lCurr[ QString::number( ii.first ) ] = ii.second.toJsonValue();
+				lDataArray.push_back( lCurr );
+			}
+			if ( lDataArray.size() )
+				xJSON[ "Data" ] = lDataArray;
         }
-        if ( lDataArray.size() )
-            xJSON[ "Data" ] = lDataArray;
 
         if ( xRecursive )
         {
@@ -1167,7 +1243,7 @@ public:
             for ( auto&& ii : dChildren )
             {
                 QJsonObject lCurr;
-                ii->mDump( lCurr, true );
+                ii->mDump( lCurr, xBrief, true );
                 lChildren.push_back( lCurr );
             }
             if ( lChildren.size() )
@@ -1211,7 +1287,7 @@ public:
     {
         if ( !dHeader )
             return 0;
-        return dHeader->mGetTextSize().width();
+        return dHeader->mGetTextSize( true ).width();
     }
 
     void mForceRepaint()
@@ -1220,6 +1296,11 @@ public:
             dHeader->mForceRepaint();
         else if ( dTreeWidgetItem )
             dTreeWidgetItem->treeWidget()->viewport()->update();
+    }
+
+    CFlowWidgetItem * mFindItem( const QStringList & xPath ) const
+    {
+    	return ::mFindItem( dChildren, xPath );
     }
 
     CFlowWidgetItem* dContainer{ nullptr };
@@ -1233,7 +1314,7 @@ public:
     QString dText;
     QString dToolTip;
     QIcon dIcon;
-    TDataMap dData;
+    TDataMap dVariantData;
     TFlowWidgetItems dChildren;
     bool dSummarizeStatus{ false };
     bool dAlignStatus{ false };
@@ -1314,8 +1395,7 @@ public:
         {
             dCurrentTopLevelItem = xItem;
             dFlowWidget->dImpl->mUpdateTabs();
-            if ( !xItem || !xItem->mIsDisabled() )
-                emit dFlowWidget->sigFlowWidgetItemSelected( xItem, true );
+            emit dFlowWidget->dImpl->emitFlowWidgetItemSelected( xItem, true );
         }
     }
 
@@ -1410,6 +1490,33 @@ public:
         return lRetVal;
     }
 
+    QList< int > mGetStates( const QStringList & xStateStatuses, bool & aOK ) const
+	{
+    	aOK = false;
+    	QList< int > lRetVal;
+    	for( auto && ii : xStateStatuses )
+    	{
+    		bool lFound = false;
+    		for( auto && jj : dStateStatusMap )
+    		{
+    			if ( jj.second.dStateDesc == ii )
+    			{
+    				lRetVal << jj.second.dStateID;
+    				lFound = true;
+    				break;
+    			}
+    		}
+    		if ( !lFound )
+    		{
+    			aOK = false;
+    			return QList< int >();
+    		}
+    	}
+
+    	aOK = true;
+    	return lRetVal;
+	}
+
     const CFlowWidgetItem* mTopLevelItem( int xIndex ) const;
     CFlowWidgetItem* mTopLevelItem( int xIndex );
 
@@ -1418,24 +1525,29 @@ public:
     void mRemoveTopLevelItem( int xIndex );
 
     void mToggleTopLevelItem( int index ); // if already open, close it, if closed open it
-    void mDump( QJsonObject& xJSON ) const
+    void mDump( QJsonObject& xJSON, bool xBrief ) const
     {
         if ( dCurrentTopLevelItem )
         {
             QJsonObject lCurrentObject;
-            dCurrentTopLevelItem->mDump( lCurrentObject, false );
+            dCurrentTopLevelItem->mDump( lCurrentObject, true, false ); // always brief
             xJSON[ "Current" ] = lCurrentObject;
         }
         else
         {
             xJSON[ "Current" ] = "nullptr";
         }
+        xJSON[ "ElideText" ] = dElideText;
+        xJSON[ "SummarizeStatus" ] = dSummarizeStatus;
+        xJSON[ "AlignStatus" ] = dAlignStatus;
+        xJSON[ "CustomMergeFunc" ] = dMergeStatesFunc ? true : false;
+        xJSON[ "XMLFileName" ] = dXMLFileName;
 
         QJsonArray lChildren;
         for ( auto&& ii : dTopLevelItems )
         {
             QJsonObject lCurr;
-            ii->mDump( lCurr, true );
+            ii->mDump( lCurr, xBrief, true );
             lChildren.append( lCurr );
         }
         if ( lChildren.size() )
@@ -1455,17 +1567,24 @@ public:
         return lRetVal;
     }
 
-    void mRegisterStateStatus( int xState, const QString& xDescription, const QIcon& xIcon, bool xInternal, bool xCheckForNullIcon )
+    bool mRegisterStateStatus( int xState, const QString& xDescription, const QIcon& xIcon, bool xInternal, bool xCheckForNullIcon )
     {
         Q_ASSERT( !xCheckForNullIcon || (!xIcon.isNull() && !xIcon.pixmap( 16, 16 ).isNull()) );
+        if ( xCheckForNullIcon )
+        {
+        	if ( xIcon.isNull() || xIcon.pixmap( 16, 16 ).isNull() )
+        		return false;
+        }
+
         if ( xInternal )
         {
             auto pos = dStateStatusMap.find( xState );
             Q_ASSERT( pos == dStateStatusMap.end() );
             if ( pos != dStateStatusMap.end() )
-                return;
+                return false;
         }
         dStateStatusMap[ xState ] = SRegisteredStatusInfo( xState, xDescription, xIcon, xInternal );
+        return true;
     }
 
     int mGetNextStatusID() const
@@ -1555,7 +1674,7 @@ public:
         {
             for ( auto&& ii : dTopLevelItems )
             {
-                dHeaderTextWidth = std::max( dHeaderTextWidth, ii->dImpl->mGetHeaderTextWidth() );
+                dHeaderTextWidth = qMax( dHeaderTextWidth, ii->dImpl->mGetHeaderTextWidth() );
             }
         }
         return dHeaderTextWidth;
@@ -1576,6 +1695,25 @@ public:
         dFlowWidget->repaint();
     }
 
+    CFlowWidgetItem * mFindItem( const QStringList & xPath ) const
+    {
+    	return ::mFindItem( dTopLevelItems, xPath );
+    }
+
+    void emitFlowWidgetItemSelected( CFlowWidgetItem * xItem, bool xSelected )
+    {
+    	if ( ( xItem == dLastSelectedItem.first ) && ( xSelected == dLastSelectedItem.second ) )
+    		return;
+
+    	if ( xItem && xItem->mText().isEmpty() )
+    		return;
+
+    	if ( !xItem || xItem->mIsDisabled() )
+    		emit dFlowWidget->sigFlowWidgetItemSelected( nullptr, false );
+    	else
+    		emit dFlowWidget->sigFlowWidgetItemSelected( xItem, xSelected );
+    	dLastSelectedItem = std::make_pair( xItem, xSelected );
+    }
 
     QVBoxLayout* fTopLayout{ nullptr };
     CFlowWidget* dFlowWidget{ nullptr };
@@ -1585,11 +1723,13 @@ public:
     TFlowWidgetItems dTopLevelItems;
 
     std::unordered_map< int, SRegisteredStatusInfo > dStateStatusMap;
+    std::pair< CFlowWidgetItem *, bool > dLastSelectedItem{nullptr, false};
     bool dElideText{ false };
     bool dSummarizeStatus{ false };
     bool dAlignStatus{ false };
     mutable int dHeaderTextWidth{ -1 };
     std::function< QList< int >( CFlowWidgetItem * xParent, const QList< int > & lParentLocalStates, const QList< QList< int > > & xChildStates ) > dMergeStatesFunc;
+    QString dXMLFileName;
 };
 
 CFlowWidgetItem::CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon )
@@ -1735,6 +1875,21 @@ void CFlowWidgetItem::mSetText( const QString& xText )
     return dImpl->mSetText( xText );
 }
 
+void CFlowWidgetItemImpl::mSetText( const QString& text )
+{
+	bool lEmitSelected = dText.isEmpty() && mIsSelected();
+
+    dText = text;
+    if ( dHeader )
+        dHeader->mSetText( text );
+    else if ( dTreeWidgetItem )
+        dTreeWidgetItem->setText( 0, text );
+    mSetHeaderWidthNeedsUpdate();
+
+    if ( lEmitSelected )
+    	mFlowWidget()->dImpl->emitFlowWidgetItemSelected( dContainer, true );
+}
+
 QString CFlowWidgetItem::mText() const
 {
     return dImpl->mText();
@@ -1768,6 +1923,16 @@ QIcon CFlowWidgetItem::mIcon() const
 void CFlowWidgetItem::mSetAttribute( const QString& xAttributeName, const QString& xValue )
 {
     return dImpl->mSetAttribute( xAttributeName, xValue );
+}
+
+void CFlowWidgetItem::mSetAttributes( const std::list< std::pair< QString, QString > > & xAttributes )
+{
+    return dImpl->mSetAttributes( xAttributes );
+}
+
+void CFlowWidgetItem::mAddAttributes( const std::list< std::pair< QString, QString > > & xAttributes )
+{
+    return dImpl->mAddAttributes( xAttributes );
 }
 
 QString CFlowWidgetItem::mGetAttribute( const QString& xAttributeName ) const
@@ -1835,9 +2000,9 @@ void CFlowWidgetItem::mSetSelected( bool xSelected )
     dImpl->mFlowWidget()->mSelectFlowItem( this, xSelected, true );
 }
 
-bool CFlowWidgetItem::mSelected() const
+bool CFlowWidgetItem::mIsSelected() const
 {
-    return dImpl->mSelected();
+    return dImpl->mIsSelected();
 }
 
 bool CFlowWidgetItemImpl::mBeenPlaced() const
@@ -1895,7 +2060,8 @@ void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent )
             lIcons.push_back( lIcon );
     }
 
-    mSetData( CFlowWidgetItem::eStateIconsRole, QVariant::fromValue< QList< QIcon > >( lIcons ) );
+    auto lVariant = lIcons.count() ? QVariant::fromValue< QList< QIcon > >( lIcons ) : QVariant();
+    mSetData( CFlowWidgetItem::eStateIconsRole, lVariant );
 
     if ( xUpdateParent && dParent )
         dParent->dImpl->mUpdateStateStatusIconRole( xUpdateParent );
@@ -1911,15 +2077,24 @@ void CFlowWidgetItemImpl::mUpdateStateStatusIconRole( bool xUpdateParent )
 bool CFlowWidgetItemImpl::mSetData( int xRole, const QVariant& xData, bool xSetState /*= true */ )
 {
     // header data comes from here
-    auto pos = dData.find( xRole );
+    auto pos = dVariantData.find( xRole );
     QVariant lData;
-    if ( pos != dData.end() )
+    if ( pos != dVariantData.end() )
         lData = (*pos).second;
 
     if ( lData == xData )
         return false;
 
-    dData[ xRole ] = xData;
+    if ( xData.isValid() )
+    {
+    	dVariantData[ xRole ] = xData;
+    }
+    else
+    {
+    	if ( pos != dVariantData.end() )
+    		dVariantData.erase( pos );
+    }
+
     if ( !dTreeWidgetItem )
         emit mFlowWidget()->sigFlowWidgetItemChanged( dContainer );
 
@@ -1943,7 +2118,7 @@ QVariant CFlowWidgetItemImpl::mGetStateStatusRoleRecursive() const
     auto lAsList = lMyValue.value< QList< int > >();
     lAsList.removeAll( CFlowWidget::EStates::eNone );
 
-    if ( !lAsList.isEmpty() || !dSummarizeStatus )
+    if ( !dSummarizeStatus )
         return lMyValue;
 
     QList< QList< int > > lChildStates;
@@ -1964,22 +2139,52 @@ QVariant CFlowWidgetItemImpl::mGetStateStatusRoleRecursive() const
     }
     else
     {
-        for ( int ii = 0; ii < lChildStates.count(); ++ii )
-        {
-            auto lCurrChildStates = lChildStates[ ii ];
-            for ( int ii = 0; ii < lCurrChildStates.count(); ++ii )
-            {
-                if ( lCurrChildStates[ ii ] == CFlowWidget::EStates::eNone )
-                    continue;
-                if ( lRetVal.indexOf( lCurrChildStates[ ii ] ) == -1 )
-                    lRetVal.push_back( lCurrChildStates[ ii ] );
-            }
-        }
+    	if ( lAsList.isEmpty() )
+    	{
+			for ( int ii = 0; ii < lChildStates.count(); ++ii )
+			{
+				auto lCurrChildStates = lChildStates[ ii ];
+				for ( int ii = 0; ii < lCurrChildStates.count(); ++ii )
+				{
+					if ( lCurrChildStates[ ii ] == CFlowWidget::EStates::eNone )
+						continue;
+					if ( lRetVal.indexOf( lCurrChildStates[ ii ] ) == -1 )
+						lRetVal.push_back( lCurrChildStates[ ii ] );
+				}
+			}
+    	}
+    	else
+    		return lMyValue;
     }
     return QVariant::fromValue< QList< int > >( lRetVal );
 }
 
-bool CFlowWidgetItemImpl::mSetStateStatus( QList< int > xStateStatuses )
+bool CFlowWidgetItemImpl::mSetStateStatuses( const QStringList & xStateStatuses, bool & aOK )
+{
+	auto lStateStatuses = mFlowWidget()->dImpl->mGetStates( xStateStatuses, aOK );
+	if ( !aOK )
+	{
+		return false;
+	}
+	return mSetStateStatuses( lStateStatuses );
+}
+
+bool CFlowWidgetItemImpl::mAddStateStatuses( const QStringList & xStateStatuses, bool & aOK )
+{
+	auto lStateStatuses = mFlowWidget()->dImpl->mGetStates( xStateStatuses, aOK );
+	if ( !aOK )
+	{
+		return false;
+	}
+	bool lRetVal = false;
+	for( auto && ii : lStateStatuses )
+	{
+		lRetVal = mAddStateStatus( ii ) || lRetVal;
+	}
+	return lRetVal;
+}
+
+bool CFlowWidgetItemImpl::mSetStateStatuses( QList< int > xStateStatuses )
 {
     xStateStatuses.removeAll( CFlowWidget::EStates::eNone );
     auto lCurrData = mStateStatuses( true );
@@ -2033,17 +2238,28 @@ bool CFlowWidgetItem::mIsTopLevelItem() const
 
 bool CFlowWidgetItem::mSetStateStatus( int xStateStatus )
 {
-    return mSetStateStatus( QList< int >( { xStateStatus } ) );
+    return mSetStateStatuses( QList< int >( { xStateStatus } ) );
 }
 
-bool CFlowWidgetItem::mSetStateStatus( const QList< int >& xStateStatus )
+bool CFlowWidgetItem::mSetStateStatuses( const QList< int >& xStateStatus )
 {
-    return dImpl->mSetStateStatus( xStateStatus );
+    return dImpl->mSetStateStatuses( xStateStatus );
 }
 
 bool CFlowWidgetItem::mAddStateStatus( int xStateStatus )
 {
     return dImpl->mAddStateStatus( xStateStatus );
+}
+
+bool CFlowWidgetItem::mSetStateStatuses( const QStringList & xStateStatuses, bool & aOK ) // returns true if state changed if none is sent it, it clears all
+{
+    return dImpl->mSetStateStatuses( xStateStatuses, aOK );
+}
+
+bool CFlowWidgetItem::mAddStateStatuses( const QStringList & xStateStatuses, bool & aOK ) // returns true if state changed if none is sent it, it clears all
+{
+
+    return dImpl->mAddStateStatuses( xStateStatuses, aOK );
 }
 
 bool CFlowWidgetItem::mRemoveStateStatus( int xStateStatus )
@@ -2054,6 +2270,11 @@ bool CFlowWidgetItem::mRemoveStateStatus( int xStateStatus )
 QList< int > CFlowWidgetItem::mStateStatuses( bool xLocalOnly ) const
 {
     return dImpl->mStateStatuses( xLocalOnly );
+}
+
+QStringList CFlowWidgetItem::mStateStatusStrings( bool xLocalOnly ) const
+{
+	return dImpl->mStateStatusStrings( xLocalOnly );
 }
 
 void CFlowWidgetItem::mExpandAll()
@@ -2163,8 +2384,7 @@ CFlowWidgetHeader::CFlowWidgetHeader( CFlowWidgetItem* xContainer, CFlowWidget* 
              [this]()
     {
         auto lSelected = mSelectedItem();
-        if ( !lSelected || !lSelected->mIsDisabled() )
-            mFlowWidget()->sigFlowWidgetItemSelected( lSelected, true );
+        mFlowWidget()->dImpl->emitFlowWidgetItemSelected( lSelected, true );
     }
     );
 
@@ -2322,17 +2542,17 @@ void CFlowWidgetHeader::mAddChildren( const TFlowWidgetItems& xChildren )
     }
 }
 
-QString CFlowWidgetItem::mDump( bool xRecursive, bool xCompacted ) const
+QString CFlowWidgetItem::mDump( bool xCompacted, bool xBrief, bool xRecursive ) const
 {
     QJsonObject lObject;
-    mDump( lObject, xRecursive );
+    mDump( lObject, xBrief, xRecursive );
     auto lRetVal = QJsonDocument( lObject ).toJson( xCompacted ? QJsonDocument::Compact : QJsonDocument::Indented );
     return lRetVal;
 }
 
-void CFlowWidgetItem::mDump( QJsonObject& xJSON, bool xRecursive ) const
+void CFlowWidgetItem::mDump( QJsonObject& xJSON, bool xBrief, bool xRecursive ) const
 {
-    dImpl->mDump( xJSON, xRecursive );
+    dImpl->mDump( xJSON, xBrief, xRecursive );
 }
 
 CFlowWidgetItem* CFlowWidgetItem::mTakeChild( CFlowWidgetItem* xItem )
@@ -2477,8 +2697,8 @@ void CFlowWidgetHeader::mSetExpanded( bool xExpanded )
         auto lCurrSelected = dTreeWidget->selectedItems();
         for ( auto&& ii : lCurrSelected )
             ii->setSelected( false );
-        if ( !dContainer || !dContainer->mIsDisabled() )
-            emit mFlowWidget()->sigFlowWidgetItemSelected( dContainer, dSelected );
+
+        mFlowWidget()->dImpl->emitFlowWidgetItemSelected( dContainer, dSelected );
     }
 }
 
@@ -2528,24 +2748,41 @@ void CFlowWidgetHeader::mTakeFromLayout( QVBoxLayout* xLayout )
 
 }
 
-QSize CFlowWidgetHeader::mGetTextSize() const
+QSize CFlowWidgetHeader::mGetTextSize( bool xIncludeBoldOnSelect ) const
 {
-    QSize iconSize( 8, 8 );
+    auto lFont = font();
+    if ( xIncludeBoldOnSelect )
+    {
+    	QStyleOptionToolBox lOption;
+        initStyleOption( &lOption );
+        if ( style()->proxy()->styleHint( QStyle::SH_ToolBox_SelectedPageTitleBold, &lOption, this ) )
+        {
+        	lFont.setBold( true );
+        }
+    }
+
+    QSize lTextSize = QFontMetrics( lFont ).size( Qt::TextShowMnemonic, text() );
+    return lTextSize;
+}
+
+QSize CFlowWidgetHeader::mGetHeaderSize( bool xIncludeBoldOnSelect ) const
+{
+    QSize iconSize( 0, 0 );
     int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
     if ( !icon().isNull() )
     {
         iconSize += QSize( icone + 2, icone );
     }
-    QSize textSize = fontMetrics().size( Qt::TextShowMnemonic, text() ) + QSize( 0, 8 );
 
-    QSize total( iconSize.width() + textSize.width(), qMax( iconSize.height(), textSize.height() ) );
-
-    return total.expandedTo( QApplication::globalStrut() );
+    auto lTextSize = mGetTextSize( xIncludeBoldOnSelect );
+    QSize total( iconSize.width() + lTextSize.width(), qMax( iconSize.height(), lTextSize.height() ) );
+    total = total.expandedTo( QApplication::globalStrut() );
+    return total;
 }
 
 QSize CFlowWidgetHeader::sizeHint() const
 {
-    auto lTotal = mGetTextSize();
+    auto lTotal = mGetTextSize( false );
 
     int icone = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, mFlowWidget() );
     auto xStates = dContainer->mData( CFlowWidgetItem::ERoles::eStateStatusRole ).value< QList< int > >();
@@ -2573,11 +2810,20 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
     QStyleOptionToolBox lOption;
     initStyleOption( &lOption );
 
+    bool lSelected = lOption.state & QStyle::State_Selected;
     lPainter->save();
+
+    QFont lFont( lPainter->font() );
+    bool lBolded = lSelected && style()->proxy()->styleHint( QStyle::SH_ToolBox_SelectedPageTitleBold, &lOption, this );
+    if ( lBolded )
+    {
+    	lFont.setBold( true );
+        lPainter->setFont( lFont );
+    }
+
     style()->drawControl( QStyle::CE_ToolBoxTabShape, &lOption, lPainter, mFlowWidget() );
 
     bool lEnabled = lOption.state & QStyle::State_Enabled;
-    bool lSelected = lOption.state & QStyle::State_Selected;
     int lIconExtent = style()->proxy()->pixelMetric( QStyle::PM_SmallIconSize, &lOption, this );
     QPixmap lIdentityPixmap = lOption.icon.pixmap( this->window()->windowHandle(), QSize( lIconExtent, lIconExtent ), lEnabled ? QIcon::Normal : QIcon::Disabled );
 
@@ -2590,21 +2836,15 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
             lPixMaps.push_back( lPixmap );
     }
 
-    if ( lSelected && style()->proxy()->styleHint( QStyle::SH_ToolBox_SelectedPageTitleBold, &lOption, this ) )
-    {
-        QFont f( lPainter->font() );
-        f.setBold( true );
-        lPainter->setFont( f );
-    }
     QRect cr = style()->subElementRect( QStyle::SE_ToolBoxTabContents, &lOption, this );
     auto lHeaderTextMaxWidth = dAlignStatus ? mFlowWidget()->dImpl->mGetHeaderTextWidth() : -1;
 
     int lMaxWidth = mComputeMaxAllowedTextWidth( cr.width(), lIdentityPixmap, lPixMaps );
 
-    auto lElidedText = mComputeTextWidth( lOption, std::make_pair( true, lHeaderTextMaxWidth ), std::make_pair( dElideText, lMaxWidth - 4 ) );
+    auto lElidedText = mComputeTextWidth( mGetTextSize( lBolded ), lOption.fontMetrics, lOption.text, std::make_pair( dAlignStatus, lHeaderTextMaxWidth ), std::make_pair( dElideText, lMaxWidth - 4 ) );
 
     QRect lTextRect;
-    QRect lIdentyIconRect;
+    QRect lIdentityIconRect;
     if ( lIdentityPixmap.isNull() )
     {
         lTextRect = QRect( cr.left() + 4, cr.top(), lElidedText.first, cr.height() );
@@ -2614,9 +2854,9 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
         int lIconWidth = (lIdentityPixmap.width() / lIdentityPixmap.devicePixelRatio() + 4);
         int lIconHeight = (lIdentityPixmap.height() / lIdentityPixmap.devicePixelRatio());
 
-        lIdentyIconRect = QRect( cr.left() + 4, cr.top(), lIconWidth + 2, lIconHeight );
-        lTextRect = QRect( lIdentyIconRect.right(), cr.top(), lElidedText.first, cr.height() );
-        lPainter->drawPixmap( lIdentyIconRect.left(), (lOption.rect.height() - lIdentyIconRect.height()) / 2, lIdentityPixmap );
+        lIdentityIconRect = QRect( cr.left() + 4, cr.top(), lIconWidth + 2, lIconHeight );
+        lTextRect = QRect( lIdentityIconRect.right(), cr.top(), lElidedText.first, cr.height() );
+        lPainter->drawPixmap( lIdentityIconRect.left(), (lOption.rect.height() - lIdentityIconRect.height()) / 2, lIdentityPixmap );
     }
 
     int lAlign = Qt::AlignLeft | Qt::AlignVCenter | Qt::TextShowMnemonic;
@@ -2624,7 +2864,7 @@ void CFlowWidgetHeader::paintEvent( QPaintEvent* )
         lAlign |= Qt::TextHideMnemonic;
     style()->proxy()->drawItemText( lPainter, lTextRect, lAlign, lOption.palette, lEnabled, lElidedText.second, QPalette::ButtonText );
 
-    auto x1 = qMax( lTextRect.right(), lIdentyIconRect.right() ) + 4;
+    auto x1 = qMax( lTextRect.right(), lIdentityIconRect.right() ) + 4;
     for ( int ii = 0; ii < lPixMaps.count(); ++ii )
     {
         auto y1 = lOption.rect.height();
@@ -2702,6 +2942,7 @@ void CFlowWidget::slotExpandItem( CFlowWidgetItem* xItem, bool xExpand )
 
 void CFlowWidget::mSelectFlowItem( CFlowWidgetItem* xItem, bool xSelect, bool xExpand )
 {
+	bool lWasBlocked = blockSignals( true );
     auto lOrigItem = xItem;
     while ( xItem )
     {
@@ -2710,6 +2951,10 @@ void CFlowWidget::mSelectFlowItem( CFlowWidgetItem* xItem, bool xSelect, bool xE
         xItem->dImpl->mSetSelected( xSelect );
         xItem = xItem->mParentItem();
     }
+    if ( !lWasBlocked )
+    	blockSignals( false );
+    if ( xItem != lOrigItem )
+    	lOrigItem->dImpl->mSetSelected( xSelect );
     if ( lOrigItem->mIsTopLevelItem() )
     {
         dImpl->mSetCurrentTopLevelItem( lOrigItem );
@@ -2922,7 +3167,7 @@ void CFlowWidgetHeader::mSetEnabled( bool xEnabled )
     }
 }
 
-bool CFlowWidgetHeader::mSelected() const
+bool CFlowWidgetHeader::mIsSelected() const
 {
     return dSelected;
 }
@@ -2986,8 +3231,7 @@ int CFlowWidgetImpl::mInsertTopLevelItem( int xIndex, std::unique_ptr< CFlowWidg
 
         auto lItem = dTopLevelItems[ lIndex ].get();
         dFlowWidget->dImpl->mSetCurrentTopLevelItem( lItem );
-        if ( !lItem || !lItem->mIsDisabled() )
-            dFlowWidget->sigFlowWidgetItemSelected( lItem, true );
+        dFlowWidget->dImpl->emitFlowWidgetItemSelected( lItem, true );
     } );
 
     QObject::connect( lFlowItem->dImpl->dHeader, &CFlowWidgetHeader::sigDoubleClicked,
@@ -3108,7 +3352,12 @@ CFlowWidgetItem* CFlowWidget::mSelectedItem() const
 
 void CFlowWidget::mRegisterStateStatus( int xState, const QString& xDescription, const QIcon& xIcon )
 {
-    return dImpl->mRegisterStateStatus( xState, xDescription, xIcon, false, false );
+    dImpl->mRegisterStateStatus( xState, xDescription, xIcon, false, false );
+}
+
+bool CFlowWidget::mRegisterStateStatus( int xState, const QString& xDescription, const QString & xPath )
+{
+    return dImpl->mRegisterStateStatus( xState, xDescription, QIcon( xPath ), false, true );
 }
 
 int CFlowWidget::mGetNextStatusID() const
@@ -3136,15 +3385,15 @@ bool CFlowWidget::mElideText() const
     return dImpl->mElideText();
 }
 
-void CFlowWidget::mDump( QJsonObject& xJSON ) const
+void CFlowWidget::mDump( QJsonObject& xJSON, bool xBrief ) const
 {
-    dImpl->mDump( xJSON );
+    dImpl->mDump( xJSON, xBrief );
 }
 
-QString CFlowWidget::mDump( bool xCompacted ) const
+QString CFlowWidget::mDump( bool xCompacted, bool xBrief ) const
 {
     QJsonObject lObject;
-    mDump( lObject );
+    mDump( lObject, xBrief );
     auto lRetVal = QJsonDocument( lObject ).toJson( xCompacted ? QJsonDocument::Compact : QJsonDocument::Indented );
     return lRetVal;
 }
@@ -3152,6 +3401,11 @@ QString CFlowWidget::mDump( bool xCompacted ) const
 std::pair< bool, QString > CFlowWidget::mLoadFromXML( const QString& xFileName )
 {
     return dImpl->mLoadFromXML( xFileName );
+}
+
+QString CFlowWidget::mGetXMLFileName() const
+{
+	return dImpl->dXMLFileName;
 }
 
 void CFlowWidget::mSetSummarizeStatus( bool xSummarizeStatus )
@@ -3174,18 +3428,38 @@ bool CFlowWidget::mAlignStatus() const
     return dImpl->mAlignStatus();
 }
 
+// priority
+// if abs, has to exist
+// if QRC (relto or xfilename), search for it as filename relto dir
+// check icon system
+// check filesystem
 std::pair< bool, QIcon > CFlowWidgetImpl::mFindIcon( const QDir& xRelToDir, const QString& xFileName ) const
 {
     auto lRetVal = std::make_pair( false, QIcon() );
 
-#ifndef NON_VIS_BUILD
-    if ( !xFileName.startsWith( ":" ) )
+    // if its abs, it has to exist or
+    bool lIsRelative = QFileInfo( xFileName ).isRelative();
+    if ( !lIsRelative )
+	{
+    	if ( QFileInfo::exists( xFileName ) )
+    		return std::make_pair( true, QIcon( xRelToDir.absoluteFilePath( xFileName ) ) );
+    	return lRetVal;
+	}
+
+    // relative path where the dir is a QRC, never search the hIcon system
+    if ( xRelToDir.absolutePath().startsWith( ":" ) || xFileName.startsWith( ":" ) )
     {
-        auto lIconFromMgr = hIcon->mGetIconDef( xFileName, QString(), QString() );
-        if ( lIconFromMgr )
-            return std::make_pair( true, *lIconFromMgr->mGetIcon() );
+        if ( QFileInfo::exists( xRelToDir.absoluteFilePath( xFileName ) ) )
+            return std::make_pair( true, QIcon( xRelToDir.absoluteFilePath( xFileName ) ) );
     }
+
+#ifndef NON_VIS_BUILD
+    // relative file that is not a QRC based file, try to find it in the icon system
+	auto lIconFromMgr = hIcon->mGetIconDef( xFileName, QString(), QString() );
+	if ( lIconFromMgr )
+		return std::make_pair( true, *lIconFromMgr->mGetIcon() );
 #endif
+
     if ( QFileInfo::exists( xRelToDir.absoluteFilePath( xFileName ) ) )
         return std::make_pair( true, QIcon( xRelToDir.absoluteFilePath( xFileName ) ) );
 
@@ -3245,6 +3519,7 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QDomElement& xSt
 
 std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QString& xFileName )
 {
+	dXMLFileName.clear();
     QFile lFile( xFileName );
     if ( !lFile.open( QFile::ReadOnly | QFile::Text ) )
     {
@@ -3286,6 +3561,7 @@ std::pair< bool, QString > CFlowWidgetImpl::mLoadFromXML( const QString& xFileNa
     if ( dTopLevelItems.size() )
         dTopLevelItems[ 0 ]->mSetSelected( true );
 
+    dXMLFileName = xFileName;
     return std::make_pair( true, QString() );
 }
 
@@ -3302,5 +3578,14 @@ void CFlowWidget::mSetMergeStatesFunction( const std::function< QList< int >( CF
     dImpl->mSetMergeStatesFunction( xMergeStatesFunc );
 }
 
+CFlowWidgetItem * CFlowWidget::mFindItem( const QStringList & xPath ) const
+{
+	return dImpl->mFindItem( xPath );
+}
+
+CFlowWidgetItem * CFlowWidgetItem::mFindItem( const QStringList & xPath ) const
+{
+	return dImpl->mFindItem( xPath );
+}
 
 #include "FlowNavigator.moc.h"
