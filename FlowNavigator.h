@@ -31,8 +31,8 @@ class CFlowWidgetHeaderImpl;
 
 struct WINDOWS_QDECLSPEC SRegisteredStatusInfo
 {
-    SRegisteredStatusInfo(){};
-    SRegisteredStatusInfo( int xStateID, const QString & xStateDesc, const QIcon & xIcon, bool xIsInternal ) :
+    SRegisteredStatusInfo() {};
+    SRegisteredStatusInfo( int xStateID, const QString& xStateDesc, const QIcon& xIcon, bool xIsInternal ) :
         dStateID( xStateID ),
         dStateDesc( xStateDesc ),
         dIcon( xIcon ),
@@ -40,10 +40,10 @@ struct WINDOWS_QDECLSPEC SRegisteredStatusInfo
     {
     }
 
-    int dStateID{-1};
+    int dStateID{ -1 };
     QString dStateDesc;
     QIcon dIcon;
-    bool dIsInternal{false};
+    bool dIsInternal{ false };
 };
 
 #ifndef NON_VIS_BUILD
@@ -54,7 +54,7 @@ struct WINDOWS_QDECLSPEC SRegisteredStatusInfo
 //    [-init] Allows the opening of the flownavigator without a filename but before the gui startup has finished
 //    due to the window manager restoring the windows without their parameters, this enables the navigator to be created and loaded later
 
-class WINDOWS_QDECLSPEC CFlowNavigator : public basicWindow 
+class WINDOWS_QDECLSPEC CFlowNavigator : public basicWindow
     // derived from QDockWidget
     // contains a QMainWindow
     // CFlowWidget -> is the Central Widget of the mainwindow and takes ownership
@@ -65,31 +65,31 @@ public:
     CFlowNavigator();
     ~CFlowNavigator();
 
-    CFlowWidget * mGetFlowWidget() const{ return dFlowWidget; }
+    CFlowWidget* mGetFlowWidget() const { return dFlowWidget; }
 
-    static QObject * mCreateWindow(int xId, const QStringList& xArgs );
-    static void mSetInitFunction( const std::function< CFlowWidget*() > & xFunction );
+    static QObject* mCreateWindow( int xId, const QStringList& xArgs );
+    static void mSetInitFunction( const std::function< CFlowWidget* () >& xFunction );
     static bool mIsEnabled(); // retuns true if the LFK for 2021.1 is enabled and the envvar ENABLE_FLOWNAV is set
 
-    virtual bool mWrite (QDomDocument& xDocument,QDomElement& xElement) override;
-    virtual bool mRead (QDomElement& xElement) override;
+    virtual bool mWrite( QDomDocument& xDocument, QDomElement& xElement ) override;
+    virtual bool mRead( QDomElement& xElement ) override;
 
-    virtual QMenu * mGetActiveWindowMenu() override{ return nullptr; }
+    virtual QMenu* mGetActiveWindowMenu() override { return nullptr; }
 public Q_SLOTS:
     // no slots
 
 Q_SIGNALS: // you can connect to the FlowNavigator or the owned CFlowWidget
      // item information signals (changed and inserted) are sent out even if 
-     void sigFlowWidgetItemChanged( CFlowWidgetItem * xItem ); // data change
-     void sigFlowWidgetItemInserted( CFlowWidgetItem* xItem ); // item was in
- 
-     // item based selection signals are NOT sent out if the item is disabled
-     void sigFlowWidgetItemSelected( CFlowWidgetItem* xItem, bool xSelected );
-     void sigFlowWidgetItemDoubleClicked( CFlowWidgetItem* xItem );
-     void sigFlowWidgetItemHovered( CFlowWidgetItem* xItem ); // can be null 
+    void sigFlowWidgetItemChanged( CFlowWidgetItem* xItem ); // data change
+    void sigFlowWidgetItemInserted( CFlowWidgetItem* xItem ); // item was in
+
+    // item based selection signals are NOT sent out if the item is disabled
+    void sigFlowWidgetItemSelected( CFlowWidgetItem* xItem, bool xSelected );
+    void sigFlowWidgetItemDoubleClicked( CFlowWidgetItem* xItem );
+    void sigFlowWidgetItemHovered( CFlowWidgetItem* xItem ); // can be null 
 protected:
-    CFlowWidget * dFlowWidget{nullptr}; // memory is owned by basicWindow
-    static std::function< CFlowWidget *() > dInitFunction;
+    CFlowWidget* dFlowWidget{ nullptr }; // memory is owned by basicWindow
+    static std::function< CFlowWidget* () > dInitFunction;
 };
 #endif
 
@@ -123,36 +123,36 @@ public:
 
     explicit CFlowWidget( QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags() );
 
-    std::pair< bool, QString > mLoadFromXML( const QString & xFileName );
+    std::pair< bool, QString > mLoadFromXML( const QString& xFileName );
     QString mGetXMLFileName() const; // only set if mLoadFromXML was previously called
 
     // The returned CFLowWidgetItems are OWNED by the flow widget, and should not be deleted by the user without removing them from thw CFlowWidget or parent CFlowWidgetItem first
-    CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon ) { return mInsertTopLevelItem( -1, xStepID, xFlowName, xDescIcon ); }
-    CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QString& xFlowName );
-    CFlowWidgetItem* mAddTopLevelItem( const QString & xStepID, const QIcon& xDescIcon );
+    CFlowWidgetItem* mAddTopLevelItem( const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon ) { return mInsertTopLevelItem( -1, xStepID, xFlowName, xDescIcon ); }
+    CFlowWidgetItem* mAddTopLevelItem( const QString& xStepID, const QString& xFlowName );
+    CFlowWidgetItem* mAddTopLevelItem( const QString& xStepID, const QIcon& xDescIcon );
 
-    CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon );
-    CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QString& xFlowName );
-    CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString & xStepID, const QIcon& xDescIcon ) { return mInsertTopLevelItem( xIndex, xStepID, QString(), xDescIcon ); }
+    CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon );
+    CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString& xStepID, const QString& xFlowName );
+    CFlowWidgetItem* mInsertTopLevelItem( int xIndex, const QString& xStepID, const QIcon& xDescIcon ) { return mInsertTopLevelItem( xIndex, xStepID, QString(), xDescIcon ); }
 
     std::pair< CFlowWidgetItem*, bool > mAddTopLevelItem( CFlowWidgetItem* xItem ) { return mInsertTopLevelItem( -1, xItem ); }
     std::pair< CFlowWidgetItem*, bool > mInsertTopLevelItem( int xIndex, CFlowWidgetItem* xItem );
     std::pair< CFlowWidgetItem*, bool > mInsertTopLevelItem( CFlowWidgetItem* xPeer, CFlowWidgetItem* xItem, bool xBefore );
 
-    CFlowWidgetItem* mAddItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, xFlowName, xDescIcon, xParent ); }
-    CFlowWidgetItem* mAddItem( const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
-    CFlowWidgetItem* mAddItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, QString(), xDescIcon, xParent ); }
+    CFlowWidgetItem* mAddItem( const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, xFlowName, xDescIcon, xParent ); }
+    CFlowWidgetItem* mAddItem( const QString& xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
+    CFlowWidgetItem* mAddItem( const QString& xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( -1, xStepID, QString(), xDescIcon, xParent ); }
 
-    CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
-    CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
-    CFlowWidgetItem* mInsertItem( int xIndex, const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStepID, QString(), xDescIcon, xParent ); }
+    CFlowWidgetItem* mInsertItem( int xIndex, const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+    CFlowWidgetItem* mInsertItem( int xIndex, const QString& xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
+    CFlowWidgetItem* mInsertItem( int xIndex, const QString& xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent ) { return mInsertItem( xIndex, xStepID, QString(), xDescIcon, xParent ); }
 
     int mTopLevelItemCount() const;
     CFlowWidgetItem* mGetTopLevelItem( int xIndex ) const;
-    CFlowWidgetItem* mGetTopLevelItem( const QString & xStepID ) const; // returns the first top level item with the stepID
+    CFlowWidgetItem* mGetTopLevelItem( const QString& xStepID ) const; // returns the first top level item with the stepID
     int mIndexOfTopLevelItem( const CFlowWidgetItem* xItem ) const; // returns -1 if not found as a top level widget
 
-    CFlowWidgetItem * mFindItem( const QStringList & xPath ) const; // hierarchical path to the item, nullptr if not found
+    CFlowWidgetItem* mFindItem( const QStringList& xPath ) const; // hierarchical path to the item, nullptr if not found
 
     void mRemoveTopLevelItem( int xIndex ); // deletes the CFlowStateDefItem
     CFlowWidgetItem* mTakeTopLevelItem( int xIndex );
@@ -165,8 +165,8 @@ public:
 
     CFlowWidgetItem* mSelectedItem() const; // only one item is selectable at a time.
 
-    void mRegisterStateStatus( int xStateID, const QString & xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
-    bool mRegisterStateStatus( int xStateID, const QString & xDescription, const QString & xIconPath );  // xIcon can be null if so, nothing painted, if not empty must exist and not be null (retval false otherwise)
+    void mRegisterStateStatus( int xStateID, const QString& xDescription, const QIcon& xIcon );  // xIcon can be null if so, nothing painted
+    bool mRegisterStateStatus( int xStateID, const QString& xDescription, const QString& xIconPath );  // xIcon can be null if so, nothing painted, if not empty must exist and not be null (retval false otherwise)
     int mGetNextStatusID() const;
     QList< SRegisteredStatusInfo > mGetRegisteredStatuses() const;
     SRegisteredStatusInfo mGetStateStatus( int xState ) const;
@@ -183,14 +183,14 @@ public:
     QString mDump( bool xCompacted, bool xBrief ) const;
     void mDump( QJsonObject& xTS, bool xBrief ) const;
 
-    void mSetMergeStatesFunction( const std::function< QList< int >( CFlowWidgetItem* xParent, const QList< int >& lParentLocalStates, const QList< QList< int > >& xChildStates ) > & xMergeStatesFunc );
+    void mSetMergeStatesFunction( const std::function< QList< int >( CFlowWidgetItem* xParent, const QList< int >& lParentLocalStates, const QList< QList< int > >& xChildStates ) >& xMergeStatesFunc );
 
 protected Q_SLOTS:
     void slotOpenTopLevelItem( int xIndex );
     void slotExpandItem( CFlowWidgetItem* xItem, bool xExpand );
-Q_SIGNALS: 
+Q_SIGNALS:
     // item information signals (changed and inserted) are sent out even if the item is disabled
-    void sigFlowWidgetItemChanged( CFlowWidgetItem * xItem ); // data changed
+    void sigFlowWidgetItemChanged( CFlowWidgetItem* xItem ); // data changed
     void sigFlowWidgetItemInserted( CFlowWidgetItem* xItem ); // item was inserted into the flow widget
 
     // item based selection signals are NOT sent out if the item is disabled
@@ -205,7 +205,7 @@ protected:
 protected:
     void mSetCurrentItemExpanded( bool xExpanded );
     CFlowWidgetItem* mCurrentTopLevelItem() const;
-    CFlowWidgetImpl * dImpl{nullptr};
+    CFlowWidgetImpl* dImpl{ nullptr };
 };
 Q_DECLARE_METATYPE( CFlowWidget::EStates );
 
@@ -231,17 +231,17 @@ public:
     };
 
     CFlowWidgetItem();
-    CFlowWidgetItem( CFlowWidgetItem * xParent );
-    CFlowWidgetItem( CFlowWidget * xParent );
+    CFlowWidgetItem( CFlowWidgetItem* xParent );
+    CFlowWidgetItem( CFlowWidget* xParent );
 
-    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, CFlowWidget* xParent );
+    CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, CFlowWidget* xParent );
     CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, CFlowWidgetItem* xParent );
 
-    CFlowWidgetItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidget* xParent );
-    CFlowWidgetItem( const QString & xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+    CFlowWidgetItem( const QString& xStepID, const QIcon& xDescIcon, CFlowWidget* xParent );
+    CFlowWidgetItem( const QString& xStepID, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
 
-    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidget* xParent );
-    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
+    CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidget* xParent );
+    CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon, CFlowWidgetItem* xParent );
     ~CFlowWidgetItem();
 
     void deleteLater();
@@ -257,8 +257,8 @@ public:
 
     int mChildCount() const;
     CFlowWidgetItem* mGetChild( int xIndex ) const;
-    CFlowWidgetItem* mGetChild( const QString & xStepID ) const; // returns the first child with the stepID
-    CFlowWidgetItem * mFindItem( const QStringList & xPath ) const; // hierarchical path to the item, nullptr if not found
+    CFlowWidgetItem* mGetChild( const QString& xStepID ) const; // returns the first child with the stepID
+    CFlowWidgetItem* mFindItem( const QStringList& xPath ) const; // hierarchical path to the item, nullptr if not found
 
     CFlowWidgetItem* mTakeChild( CFlowWidgetItem* xItem ); // ownership of the returned item is now the client
 
@@ -272,24 +272,24 @@ public:
     void mSetIcon( const QIcon& xIcon );
     QIcon mIcon() const;
 
-    void mSetStepID( const QString & xStepID );
+    void mSetStepID( const QString& xStepID );
     QString mStepID() const;
 
     void mSetToolTip( const QString& xToolTip );
     QString mToolTip() const;
 
-    void mSetAttribute( const QString & xAttributeName, const QString & xValue );
-    void mSetAttributes( const std::list< std::pair< QString, QString > > & xAttributes );
-    void mAddAttributes( const std::list< std::pair< QString, QString > > & xAttributes );
-    QString mGetAttribute( const QString & xAttributeName ) const;
+    void mSetAttribute( const QString& xAttributeName, const QString& xValue );
+    void mSetAttributes( const std::list< std::pair< QString, QString > >& xAttributes );
+    void mAddAttributes( const std::list< std::pair< QString, QString > >& xAttributes );
+    QString mGetAttribute( const QString& xAttributeName ) const;
     std::list< std::pair< QString, QString > > mGetAttributes() const;
 
     // order is kept of statuses, if you set via a list and only the order is changed, the item is considered changed
     bool mSetStateStatus( int xStateStatus ); // returns true if state changed if none is sent it, it clears all
-    bool mSetStateStatuses( const QList< int > & xStateStatuses ); // returns true if state changed, if none is the only item sent in, it clears, if individual it is ignored
-    bool mSetStateStatuses( const QStringList & xStateStatuses, bool & aOK ); // returns true if state changed if none is sent it, it clears all, aOK is set to false if the strings are invalid
+    bool mSetStateStatuses( const QList< int >& xStateStatuses ); // returns true if state changed, if none is the only item sent in, it clears, if individual it is ignored
+    bool mSetStateStatuses( const QStringList& xStateStatuses, bool& aOK ); // returns true if state changed if none is sent it, it clears all, aOK is set to false if the strings are invalid
     bool mAddStateStatus( int xStateStatus ); // returns true if state add, false if already set, none is sent in, its ignored
-    bool mAddStateStatuses( const QStringList & xStateStatuses, bool & aOK ); // returns true if state changed if none is sent it, it clears all, aOK is set to false if the strings are invalid
+    bool mAddStateStatuses( const QStringList& xStateStatuses, bool& aOK ); // returns true if state changed if none is sent it, it clears all, aOK is set to false if the strings are invalid
     bool mRemoveStateStatus( int xStateStatus ); // returns true if state removed, false if already set
     QList< int > mStateStatuses( bool xLocalOnly ) const; // guaranteed to never be empty, eNone is always returned if needed
     QStringList mStateStatusStrings( bool xLocalOnly ) const; // guaranteed to never be empty, eNone is always returned if needed
@@ -321,8 +321,8 @@ public:
     void mDump( QJsonObject& xJSON, bool xBrief, bool xRecursive ) const;
 
 private:
-    CFlowWidgetItem( const QString & xStepID, const QString& xFlowName, const QIcon& xDescIcon );
-    CFlowWidgetItemImpl * dImpl{nullptr};
+    CFlowWidgetItem( const QString& xStepID, const QString& xFlowName, const QIcon& xDescIcon );
+    CFlowWidgetItemImpl* dImpl{ nullptr };
 };
 Q_DECLARE_METATYPE( CFlowWidgetItem* );
 

@@ -417,31 +417,31 @@ private Q_SLOTS:
     {
         QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
 
-        QCOMPARE( true, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eDisabled ) );
-        QCOMPARE( true, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ) );
-        QCOMPARE( true, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eRunPassed ) );
-        QCOMPARE( false, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eDisabled ) );
-        QCOMPARE( false, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ) );
-        QCOMPARE( false, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eRunPassed ) );
+        QCOMPARE( dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eDisabled ), true);
+        QCOMPARE( dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ), true );
+        QCOMPARE( dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eRunPassed ), true );
+        QCOMPARE( dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eDisabled ), false );
+        QCOMPARE( dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ), false );
+        QCOMPARE( dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( CFlowWidget::EStates::eRunPassed ), false );
 
         QCOMPARE( dFlowItem1->mStateStatuses( true ).size(), 3 );
         QCOMPARE( dFlowItem1->mStateStatuses( true )[ 0 ], CFlowWidget::EStates::eDisabled );
         QCOMPARE( dFlowItem1->mStateStatuses( true )[ 1 ], CFlowWidget::EStates::eReadyToRun );
         QCOMPARE( dFlowItem1->mStateStatuses( true )[ 2 ], CFlowWidget::EStates::eRunPassed );
 
-        QCOMPARE( true, dFlowItem1->mSetStateStatus( CFlowWidget::EStates::eNone ) );
+        QCOMPARE( dFlowItem1->mSetStateStatus( CFlowWidget::EStates::eNone ), true );
         QCOMPARE( dFlowItem1->mStateStatuses( true ).size(), 1 );
         QCOMPARE( dFlowItem1->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
 
-        QCOMPARE( true, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithWarning ) );
-        QCOMPARE( true, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ) );
-        QCOMPARE( true, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithInfo ) );
+        QCOMPARE( dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithWarning ), true );
+        QCOMPARE( dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ), true );
+        QCOMPARE( dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithInfo ), true );
 
-        QCOMPARE( false, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithWarning ) );
-        QCOMPARE( false, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ) );
-        QCOMPARE( false, dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithInfo ) );
+        QCOMPARE( dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithWarning ), false );
+        QCOMPARE( dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eReadyToRun ), false );
+        QCOMPARE( dFlowItem11->mAddStateStatus( CFlowWidget::EStates::eRunCompletedWithInfo ), false );
 
-        QCOMPARE( true, dFlowItem11->mSetStateStatus( CFlowWidget::EStates::eNone ) );
+        QCOMPARE( dFlowItem11->mSetStateStatus( CFlowWidget::EStates::eNone ), true );
         QCOMPARE( dFlowItem11->mStateStatuses( true ).size(), 1 );
         QCOMPARE( dFlowItem11->mStateStatuses( true ).front(), CFlowWidget::EStates::eNone );
     }
@@ -452,33 +452,33 @@ private Q_SLOTS:
         {
             eMyState = CFlowWidget::EStates::eLastState + 1
         };
-        QCOMPARE( false, dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( eMyState ) );
+        QCOMPARE( dFlowWidget->mGetTopLevelItem( 0 )->mAddStateStatus( eMyState ), false );
         dFlowWidget->mRegisterStateStatus( eMyState, "MyState", QIcon( ":/Entity.png" ) );
 
         QCOMPARE( "MyState", dFlowWidget->mGetStateStatus( eMyState ).dStateDesc );
-        QCOMPARE( true, !dFlowWidget->mGetStateStatus( eMyState ).dIcon.isNull() );
+        QCOMPARE( !dFlowWidget->mGetStateStatus( eMyState ).dIcon.isNull(), true );
     }
 
     void testDump()
     {
         //dFlowWidget->mDump( true )
-        //QCOMPARE( "{\"Children\":[{\"Children\":[{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"State_2\",\"Text\":\"SubFlowItem 1-1-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"State_1\",\"Text\":\"SubFlowItem 1-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Disabled\":false,\"HasIcon\":false,\"State_3\",\"Text\":\"SubFlowItem 1-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"State_0\",\"Text\":\"FlowItem 1\",\"ToolTip\":\"\",\"Visible\":false},{\"Children\":[{\"Disabled\":false,\"HasIcon\":false,\"State_5\",\"Text\":\"SubFlowItem 2-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"State_7\",\"Text\":\"SubFlowItem 2-2-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Disabled\":false,\"HasIcon\":true,\"State_8\",\"Text\":\"SubFlowItem 2-2-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"State_6\",\"Text\":\"SubFlowItem 2-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"State_4\",\"Text\":\"FlowItem 2\",\"ToolTip\":\"\",\"Visible\":false},{\"Children\":[{\"Disabled\":false,\"HasIcon\":false,\"State_10\",\"Text\":\"SubFlowItem 3-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"State_12\",\"Text\":\"SubFlowItem 3-2-1\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"State_11\",\"Text\":\"SubFlowItem 3-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"State_9\",\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}],\"Current\":{\"Disabled\":false,\"HasIcon\":false,\"State_9\",\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}}", dFlowWidget->mDump( true ) );
+        //QCOMPARE( dFlowWidget->mDump( true ), "{\"Children\":[{\"Children\":[{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"State_2\",\"Text\":\"SubFlowItem 1-1-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"State_1\",\"Text\":\"SubFlowItem 1-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Disabled\":false,\"HasIcon\":false,\"State_3\",\"Text\":\"SubFlowItem 1-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"State_0\",\"Text\":\"FlowItem 1\",\"ToolTip\":\"\",\"Visible\":false},{\"Children\":[{\"Disabled\":false,\"HasIcon\":false,\"State_5\",\"Text\":\"SubFlowItem 2-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"State_7\",\"Text\":\"SubFlowItem 2-2-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Disabled\":false,\"HasIcon\":true,\"State_8\",\"Text\":\"SubFlowItem 2-2-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"State_6\",\"Text\":\"SubFlowItem 2-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":true,\"State_4\",\"Text\":\"FlowItem 2\",\"ToolTip\":\"\",\"Visible\":false},{\"Children\":[{\"Disabled\":false,\"HasIcon\":false,\"State_10\",\"Text\":\"SubFlowItem 3-1\",\"ToolTip\":\"\",\"Visible\":true},{\"Children\":[{\"Disabled\":false,\"HasIcon\":true,\"State_12\",\"Text\":\"SubFlowItem 3-2-1\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"State_11\",\"Text\":\"SubFlowItem 3-2\",\"ToolTip\":\"\",\"Visible\":true}],\"Disabled\":false,\"HasIcon\":false,\"State_9\",\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}],\"Current\":{\"Disabled\":false,\"HasIcon\":false,\"State_9\",\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}}" );
+                  ;
+        QCOMPARE( dFlowItem1->mDump( true, false, false )  , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":true,\"Selected\":false,\"StepID\":\"State_0\",\"Text\":\"FlowItem 1\",\"ToolTip\":\"\",\"Visible\":false}" );
+        QCOMPARE( dFlowItem11->mDump( true, false, false ) , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":true,\"Selected\":false,\"StepID\":\"State_1\",\"Text\":\"SubFlowItem 1-1\",\"ToolTip\":\"\",\"Visible\":true}" );
+        QCOMPARE( dFlowItem112->mDump( true, false, false ), "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":true,\"Selected\":false,\"StepID\":\"State_2\",\"Text\":\"SubFlowItem 1-1-2\",\"ToolTip\":\"\",\"Visible\":true}" );
+        QCOMPARE( dFlowItem12->mDump( true, false, false ) , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":false,\"Selected\":false,\"StepID\":\"State_3\",\"Text\":\"SubFlowItem 1-2\",\"ToolTip\":\"\",\"Visible\":true}" );
 
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StepID\":\"State_0\",\"Text\":\"FlowItem 1\",\"ToolTip\":\"\",\"Visible\":false}", dFlowItem1->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StepID\":\"State_1\",\"Text\":\"SubFlowItem 1-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem11->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StepID\":\"State_2\",\"Text\":\"SubFlowItem 1-1-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem112->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StepID\":\"State_3\",\"Text\":\"SubFlowItem 1-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem12->mDump( false, false, true ) );
+        QCOMPARE( dFlowItem2->mDump( true, false, false )  , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":true,\"Selected\":false,\"StepID\":\"State_4\",\"Text\":\"FlowItem 2\",\"ToolTip\":\"\",\"Visible\":false}" );
+        QCOMPARE( dFlowItem21->mDump( true, false, false ) , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":false,\"Selected\":false,\"StepID\":\"State_5\",\"Text\":\"SubFlowItem 2-1\",\"ToolTip\":\"\",\"Visible\":true}" );
+        QCOMPARE( dFlowItem22->mDump( true, false, false ) , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":false,\"Selected\":false,\"StepID\":\"State_6\",\"Text\":\"SubFlowItem 2-2\",\"ToolTip\":\"\",\"Visible\":true}" );
+        QCOMPARE( dFlowItem221->mDump( true, false, false ), "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":true,\"Selected\":false,\"StepID\":\"State_7\",\"Text\":\"SubFlowItem 2-2-1\",\"ToolTip\":\"\",\"Visible\":true}" );
+        QCOMPARE( dFlowItem222->mDump( true, false, false ), "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":true,\"Selected\":false,\"StepID\":\"State_8\",\"Text\":\"SubFlowItem 2-2-2\",\"ToolTip\":\"\",\"Visible\":true}" );
 
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StepID\":\"State_4\",\"Text\":\"FlowItem 2\",\"ToolTip\":\"\",\"Visible\":false}", dFlowItem2->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StepID\":\"State_5\",\"Text\":\"SubFlowItem 2-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem21->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StepID\":\"State_6\",\"Text\":\"SubFlowItem 2-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem22->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StepID\":\"State_7\",\"Text\":\"SubFlowItem 2-2-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem221->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StepID\":\"State_8\",\"Text\":\"SubFlowItem 2-2-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem222->mDump( false, false, true ) );
-
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StepID\":\"State_9\",\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}", dFlowItem3->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StepID\":\"State_10\",\"Text\":\"SubFlowItem 3-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem31->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":false,\"StepID\":\"State_11\",\"Text\":\"SubFlowItem 3-2\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem32->mDump( false, false, true ) );
-        QCOMPARE( "{\"Disabled\":false,\"HasIcon\":true,\"StepID\":\"State_12\",\"Text\":\"SubFlowItem 3-2-1\",\"ToolTip\":\"\",\"Visible\":true}", dFlowItem321->mDump( false, false, true ) );
+        QCOMPARE( dFlowItem3->mDump( true, false, false )  , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":false,\"Selected\":false,\"StepID\":\"State_9\",\"Text\":\"FlowItem 3\",\"ToolTip\":\"\",\"Visible\":false}" );
+        QCOMPARE( dFlowItem31->mDump( true, false, false ) , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":false,\"Selected\":false,\"StepID\":\"State_10\",\"Text\":\"SubFlowItem 3-1\",\"ToolTip\":\"\",\"Visible\":true}" );
+        QCOMPARE( dFlowItem32->mDump( true, false, false ) , "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":false,\"Selected\":false,\"StepID\":\"State_11\",\"Text\":\"SubFlowItem 3-2\",\"ToolTip\":\"\",\"Visible\":true}" );
+        QCOMPARE( dFlowItem321->mDump( true, false, false ), "{\"Disabled\":false,\"Expanded\":false,\"HasIcon\":true,\"Selected\":false,\"StepID\":\"State_12\",\"Text\":\"SubFlowItem 3-2-1\",\"ToolTip\":\"\",\"Visible\":true}" );
     }
 
 private:
