@@ -38,10 +38,12 @@ public:
 
     void mRunIt()
     {
-        auto lFuture = QtConcurrent::run( QThreadPool::globalInstance(), dFunction );
         dWatcher = new QFutureWatcher<void>( dParent );
-        dWatcher->setFuture( lFuture );
         QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedProgressDialog::close );
+        QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &QFutureWatcher< void >::deleteLater );
+
+        auto lFuture = QtConcurrent::run( QThreadPool::globalInstance(), dFunction );
+        dWatcher->setFuture( lFuture );
     }
     QString dCancelButtonText{ QObject::tr( "&Cancel" ) };
     TVoidFunction dFunction;
