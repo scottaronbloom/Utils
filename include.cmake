@@ -34,6 +34,7 @@ set(qtproject_SRCS
     CollapsableGroupBox.cpp
     WordExp.cpp
     QtDumper.cpp
+    ThreadedProgressDialog.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -46,6 +47,7 @@ set(qtproject_H
     SpinBox64U.h
     ScrollMessageBox.h
     CollapsableGroupBox.h
+    ThreadedProgressDialog.h
 )
 
 set(project_H

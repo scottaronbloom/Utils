@@ -48,7 +48,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
-find_package(Qt5 COMPONENTS Core Widgets Xml REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Xml Concurrent REQUIRED)
 find_package(Qt5 COMPONENTS XmlPatterns QUIET)
 find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)
