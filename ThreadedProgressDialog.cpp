@@ -24,6 +24,7 @@
 #include <QFutureWatcher>
 #include <QtConcurrent>
 #include <QPushButton>
+#include <QApplication>
 
 namespace NSABUtils
 {
@@ -98,4 +99,54 @@ int CThreadedProgressDialog::exec()
     return QProgressDialog::exec();
 }
 
+class CThreadedEventLoopImpl
+{
+public:
+    CThreadedEventLoopImpl( TVoidFunction xFunc, CThreadedEventLoop* xParent ) :
+        dFunction( xFunc ),
+        dParent( xParent )
+    {
+    }
+
+    void mRunIt()
+    {
+        dWatcher = new QFutureWatcher<void>( dParent );
+        QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedEventLoop::mExit );
+        QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &QFutureWatcher< void >::deleteLater );
+
+        auto lFuture = QtConcurrent::run( QThreadPool::globalInstance(), dFunction );
+        dWatcher->setFuture( lFuture );
+    }
+    QString dCancelButtonText{ QObject::tr( "&Cancel" ) };
+    TVoidFunction dFunction;
+    CThreadedEventLoop* dParent{ nullptr };
+    QFutureWatcher<void>* dWatcher{ nullptr };
+};
+
+CThreadedEventLoop::CThreadedEventLoop( TVoidFunction xFunc, QObject * xParent /*= nullptr*/ ) :
+    QEventLoop( xParent ),
+    dImpl( new CThreadedEventLoopImpl( xFunc, this ) )
+{
 }
+
+
+CThreadedEventLoop::~CThreadedEventLoop()
+{
+}
+
+void CThreadedEventLoop::mExit()
+{
+    return QEventLoop::exit();
+}
+
+int CThreadedEventLoop::exec( QEventLoop::ProcessEventsFlags flags )
+{
+    QApplication::setOverrideCursor( Qt::WaitCursor ); 
+    dImpl->mRunIt();
+    int lRetVal = QEventLoop::exec( flags );
+    QApplication::restoreOverrideCursor();
+    return lRetVal;
+}
+}
+
+//

@@ -24,6 +24,7 @@
 #define __THREADEDPROGRESSDIALOG_H
 
 #include <QProgressDialog>
+#include <QEventLoop>
 #include <functional>
 #include <memory>
 
@@ -47,6 +48,21 @@ public:
     int exec() override;
 private:
     std::unique_ptr< CThreadedProgressDialogImpl > dImpl;
+};
+
+class CThreadedEventLoopImpl;
+class CThreadedEventLoop : public QEventLoop
+{
+    Q_OBJECT;
+public:
+    CThreadedEventLoop( TVoidFunction xFunc, QObject* xParent = nullptr );
+    ~CThreadedEventLoop();
+
+    int exec( QEventLoop::ProcessEventsFlags flags = AllEvents );
+public Q_SLOTS:
+    void mExit(); // calls exit();
+private:
+    std::unique_ptr< CThreadedEventLoopImpl > dImpl;
 };
 
 }
