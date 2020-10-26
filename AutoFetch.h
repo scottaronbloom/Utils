@@ -31,9 +31,7 @@ namespace NQtUtils
     class CAutoFetchMore : public QObject
     {
     public:
-        CAutoFetchMore( QTreeView * view, QObject * parent = nullptr );
-    private:
-        QTreeView * fView{nullptr};
+        CAutoFetchMore( QTreeView * view );
     };
 }
 #endif

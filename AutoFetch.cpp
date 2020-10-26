@@ -144,31 +144,30 @@ namespace NQtUtils
     }
 
 
-    CAutoFetchMore::CAutoFetchMore( QTreeView * view, QObject * parent ) :
-        QObject( parent ),
-        fView( view )
+    CAutoFetchMore::CAutoFetchMore( QTreeView * view ) :
+        QObject( view )
     {
-        if ( !fView )
+        if ( !view )
             return;
-        connect( fView->verticalScrollBar(), &QScrollBar::valueChanged,
-                 [this]( int /*value*/ )
+        connect( view->verticalScrollBar(), &QScrollBar::valueChanged,
+                 [view]( int /*value*/ )
                  {
-                     autoFetchMore( fView, QModelIndex() );
+                     autoFetchMore( view, QModelIndex() );
                  } );
-        connect( fView->verticalScrollBar(), &QScrollBar::rangeChanged,
-                 [this]( int /*min*/, int /*max*/ )
+        connect( view->verticalScrollBar(), &QScrollBar::rangeChanged,
+                 [view]( int /*min*/, int /*max*/ )
                  {
-                     autoFetchMore( fView, QModelIndex() );
+                     autoFetchMore( view, QModelIndex() );
                  } );
-        connect( fView, &QTreeView::expanded,
-                 [this]( const QModelIndex & idx )
+        connect( view, &QTreeView::expanded,
+                 [view]( const QModelIndex & idx )
                  {
-                     autoFetchMore( fView, idx );
+                     autoFetchMore( view, idx );
                  } );
-        connect( fView, &QTreeView::collapsed,
-                 [this]( const QModelIndex & /*idx*/ )
+        connect( view, &QTreeView::collapsed,
+                 [view]( const QModelIndex & /*idx*/ )
                  {
-                     autoFetchMore( fView, QModelIndex() );
+                     autoFetchMore( view, QModelIndex() );
                  } );
     }
 }
