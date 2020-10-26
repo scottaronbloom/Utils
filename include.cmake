@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 set(qtproject_SRCS
+    AutoFetch.cpp
     utils.cpp
     FileUtils.cpp
     FromString.cpp
@@ -51,6 +52,7 @@ set(qtproject_H
 )
 
 set(project_H
+    AutoFetch.h
     utils.h
     FileUtils.h
     FromString.h
