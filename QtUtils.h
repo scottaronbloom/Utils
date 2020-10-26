@@ -40,6 +40,8 @@ class QXmlQuery;
 #include <QSet>
 #include <QList>
 #include <set>
+#include <QDebug>
+#include <QTextStream>
 
 #ifndef QHASHFUNCTIONS_H
 namespace std
@@ -142,5 +144,34 @@ namespace NQtUtils
                      const std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) > & writeRow = 
                            std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) >() );
 }
+
+template< std::size_t I = 0, typename... Tp>
+inline typename std::enable_if<I == sizeof...(Tp), void>::type
+printToDebug( QDebug & /*retVal*/, const std::tuple< Tp... > & /*value*/ )
+{
+    return;
+}
+
+template< std::size_t I = 0, typename... Tp>
+inline typename std::enable_if < I < sizeof...(Tp), void>::type
+    printToDebug( QDebug & debug, const std::tuple< Tp... > & value )
+{
+    if ( I != 0 )
+        debug.nospace() << ", ";
+
+    debug << std::get< I >( value );
+
+    printToDebug< I + 1, Tp... >( debug, value );
+}
+
+template< typename... Tp>
+QDebug operator<<( QDebug & debug, const std::tuple< Tp... > & value )
+{
+    debug.nospace() << "std::tuple(";
+    printToDebug( debug, value );
+    debug.nospace() << ")";
+    return debug;
+}
+
 #endif
 
