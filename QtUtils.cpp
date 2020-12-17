@@ -33,7 +33,7 @@
 #include <QSize>
 #include <QPoint>
 #include <QColor>
-#ifdef QT_XMLPATTERS_LIB
+#ifdef QT_XMLPATTERNS_LIB
 #include <QXmlQuery>
 #endif
 
@@ -59,7 +59,7 @@ namespace NQtUtils
         return retVal;
     }
 
-#ifdef QT_XMLPATTERS_LIB
+#ifdef QT_XMLPATTERNS_LIB
     QString getString( QXmlQuery & query, const QString & queryString, bool * aOK /*= nullptr */ )
     {
         query.setQuery( queryString );
