@@ -1,7 +1,7 @@
 # The MIT License (MIT)
 #
 # Copyright (c) 2017 Nathan Osman
-# Copyright (c) 2020 Scott Aron Bloom - Work on linux and mac
+# Copyright (c) 2020-2021 Scott Aron Bloom - Work on linux and mac
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
