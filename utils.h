@@ -24,6 +24,7 @@
 #define __UTILS_H
 
 #include <cinttypes>
+#include <cstdarg>
 #include <string>
 #include <chrono>
 #include <cmath>
@@ -100,6 +101,19 @@ inline std::ostream & sabsabDebugStreamInternal(){ return std::cout; }
 
 namespace NUtils
 {
+template< typename T >
+T indexInList( std::size_t index, const std::list< T > & list )
+{
+    auto pos = list.begin();
+    while ( index && (pos != list.end()) )
+    {
+        pos++;
+        index--;
+    }
+    if ( pos != list.end() )
+        return *pos;
+    return T();
+}
 
 template< typename T1, typename T2 >
 using TLargestType = typename std::conditional< ( sizeof( T1 ) >= sizeof( T2 ) ), T1, T2 >::type;
@@ -313,6 +327,46 @@ std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::list< 
         retVal = addVectorElementToSets( retVal, arr[ ii ], addToResult );
     }
     return retVal;
+}
+
+template< typename T >
+std::pair< typename std::list< T >::const_iterator, typename std::list< T >::const_iterator > mid( const std::list< T > & inList, int xFirst, int xCount = -1 )
+{
+    using listType = std::list< T >;
+    using iter = listType::const_iterator;
+
+    iter pos1;
+    if ( xFirst >= inList.size() )
+        pos1 = inList.cend();
+    else
+        pos1 = std::next( inList.cbegin(), xFirst );
+
+    iter pos2;
+    if ( ( xCount == -1 ) || ( ( xFirst + xCount ) >= inList.size() ) )
+        pos2 = inList.cend();
+    else 
+        pos2 = std::next( inList.cbegin(), xFirst + xCount );
+
+    return std::make_pair( pos1, pos2 );
+}
+
+template< typename T >
+std::list< T > operator +( const std::list< T > & lhs, const std::pair< typename std::list< T >::const_iterator, typename std::list< T >::const_iterator > & rhs )
+{
+    auto lRetVal = lhs;
+    lRetVal.insert( lRetVal.end(), rhs.first, rhs.second );
+    return lRetVal;
+}
+
+template< typename T >
+std::list< T > replaceInList( const std::list< T > & inList, int xFirst, int xCount, const std::list< T > & values, int xNum = -1 )
+{
+    auto prefix = NUtils::mid( inList, 0, xFirst );
+    auto mid = NUtils::mid( values, 0, xNum );
+    auto suffix = NUtils::mid( inList, xFirst + xCount );
+
+    auto lRetVal = std::list< T >( { prefix.first, prefix.second } ) + mid + suffix; //( { prefix.first, prefix.second } );
+    return lRetVal;
 }
 
 }

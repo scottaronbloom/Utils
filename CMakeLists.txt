@@ -54,9 +54,6 @@ find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)
 find_package(Qt5SrcMoc REQUIRED)
 
-if ( SAB_ENABLE_TESTING )
-endif()
-
 project( SABUtils )
 
 AddQtIncludes()
