@@ -25,6 +25,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cctype>
+
 namespace NUtils
 {
     int fromChar( char ch, int base, bool& aOK )
