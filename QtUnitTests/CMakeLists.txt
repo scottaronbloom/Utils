@@ -53,11 +53,8 @@ target_link_libraries( SABUtils_TestFlowWidget
                  Qt5::Test
                  SABUtils
           )
-DeployQt( SABUtils_TestFlowWidget . )
-DeploySystem( SABUtils_TestFlowWidget )
-
-INSTALL( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION . )
-INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${PROJECT_NAME}.pdb DESTINATION . CONFIGURATIONS Debug )
+DeployQt( SABUtils_TestFlowWidget .)
+DeploySystem( SABUtils_TestFlowWidget .)
 
 ADD_TEST( NAME FlowWidgetTests COMMAND SABUtils_TestFlowWidget )
 
