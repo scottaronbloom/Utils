@@ -22,10 +22,12 @@
 
 #include "../utils.h"
 #include "../WordExp.h"
+#include "../QtUtils.h"
 
 #include <QCoreApplication>
 #include <string>
 #include <memory>
+#include <filesystem>
 #include "gtest/gtest.h"
 #include "../FileUtils.h"
 
@@ -49,7 +51,93 @@ void PrintTo( const QString & str, ::std::ostream * oss )
 
 namespace 
 {
-    TEST(TestUtils, power ) 
+    TEST( TestUtils, TestListIndex )
+    {
+        std::list< std::string > lst = { "a", "b", "c", "d", "e" };
+        EXPECT_EQ( "a", NUtils::indexInList( 0, lst ) );
+        EXPECT_EQ( "b", NUtils::indexInList( 1, lst ) );
+        EXPECT_EQ( "c", NUtils::indexInList( 2, lst ) );
+        EXPECT_EQ( "d", NUtils::indexInList( 3, lst ) );
+        EXPECT_EQ( "e", NUtils::indexInList( 4, lst ) );
+        EXPECT_EQ( std::string(), NUtils::indexInList( 5, lst ) );
+    }
+
+    TEST( TestUtils, TestReplaceInList )
+    {
+        auto tmp = QStringList() << "a" << "b" << "c" << "d" << "e";
+        auto t2 = QStringList() << "z" << "y" << "x" << "w" << "v";
+
+        auto t3 = NQtUtils::replaceInList( tmp, 1, 2, t2, 3 ); // replaces b,c with z,y,x yeilding a, z, y, x, d, e
+
+        EXPECT_EQ( 6, t3.length() );
+        EXPECT_EQ( "a", t3[ 0 ] );
+        EXPECT_EQ( "z", t3[ 1 ] );
+        EXPECT_EQ( "y", t3[ 2 ] );
+        EXPECT_EQ( "x", t3[ 3 ] );
+        EXPECT_EQ( "d", t3[ 4 ] );
+        EXPECT_EQ( "e", t3[ 5 ] );
+
+        t3 = NQtUtils::replaceInList( tmp, 1, 6, t2, 3 ); // replaces b,c, d, e with z,y,x yeilding a, z, y, x
+
+        EXPECT_EQ( 4, t3.length() );
+        EXPECT_EQ( "a", t3[ 0 ] );
+        EXPECT_EQ( "z", t3[ 1 ] );
+        EXPECT_EQ( "y", t3[ 2 ] );
+        EXPECT_EQ( "x", t3[ 3 ] );
+
+        t3 = NQtUtils::replaceInList( tmp, 3, 6, t2, 5); // replaces d, e with z,y,x,q,v yeilding a, b, c, z, y, x, w, v
+
+        EXPECT_EQ( 8, t3.length() );
+        EXPECT_EQ( "a", t3[ 0 ] );
+        EXPECT_EQ( "b", t3[ 1 ] );
+        EXPECT_EQ( "c", t3[ 2 ] );
+        EXPECT_EQ( "z", t3[ 3 ] );
+        EXPECT_EQ( "y", t3[ 4 ] );
+        EXPECT_EQ( "x", t3[ 5 ] );
+        EXPECT_EQ( "w", t3[ 6 ] );
+        EXPECT_EQ( "v", t3[ 7 ] );
+    }
+
+    TEST( TestUtils, TestReplaceInListStd )
+    {
+        auto tmp = std::list< std::string >{ "a", "b", "c", "d", "e" };
+        auto t2 = std::list< std::string >{ "z", "y", "x", "w", "v" };
+
+        auto t3 = NUtils::replaceInList( tmp, 1, 2, t2, 3 ); // replaces b,c with z,y,x yeilding a, z, y, x, d, e
+
+        EXPECT_EQ( 6, t3.size() );
+        auto pos = t3.begin();
+        EXPECT_EQ( "a", *pos++ );
+        EXPECT_EQ( "z", *pos++ );
+        EXPECT_EQ( "y", *pos++ );
+        EXPECT_EQ( "x", *pos++ );
+        EXPECT_EQ( "d", *pos++ );
+        EXPECT_EQ( "e", *pos++ );
+
+        t3 = NUtils::replaceInList( tmp, 1, 6, t2, 3 ); // replaces b,c, d, e with z,y,x yeilding a, z, y, x
+
+        EXPECT_EQ( 4, t3.size() );
+        pos = t3.begin();
+        EXPECT_EQ( "a", *pos++ );
+        EXPECT_EQ( "z", *pos++ );
+        EXPECT_EQ( "y", *pos++ );
+        EXPECT_EQ( "x", *pos++ );
+
+        t3 = NUtils::replaceInList( tmp, 3, 6, t2, 5 ); // replaces d, e with z,y,x,q,v yeilding a, b, c, z, y, x, w, v
+
+        EXPECT_EQ( 8, t3.size() );
+        pos = t3.begin();
+        EXPECT_EQ( "a", *pos++ );
+        EXPECT_EQ( "b", *pos++ );
+        EXPECT_EQ( "c", *pos++ );
+        EXPECT_EQ( "z", *pos++ );
+        EXPECT_EQ( "y", *pos++ );
+        EXPECT_EQ( "x", *pos++ );
+        EXPECT_EQ( "w", *pos++ );
+        EXPECT_EQ( "v", *pos++ );
+    }
+
+    TEST(TestUtils, power )
     {
         EXPECT_DOUBLE_EQ( 100.0, NUtils::power( 10.0, 2.0 ) );
         EXPECT_EQ( 100, NUtils::power( 10, 2 ) );
