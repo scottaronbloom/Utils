@@ -54,7 +54,7 @@ target_link_libraries( SABUtils_TestFlowWidget
                  SABUtils
           )
 DeployQt( SABUtils_TestFlowWidget .)
-DeploySystem( SABUtils_TestFlowWidget .)
+DeploySystem( SABUtils_TestFlowWidget )
 
 ADD_TEST( NAME FlowWidgetTests COMMAND SABUtils_TestFlowWidget )
 
