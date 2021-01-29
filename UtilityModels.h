@@ -147,7 +147,27 @@ public:
     bool isChecked( int rowNum ) const;
 
     void setStringList( const std::list< std::pair< QString, bool > > & values );
-    void setStringList( const QStringList &strings ){ QStringListModel::setStringList( strings ); }
+    void setStringList( const QStringList & strings, bool checked ) { QStringListModel::setStringList( strings ); setChecked( strings, checked, true ); }
+    void setStringList( const QStringList & strings ) { QStringListModel::setStringList( strings ); }
+
+    void insertFront( const QStringList & strings, bool checked )
+    {
+        setStringList( QStringList() << strings << this->stringList() );
+        setChecked( strings, checked, true );
+    }
+    void insertFront( const QString & str, bool checked )
+    {
+        insertFront( QStringList() << str, checked );
+    }
+    void append( const QStringList & strings, bool checked )
+    {
+        setStringList( this->stringList() << strings );
+        setChecked( strings, checked, true );
+    }
+    void append( const QString & str, bool checked )
+    {
+        append( QStringList() << str, checked );
+    }
 
     void setAliasMap( const std::map< QString, QString > & map );
 signals:
