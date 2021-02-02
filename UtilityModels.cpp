@@ -292,16 +292,27 @@ bool CCheckableStringListModel::setChecked( QString item, bool checked, bool upd
     return found;
 }
 
+void CCheckableStringListModel::andChecked( const QStringList & strings, bool checked, bool update )
+{
+    if ( update )
+        beginResetModel();
+
+    for ( int ii = 0; ii < strings.count(); ++ii )
+    {
+        setChecked( strings[ ii ], checked, false );
+    }
+
+    if ( update )
+        endResetModel();
+}
+
 void CCheckableStringListModel::setChecked( const QStringList & strings, bool checked, bool update )
 {
     if ( update )
         beginResetModel();
 
     fEnabled.clear();
-    for( int ii = 0; ii < strings.count(); ++ii )
-    {
-        setChecked( strings[ ii ], checked, false );
-    }
+    andChecked( strings, checked, false );
 
     if ( update )
         endResetModel();

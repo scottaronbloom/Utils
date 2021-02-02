@@ -136,6 +136,7 @@ public:
 
     bool setChecked( QString string, bool checked, bool update );
     void setChecked( const QStringList & strings, bool checked, bool update );
+    void andChecked( const QStringList & strings, bool checked, bool update );
 
     QStringList getCheckedStrings( bool & allChecked ) const;
     QStringList getCheckedStrings() const;
@@ -153,7 +154,7 @@ public:
     void insertFront( const QStringList & strings, bool checked )
     {
         setStringList( QStringList() << strings << this->stringList() );
-        setChecked( strings, checked, true );
+        andChecked( strings, checked, true );
     }
     void insertFront( const QString & str, bool checked )
     {
@@ -162,7 +163,7 @@ public:
     void append( const QStringList & strings, bool checked )
     {
         setStringList( this->stringList() << strings );
-        setChecked( strings, checked, true );
+        andChecked( strings, checked, true );
     }
     void append( const QString & str, bool checked )
     {
