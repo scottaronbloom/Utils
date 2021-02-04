@@ -64,7 +64,7 @@ source_group("Source Files" FILES ${qtproject_CPPMOC_SRCS} )
 SET( _CMAKE_FILES "CMakeLists.txt;include.cmake" )
 source_group("CMake Files" FILES ${_CMAKE_FILES} )
 FILE(GLOB _CMAKE_MODULE_FILES "${CMAKE_SOURCE_DIR}/Modules/*")
-source_group("CMake Files\\Modues" FILES ${_CMAKE_MODULE_FILES} )
+source_group("CMake Files\\Modules" FILES ${_CMAKE_MODULE_FILES} )
 
 if( SAB_UTILS_DIR )
     include( ${SAB_UTILS_DIR}/CompilerSettings.cmake )
