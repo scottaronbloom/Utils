@@ -55,7 +55,8 @@ ELSEIF( UNIX )
 ENDIF()
 mark_as_advanced(DEPLOYQT_EXECUTABLE)
 
-function( DeploySystem target)
+function( DeploySystem target directory)
+    message( STATUS "Deploy System ${target}" )
     if ( WIN32 )
         set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
         #set(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE ) 
@@ -66,10 +67,12 @@ function( DeploySystem target)
     SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
     include(InstallRequiredSystemLibraries)
         
+    message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
     foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
         get_filename_component(filename "${lib}" NAME)
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
+            COMMENT "Deploying System Libraries for '${target}'"
         )
     endforeach()
 endfunction()
@@ -87,7 +90,7 @@ function(DeployQt target directory)
 
     SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
     IF( WIN32 )
-        SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
+        SET(_QTDEPLOY_OPTIONS "--verbose=1;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
     ELSEIF( APPLE )
         SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
         SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--always-overwrite" )
@@ -102,7 +105,7 @@ function(DeployQt target directory)
             env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
                 ${_QTDEPLOY_OPTIONS}
                 ${_QTDEPLOY_TARGET_DIR}
-        COMMENT "Deploying Qt to Build Area for Project '${target}' ..."
+        COMMENT "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
     )
 
     # install(CODE ...) doesn't support generator expressions, but
@@ -125,7 +128,7 @@ function(DeployQt target directory)
             SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;\" )
         ENDIF()
 
-        MESSAGE( STATUS \"Deploying Qt to the Install Area '\${CMAKE_INSTALL_PREFIX}/${directory}'\" )
+        MESSAGE( STATUS \"Deploying Qt to the Install Area '\${CMAKE_INSTALL_PREFIX}/${directory}' using '${DEPLOYQT_EXECUTABLE}' ...\" )
         execute_process(
             COMMAND \"${CMAKE_COMMAND}\" -E
                 env PATH=\"${_qt_bin_dir}\" \"${DEPLOYQT_EXECUTABLE}\"

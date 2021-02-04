@@ -82,6 +82,8 @@ add_library(SABUtils STATIC
 
 add_definitions( -DNON_VIS_BUILD=1 )
 set_target_properties( SABUtils PROPERTIES FOLDER Libs )
-add_subdirectory(UnitTests)
-add_subdirectory(QtUnitTests)
-
+add_subdirectory(main)
+if( SAB_ENABLE_TESTING )
+    add_subdirectory(UnitTests)
+    add_subdirectory(QtUnitTests)
+endif()

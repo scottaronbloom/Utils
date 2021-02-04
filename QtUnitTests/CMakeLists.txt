@@ -25,7 +25,7 @@ project(SABUtils_TestFlowWidget)
 find_package(Qt5SrcMoc REQUIRED)
 
 include( include.cmake )
-include( ${CMAKE_SOURCE_DIR}/SABUtils/Project.cmake )
+include( ${SAB_UTILS_DIR}/Project.cmake )
 
 add_executable( SABUtils_TestFlowWidget
                  ${project_SRCS} 
@@ -53,7 +53,7 @@ target_link_libraries( SABUtils_TestFlowWidget
                  Qt5::Test
                  SABUtils
           )
-DeployQt( SABUtils_TestFlowWidget .)
+DeployQt( SABUtils_TestFlowWidget . )
 DeploySystem( SABUtils_TestFlowWidget )
 
 ADD_TEST( NAME FlowWidgetTests COMMAND SABUtils_TestFlowWidget )
