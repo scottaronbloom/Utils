@@ -22,6 +22,7 @@
 
 #include "StringComparisonClasses.h"
 #include "StringUtils.h"
+#include <QHash>
 
 namespace NStringUtils
 {
@@ -39,6 +40,21 @@ namespace NStringUtils
     bool noCaseStringEq::operator() ( const std::string& s1, const std::string& s2 ) const
     {
         return strCaseCmp( s1, s2 ) == 0;
+    }
+
+    size_t noCaseQStringHash::operator()( const QString & s ) const
+    {
+        return static_cast<size_t>( qHash( s ) );
+    }
+
+    bool noCaseQStringCmp::operator() ( const QString & s1, const QString & s2 ) const
+    {
+        return s1.compare( s2, Qt::CaseInsensitive ) < 0;
+    }
+
+    bool noCaseQStringEq::operator() ( const QString & s1, const QString & s2 ) const
+    {
+        return s1.compare( s2, Qt::CaseInsensitive ) == 0;
     }
 }
 

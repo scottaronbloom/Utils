@@ -24,7 +24,7 @@
 #define __STRINGCOMPARISONCLASSES_H
 
 #include <string>
-
+#include <QString>
 namespace NStringUtils
 {
     // Functors
@@ -44,6 +44,23 @@ namespace NStringUtils
     struct noCaseStringHash
     {
         size_t operator()( const std::string& s ) const;
+    };
+
+    class noCaseQStringCmp
+    {
+    public:
+        bool operator() ( const QString & s1, const QString & s2 ) const;
+    };
+
+    class noCaseQStringEq
+    {
+    public:
+        bool operator() ( const QString & s1, const QString & s2 ) const;
+    };
+
+    struct noCaseQStringHash
+    {
+        size_t operator()( const QString & s ) const;
     };
 }
 
