@@ -43,7 +43,7 @@ class QXmlQuery;
 #include <QDebug>
 #include <QTextStream>
 
-#ifndef QHASHFUNCTIONS_H
+#if QT_VERSION < QT_VERSION_CHECK(5,15,0)
 namespace std
 {
     template <>

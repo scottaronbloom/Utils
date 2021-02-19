@@ -227,9 +227,17 @@ bool CCheckableStringListModel::operator==( const CCheckableStringListModel & rh
 {
     bool allChecked;
     auto lhs = getCheckedStrings( allChecked );
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
     QSet< QString > lhsSet( lhs.begin(), lhs.end() );
+#else
+    QSet< QString > lhsSet = lhs.toSet();
+#endif
     auto rhsList = rhs.getCheckedStrings( allChecked );
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
     QSet< QString > rhsSet( rhsList.begin(), rhsList.end() );
+#else
+    QSet< QString > rhsSet = rhsList.toSet();
+#endif
     return lhsSet == rhsSet;
 }
 
