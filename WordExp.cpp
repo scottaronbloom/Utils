@@ -1,9 +1,7 @@
 #include "WordExp.h"
-//#include <QObject>
 #include <QDir>
 #include <QDebug>
 #include <iostream>
-//#include <QRegularExpression>
 #ifdef WIN32 
 #include <QProcessEnvironment>
 #define UNICODE
