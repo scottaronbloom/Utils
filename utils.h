@@ -333,7 +333,7 @@ template< typename T >
 std::pair< typename std::list< T >::const_iterator, typename std::list< T >::const_iterator > mid( const std::list< T > & inList, int xFirst, int xCount = -1 )
 {
     using listType = std::list< T >;
-    using iter = listType::const_iterator;
+    using iter = typename listType::const_iterator;
 
     iter pos1;
     if ( xFirst >= inList.size() )
