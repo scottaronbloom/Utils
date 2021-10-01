@@ -26,7 +26,10 @@
 class QByteArray;
 class QFileInfo;
 class QString;
+#include <QRunnable>
 #include <string>
+#include <QObject>
+#include <QFileInfo>
 
 namespace Verific{ class verific_stream; }
 namespace NUtils
@@ -36,6 +39,36 @@ namespace NUtils
     QString getMd5( const QString & data, bool isFileName=false );
     std::string getMd5( const std::string & data, bool isFileName=false );
     QByteArray formatMd5( const QByteArray & digest, bool isHex );
+
+
+    class CComputeMD5 : public QObject, public QRunnable
+    {
+        Q_OBJECT;
+    public:
+        CComputeMD5( const QString& fileName ) :
+            fFileInfo( fileName )
+        {
+        };
+
+        void run() override;
+        QString md5() const { return fMD5; }
+
+        void stop() { slotStop(); }
+    Q_SIGNALS:
+        void sigStarted( unsigned long long threadID, const QDateTime& dt, const QString& filename );
+        void sigFinishedReading( unsigned long long threadID, const QDateTime& dt, const QString& filename );
+        void sigFinishedComputing( unsigned long long threadID, const QDateTime& dt, const QString& filename );
+        void sigFinished( unsigned long long threadID, const QDateTime& dt, const QString& filename, const QString & md5 );
+    public Q_SLOTS:
+        void slotStop();
+    private:
+        void emitFinished();
+
+        QFileInfo fFileInfo;
+        QString fMD5;
+        bool fStopped{ false };
+    };
+
 }
 
 #endif
