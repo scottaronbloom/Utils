@@ -36,6 +36,8 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <QString>
+class QDateTime;
 #if __cplusplus > 201703L
 #include <optional>
 #endif
@@ -155,8 +157,11 @@ void toDigits( int64_t val, int base, std::pair< int8_t*, uint32_t > & retVal, s
 std::string toString( int64_t val, int base );
 int64_t fromString( const std::string& str, int base );
 std::string getTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point >& startEndTime, bool reportTotalSeconds, bool highPrecision );
-std::string getTimeString( const std::chrono::system_clock::duration& duration, bool reportTotalSeconds, bool highPrecision );
+std::string getTimeString( const std::chrono::system_clock::duration& duration, bool reportTotalSeconds=false, bool highPrecision=true );
 double getSeconds( const std::chrono::system_clock::duration& duration, bool highPrecision );
+
+QString getTimeString( const QDateTime& startTime, const QDateTime& endTime, bool reportTotalSeconds = false, bool highPrecision = true );
+QString secsToString( qint64 seconds );
 
 std::list< int64_t > computeFactors( int64_t num, bool properFactors=false );
 std::list< int64_t > computePrimeFactors( int64_t num );
