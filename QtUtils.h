@@ -42,6 +42,7 @@ class QXmlQuery;
 #include <set>
 #include <QDebug>
 #include <QTextStream>
+#include <unordered_set>
 
 #if QT_VERSION < QT_VERSION_CHECK(5,15,0)
 namespace std
@@ -59,6 +60,18 @@ namespace std
 
 namespace NQtUtils
 {
+    struct CCaseInsensitiveHash
+    {
+        size_t operator()( const QString& str ) const;
+    };
+
+    struct CCaseInsensitiveEqual
+    {
+        size_t operator()( const QString& lhs, const QString& rhs ) const;
+    };
+
+    using TCaseInsensitiveHash = std::unordered_set< QString, CCaseInsensitiveHash, CCaseInsensitiveEqual >;
+
     template< typename T >
     QList< T > replaceInList( const QList< T > & inList, int xFirst, int xCount, const QList< T > & values, int xNum=-1 )
     {

@@ -1,6 +1,5 @@
-// The MIT License( MIT )
 //
-// Copyright( c ) 2021 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -20,38 +19,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef __BUTTONENABLER_H
-#define __BUTTONENABLER_H
 
-#include <QObject>
-class QAbstractItemView;
-class QAbstractButton;
-class QItemSelection;
-class QLineEdit;
+#include "AutoWaitCursor.h"
+#include <QApplication>
 
-class CButtonEnabler : public QObject
+CAutoWaitCursor::CAutoWaitCursor( QObject * revertOnShowWidget ) :
+    QObject( nullptr ),
+    fRestoreOnOpenWidget( revertOnShowWidget )
 {
-Q_OBJECT;
-public:
-    CButtonEnabler( QAbstractItemView * view, QAbstractButton * btn, QObject * parent=nullptr );
-    CButtonEnabler( QLineEdit * le, QAbstractButton * btn, QObject * parent=nullptr );
+    QCursor * cursor = QApplication::overrideCursor();
+    QApplication::setOverrideCursor( Qt::BusyCursor );
+    if ( !cursor )
+        qApp->processEvents();
+    if ( revertOnShowWidget )
+    {
+        revertOnShowWidget->installEventFilter( this );
+    }
+    qApp->processEvents();
+}
 
-    void setLineEditIsFile(){ fLineEditIsFile = true; };
-public slots:
-    void slotReset();
+bool CAutoWaitCursor::eventFilter(QObject *obj, QEvent *event)
+{
+    if ( obj == fRestoreOnOpenWidget ) 
+    {
+        if (event->type() == QEvent::Show ) 
+        {
+            restore();
+        }
+    }
+    return QObject::eventFilter(obj, event);
+}
 
-private slots:
-    void slotSelectionChanged( const QItemSelection  & selected, const QItemSelection  & );
-    void slotTextChanged( const QString & changed );
-private:
-    QAbstractButton * fButton;
-    bool fLineEditIsFile{ true };
-};
-<<<<<<< HEAD
-#endif
+CAutoWaitCursor::~CAutoWaitCursor()
+{
+    restore();
+}
 
-=======
+void CAutoWaitCursor::restore()
+{
+    QApplication::restoreOverrideCursor();
+    qApp->processEvents();
+}
+
+bool CAutoWaitCursor::active()
+{
+    return QApplication::overrideCursor() != nullptr;
+}
 
 
-#endif
->>>>>>> fddf66e4dbaecfa7e95c817fc2e27d68e2ce871b

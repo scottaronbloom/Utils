@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 set(qtproject_SRCS
+    AutoWaitCursor.cpp
     AutoFetch.cpp
     ButtonEnabler.cpp
     utils.cpp
@@ -46,8 +47,10 @@ set(qtproject_CPPMOC_SRCS
 )
 
 set(qtproject_H
+    AutoWaitCursor.h
     ButtonEnabler.h
     FlowNavigator.h
+    MD5.h
     SpinBox64.h
     SpinBox64U.h
     ScrollMessageBox.h
@@ -62,7 +65,6 @@ set(project_H
     utils.h
     FileUtils.h
     FromString.h
-    MD5.h
     SpinBox64_StepType.h
     QtUtils.h
     EnumUtils.h

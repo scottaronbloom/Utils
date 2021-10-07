@@ -25,6 +25,11 @@
 #include <QString>
 #include <QCryptographicHash>
 #include <QFileInfo>
+#include <QThread>
+#include <QDateTime>
+#include <QDebug>
+#include <QAbstractEventDispatcher>
+
 namespace NUtils
 {
     QByteArray formatMd5( const QByteArray & digest, bool isHex )
@@ -88,5 +93,66 @@ namespace NUtils
 
         return QString();
     }
+
+    void CComputeMD5::run()
+    {
+        emit sigStarted( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+
+
+        QFile file( fFileInfo.absoluteFilePath() );
+        if ( !file.open( QIODevice::ReadOnly ) )
+            emitFinished();
+
+
+        QCryptographicHash hash( QCryptographicHash::Md5 );
+        if ( !file.isReadable() )
+            emitFinished();
+
+        char buffer[1024];
+        int length;
+
+        while ( !fStopped && ( length = file.read( buffer, sizeof( buffer ) ) ) > 0 )
+        {
+            hash.addData( buffer, length );
+            if ( QThread::currentThread() && QThread::currentThread()->eventDispatcher() )
+            {
+                QThread::currentThread()->eventDispatcher()->processEvents( QEventLoop::AllEvents );
+            }
+        }
+
+        if ( file.atEnd() )
+        {
+            emit sigFinishedReading( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+            if ( fStopped )
+            {
+                emitFinished();
+                return;
+            }
+
+            auto tmp = hash.result();
+            emit sigFinishedComputing( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+            if ( fStopped )
+            {
+                emitFinished();
+                return;
+            }
+            
+            fMD5 = QString::fromLatin1( formatMd5( tmp, false ) );
+        }
+        emitFinished();
+    }
+
+
+    void CComputeMD5::slotStop()
+    {
+        fStopped = true;
+        //qDebug() << "ComputeMD5 stopped";
+    }
+
+    void CComputeMD5::emitFinished()
+    {
+        emit sigFinished( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), fMD5 );
+    }
+
 }
 

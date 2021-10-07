@@ -83,3 +83,4 @@ void CButtonEnabler::slotTextChanged( const QString  & txt )
     }
     fButton->setEnabled( !txt.isEmpty() );
 }
+

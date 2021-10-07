@@ -1,6 +1,9 @@
+#ifndef __AUTOWAITCURSOR_H
+#define __AUTOWAITCURSOR_H
+
 // The MIT License( MIT )
 //
-// Copyright( c ) 2021 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -20,38 +23,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef __BUTTONENABLER_H
-#define __BUTTONENABLER_H
 
 #include <QObject>
-class QAbstractItemView;
-class QAbstractButton;
-class QItemSelection;
-class QLineEdit;
-
-class CButtonEnabler : public QObject
+class CAutoWaitCursor : public QObject // allows for delete later
 {
-Q_OBJECT;
+    Q_OBJECT;
 public:
-    CButtonEnabler( QAbstractItemView * view, QAbstractButton * btn, QObject * parent=nullptr );
-    CButtonEnabler( QLineEdit * le, QAbstractButton * btn, QObject * parent=nullptr );
+    CAutoWaitCursor( QObject * revertOnOpen = nullptr );
+    ~CAutoWaitCursor();
 
-    void setLineEditIsFile(){ fLineEditIsFile = true; };
-public slots:
-    void slotReset();
+    void restore();
 
-private slots:
-    void slotSelectionChanged( const QItemSelection  & selected, const QItemSelection  & );
-    void slotTextChanged( const QString & changed );
+    bool eventFilter( QObject *, QEvent * );
+    static bool active();
 private:
-    QAbstractButton * fButton;
-    bool fLineEditIsFile{ true };
+    QObject * fRestoreOnOpenWidget;
 };
-<<<<<<< HEAD
-#endif
-
-=======
-
 
 #endif
->>>>>>> fddf66e4dbaecfa7e95c817fc2e27d68e2ce871b
