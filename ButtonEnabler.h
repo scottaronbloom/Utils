@@ -47,11 +47,5 @@ private:
     QAbstractButton * fButton;
     bool fLineEditIsFile{ true };
 };
-<<<<<<< HEAD
 #endif
 
-=======
-
-
-#endif
->>>>>>> fddf66e4dbaecfa7e95c817fc2e27d68e2ce871b
