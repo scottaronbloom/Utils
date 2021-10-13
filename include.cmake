@@ -24,6 +24,7 @@ set(qtproject_SRCS
     AutoWaitCursor.cpp
     AutoFetch.cpp
     ButtonEnabler.cpp
+    DelayLineEdit.cpp
     utils.cpp
     FileUtils.cpp
     FromString.cpp
@@ -50,6 +51,7 @@ set(qtproject_CPPMOC_SRCS
 set(qtproject_H
     AutoWaitCursor.h
     ButtonEnabler.h
+    DelayLineEdit.h
     FlowNavigator.h
     MD5.h
     SpinBox64.h
