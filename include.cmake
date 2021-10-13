@@ -27,6 +27,7 @@ set(qtproject_SRCS
     utils.cpp
     FileUtils.cpp
     FromString.cpp
+    JsonUtils.cpp
     MD5.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
@@ -65,6 +66,7 @@ set(project_H
     utils.h
     FileUtils.h
     FromString.h
+    JsonUtils.h
     SpinBox64_StepType.h
     QtUtils.h
     EnumUtils.h

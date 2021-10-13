@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 #include "JsonUtils.h"
-#include "DebugTarget.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -50,16 +49,6 @@ void FromJson( QStringList& value, const QJsonValue & val )
     {
         value << array.at( ii ).toString();
     }
-}
-
-void ToJson( const NVSProjectMaker::SDebugTarget & value, QJsonValue& val )
-{
-    value.toJson( val );
-}
-
-void FromJson( NVSProjectMaker::SDebugTarget & value, const QJsonValue & val )
-{
-    value.fromJson( val );
 }
 
 void FromJson( bool& value, const QJsonValue & val )

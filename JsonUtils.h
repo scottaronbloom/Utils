@@ -29,8 +29,6 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-namespace NVSProjectMaker { struct SDebugTarget; }
-
 template< typename T >
 void ToJson( const T& value, QJsonValue& obj )
 {
@@ -92,7 +90,6 @@ void ToJson( const std::unordered_map< QString, T2 >& value, QJsonValue& obj )
     }
     obj = retVal;
 }
-void ToJson( const NVSProjectMaker::SDebugTarget & value, QJsonValue& obj );
 
 void FromJson( QStringList& value, const QJsonValue& obj );
 void FromJson( bool& value, const QJsonValue& obj );
@@ -164,7 +161,5 @@ void FromJson( std::unordered_map< QString, T2 >& value, const QJsonValue& obj )
         value[key] = currObj;
     }
 }
-
-void FromJson( NVSProjectMaker::SDebugTarget& value, const QJsonValue& obj );
 
 #endif 
