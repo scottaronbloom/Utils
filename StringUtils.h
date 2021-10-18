@@ -433,6 +433,8 @@ namespace NStringUtils
 
     bool isSpecialRegExChar( char ch, bool includeDotSlash=true );
     bool isSpecialRegExChar( const QChar & ch, bool includeDotSlash=true );
+
+    QString transformTitle( const QString & title );
 }
 
 #endif 

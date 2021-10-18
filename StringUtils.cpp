@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <unordered_set>
 
 #ifdef _WIN32
 #define vscprintf _vscprintf
@@ -2553,6 +2554,60 @@ namespace NStringUtils
     bool isSpecialRegExChar( const QChar & ch, bool includeDotSlash )
     {
         return isSpecialRegExChar( ch.toLatin1(), includeDotSlash );
+    }
+
+    QString titleCase( const QString &string, bool first )
+    {
+        if ( string.isEmpty() )
+            return string;
+        auto retVal = string;
+        bool allCap = true;
+        for ( auto &&ii : string )
+        {
+            if ( ii != ii.toUpper() )
+            {
+                allCap = false;
+                break;
+            }
+        }
+        if ( allCap )
+            return string;
+
+        static std::unordered_set< QString > keepLower =
+        {
+            "a",
+            "an",
+            "the",
+            "at",
+            "by",
+            "for",
+            "in",
+            "is",
+            "of",
+            "on",
+            "to",
+            "and",
+            "as",
+            "or"
+        };
+
+        retVal = retVal.toLower();
+        if ( first || ( keepLower.find( retVal ) == keepLower.end() ) )
+            retVal[0] = retVal[0].toUpper();
+        return retVal;
+    }
+
+    QString transformTitle( const QString &title )
+    {
+        auto retVal = title;
+        retVal = retVal.replace( '.', ' ' ).trimmed();
+        auto tmp = retVal.split( ' ' );
+        for ( auto ii = tmp.begin(); ii != tmp.end(); ++ii )
+        {
+            *ii = titleCase( *ii, ii == tmp.begin() );
+        }
+
+        return retVal;
     }
 }
 
