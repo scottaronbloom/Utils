@@ -21,10 +21,14 @@
 # SOFTWARE.
 
 set(qtproject_SRCS
+    AutoWaitCursor.cpp
     AutoFetch.cpp
+    ButtonEnabler.cpp
+    DelayLineEdit.cpp
     utils.cpp
     FileUtils.cpp
     FromString.cpp
+    JsonUtils.cpp
     MD5.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
@@ -45,7 +49,11 @@ set(qtproject_CPPMOC_SRCS
 )
 
 set(qtproject_H
+    AutoWaitCursor.h
+    ButtonEnabler.h
+    DelayLineEdit.h
     FlowNavigator.h
+    MD5.h
     SpinBox64.h
     SpinBox64U.h
     ScrollMessageBox.h
@@ -60,7 +68,7 @@ set(project_H
     utils.h
     FileUtils.h
     FromString.h
-    MD5.h
+    JsonUtils.h
     SpinBox64_StepType.h
     QtUtils.h
     EnumUtils.h

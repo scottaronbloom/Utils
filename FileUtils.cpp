@@ -996,6 +996,130 @@ QStringList dumpResources( bool ignoreInternal )
 {
     return dumpResources( QDir( ":/" ), ignoreInternal );
 }
+
+bool setTimeStamp(const QString& path, bool allTimeStamps, QString * msg)
+{
+    return setTimeStamp(path, QDateTime::currentDateTime(), allTimeStamps, msg);
+}
+
+bool setTimeStamp( const QString & path, QFileDevice::FileTime ft, QString* msg)
+{
+    return setTimeStamp(path, QDateTime::currentDateTime(), ft, msg);
+}
+
+bool setTimeStamp(const QString& path, const QDateTime& dt, bool allTimeStamps, QString* msg)
+{
+    if ( !allTimeStamps )
+        return setTimeStamp(path, dt, msg);
+
+    bool retVal = setTimeStamp( path, dt, QFileDevice::FileAccessTime, msg);
+#ifdef _WIN32
+    retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileBirthTime, msg);
+#endif
+
+#ifndef _WIN32
+    retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileMetadataChangeTime, msg);
+#endif
+    retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileModificationTime, msg);
+    return retVal;
+}
+
+
+bool setTimeStamp( const QString & path, const QDateTime & dt, QFileDevice::FileTime ft, QString* msg )
+{
+    if ( dt.isNull() || !dt.isValid() )
+    {
+        return setTimeStamp(path, ft, msg);
+    }
+
+    QFile file(path);
+    if (!file.exists())
+    {
+        if (msg)
+            *msg = "File does not exist";
+        return false;
+    }
+    if (!file.open(QFile::ReadWrite | QFile::ExistingOnly))
+    {
+        if (msg)
+            *msg = "Could not open file to read information. Please check permissions.";
+        return false;
+    }
+    bool aOK = file.setFileTime(dt, ft);
+    if ( !aOK )
+    {
+        if (msg)
+            *msg = file.errorString();
+    }
+    return aOK;
+}
+
+bool setTimeStamp(const QString& path, const QFileInfo & reference, QString* msg )
+{
+    if (!reference.exists() || !reference.isReadable() )
+        return false;
+
+    QFileInfo tgt(path);
+    if (!tgt.exists() || !tgt.isWritable() )
+        return false;
+
+    QFile refFile(reference.absoluteFilePath());
+    bool aOK = true;
+
+    auto ts = refFile.fileTime(QFileDevice::FileAccessTime);
+    if (ts.isValid())
+        aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileAccessTime, msg);
+
+#ifdef _WIN32
+    ts = refFile.fileTime(QFileDevice::FileBirthTime);
+    if (ts.isValid())
+        aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileBirthTime, msg);
+#endif
+
+#ifndef _WIN32
+    ts = refFile.fileTime(QFileDevice::FileMetadataChangeTime);
+    if (ts.isValid())
+        aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileMetadataChangeTime, msg);
+#endif
+
+    ts = refFile.fileTime(QFileDevice::FileModificationTime);
+    if (ts.isValid())
+        aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileModificationTime, msg);
+
+    return aOK;
+}
+
+QDateTime oldestTimeStamp( const QString & path )
+{
+    auto fi = QFileInfo(path);
+    if (!fi.exists())
+        return QDateTime();
+
+    auto retVal = fi.fileTime(QFile::FileAccessTime);
+
+    qDebug() << "AccessTime: " << retVal;
+    QDateTime temp;
+#ifdef _WIN32
+    temp = fi.fileTime(QFile::FileBirthTime);
+    qDebug() << "BirthTime: " << temp;
+    if (temp < retVal)
+        retVal = temp;
+#endif
+
+#ifndef _WIN32
+    temp = fi.fileTime(QFile::FileMetadataChangeTime);
+    //qDebug() << "MetaChangeTime: " << temp;
+    if (temp < retVal)
+        retVal = temp;
+#endif
+
+    temp = fi.fileTime(QFile::FileModificationTime);
+    qDebug() << "ModChangeTime: " << temp;
+    if (temp < retVal)
+        retVal = temp;
+
+    return retVal;
+}
 }
 
 

@@ -584,4 +584,16 @@ void writeModel( QAbstractItemModel * model,
     }
     writer.writeEndElement();
 }
+
+
+size_t CCaseInsensitiveHash::operator()( const QString& str ) const
+{
+    return qHash( QDir( str ).absolutePath().toLower() );
+}
+
+size_t CCaseInsensitiveEqual::operator()( const QString& lhs, const QString& rhs ) const
+{
+    return QDir( lhs ).absolutePath().compare( QDir( rhs ).absolutePath(), Qt::CaseInsensitive ) == 0;
+}
+
 }

@@ -25,6 +25,8 @@
 #include <sstream>
 #include <algorithm>
 #include <cctype>
+#include <QString>
+#include <QDateTime>
 
 namespace NUtils
 {
@@ -185,6 +187,51 @@ namespace NUtils
         return oss.str();
     }
 
+    QString getTimeString( const QDateTime& startTime, const QDateTime& endTime, bool reportTotalSeconds, bool highPrecision )
+    {
+        auto msecs = startTime.msecsTo( endTime );
+        auto totalMsecs = (1.0*msecs);
+        auto days = msecs / ( 24 * 60 * 60 * 1000 );
+        msecs = msecs - ( days * ( 24 * 60 * 60 * 1000 ) );
+
+        auto hours = msecs / ( 60 * 60 * 1000 );
+        msecs = msecs - ( hours * ( 60 * 60 * 1000 ) );
+
+        auto mins = msecs / ( 60 * 1000 );
+        msecs = msecs - ( mins * ( 60 * 1000 ) );
+
+        auto secs = msecs / 1000;
+        msecs = msecs - ( secs * 1000 );
+
+        auto retVal = QString( "%1:%2:%3:%4" )
+            .arg( days, 1, 10, QChar( '0' ) )
+            .arg( hours, 2, 10, QChar( '0' ) )
+            .arg( mins, 2, 10, QChar( '0' ) )
+            .arg( secs, 2, 10, QChar( '0' ) )
+            ;
+        if ( highPrecision )
+            retVal += QString( ".%1" ).arg( msecs, 3, 10, QChar( '0' ) );
+        if ( reportTotalSeconds )
+        {
+            auto secs = totalMsecs / 1000;
+            totalMsecs = totalMsecs - ( secs * 1000 );
+
+            retVal += QString( ", (%1" ).arg( secs );
+            if ( highPrecision )
+            {
+                retVal += QString( ".%2" ).arg( totalMsecs );
+            }
+
+            if ( ( secs != 1 ) || ( totalMsecs != 0 ) )
+            {
+                retVal += "s";
+            }
+
+            retVal += ")";
+        }
+        return retVal;
+    }
+
     bool isNarcissisticDigits( int64_t val, int base, bool& aOK )
     {
         aOK = true;
@@ -333,4 +380,13 @@ namespace NUtils
         auto retVal = static_cast< uint64_t >( t4 );
         return retVal;
     }
+
+    QString secsToString( qint64 seconds )
+    {
+        const qint64 DAY = 86400;
+        qint64 days = seconds / DAY;
+        QTime t = QTime( 0, 0 ).addSecs( seconds % DAY );
+        return QString( "%1 days, %2 hours, %3 minutes, %4 seconds" ).arg( days ).arg( t.hour() ).arg( t.minute() ).arg( t.second() );
+    }
+
 }
