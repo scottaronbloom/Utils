@@ -42,14 +42,45 @@ CDelayLineEdit::CDelayLineEdit( const QString& text, int delayMS, QWidget* paren
     connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
 
     fChangedTimer = new QTimer( this );
-    fChangedTimer->setInterval( fDelayMS );
     fChangedTimer->setSingleShot( true );
     connect( fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout );
 
     fEditedTimer = new QTimer( this );
-    fEditedTimer->setInterval( fDelayMS );
     fEditedTimer->setSingleShot( true );
     connect( fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout );
+
+    setDelay( delayMS );
+}
+
+void CDelayLineEdit::setText( const QString & text, bool emitSignal )
+{
+    if ( emitSignal )
+        QLineEdit::setText( text );
+    else
+    {
+        disconnect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
+        disconnect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+
+        QLineEdit::setText( text );
+
+        connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
+        connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+    }
+}
+
+void CDelayLineEdit::setDelay( int delayMS )
+{
+    fDelayMS = delayMS;
+    bool isActive = fChangedTimer->isActive();
+    fChangedTimer->stop();
+    fChangedTimer->setInterval( fDelayMS );
+    if ( isActive )
+        fChangedTimer->start();
+    isActive = fEditedTimer->isActive();
+    fEditedTimer->stop();
+    fEditedTimer->setInterval( fDelayMS );
+    if ( isActive )
+        fEditedTimer->start();
 }
 
 CDelayLineEdit::~CDelayLineEdit()
