@@ -596,4 +596,47 @@ size_t CCaseInsensitiveEqual::operator()( const QString& lhs, const QString& rhs
     return QDir( lhs ).absolutePath().compare( QDir( rhs ).absolutePath(), Qt::CaseInsensitive ) == 0;
 }
 
+
+QDate findDate( const QString &string, const QStringList &aFormats, const QStringList &bFormats, const QStringList &cFormats )
+{
+    static auto separators = QStringList() << ":" << "/" << "-" << "";
+    for ( auto &&ii : aFormats )
+    {
+        for ( auto &&jj : bFormats )
+        {
+            for ( auto &&kk : cFormats )
+            {
+                for ( auto && ll : separators )
+                {
+                    auto dt = QDate::fromString( string, QString( "%1%4%2%4%3" ).arg( ii ).arg( jj ).arg( kk ).arg( ll ) );
+                    if ( dt.isValid() )
+                    {
+                        return dt;
+                    }
+                }
+            }
+        }
+    }
+    return QDate();
+}
+
+QDate findDate( const QString & dateString )
+{
+    static auto yearFormats = QStringList() << "yyyy" << "yy";
+    static auto monthFormats = QStringList() << "M" << "MM";
+    static auto dateFormats = QStringList() << "dd" << "d";
+    auto dt = findDate( dateString, yearFormats, monthFormats, dateFormats );
+    if ( !dt.isValid() )
+        dt = findDate( dateString, yearFormats, dateFormats, monthFormats );
+    if ( !dt.isValid() )
+        dt = findDate( dateString, monthFormats, yearFormats, dateFormats );
+    if ( !dt.isValid() )
+        dt = findDate( dateString, monthFormats, dateFormats, yearFormats );
+    if ( !dt.isValid() )
+        dt = findDate( dateString, dateFormats, yearFormats, monthFormats );
+    if ( !dt.isValid() )
+        dt = findDate( dateString, dateFormats, monthFormats, yearFormats );
+    return dt;
+}
+
 }

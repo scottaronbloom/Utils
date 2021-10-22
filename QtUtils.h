@@ -167,6 +167,8 @@ namespace NQtUtils
                      const QString & plauralSuffix, 
                      const std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) > & writeRow = 
                            std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) >() );
+
+    QDate findDate( const QString &dateString );
 }
 
 template< std::size_t I = 0, typename... Tp>
