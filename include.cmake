@@ -30,6 +30,7 @@ set(qtproject_SRCS
     FromString.cpp
     JsonUtils.cpp
     MD5.cpp
+    MenuBarEx.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
     QtUtils.cpp
@@ -61,6 +62,7 @@ set(qtproject_H
     ThreadedProgressDialog.h
     UtilityModels.h
     UtilityViews.h
+    MenuBarEx.h
 )
 
 set(project_H
