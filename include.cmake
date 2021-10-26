@@ -43,6 +43,7 @@ set(qtproject_SRCS
     ThreadedProgressDialog.cpp
     UtilityModels.cpp
     UtilityViews.cpp
+    VSInstallUtils.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -78,6 +79,7 @@ set(project_H
     StringUtils.h
     WordExp.h
     QtDumper.h
+    VSInstallUtils.h
 )
 
 set(qtproject_UIS
