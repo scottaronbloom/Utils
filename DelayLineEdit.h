@@ -34,7 +34,7 @@ public:
     explicit CDelayLineEdit( const QString& text, int delayMS, QWidget* parent = nullptr );
     virtual ~CDelayLineEdit();
 
-    void setText( const QString &text, bool emitSignal );
+    void setText( const QString &text );
     void setDelay( int delayMS );
 Q_SIGNALS:
     void sigTextChanged( const QString& text );
