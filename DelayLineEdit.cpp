@@ -52,17 +52,18 @@ CDelayLineEdit::CDelayLineEdit( const QString& text, int delayMS, QWidget* paren
     setDelay( delayMS );
 }
 
-void CDelayLineEdit::setText( const QString & text, bool emitSignal )
+void CDelayLineEdit::setText( const QString &text )
 {
-    if ( emitSignal )
-        QLineEdit::setText( text );
-    else
+    if ( !isVisible() )
     {
         disconnect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
         disconnect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+    }
 
-        QLineEdit::setText( text );
+    QLineEdit::setText( text );
 
+    if ( !isVisible() )
+    {
         connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
         connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
     }
