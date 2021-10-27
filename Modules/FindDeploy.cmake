@@ -56,7 +56,7 @@ ENDIF()
 mark_as_advanced(DEPLOYQT_EXECUTABLE)
 
 function( DeploySystem target directory)
-    message( STATUS "Deploy System ${target}" )
+    #message( STATUS "Deploy System ${target}" )
     if ( WIN32 )
         set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
         #set(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE ) 
@@ -77,9 +77,9 @@ function( DeploySystem target directory)
     endforeach()
 
 	if( DEFINED OPENSSL_FOUND )
-		MESSAGE( STATUS "OpenSSL Found, Deploying OpenSSL Libraries" )
+		MESSAGE( STATUS "OpenSSL Found, Deploying OpenSSL Libraries for target '${target}'" )
 	elseif ( DEFINED OPENSSL_ROOT_DIR )
-		MESSAGE( STATUS "OPENSSL_ROOT_DIR set, Deploying OpenSSL Libraries" )
+		MESSAGE( STATUS "OPENSSL_ROOT_DIR set to ${OPENSSL_ROOT_DIR}, Deploying OpenSSL Libraries for target '${target}'" )
 		SET( OPENSSL_LIBRARIES "${OPENSSL_ROOT_DIR}/libcrypto-1_1-x64.dll" "${OPENSSL_ROOT_DIR}/libssl-1_1-x64.dll" )
 	endif()
 	#message( STATUS "OPENSSL_LIBRARIES = ${OPENSSL_LIBRARIES}" )
@@ -130,6 +130,15 @@ function(DeployQt target directory)
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${target}_$<CONFIG>_path"
         CONTENT "$<TARGET_FILE:${target}>"
     )
+
+	if( DEFINED OPENSSL_FOUND )
+		MESSAGE( STATUS "OpenSSL Found, Installing OpenSSL Libraries" )
+	elseif ( DEFINED OPENSSL_ROOT_DIR )
+		MESSAGE( STATUS "OPENSSL_ROOT_DIR set to ${OPENSSL_ROOT_DIR}, Installing OpenSSL Libraries" )
+		SET( OPENSSL_LIBRARIES "${OPENSSL_ROOT_DIR}/libcrypto-1_1-x64.dll" "${OPENSSL_ROOT_DIR}/libssl-1_1-x64.dll" )
+	endif()
+	#message( STATUS \"OPENSSL_LIBRARIES = ${OPENSSL_LIBRARIES}\" )
+	INSTALL( FILES ${OPENSSL_LIBRARIES} DESTINATION . )
 
     # Before installation, run a series of commands that copy each of the Qt
     # runtime files to the appropriate directory for installation
