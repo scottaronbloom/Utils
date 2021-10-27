@@ -66,15 +66,31 @@ function( DeploySystem target directory)
     # so we fall back to one of CMake's own modules for copying them over
     SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
     include(InstallRequiredSystemLibraries)
-        
-    message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
+
+    #message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
     foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
         get_filename_component(filename "${lib}" NAME)
         add_custom_command(TARGET ${target} POST_BUILD
+			COMMAND "${CMAKE_COMMAND}" -E echo "Deploying System Library '${filename}' for '${target}'"
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
-            COMMENT "Deploying System Libraries for '${target}'"
         )
     endforeach()
+
+	if( DEFINED OPENSSL_FOUND )
+		MESSAGE( STATUS "OpenSSL Found, Deploying OpenSSL Libraries" )
+	elseif ( DEFINED OPENSSL_ROOT_DIR )
+		MESSAGE( STATUS "OPENSSL_ROOT_DIR set, Deploying OpenSSL Libraries" )
+		SET( OPENSSL_LIBRARIES "${OPENSSL_ROOT_DIR}/libcrypto-1_1-x64.dll" "${OPENSSL_ROOT_DIR}/libssl-1_1-x64.dll" )
+	endif()
+	#message( STATUS "OPENSSL_LIBRARIES = ${OPENSSL_LIBRARIES}" )
+	foreach(lib ${OPENSSL_LIBRARIES})
+		get_filename_component(filename "${lib}" NAME)
+		add_custom_command(TARGET ${target} POST_BUILD
+			COMMAND "${CMAKE_COMMAND}" -E echo "Deploying OpenSSL Library '${filename}' for '${target}'"
+			COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
+		)
+	endforeach()
+	
 endfunction()
 
 # Add commands that copy the required Qt files to the same directory as the
@@ -101,11 +117,11 @@ function(DeployQt target directory)
 
     # Run deployqt immediately after build to make the build area "complete"
     add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E echo "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
         COMMAND "${CMAKE_COMMAND}" -E
             env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
                 ${_QTDEPLOY_OPTIONS}
                 ${_QTDEPLOY_TARGET_DIR}
-        COMMENT "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
     )
 
     # install(CODE ...) doesn't support generator expressions, but
