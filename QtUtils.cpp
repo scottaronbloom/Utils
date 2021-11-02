@@ -33,6 +33,7 @@
 #include <QSize>
 #include <QPoint>
 #include <QColor>
+#include <QTimer>
 #ifdef QT_XMLPATTERNS_LIB
 #include <QXmlQuery>
 #endif
@@ -637,6 +638,18 @@ QDate findDate( const QString & dateString )
     if ( !dt.isValid() )
         dt = findDate( dateString, dateFormats, monthFormats, yearFormats );
     return dt;
+}
+
+void updateTimer( int delayMS, QTimer *timer )
+{
+    if ( !timer )
+        return;
+
+    bool isActive = timer->isActive();
+    timer->stop();
+    timer->setInterval( delayMS );
+    if ( isActive )
+        timer->start();
 }
 
 }

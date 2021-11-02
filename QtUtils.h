@@ -169,6 +169,8 @@ namespace NQtUtils
                            std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) >() );
 
     QDate findDate( const QString &dateString );
+
+    void updateTimer( int delayMS, QTimer * timer );
 }
 
 template< std::size_t I = 0, typename... Tp>
