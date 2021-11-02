@@ -23,6 +23,7 @@
 #include "DelayLineEdit.h"
 
 #include <QTimer>
+#include "QtUtils.h"
 
 CDelayLineEdit::CDelayLineEdit( QWidget* parent ) :
     CDelayLineEdit( QString(), 250, parent )
@@ -72,16 +73,8 @@ void CDelayLineEdit::setText( const QString &text )
 void CDelayLineEdit::setDelay( int delayMS )
 {
     fDelayMS = delayMS;
-    bool isActive = fChangedTimer->isActive();
-    fChangedTimer->stop();
-    fChangedTimer->setInterval( fDelayMS );
-    if ( isActive )
-        fChangedTimer->start();
-    isActive = fEditedTimer->isActive();
-    fEditedTimer->stop();
-    fEditedTimer->setInterval( fDelayMS );
-    if ( isActive )
-        fEditedTimer->start();
+    NQtUtils::updateTimer( fDelayMS, fChangedTimer );
+    NQtUtils::updateTimer( fDelayMS, fEditedTimer );
 }
 
 CDelayLineEdit::~CDelayLineEdit()
