@@ -30,6 +30,7 @@ class QXmlStreamReader;
 class QXmlStreamWriter;
 class QAbstractItemModel;
 class QSettings;
+class QTimer;
 #ifdef QT_XMLPATTERNS_LIB
 class QXmlQuery;
 #endif
@@ -43,20 +44,6 @@ class QXmlQuery;
 #include <QDebug>
 #include <QTextStream>
 #include <unordered_set>
-
-#if QT_VERSION < QT_VERSION_CHECK(5,15,0)
-namespace std
-{
-    template <>
-    struct hash<QString>
-    {
-        std::size_t operator()( const QString& k ) const
-        {
-            return qHash( k );
-        }
-    };
-}
-#endif
 
 namespace NQtUtils
 {

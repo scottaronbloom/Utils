@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "StringUtils.h"
+#include "QtHash.h"
 #include "FromString.h"
 
 #include <QString>
