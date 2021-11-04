@@ -39,23 +39,31 @@ public:
 
 Q_SIGNALS:
     void sigValueChanged( int );
-    void sigTextChanged( const QString & );
     void sigEditingFinished();
+#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+    void sigTextChanged( const QString & );
+#endif
 
 public Q_SLOTS:
     void slotValueChanged();
-    void slotTextChanged();
     void slotEditingFinished();
+#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+    void slotTextChanged();
+#endif
 
     void slotValueChangedTimerTimeout();
-    void slotTextChangedTimerTimeout();
     void slotEditingFinishedTimerTimeout();
+#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+    void slotTextChangedTimerTimeout();
+#endif
 
 private:
     int fDelayMS{ 500 };
     QTimer *fValueChangedTimer{ nullptr };
-    QTimer *fTextChangedTimer{ nullptr };
     QTimer *fEditFinishedTimer{ nullptr };
+#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+    QTimer *fTextChangedTimer{ nullptr };
+#endif
 };
 
 #endif
