@@ -22,6 +22,7 @@
 
 #include "JsonUtils.h"
 
+#include <QStringList>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
