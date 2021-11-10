@@ -25,6 +25,7 @@
 #include <string>
 #include <list>
 #include <set>
+#include <unordered_map>
 #include <QStringList>
 #include <QFileDevice>
 class QFileInfo;
@@ -97,11 +98,13 @@ namespace NFileUtils
     QStringList dumpResources( bool ignoreInternal = true );
     QStringList dumpResources( const QDir & xDir, bool ignoreInternal=true );
 
-    QDateTime oldestTimeStamp(const QString& path); // returns the oldest time based on QFileDevice::FileTime types
+    std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps( const QString &path );
+    QDateTime oldestTimeStamp( const QString &path ); // returns the oldest time based on QFileDevice::FileTime types
     bool setTimeStamp(const QString& path, const QFileInfo & srcPath, QString * msg = nullptr ); // uses the ts info on srcPath setting it on path for all filetimes
     bool setTimeStamp(const QString& path, const QDateTime& ts, bool allTimeStamps, QString* msg = nullptr); // if ts is not valid uses current dt, if allTimeStamps is false use FileModificationTime
     bool setTimeStamp(const QString& path, const QDateTime & ts, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // if ts is not valid uses current dt
     bool setTimeStamp(const QString& path, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // uses QDateTime::currentDateTime
     bool setTimeStamp(const QString& path, bool allTimeStamps, QString* msg = nullptr); // uses QDateTime::currentDateTime
+    bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > & timeStamps, QString *msg = nullptr ); 
 }
 #endif

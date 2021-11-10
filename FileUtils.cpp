@@ -1024,6 +1024,141 @@ bool setTimeStamp(const QString& path, const QDateTime& dt, bool allTimeStamps, 
     return retVal;
 }
 
+QString getWindowsError( int errorCode )
+{
+    QString ret;
+#ifndef Q_OS_WINRT
+    wchar_t *string = 0;
+    FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                   NULL,
+                   errorCode,
+                   MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                   (LPWSTR)&string,
+                   0,
+                   NULL );
+    ret = QString::fromWCharArray( string );
+    LocalFree( (HLOCAL)string );
+#else
+    wchar_t errorString[1024];
+    FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM,
+                   NULL,
+                   errorCode,
+                   MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                   (LPWSTR)&errorString,
+                   sizeof( errorString ) / sizeof( wchar_t ),
+                   NULL );
+    ret = QString::fromWCharArray( errorString );
+#endif  // Q_OS_WINRT
+
+    if ( ret.isEmpty() && errorCode == ERROR_MOD_NOT_FOUND )
+        ret = QString::fromLatin1( "The specified module could not be found." );
+    if ( ret.endsWith( QLatin1String( "\r\n" ) ) )
+        ret.chop( 2 );
+    if ( ret.isEmpty() )
+        ret = QString::fromLatin1( "Unknown error 0x%1." )
+        .arg( unsigned( errorCode ), 8, 16, QLatin1Char( '0' ) );
+    return ret;
+}
+
+#ifdef Q_OS_WINDOWS
+static inline bool toFileTime( const QDateTime &date, FILETIME *fileTime )
+{
+    SYSTEMTIME sTime;
+    if ( date.timeSpec() == Qt::LocalTime )
+    {
+        SYSTEMTIME lTime;
+        const QDate d = date.date();
+        const QTime t = date.time();
+
+        lTime.wYear = d.year();
+        lTime.wMonth = d.month();
+        lTime.wDay = d.day();
+        lTime.wHour = t.hour();
+        lTime.wMinute = t.minute();
+        lTime.wSecond = t.second();
+        lTime.wMilliseconds = t.msec();
+        lTime.wDayOfWeek = d.dayOfWeek() % 7;
+
+        if ( !::TzSpecificLocalTimeToSystemTime( 0, &lTime, &sTime ) )
+            return false;
+    }
+    else
+    {
+        QDateTime utcDate = date.toUTC();
+        const QDate d = utcDate.date();
+        const QTime t = utcDate.time();
+
+        sTime.wYear = d.year();
+        sTime.wMonth = d.month();
+        sTime.wDay = d.day();
+        sTime.wHour = t.hour();
+        sTime.wMinute = t.minute();
+        sTime.wSecond = t.second();
+        sTime.wMilliseconds = t.msec();
+        sTime.wDayOfWeek = d.dayOfWeek() % 7;
+    }
+
+    return ::SystemTimeToFileTime( &sTime, fileTime );
+}
+
+bool setDirTimeStamp( HANDLE fHandle, const QDateTime &newDate, QFileDevice::FileTime time, QString * msg )
+{
+    FILETIME fTime;
+    FILETIME *pLastWrite = NULL;
+    FILETIME *pLastAccess = NULL;
+    FILETIME *pCreationTime = NULL;
+
+    switch ( time )
+    {
+        case QFileDevice::FileTime::FileModificationTime:
+            pLastWrite = &fTime;
+            break;
+
+        case QFileDevice::FileTime::FileAccessTime:
+            pLastAccess = &fTime;
+            break;
+
+        case QFileDevice::FileTime::FileBirthTime:
+            pCreationTime = &fTime;
+            break;
+
+        default:
+            if ( msg )
+                *msg = getWindowsError( ERROR_INVALID_PARAMETER );
+            return false;
+    }
+
+    if ( !toFileTime( newDate, &fTime ) )
+        return false;
+
+    if ( !::SetFileTime( fHandle, pCreationTime, pLastAccess, pLastWrite ) )
+    {
+        if ( msg )
+            *msg = getWindowsError( ::GetLastError() );
+        return false;
+    }
+    return true;
+}
+#endif
+
+bool setDirTimeStamp( const QString &path, const QDateTime &dt, QFileDevice::FileTime ft, QString *msg )
+{
+    bool retVal = false;
+#ifdef Q_OS_WINDOWS
+    auto handle = CreateFileW( (wchar_t *)path.utf16(), GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                         FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL );
+
+    if ( handle == INVALID_HANDLE_VALUE )
+    {
+        if ( msg )
+            *msg = "Could not open directory";
+        return false;
+    }
+    retVal = setDirTimeStamp( handle, dt, ft, msg );
+    CloseHandle( handle );
+#endif
+    return retVal;
+}
 
 bool setTimeStamp( const QString & path, const QDateTime & dt, QFileDevice::FileTime ft, QString* msg )
 {
@@ -1032,6 +1167,10 @@ bool setTimeStamp( const QString & path, const QDateTime & dt, QFileDevice::File
         return setTimeStamp(path, ft, msg);
     }
 
+    if ( QFileInfo( path ).isDir() )
+    {
+        return setDirTimeStamp( path, dt, ft, msg );
+    }
     QFile file(path);
     if (!file.exists())
     {
@@ -1039,13 +1178,14 @@ bool setTimeStamp( const QString & path, const QDateTime & dt, QFileDevice::File
             *msg = "File does not exist";
         return false;
     }
-    if (!file.open(QFile::ReadWrite | QFile::ExistingOnly))
+    auto aOK = file.open( QFile::ReadWrite | QFile::ExistingOnly );
+    if (!aOK)
     {
         if (msg)
             *msg = "Could not open file to read information. Please check permissions.";
         return false;
     }
-    bool aOK = file.setFileTime(dt, ft);
+    aOK = file.setFileTime(dt, ft);
     if ( !aOK )
     {
         if (msg)
@@ -1089,35 +1229,58 @@ bool setTimeStamp(const QString& path, const QFileInfo & reference, QString* msg
     return aOK;
 }
 
-QDateTime oldestTimeStamp( const QString & path )
+bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > &timeStamps, QString *msg )
 {
-    auto fi = QFileInfo(path);
-    if (!fi.exists())
-        return QDateTime();
+    bool aOK = true;
+    for( auto && ii : timeStamps )
+    {
+        aOK = aOK && setTimeStamp( path, ii.second, ii.first, msg );
+        if ( !aOK )
+            return false;
+    }
+    return aOK;
+}
 
-    auto retVal = fi.fileTime(QFile::FileAccessTime);
+std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps( const QString & path )
+{
+    auto fi = QFileInfo( path );
+    if ( !fi.exists() )
+        return {};
 
-    qDebug() << "AccessTime: " << retVal;
-    QDateTime temp;
+    std::unordered_map< QFileDevice::FileTime, QDateTime > retVal;
+    
+    auto currTime = fi.fileTime( QFile::FileAccessTime );
+    qDebug() << "AccessTime: " << currTime;
+    retVal[QFile::FileAccessTime] = currTime;
+
 #ifdef _WIN32
-    temp = fi.fileTime(QFile::FileBirthTime);
-    qDebug() << "BirthTime: " << temp;
-    if (temp < retVal)
-        retVal = temp;
+    currTime = fi.fileTime( QFile::FileBirthTime );
+    qDebug() << "BirthTime: " << currTime;
+    retVal[QFile::FileBirthTime] = currTime;
 #endif
 
 #ifndef _WIN32
-    temp = fi.fileTime(QFile::FileMetadataChangeTime);
-    //qDebug() << "MetaChangeTime: " << temp;
-    if (temp < retVal)
-        retVal = temp;
+    currTime = fi.fileTime( QFile::FileMetadataChangeTime );
+    qDebug() << "MetaChangeTime: " << temp;
+    retVal[QFile::FileMetadataChangeTime] = currTime;
 #endif
 
-    temp = fi.fileTime(QFile::FileModificationTime);
-    qDebug() << "ModChangeTime: " << temp;
-    if (temp < retVal)
-        retVal = temp;
+    currTime = fi.fileTime( QFile::FileModificationTime );
+    qDebug() << "ModChangeTime: " << currTime;
+    retVal[QFile::FileModificationTime] = currTime;
+    return retVal;
+}
 
+QDateTime oldestTimeStamp( const QString & path )
+{
+    auto allTimes = timeStamps( path );
+
+    QDateTime retVal;
+    for( auto && ii : allTimes )
+    {
+        if ( !retVal.isValid() || ( retVal < ii.second ) )
+            retVal = ii.second;
+    }
     return retVal;
 }
 }
