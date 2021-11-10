@@ -33,6 +33,7 @@
 #include <QSize>
 #include <QPoint>
 #include <QColor>
+#include <QTreeView>
 #include <QTimer>
 #ifdef QT_XMLPATTERNS_LIB
 #include <QXmlQuery>
@@ -586,6 +587,25 @@ void writeModel( QAbstractItemModel * model,
     writer.writeEndElement();
 }
 
+
+void expandAll( QAbstractItemModel *model, const QModelIndex &index, QTreeView *view )
+{
+    if ( !model || !view )
+        return;
+
+    view->setExpanded( index, true );
+
+    auto rowCount = model->rowCount( index );
+    auto columnCount = model->columnCount( index );
+    for ( auto ii = 0; ii < rowCount; ++ii )
+    {
+        for ( auto jj = 0; jj < columnCount; ++jj )
+        {
+            auto childIndex = model->index( ii, jj, index );
+            expandAll( model, childIndex, view );
+        }
+    }
+}
 
 size_t CCaseInsensitiveHash::operator()( const QString& str ) const
 {

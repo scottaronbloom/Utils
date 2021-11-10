@@ -29,6 +29,8 @@ class QDir;
 class QXmlStreamReader;
 class QXmlStreamWriter;
 class QAbstractItemModel;
+class QModelIndex;
+class QTreeView;
 class QSettings;
 class QTimer;
 #ifdef QT_XMLPATTERNS_LIB
@@ -154,6 +156,8 @@ namespace NQtUtils
                      const QString & plauralSuffix, 
                      const std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) > & writeRow = 
                            std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) >() );
+
+    void expandAll( QAbstractItemModel *model, const QModelIndex &index, QTreeView *view );
 
     QDate findDate( const QString &dateString );
 
