@@ -160,6 +160,7 @@ std::string getTimeString( const std::pair< std::chrono::system_clock::time_poin
 std::string getTimeString( const std::chrono::system_clock::duration& duration, bool reportTotalSeconds=false, bool highPrecision=true );
 double getSeconds( const std::chrono::system_clock::duration& duration, bool highPrecision );
 
+QString getTimeString( qint64 msecs, bool reportTotalSeconds=false, bool highPrecision=false );
 QString getTimeString( const QDateTime& startTime, const QDateTime& endTime, bool reportTotalSeconds = false, bool highPrecision = true );
 QString secsToString( qint64 seconds );
 

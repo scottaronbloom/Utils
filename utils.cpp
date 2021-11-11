@@ -187,10 +187,9 @@ namespace NUtils
         return oss.str();
     }
 
-    QString getTimeString( const QDateTime& startTime, const QDateTime& endTime, bool reportTotalSeconds, bool highPrecision )
+    QString getTimeString( qint64 msecs, bool reportTotalSeconds, bool highPrecision )
     {
-        auto msecs = startTime.msecsTo( endTime );
-        auto totalMsecs = (1.0*msecs);
+        auto totalMsecs = ( 1.0 * msecs );
         auto days = msecs / ( 24 * 60 * 60 * 1000 );
         msecs = msecs - ( days * ( 24 * 60 * 60 * 1000 ) );
 
@@ -230,6 +229,12 @@ namespace NUtils
             retVal += ")";
         }
         return retVal;
+    }
+
+    QString getTimeString( const QDateTime &startTime, const QDateTime &endTime, bool reportTotalSeconds, bool highPrecision )
+    {
+        auto msecs = startTime.msecsTo( endTime );
+        return getTimeString( msecs, reportTotalSeconds, highPrecision );
     }
 
     bool isNarcissisticDigits( int64_t val, int base, bool& aOK )

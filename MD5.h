@@ -51,13 +51,17 @@ namespace NUtils
         };
 
         void run() override;
+
+        unsigned long long getThreadID() const;
+
         QString md5() const { return fMD5; }
 
         void stop() { slotStop(); }
     Q_SIGNALS:
         void sigStarted( unsigned long long threadID, const QDateTime& dt, const QString& filename );
         void sigFinishedReading( unsigned long long threadID, const QDateTime& dt, const QString& filename );
-        void sigFinishedComputing( unsigned long long threadID, const QDateTime& dt, const QString& filename );
+        void sigReadPositionStatus( unsigned long long threadID, const QDateTime &dt, const QString &filename, qint64 pos );
+        void sigFinishedComputing( unsigned long long threadID, const QDateTime &dt, const QString &filename );
         void sigFinished( unsigned long long threadID, const QDateTime& dt, const QString& filename, const QString & md5 );
     public Q_SLOTS:
         void slotStop();
