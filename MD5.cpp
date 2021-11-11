@@ -96,7 +96,7 @@ namespace NUtils
 
     void CComputeMD5::run()
     {
-        emit sigStarted( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+        emit sigStarted( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
 
 
         QFile file( fFileInfo.absoluteFilePath() );
@@ -108,12 +108,15 @@ namespace NUtils
         if ( !file.isReadable() )
             emitFinished();
 
-        char buffer[1024];
+        char buffer[4096];
         int length;
 
+        qint64 pos = 0;
         while ( !fStopped && ( length = file.read( buffer, sizeof( buffer ) ) ) > 0 )
         {
+            pos += length;
             hash.addData( buffer, length );
+            emit sigReadPositionStatus( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absolutePath(), pos );
             if ( QThread::currentThread() && QThread::currentThread()->eventDispatcher() )
             {
                 QThread::currentThread()->eventDispatcher()->processEvents( QEventLoop::AllEvents );
@@ -122,7 +125,7 @@ namespace NUtils
 
         if ( file.atEnd() )
         {
-            emit sigFinishedReading( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+            emit sigFinishedReading( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
             if ( fStopped )
             {
                 emitFinished();
@@ -130,7 +133,7 @@ namespace NUtils
             }
 
             auto tmp = hash.result();
-            emit sigFinishedComputing( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+            emit sigFinishedComputing( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
             if ( fStopped )
             {
                 emitFinished();
@@ -143,6 +146,11 @@ namespace NUtils
     }
 
 
+    unsigned long long CComputeMD5::getThreadID() const
+    {
+        return reinterpret_cast<unsigned long long>( QThread::currentThreadId() );
+    }
+
     void CComputeMD5::slotStop()
     {
         fStopped = true;
@@ -151,7 +159,7 @@ namespace NUtils
 
     void CComputeMD5::emitFinished()
     {
-        emit sigFinished( reinterpret_cast<unsigned long long>( QThread::currentThreadId() ), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), fMD5 );
+        emit sigFinished( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), fMD5 );
     }
 
 }
