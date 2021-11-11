@@ -116,7 +116,7 @@ namespace NUtils
         {
             pos += length;
             hash.addData( buffer, length );
-            emit sigReadPositionStatus( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absolutePath(), pos );
+            emit sigReadPositionStatus( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), pos );
             if ( QThread::currentThread() && QThread::currentThread()->eventDispatcher() )
             {
                 QThread::currentThread()->eventDispatcher()->processEvents( QEventLoop::AllEvents );
