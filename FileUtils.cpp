@@ -22,6 +22,7 @@
 
 #include "FileUtils.h"
 #include "StringUtils.h"
+#include "utils.h"
 
 #include <Qt>
 #include <QDebug>
@@ -351,6 +352,93 @@ QString gSoftenPath( const QString & xFileName, const std::set< QString > & xEnv
     }
 
     return lRetVal;
+}
+
+QString fileSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision )
+{
+    return fileSizeString( fi.size(), prettyPrint, byteSize, precision );
+}
+
+template< typename T >
+std::pair< T, T > correctFixedPointRemainder( T inValue, uint8_t precisionIn, uint8_t precisionOut )
+{
+    //if ( precisionIn == precisionOut )
+    //    return std::make_pair( inValue, 0 );
+    if ( precisionOut > precisionIn )
+        return std::make_pair( inValue, 0 );
+
+    auto maxOut = NUtils::power( 10, precisionOut );
+    auto divBy = NUtils::power( 10, precisionIn-precisionOut );
+    auto half = divBy / 2;
+
+    auto value = inValue;
+    T overflow{ 0 };
+    if ( divBy != 0 )
+    {
+        auto remainder = value % divBy;
+        auto integral = value / divBy;
+        if ( remainder >= half )
+        {
+            if ( integral )
+                integral++;
+            else
+                overflow++;
+            if ( integral >= maxOut )
+            {
+                overflow++;
+                integral = 0;
+            }
+        }
+        value = integral;
+    }
+    return std::make_pair( value, overflow );
+}
+
+//if ( remainder > 500 )
+//size++;
+//remainder = 0;
+
+
+QString fileSizeString( uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision )
+{
+    if ( !prettyPrint )
+    {
+        QLocale locale;
+        return locale.toString( size );
+    }
+
+    auto suffixes = std::vector< QString >( { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" } );
+
+    auto base = static_cast<uint64_t>( byteSize ? 1024 : 1000 );
+    auto suffixPos = 0;
+    while( ( size > ( base * base ) ) && ( suffixPos < suffixes.size() ) )
+    {
+        auto remainder = size % base;
+        size -= remainder;
+        size /= base;
+        suffixPos++;
+    }
+    uint64_t remainder = 0;
+    if ( size > base )
+    {
+        remainder = size % base;
+        size /= base;
+        suffixPos++;
+    }
+
+    // remainder will be from 0 to 999(1023)
+    // we only want 
+    uint64_t overflow = 0;
+    std::tie( remainder, overflow ) = correctFixedPointRemainder( remainder, 3, precision );
+    size += overflow;
+
+    auto suffix = suffixes[suffixPos];
+    if ( !byteSize && suffix.length() > 1 )
+        suffix = suffix.left( 1 );
+
+    QLocale locale;
+    auto retVal = QString( "%1%2%3B" ).arg( locale.toString( size ) ).arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() ).arg( suffix );
+    return retVal;
 }
 
 QString getRelativePath( const QDir & absDir, const QString & path )

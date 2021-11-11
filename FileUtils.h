@@ -106,5 +106,8 @@ namespace NFileUtils
     bool setTimeStamp(const QString& path, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // uses QDateTime::currentDateTime
     bool setTimeStamp(const QString& path, bool allTimeStamps, QString* msg = nullptr); // uses QDateTime::currentDateTime
     bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > & timeStamps, QString *msg = nullptr ); 
+
+    QString fileSizeString( const QFileInfo & fi, bool prettyPrint = true, bool byteBased=true, uint8_t precision=1 ); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
+    QString fileSizeString( uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision=1 );
 }
 #endif
