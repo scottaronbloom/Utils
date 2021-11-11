@@ -48,7 +48,6 @@ set(qtproject_SRCS
 )
 
 set(qtproject_CPPMOC_SRCS
-    FlowNavigator.cxx
 )
 
 set(qtproject_H
@@ -56,7 +55,6 @@ set(qtproject_H
     ButtonEnabler.h
     DelayLineEdit.h
     DelaySpinBox.h
-    FlowNavigator.h
     MD5.h
     SpinBox64.h
     SpinBox64U.h
@@ -91,6 +89,5 @@ set(qtproject_UIS
 
 
 set(qtproject_QRC
-    FlowNavigator.qrc
 )
 
