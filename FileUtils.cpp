@@ -1191,7 +1191,7 @@ static inline bool toFileTime( const QDateTime &date, FILETIME *fileTime )
 
 bool setDirTimeStamp( HANDLE fHandle, const QDateTime &newDate, QFileDevice::FileTime time, QString * msg )
 {
-    FILETIME fTime;
+    FILETIME sysTime;
     FILETIME *pLastWrite = NULL;
     FILETIME *pLastAccess = NULL;
     FILETIME *pCreationTime = NULL;
@@ -1199,15 +1199,15 @@ bool setDirTimeStamp( HANDLE fHandle, const QDateTime &newDate, QFileDevice::Fil
     switch ( time )
     {
         case QFileDevice::FileTime::FileModificationTime:
-            pLastWrite = &fTime;
+            pLastWrite = &sysTime;
             break;
 
         case QFileDevice::FileTime::FileAccessTime:
-            pLastAccess = &fTime;
+            pLastAccess = &sysTime;
             break;
 
         case QFileDevice::FileTime::FileBirthTime:
-            pCreationTime = &fTime;
+            pCreationTime = &sysTime;
             break;
 
         default:
@@ -1216,7 +1216,7 @@ bool setDirTimeStamp( HANDLE fHandle, const QDateTime &newDate, QFileDevice::Fil
             return false;
     }
 
-    if ( !toFileTime( newDate, &fTime ) )
+    if ( !toFileTime( newDate, &sysTime ) )
         return false;
 
     if ( !::SetFileTime( fHandle, pCreationTime, pLastAccess, pLastWrite ) )
