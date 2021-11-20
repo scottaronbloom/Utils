@@ -74,7 +74,7 @@ set(project_H
     JsonUtils.h
     SpinBox64_StepType.h
     QtUtils.h
-    QtHash.h
+    HashUtils.h
     EnumUtils.h
     StringComparisonClasses.h
     StringUtils.h

@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 #include "StringUtils.h"
-#include "QtHash.h"
+#include "HashUtils.h"
 #include "FromString.h"
 
 #include <QString>
@@ -53,7 +53,6 @@
 #include <locale>
 #include <map>
 
-using namespace std;
 namespace NStringUtils
 {
     double round( double value, int numDecimalPlaces )
@@ -389,10 +388,10 @@ namespace NStringUtils
         return false;
     }
 
-    string stripAllBlanksAndQuotes( const std::string &text )
+    std::string stripAllBlanksAndQuotes( const std::string &text )
     {
         static std::string whitespace( " \t\f\v\n\r" );
-        static string quotes( "\"\'" );
+        static std::string quotes( "\"\'" );
         std::string retVal( "" );
         retVal.reserve( text.length() + 1 );
         for ( std::string::const_iterator si = text.begin(); si != text.end(); ++si )
@@ -440,13 +439,13 @@ namespace NStringUtils
     //////////////////////////////////////////////////////////////////////////
     bool containsSubString( const std::string & str, const std::string & subs, std::string::size_type *ind )
     {
-        string::size_type idx;
+        std::string::size_type idx;
 
         if ( str.empty() || subs.empty() )
             return false;
 
         idx = subs.find_first_not_of( "*" );
-        if ( idx == string::npos )
+        if ( idx == std::string::npos )
             return true;
 
         std::string realSubs = subs.substr( idx );
@@ -457,7 +456,7 @@ namespace NStringUtils
             realSubs = realSubs.substr( 0, endi );
 
         idx = str.find( realSubs );
-        if ( idx == string::npos )
+        if ( idx == std::string::npos )
             return false;
 
         if ( ind )
@@ -466,11 +465,11 @@ namespace NStringUtils
     }
 
     //////////////////////////////////////////////////////////////////////////
-    // hasPrefixSubString(string str, string substr)
+    // hasPrefixSubString(string str, std::string substr)
     // 
     // 
     //
-    // Returns true if string contains sub-string. Ending * is wild-card
+    // Returns true if std::string contains sub-string. Ending * is wild-card
     //////////////////////////////////////////////////////////////////////////
     bool hasPrefixSubString( const std::string & str, const std::string & prefix )
     {
@@ -486,11 +485,11 @@ namespace NStringUtils
 
 
     //////////////////////////////////////////////////////////////////////////
-    // hasSuffixSubString(string str, string substr)
+    // hasSuffixSubString(string str, std::string substr)
     // 
     // 
     //
-    // Returns true if string contains sub-string. Starting * is wild-card
+    // Returns true if std::string contains sub-string. Starting * is wild-card
     //////////////////////////////////////////////////////////////////////////
     bool hasSuffixSubString( const std::string & str, const std::string & suffix )
     {
@@ -1873,11 +1872,11 @@ namespace NStringUtils
     {
         // Check the format
         size_t pos = bString.find( "'b" );
-        if ( pos == string::npos )
+        if ( pos == std::string::npos )
             return bString; // Can't convert.
 
         // Check the provided-size prefix.
-        string tmpString = bString.substr( 0, pos );
+        std::string tmpString = bString.substr( 0, pos );
         size_t size;
         ::fromString( size, tmpString );
         if ( size % 8 != 0 )
@@ -1896,7 +1895,7 @@ namespace NStringUtils
     /**********************************************************************************************
       Function: binaryToASCII()
       Description:
-      Convert binary string to ASCII, core function without attribute format checking.
+      Convert binary std::string to ASCII, core function without attribute format checking.
       - For attribute or parameter, use binaryAttrToASCII()
 
       Revision:
@@ -1908,7 +1907,7 @@ namespace NStringUtils
         int hexCnt = 0; // 2-hexes for byte
         unsigned int hexNum = 0; // Keep two hex numbers each time
         const char *c = bString.c_str();
-        string aString;
+        std::string aString;
         for ( size_t idx = 0; idx < bString.size(); ++idx )
         {
             // Build the hex number
