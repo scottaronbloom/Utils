@@ -149,6 +149,8 @@ namespace NQtUtils
     void move( QSettings & settings, const QString & subGroup, const QString & key, bool overwrite );
     void copy( QSettings & from, QSettings & to, bool overwrite );
 
+    int itemCount( QAbstractItemModel * model, bool rowCountOnly );
+
     QStringList getHeadersForModel( QAbstractItemModel * model );
     void writeModel( QAbstractItemModel * model, 
                      QXmlStreamWriter & writer, 

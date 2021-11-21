@@ -544,6 +544,47 @@ void copy( QSettings & from, QSettings & to, bool overwrite )
         to.endGroup();
     }
 }
+int itemCount( const QModelIndex & idx, bool rowCountOnly )
+{
+    int retVal = 1; // 1 counts self
+    for ( int ii = 0; ii < idx.model()->rowCount( idx ); ++ii )
+    {
+        if ( rowCountOnly )
+        {
+            retVal += itemCount( idx.model()->index( ii, 0, idx ), rowCountOnly );
+        }
+        else
+        {
+            for ( int jj = 0; jj < idx.model()->columnCount(); ++jj )
+            {
+                retVal += itemCount( idx.model()->index( ii, jj, idx ), rowCountOnly );
+            }
+        }
+    }
+    return retVal;
+}
+
+int itemCount( QAbstractItemModel * model, bool rowCountOnly )
+{
+    if ( !model )
+        return 0;
+    int retVal = 0;
+    for ( int ii = 0; ii < model->rowCount(); ++ii )
+    {
+        if ( rowCountOnly )
+        {
+            retVal += itemCount( model->index( ii, 0, QModelIndex() ), rowCountOnly );
+        }
+        else
+        {
+            for ( int jj = 0; jj < model->columnCount(); ++jj )
+            {
+                retVal += itemCount( model->index( ii, jj, QModelIndex() ), rowCountOnly );
+            }
+        }
+    }
+    return retVal;
+}
 
 QStringList getHeadersForModel( QAbstractItemModel * model )
 {
