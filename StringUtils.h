@@ -32,6 +32,7 @@
 #include <cstdarg>
 #include <climits>
 #include <cstdint>
+#include <unordered_set>
 #include <chrono>
 #include <QString>
 
@@ -435,6 +436,11 @@ namespace NStringUtils
     bool isSpecialRegExChar( const QChar & ch, bool includeDotSlash=true );
 
     QString transformTitle( const QString & title );
+    QString titleCase( const QString &string );
+    const std::unordered_set< QString > &unimportantWords();
+
+    std::unordered_set< QString > getImportantWords( const QString &string, bool stripPunctuation );
+    bool isSimilar( const QString &lhs, const QString &rhs ); // is every important word in the rhs in the left
 }
 
 #endif 

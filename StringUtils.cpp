@@ -2556,6 +2556,68 @@ namespace NStringUtils
         return isSpecialRegExChar( ch.toLatin1(), includeDotSlash );
     }
 
+    const std::unordered_set< QString > & unimportantWords()
+    {
+        static std::unordered_set< QString > retVal =
+        {
+            "a",
+            "an",
+            "the",
+            "at",
+            "by",
+            "in",
+            "is",
+            "of",
+            "on",
+            "to",
+            "per",
+            "via",
+            "and",
+            "as",
+            "for",
+            "and",
+            "nor",
+            "but",
+            "or",
+            "yet",
+            "so",
+            "if",
+            "how"
+        };
+        return retVal;
+    }
+
+    std::unordered_set< QString > getImportantWords( const QString & string, bool stripPunctuation )
+    {
+        auto wordsToRemove = unimportantWords();
+            
+        std::unordered_set< QString > retVal;
+        auto words = string.toLower().split( " " );
+        for( auto && ii : words )
+        {
+            if ( stripPunctuation )
+                ii = ii.remove( QRegularExpression( "\\W" ) );
+            if ( wordsToRemove.find( ii ) != wordsToRemove.end() )
+                continue;
+            retVal.insert( ii );
+        }
+        return retVal;
+    }
+
+    // is every word in the RHS in the LHS
+    bool isSimilar( const QString &lhs, const QString &rhs )
+    {
+        auto lhsWords = getImportantWords( lhs, true );
+        auto rhsWords = getImportantWords( rhs, true );
+
+        for( auto && ii : rhsWords )
+        {
+            if ( lhsWords.find( ii ) == lhsWords.end() )
+                return false;
+        }
+        return true;
+    }
+
     QString titleCase( const QString &string, bool first )
     {
         if ( string.isEmpty() )
@@ -2573,28 +2635,17 @@ namespace NStringUtils
         if ( allCap )
             return string;
 
-        static std::unordered_set< QString > keepLower =
-        {
-            "a",
-            "an",
-            "the",
-            "at",
-            "by",
-            "for",
-            "in",
-            "is",
-            "of",
-            "on",
-            "to",
-            "and",
-            "as",
-            "or"
-        };
+        auto keepLower = unimportantWords();
 
         retVal = retVal.toLower();
         if ( first || ( keepLower.find( retVal ) == keepLower.end() ) )
             retVal[0] = retVal[0].toUpper();
         return retVal;
+    }
+
+    QString titleCase( const QString &string )
+    {
+        return titleCase( string, false );
     }
 
     QString transformTitle( const QString &title )
