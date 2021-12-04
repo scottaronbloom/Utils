@@ -1338,23 +1338,23 @@ std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps( const QString
     std::unordered_map< QFileDevice::FileTime, QDateTime > retVal;
     
     auto currTime = fi.fileTime( QFile::FileAccessTime );
-    qDebug() << "AccessTime: " << currTime;
+    //qDebug() << "AccessTime: " << currTime;
     retVal[QFile::FileAccessTime] = currTime;
 
 #ifdef _WIN32
     currTime = fi.fileTime( QFile::FileBirthTime );
-    qDebug() << "BirthTime: " << currTime;
+    //qDebug() << "BirthTime: " << currTime;
     retVal[QFile::FileBirthTime] = currTime;
 #endif
 
 #ifndef _WIN32
     currTime = fi.fileTime( QFile::FileMetadataChangeTime );
-    qDebug() << "MetaChangeTime: " << temp;
+    //qDebug() << "MetaChangeTime: " << temp;
     retVal[QFile::FileMetadataChangeTime] = currTime;
 #endif
 
     currTime = fi.fileTime( QFile::FileModificationTime );
-    qDebug() << "ModChangeTime: " << currTime;
+    //qDebug() << "ModChangeTime: " << currTime;
     retVal[QFile::FileModificationTime] = currTime;
     return retVal;
 }
