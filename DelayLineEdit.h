@@ -46,9 +46,10 @@ public:
 
     void setLineEditColor( ELineEditStatus status );
     void setLineEditColor( bool aOK );
-    void setIsOKFunction( std::function< bool( const QString &text ) > func )
+    void setIsOKFunction( std::function< bool( const QString &text ) > func, const QString &errorMsg = {} )
     {
-        fIsOKFunction = func;
+        fIsOK.first = func;
+        fIsOK.second = errorMsg;
     }
 Q_SIGNALS:
     void sigTextChanged( const QString& text );
@@ -64,7 +65,7 @@ private:
     int fDelayMS{ 500 };
     QTimer* fChangedTimer{ nullptr };
     QTimer* fEditedTimer{ nullptr };
-    std::function< bool( const QString &text ) > fIsOKFunction;
+    std::pair< std::function< bool( const QString &text ) >, QString > fIsOK;
 };
 
 #endif

@@ -98,13 +98,13 @@ void CDelayLineEdit::slotTextEdited()
 
 void CDelayLineEdit::slotChangedTimerTimeout()
 {
-    setLineEditColor( fIsOKFunction ? fIsOKFunction( text() ) : true );
+    setLineEditColor( fIsOK.first ? fIsOK.first( text() ) : true );
     emit sigTextChanged( text() );
 }
 
 void CDelayLineEdit::slotEditTimerTimeout()
 {
-    setLineEditColor( fIsOKFunction ? fIsOKFunction( text() ) : true );
+    setLineEditColor( fIsOK.first ? fIsOK.first( text() ) : true );
     emit sigTextEdited( text() );
 }
 
@@ -115,11 +115,21 @@ void CDelayLineEdit::setLineEditColor( bool aOK )
 
 void CDelayLineEdit::setLineEditColor( ELineEditStatus status )
 {
+    setToolTip( QString() );
     if ( status == ELineEditStatus::ePending )
         setStyleSheet( "QLineEdit { background-color: #b7bfaf }" );
     else if ( status == ELineEditStatus::eOK )
         setStyleSheet( "QLineEdit { background-color: white }" );
     else if ( status == ELineEditStatus::eNotOK )
+    {
+        auto errorMsg = fIsOK.second;
+        if ( !errorMsg.isEmpty() )
+        {
+            if ( errorMsg.contains( "%1" ) )
+                errorMsg = errorMsg.arg( text() );
+            setToolTip( errorMsg );
+        }
         setStyleSheet( "QLineEdit { background-color: red }" );
+    }
 }
 
