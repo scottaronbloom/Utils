@@ -85,21 +85,41 @@ void CDelayLineEdit::slotTextChanged()
 {
     fChangedTimer->stop();
     fChangedTimer->start();
+    setLineEditColor( ELineEditStatus::ePending );
 }
 
 void CDelayLineEdit::slotTextEdited()
 {
     fEditedTimer->stop();
     fEditedTimer->start();
+    setLineEditColor( ELineEditStatus::ePending );
 }
 
 
 void CDelayLineEdit::slotChangedTimerTimeout()
 {
+    setLineEditColor( fIsOKFunction ? fIsOKFunction( text() ) : true );
     emit sigTextChanged( text() );
 }
 
 void CDelayLineEdit::slotEditTimerTimeout()
 {
+    setLineEditColor( fIsOKFunction ? fIsOKFunction( text() ) : true );
     emit sigTextEdited( text() );
 }
+
+void CDelayLineEdit::setLineEditColor( bool aOK )
+{
+    setLineEditColor( aOK ? ELineEditStatus::eOK : ELineEditStatus::eNotOK );
+}
+
+void CDelayLineEdit::setLineEditColor( ELineEditStatus status )
+{
+    if ( status == ELineEditStatus::ePending )
+        setStyleSheet( "QLineEdit { background-color: #b7bfaf }" );
+    else if ( status == ELineEditStatus::eOK )
+        setStyleSheet( "QLineEdit { background-color: white }" );
+    else if ( status == ELineEditStatus::eNotOK )
+        setStyleSheet( "QLineEdit { background-color: red }" );
+}
+

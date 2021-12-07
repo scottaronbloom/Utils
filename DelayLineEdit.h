@@ -29,6 +29,13 @@ class CDelayLineEdit : public QLineEdit
 {
     Q_OBJECT;
 public:
+    enum class ELineEditStatus
+    {
+        ePending,
+        eOK,
+        eNotOK
+    };
+
     explicit CDelayLineEdit( QWidget* parent = nullptr );
     explicit CDelayLineEdit( const QString& text, QWidget* parent = nullptr );
     explicit CDelayLineEdit( const QString& text, int delayMS, QWidget* parent = nullptr );
@@ -36,6 +43,13 @@ public:
 
     void setText( const QString &text );
     void setDelay( int delayMS );
+
+    void setLineEditColor( ELineEditStatus status );
+    void setLineEditColor( bool aOK );
+    void setIsOKFunction( std::function< bool( const QString &text ) > func )
+    {
+        fIsOKFunction = func;
+    }
 Q_SIGNALS:
     void sigTextChanged( const QString& text );
     void sigTextEdited( const QString& text );
@@ -50,6 +64,7 @@ private:
     int fDelayMS{ 500 };
     QTimer* fChangedTimer{ nullptr };
     QTimer* fEditedTimer{ nullptr };
+    std::function< bool( const QString &text ) > fIsOKFunction;
 };
 
 #endif
