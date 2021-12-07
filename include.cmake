@@ -23,6 +23,7 @@
 set(qtproject_SRCS
     AutoWaitCursor.cpp
     AutoFetch.cpp
+    BIFFile.cpp
     ButtonEnabler.cpp
     DelayLineEdit.cpp
     DelaySpinBox.cpp
@@ -52,6 +53,7 @@ set(qtproject_CPPMOC_SRCS
 
 set(qtproject_H
     AutoWaitCursor.h
+    BIFFile.h
     ButtonEnabler.h
     DelayLineEdit.h
     DelaySpinBox.h
