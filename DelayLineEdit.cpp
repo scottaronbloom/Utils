@@ -39,8 +39,7 @@ CDelayLineEdit::CDelayLineEdit( const QString& text, int delayMS, QWidget* paren
     QLineEdit( text, parent ),
     fDelayMS( delayMS )
 {
-    connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
-    connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+    connectToEditor( true );
 
     fChangedTimer = new QTimer( this );
     fChangedTimer->setSingleShot( true );
@@ -57,16 +56,14 @@ void CDelayLineEdit::setText( const QString &text )
 {
     if ( !isVisible() )
     {
-        disconnect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
-        disconnect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+        connectToEditor( false );
     }
 
     QLineEdit::setText( text );
 
     if ( !isVisible() )
     {
-        connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
-        connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+        connectToEditor( true );
     }
 }
 
@@ -90,11 +87,18 @@ void CDelayLineEdit::slotTextChanged()
 
 void CDelayLineEdit::slotTextEdited()
 {
+    fEditingFinished = false;
     fEditedTimer->stop();
     fEditedTimer->start();
     setLineEditColor( ELineEditStatus::ePending );
 }
 
+void CDelayLineEdit::slotEditingFinished()
+{
+    fEditingFinished = true;
+    if ( fStatus == ELineEditStatus::eOK )
+        emit sigFinishedEditingAfterDelay();
+}
 
 void CDelayLineEdit::slotChangedTimerTimeout()
 {
@@ -106,6 +110,24 @@ void CDelayLineEdit::slotEditTimerTimeout()
 {
     setLineEditColor( fIsOK.first ? fIsOK.first( text() ) : true );
     emit sigTextEditedAfterDelay( text() );
+    if ( fEditingFinished )
+        emit sigFinishedEditingAfterDelay();
+}
+
+void CDelayLineEdit::connectToEditor( bool connectOrDisconnect )
+{
+    if ( connectOrDisconnect )
+    {
+        connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
+        connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+        connect( this, &QLineEdit::editingFinished, this, &CDelayLineEdit::slotEditingFinished );
+    }
+    else
+    {
+        disconnect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
+        disconnect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+        disconnect( this, &QLineEdit::editingFinished, this, &CDelayLineEdit::slotEditingFinished );
+    }
 }
 
 void CDelayLineEdit::setLineEditColor( bool aOK )
@@ -115,6 +137,7 @@ void CDelayLineEdit::setLineEditColor( bool aOK )
 
 void CDelayLineEdit::setLineEditColor( ELineEditStatus status )
 {
+    fStatus = status;
     setToolTip( QString() );
     if ( status == ELineEditStatus::ePending )
         setStyleSheet( "QLineEdit { background-color: #b7bfaf }" );
