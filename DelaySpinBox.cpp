@@ -109,17 +109,17 @@ void CDelaySpinBox::slotEditingFinished()
 
 void CDelaySpinBox::slotValueChangedTimerTimeout()
 {
-    emit sigValueChanged( value() );
+    emit sigValueChangedAfterDelay( value() );
 }
 
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
 void CDelaySpinBox::slotTextChangedTimerTimeout()
 {
-    emit sigTextChanged( text() );
+    emit sigTextChangedAfterDelay( text() );
 }
 #endif
 
 void CDelaySpinBox::slotEditingFinishedTimerTimeout()
 {
-    emit sigEditingFinished();
+    emit sigEditingFinishedAfterDelay();
 }

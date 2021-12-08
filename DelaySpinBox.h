@@ -38,10 +38,11 @@ public:
     void setValue( int val );
 
 Q_SIGNALS:
-    void sigValueChanged( int );
-    void sigEditingFinished();
+    void sigValueChangedAfterDelay( int );
+    void sigEditingFinishedAfterDelay();
+
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    void sigTextChanged( const QString & );
+    void sigTextChangedAfterDelay( const QString & );
 #endif
 
 public Q_SLOTS:
