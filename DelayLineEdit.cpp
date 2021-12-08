@@ -99,13 +99,13 @@ void CDelayLineEdit::slotTextEdited()
 void CDelayLineEdit::slotChangedTimerTimeout()
 {
     setLineEditColor( fIsOK.first ? fIsOK.first( text() ) : true );
-    emit sigTextChanged( text() );
+    emit sigTextChangedAfterDelay( text() );
 }
 
 void CDelayLineEdit::slotEditTimerTimeout()
 {
     setLineEditColor( fIsOK.first ? fIsOK.first( text() ) : true );
-    emit sigTextEdited( text() );
+    emit sigTextEditedAfterDelay( text() );
 }
 
 void CDelayLineEdit::setLineEditColor( bool aOK )

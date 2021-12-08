@@ -91,7 +91,7 @@ bool CBIFFile::parseHeader()
 
     fVersion = getValue( header.mid( 8, 4 ), "Version");
     fNumImages = getValue( header.mid( 12, 4 ), "Number of Images" );
-    fTSMultiplier = getValue( header.mid( 16, 4 ), "Timestamp Multiplier" );
+    fTSMultiplier = getValue( header.mid( 16, 4 ), "Timestamp Multiplier (ms/frame)" );
     fReserved = header.mid( 20, 44 );
     if ( fReserved.length() != 44 )
     {

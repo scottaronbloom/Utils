@@ -52,8 +52,8 @@ public:
         fIsOK.second = errorMsg;
     }
 Q_SIGNALS:
-    void sigTextChanged( const QString& text );
-    void sigTextEdited( const QString& text );
+    void sigTextChangedAfterDelay( const QString& text );
+    void sigTextEditedAfterDelay( const QString& text );
 
 public Q_SLOTS:
     void slotTextChanged();

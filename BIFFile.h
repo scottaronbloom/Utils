@@ -61,6 +61,8 @@ public:
     QString reserved() const { return prettyPrint( fReserved ); }
 
     const TBIFIndex & bifs() const { return fBIFs; }
+
+    QString fileName() const { return fBIFFile; }
 private:
     void loadBIF();
 

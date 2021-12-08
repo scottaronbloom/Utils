@@ -25,6 +25,7 @@ set(qtproject_SRCS
     AutoFetch.cpp
     BIFFile.cpp
     ButtonEnabler.cpp
+    DelayComboBox.cpp
     DelayLineEdit.cpp
     DelaySpinBox.cpp
     utils.cpp
@@ -55,6 +56,7 @@ set(qtproject_H
     AutoWaitCursor.h
     BIFFile.h
     ButtonEnabler.h
+    DelayComboBox.h
     DelayLineEdit.h
     DelaySpinBox.h
     MD5.h
