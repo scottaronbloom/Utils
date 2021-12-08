@@ -97,5 +97,6 @@ set(qtproject_UIS
 
 
 set(qtproject_QRC
+    BIFPlayerResources/BIFPlayerResources.qrc
 )
-
+file(GLOB qtproject_QRC_SOURCES "BIFPlayerResources/*")

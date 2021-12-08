@@ -23,36 +23,10 @@
 #include "BIFWidget.h"
 #include "BIFFile.h"
 #include "utils.h"
-//
-//#include "Core/Preferences.h"
-//#include "Core/DirModel.h"
-//#include "Core/SearchResult.h"
-//#include "Core/SearchTMDBInfo.h"
-//#include "Core/SearchTMDB.h"
-//
-//#include "SABUtils/QtUtils.h"
-//#include "SABUtils/utils.h"
-//#include "SABUtils/ScrollMessageBox.h"
-//#include "SABUtils/AutoWaitCursor.h"
-//#include "SABUtils/BIFFile.h"
-//#include "SABUtils/DelayLineEdit.h"
-//
-//#include <QSettings>
-//#include <QFileInfo>
-//#include <QFileDialog>
-//#include <QCompleter>
-//#include <QMessageBox>
-//#include <QFileSystemModel>
 #include <QTimer>
 #include <QLabel>
-//#include <QPixmap>
-//#include <QLabel>
-//#include <QSpinBox>
 #include <QIcon>
 #include <QAction>
-//
-//
-//#include <QProgressDialog>
 #include <QVBoxLayout>
 #include <QSpacerItem>
 
@@ -61,6 +35,7 @@ namespace NBIF
     CBIFWidget::CBIFWidget( QWidget *parent )
         : QFrame( parent )
     {
+        Q_INIT_RESOURCE( BIFPlayerResources );
         auto vlayout = new QVBoxLayout( this );
         vlayout->setObjectName( "vlayout" );
 
@@ -257,9 +232,9 @@ namespace NBIF
             return;
 
         if ( playPause )
-            setActionInfo( action, ":/resources/play.png", tr( "Play" ) );
+            setActionInfo( action, ":/BIFPlayerResources/play.png", tr( "Play" ) );
         else
-            setActionInfo( action, ":/resources/pause.png", tr( "Pause" ) );
+            setActionInfo( action, ":/BIFPlayerResources/pause.png", tr( "Pause" ) );
     }
 
     QAction *CBIFWidget::actionSkipBackward()
@@ -268,7 +243,7 @@ namespace NBIF
         {
             fActionSkipBackward = new QAction( this );
             fActionSkipBackward->setObjectName( QString::fromUtf8( "actionSkipBackward" ) );
-            setActionInfo( fActionSkipBackward, ":/resources/skipbackward.png", tr( "Skip Backward" ) );
+            setActionInfo( fActionSkipBackward, ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ) );
             connect( fActionSkipBackward, &QAction::triggered, this, &CBIFWidget::slotSkipBackard );
         }
         return fActionSkipBackward;
@@ -280,7 +255,7 @@ namespace NBIF
         {
             fActionPrev = new QAction( this );
             fActionPrev->setObjectName( QString::fromUtf8( "actionPrev" ) );
-            setActionInfo( fActionPrev, ":/resources/prev.png", tr( "Previous Frame" ) );
+            setActionInfo( fActionPrev, ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ) );
             connect( fActionPrev, &QAction::triggered, this, &CBIFWidget::slotPrev );
         }
         return fActionPrev;
@@ -334,7 +309,7 @@ namespace NBIF
         {
             fActionNext = new QAction( this );
             fActionNext->setObjectName( QString::fromUtf8( "actionNext" ) );
-            setActionInfo( fActionNext, ":/resources/next.png", tr( "Next Frame" ) );
+            setActionInfo( fActionNext, ":/BIFPlayerResources/next.png", tr( "Next Frame" ) );
             connect( fActionNext, &QAction::triggered, this, &CBIFWidget::slotNext );
         }
         return fActionNext;
@@ -346,7 +321,7 @@ namespace NBIF
         {
             fActionSkipForward = new QAction( this );
             fActionSkipForward->setObjectName( QString::fromUtf8( "actionSkipForward" ) );
-            setActionInfo( fActionSkipForward, ":/resources/skipforward.png", tr( "Skip Forward" ) );
+            setActionInfo( fActionSkipForward, ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ) );
             connect( fActionSkipForward, &QAction::triggered, this, &CBIFWidget::slotSkipForward );
         }
         return fActionSkipForward;
