@@ -795,15 +795,73 @@ namespace
 
     TEST( TestUtils, TestFileSizeString )
     {
+        // base 1000
         EXPECT_EQ( QString( "324.579KB" ), NFileUtils::fileSizeString( 324579, true, false, 3U ) );
         EXPECT_EQ( QString( "324.58KB" ), NFileUtils::fileSizeString( 324579, true, false, 2U ) );
         EXPECT_EQ( QString( "324.6KB" ), NFileUtils::fileSizeString( 324579, true, false, 1U ) );
         EXPECT_EQ( QString( "325KB" ), NFileUtils::fileSizeString( 324579, true, false, 0U ) );
+
+        // base 1024
         EXPECT_EQ( QString( "316.995KiB" ), NFileUtils::fileSizeString( 324579, true, true, 3U ) );
-        EXPECT_EQ( QString( "317.0KiB" ), NFileUtils::fileSizeString( 324579, true, true, 2U ) );
-        EXPECT_EQ( QString( "317.0KiB" ), NFileUtils::fileSizeString( 324579, true, true, 1U ) );
-        EXPECT_EQ( QString( "317.0KiB" ), NFileUtils::fileSizeString( 324579, true, true, 0U ) );
+        EXPECT_EQ( QString( "317KiB" ), NFileUtils::fileSizeString( 324579, true, true, 2U ) );
+        EXPECT_EQ( QString( "317KiB" ), NFileUtils::fileSizeString( 324579, true, true, 1U ) );
+        EXPECT_EQ( QString( "317KiB" ), NFileUtils::fileSizeString( 324579, true, true, 0U ) );
     }
+
+    TEST( TestUtils, TestTimeString )
+    {
+        EXPECT_EQ( QString( "00:00:00:01.001 (1,001 seconds)" ), NUtils::CTimeString( 1001 ).toString() );
+    }
+	//CFlowStateDefItem * CFlowWidgetImpl::mRemoveFromTopLevelItems( CFlowStateDefItem * xItem )
+	//{
+	//	auto first = std::find_if( fTopLevelItems.begin(), fTopLevelItems.end(), gPageEquals( xItem ) );
+	//	if ( first != fTopLevelItems.end() )
+	//	{
+	//		for ( auto ii = first; ++ii != fTopLevelItems.end(); )
+	//		{
+	//			if ( ( *ii ).get() != xItem )
+	//			{
+	//				*first++ = std::move( *ii );
+	//			}
+	//		}
+	//	}
+	//	fTopLevelItems.erase( first );
+	//}
+
+    TEST( TestUtils, Help )
+    {
+        std::vector< int > vector = { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+        auto isInRange = []( int min, int max )
+        {
+            return [min, max]( int ii ) { return ( ii >= min ) && ( ii <= max ); };
+        };
+
+        std::vector< int > lTmp;
+        auto first = std::find_if( vector.begin(), vector.end(), isInRange( 2, 4 ) );
+        //vector.erase( std::remove_if( vector.begin(), vector.end(), isInRange( 2, 4 ) ), vector.end() );
+        if ( first != vector.end() )
+        {
+            lTmp.push_back( *first );
+            for ( auto ii = first; ++ii != vector.end(); )
+            {
+                if ( !isInRange( 2, 4 )( *ii ) )
+                {
+                    *first++ = std::move( *ii );
+                }
+                else
+                {
+                    lTmp.push_back( *ii );
+                }
+            }
+        }
+        vector.erase( first, vector.end() );
+        EXPECT_EQ( 3, lTmp.size() );
+        EXPECT_EQ( 5, vector.size() );
+    }
+
+
+
 }
 
 

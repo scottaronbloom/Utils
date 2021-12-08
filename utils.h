@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <optional>
 #include <QString>
 class QDateTime;
 #if __cplusplus > 201703L
@@ -155,14 +156,24 @@ char toChar( int value );
 
 void toDigits( int64_t val, int base, std::pair< int8_t*, uint32_t > & retVal, size_t& numDigits, bool * aOK = nullptr );
 std::string toString( int64_t val, int base );
-int64_t fromString( const std::string& str, int base );
-std::string getTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point >& startEndTime, bool reportTotalSeconds, bool highPrecision );
-std::string getTimeString( const std::chrono::system_clock::duration& duration, bool reportTotalSeconds=false, bool highPrecision=true );
-double getSeconds( const std::chrono::system_clock::duration& duration, bool highPrecision );
+int64_t fromString( const std::string &str, int base );
 
-QString getTimeString( qint64 msecs, bool reportTotalSeconds=false, bool highPrecision=false );
-QString getTimeString( const QDateTime& startTime, const QDateTime& endTime, bool reportTotalSeconds = false, bool highPrecision = true );
-QString secsToString( qint64 seconds );
+class CTimeString
+{
+public:
+    CTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > &startEndTime ); // highprecsion is microseconds
+    CTimeString( const std::chrono::system_clock::time_point & startTime, const std::chrono::system_clock::time_point & endTime );
+    CTimeString( const std::chrono::system_clock::duration & duration );
+
+    CTimeString( const QDateTime &startTime, const QDateTime &endTime ); // limited to milliseconds
+    CTimeString( uint64_t msecs );
+
+    QString toString( const QString & format = "dd:hh:mm:ss.zzz (SS seconds)" ) const; // dd -> days, hh -> hours, mm minutes, ss seconds, zzz milliseconds for Qt and microseconds for chrono based SS total seconds
+    std::string toStdString( const QString &format = "dd:hh:mm:ss.zzz (SS seconds)" ) const;
+private:
+    std::chrono::system_clock::duration fDuration;
+    bool fMicroSecondsAvailable{ false };
+};
 
 std::list< int64_t > computeFactors( int64_t num, bool properFactors=false );
 std::list< int64_t > computePrimeFactors( int64_t num );
