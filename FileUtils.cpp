@@ -377,7 +377,7 @@ std::pair< T, T > correctFixedPointRemainder( T inValue, uint8_t precisionIn, ui
     {
         auto remainder = value % divBy;
         auto integral = value / divBy;
-        if ( remainder >= half )
+        if ( half && ( remainder >= half ) )
         {
             if ( integral )
                 integral++;
