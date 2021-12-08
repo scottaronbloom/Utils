@@ -24,6 +24,8 @@ set(qtproject_SRCS
     AutoWaitCursor.cpp
     AutoFetch.cpp
     BIFFile.cpp
+    BIFModel.cpp
+    BIFWidget.cpp
     ButtonEnabler.cpp
     DelayComboBox.cpp
     DelayLineEdit.cpp
@@ -55,6 +57,8 @@ set(qtproject_CPPMOC_SRCS
 set(qtproject_H
     AutoWaitCursor.h
     BIFFile.h
+    BIFModel.h
+    BIFWidget.h
     ButtonEnabler.h
     DelayComboBox.h
     DelayLineEdit.h

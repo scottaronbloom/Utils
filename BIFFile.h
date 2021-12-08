@@ -31,93 +31,77 @@
 #include <QAbstractListModel>
 
 class QFile;
-using T32BitValue = std::tuple< QByteArray, QString, uint32_t >;
-struct SBIF
+namespace NBIF
 {
-    SBIF( T32BitValue ts, T32BitValue offset, SBIF * prev );
-
-    bool isLastFrame() const;
-    [[nodiscard]] std::pair< bool, QString > loadImage( QFile *file, const QString & fn );
-    T32BitValue fBIFNum;
-    T32BitValue fOffset;
-    uint64_t fSize{ 0 };
-    std::optional< std::pair< QByteArray, QImage > > fImage;
-};
-
-using TBIFIndex = std::vector< SBIF >; // data read in of ts, pos then a pair of pos, size
-class CBIFFile : public QObject
-{
-    Q_OBJECT;
-public:
-    CBIFFile( const QString & bifFile, bool loadImages, QObject * parent=nullptr );
-    virtual ~CBIFFile();
-
-    bool isValid() const { return fAOK; }
-    QString errorString() const { return fErrorString; }
-
-    QString magicNumber() const { return prettyPrint( fMagicNumber ); } // returns pretty print of the data
-    const T32BitValue & version() const { return fVersion; }
-    const T32BitValue & numImages() const { return fNumImages; }
-    const T32BitValue & tsMultiplier() const { return fTSMultiplier; }
-    QString reserved() const { return prettyPrint( fReserved ); }
-
-    const TBIFIndex & bifs() const { return fBIFs; }
-
-    QString fileName() const { return fBIFFile; }
-    std::size_t size() const { return fBIFs.size(); }
-
-    std::pair< bool, QString > loadImage( size_t imageNum, int *insertStart=nullptr, int *numInserted = nullptr );
-    QImage image( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
-
-    int lastImageLoaded() { return fLastImageLoaded; }
-    bool canLoadMoreImages()
+    using T32BitValue = std::tuple< QByteArray, QString, uint32_t >;
+    struct SBIF
     {
-        return fLastImageLoaded < size();
-    }
-    int fetchSize() const { return 8; }
-    void fetchMore();
-private:
-    void loadBIF( bool loadImages );
+        SBIF( T32BitValue ts, T32BitValue offset, SBIF *prev );
 
-    bool checkForOpen();
-    bool openFile();
-    bool parseHeader();
-    bool parseIndex( bool loadImages );
+        bool isLastFrame() const;
+        [[nodiscard]] std::pair< bool, QString > loadImage( QFile *file, const QString &fn );
+        T32BitValue fBIFNum;
+        T32BitValue fOffset;
+        uint64_t fSize{ 0 };
+        std::optional< std::pair< QByteArray, QImage > > fImage;
+    };
 
-    QString prettyPrint( const QByteArray &in ) const;
+    using TBIFIndex = std::vector< SBIF >; // data read in of ts, pos then a pair of pos, size
+    class CBIFFile : public QObject
+    {
+        Q_OBJECT;
+    public:
+        CBIFFile( const QString &bifFile, bool loadImages, QObject *parent = nullptr );
+        virtual ~CBIFFile();
 
-    T32BitValue getValue( const QByteArray & in, std::optional< QString > desc );
-    QFile *fFile{ nullptr };
-    QString fBIFFile;
-    bool fAOK{ false };
-    QString fErrorString;
-    QByteArray fMagicNumber;
-    T32BitValue fVersion;
-    T32BitValue fNumImages;
-    T32BitValue fTSMultiplier;
-    TBIFIndex fBIFs;
-    QByteArray fReserved;
-    int fLastImageLoaded{ 0 };
-};
+        bool isValid() const { return fAOK; }
+        QString errorString() const { return fErrorString; }
 
-class CBIFModel : public QAbstractListModel
-{
-    Q_OBJECT;
-public:
-    CBIFModel( QObject * parent  = nullptr );
+        QString magicNumber() const { return prettyPrint( fMagicNumber ); } // returns pretty print of the data
+        const T32BitValue &version() const { return fVersion; }
+        const T32BitValue &numImages() const { return fNumImages; }
+        const T32BitValue &tsMultiplier() const { return fTSMultiplier; }
+        QString reserved() const { return prettyPrint( fReserved ); }
 
-    void setBIFFile( CBIFFile *bifFile );
-        
-    int rowCount( const QModelIndex & parent ) const { return ( parent.isValid() || !fBIFFile ) ? 0 : fBIFFile->lastImageLoaded(); }
-    virtual QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override;
+        const TBIFIndex &bifs() const { return fBIFs; }
 
-    QImage image( size_t imageNum );
-protected:
-    virtual bool canFetchMore( const QModelIndex &parent ) const override;
-    virtual void fetchMore( const QModelIndex &parent ) override;
-private:
-    CBIFFile *fBIFFile{ nullptr };
-};
+        QString fileName() const { return fBIFFile; }
+        std::size_t size() const { return fBIFs.size(); }
+
+        std::pair< bool, QString > loadImage( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
+        QImage image( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
+
+        int lastImageLoaded() { return fLastImageLoaded; }
+        bool canLoadMoreImages()
+        {
+            return fLastImageLoaded < size();
+        }
+        int fetchSize() const { return 8; }
+        void fetchMore();
+    private:
+        void loadBIF( bool loadImages );
+
+        bool checkForOpen();
+        bool openFile();
+        bool parseHeader();
+        bool parseIndex( bool loadImages );
+
+        QString prettyPrint( const QByteArray &in ) const;
+
+        T32BitValue getValue( const QByteArray &in, std::optional< QString > desc );
+        QFile *fFile{ nullptr };
+        QString fBIFFile;
+        bool fAOK{ false };
+        QString fErrorString;
+        QByteArray fMagicNumber;
+        T32BitValue fVersion;
+        T32BitValue fNumImages;
+        T32BitValue fTSMultiplier;
+        TBIFIndex fBIFs;
+        QByteArray fReserved;
+        int fLastImageLoaded{ 0 };
+    };
+}
 
 #endif
 

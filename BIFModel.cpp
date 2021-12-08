@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+<<<<<<< Updated upstream
 #include "BIFFile.h"
 #include <QFile>
 #include <QPixmap>
@@ -382,4 +383,82 @@ void CBIFModel::fetchMore( const QModelIndex &parent )
     beginInsertRows( QModelIndex(), fBIFFile->lastImageLoaded(), fBIFFile->lastImageLoaded() + fBIFFile->fetchSize() - 1 );
     fBIFFile->fetchMore();
     endInsertRows();
+=======
+#include "BIFModel.h"
+#include "BIFFile.h"
+
+#include <QPixmap>
+
+namespace NBIF
+{
+    CBIFModel::CBIFModel( QObject *parent /*= nullptr */ ) :
+        QAbstractListModel( parent )
+    {
+
+    }
+
+    void CBIFModel::setBIFFile( std::shared_ptr< CBIFFile > bifFile )
+    {
+        beginResetModel();
+        fBIFFile = bifFile;
+        endResetModel();
+    }
+
+    int CBIFModel::rowCount( const QModelIndex &parent ) const
+    {
+        return ( parent.isValid() || !fBIFFile ) ? 0 : fBIFFile->lastImageLoaded();
+    }
+
+    QVariant CBIFModel::data( const QModelIndex &index, int role /*= Qt::DisplayRole */ ) const
+    {
+        if ( !index.isValid() )
+            return QVariant();
+        if ( index.row() > fBIFFile->size() || index.row() < 0 )
+            return QVariant();
+        if ( role == Qt::DisplayRole )
+            return QString( "BIF #%1" ).arg( index.row() );
+        else if ( role == Qt::DecorationRole )
+        {
+            auto image = fBIFFile->image( index.row() );
+            return QPixmap::fromImage( image );
+        }
+        return QVariant();
+    }
+
+    QImage CBIFModel::image( size_t imageNum )
+    {
+        if ( !fBIFFile )
+            return QImage();
+        int insertStart = -1;
+        int insertNum = -1;
+        auto retVal = fBIFFile->image( imageNum, &insertStart, &insertNum );
+        if ( ( insertStart != -1 ) && ( insertNum != -1 ) )
+        {
+            beginInsertRows( QModelIndex(), insertStart, insertStart + insertNum - 1 );
+            endInsertRows();
+        }
+        return retVal;
+    }
+
+    bool CBIFModel::canFetchMore( const QModelIndex &parent ) const
+    {
+        if ( parent.isValid() )
+            return false; // its a list
+        if ( !fBIFFile )
+            return false;
+        return fBIFFile->canLoadMoreImages();
+    }
+
+    void CBIFModel::fetchMore( const QModelIndex &parent )
+    {
+        if ( parent.isValid() )
+            return; // its a list
+        if ( !fBIFFile )
+            return;
+
+        beginInsertRows( QModelIndex(), fBIFFile->lastImageLoaded(), fBIFFile->lastImageLoaded() + fBIFFile->fetchSize() - 1 );
+        fBIFFile->fetchMore();
+        endInsertRows();
+    }
+>>>>>>> Stashed changes
 }

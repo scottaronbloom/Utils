@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+<<<<<<< Updated upstream
 #ifndef __BIFFILE_H
 #define __BIFFILE_H
 
@@ -119,5 +120,36 @@ private:
     CBIFFile *fBIFFile{ nullptr };
 };
 
+=======
+#ifndef __BIFMODEL_H
+#define __BIFMODEL_H
+
+#include <QAbstractListModel>
+#include <memory>
+
+class QFile;
+namespace NBIF
+{
+    class CBIFFile;
+    class CBIFModel : public QAbstractListModel
+    {
+        Q_OBJECT;
+    public:
+        CBIFModel( QObject *parent = nullptr );
+
+        void setBIFFile( std::shared_ptr< CBIFFile > bifFile );
+
+        virtual int rowCount( const QModelIndex &parent ) const override;
+        virtual QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override;
+
+        QImage image( size_t imageNum );
+    protected:
+        virtual bool canFetchMore( const QModelIndex &parent ) const override;
+        virtual void fetchMore( const QModelIndex &parent ) override;
+    private:
+        std::shared_ptr< CBIFFile > fBIFFile;
+    };
+}
+>>>>>>> Stashed changes
 #endif
 
