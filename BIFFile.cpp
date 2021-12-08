@@ -22,12 +22,13 @@
 
 #include "BIFFile.h"
 #include <QFile>
+#include <QPixmap>
 
-CBIFFile::CBIFFile( const QString &bifFile, QObject *parent/*=nullptr */ ) :
+CBIFFile::CBIFFile( const QString &bifFile, bool loadImages, QObject *parent/*=nullptr */ ) :
     fBIFFile( bifFile ),
     QObject( parent )
 {
-    loadBIF();
+    loadBIF( loadImages );
 }
 
 CBIFFile::~CBIFFile()
@@ -35,7 +36,7 @@ CBIFFile::~CBIFFile()
 
 }
 
-void CBIFFile::loadBIF()
+void CBIFFile::loadBIF( bool loadImages )
 {
     if ( !openFile() )
         return;
@@ -46,7 +47,7 @@ void CBIFFile::loadBIF()
     if ( !parseHeader() )
         return;
 
-    if ( !parseIndex() )
+    if ( !parseIndex( loadImages ) )
         return;
 
     fAOK = true;
@@ -109,7 +110,57 @@ bool CBIFFile::parseHeader()
     return true;
 }
 
-bool CBIFFile::parseIndex()
+std::pair< bool, QString > CBIFFile::loadImage( size_t imageNum, int *insertStart, int *numInserted )
+{
+    if ( imageNum >= fBIFs.size() )
+        return{ false, "Invalid argument" };
+
+    auto aOK = std::make_pair( true, QString() );
+    
+    bool addingImages = ( fLastImageLoaded <= imageNum );
+    if ( addingImages )
+    {
+        if ( insertStart )
+            *insertStart = fLastImageLoaded;
+        if ( numInserted )
+            *numInserted = static_cast< int >( imageNum - fLastImageLoaded ) + 1;
+    }
+
+    while ( fLastImageLoaded <= imageNum )
+    {
+        auto curr = fBIFs[fLastImageLoaded].loadImage( fFile, fBIFFile );
+        if ( !curr.first )
+        {
+            aOK.first = false;
+            aOK.second = curr.second;
+        }
+        fLastImageLoaded++;
+    }
+    return aOK;
+}
+
+QImage CBIFFile::image( size_t imageNum, int * insertStart, int * numInserted )
+{
+    if ( !loadImage( imageNum, insertStart, numInserted ).first || !fBIFs[imageNum].fImage.has_value() )
+        return QImage();
+
+    return fBIFs[imageNum].fImage.value().second;
+}
+
+void CBIFFile::fetchMore()
+{
+    size_t remainder = size() - fLastImageLoaded;
+    int itemsToFetch = std::min( 8ULL, remainder );
+    if ( itemsToFetch == 0 )
+        return;
+
+    for ( size_t ii = 0; ii < itemsToFetch; ++ii )
+    {
+        loadImage( fLastImageLoaded );
+    }
+}
+
+bool CBIFFile::parseIndex( bool loadImages )
 {
     if ( !checkForOpen() )
         return false;
@@ -135,12 +186,11 @@ bool CBIFFile::parseIndex()
 
         fBIFs.push_back( SBIF( frameNum, absOffset, prev ) );
         prev = &fBIFs.at( ii );
-
     }
 
-    for ( uint32_t ii = 0; ii < fBIFs.size() - 1; ++ii )
+    for ( uint32_t ii = 0; loadImages && ii < fBIFs.size() - 1; ++ii )
     {
-        auto aOK = fBIFs[ii].loadImage( fFile, fBIFFile );
+        auto aOK = loadImage( ii );
         if ( !aOK.first )
         {
             fAOK = aOK.first;
@@ -242,6 +292,8 @@ bool SBIF::isLastFrame() const
 
 std::pair< bool, QString > SBIF::loadImage( QFile *file, const QString &fn )
 {
+    if ( fImage.has_value() )
+        return { true, QString() };
     if ( !file || !file->isOpen() || !file->isReadable() )
     {
         return { false, CBIFFile::tr( "File '%1' not open yet" ).arg( fn ) };
@@ -252,16 +304,82 @@ std::pair< bool, QString > SBIF::loadImage( QFile *file, const QString &fn )
         return { false, CBIFFile::tr( "Could not seek to position '%1' in file '%2' to load BIF image #%3" ).arg( std::get< 2 >( fOffset ) ).arg( fn ).arg( std::get< 2 >( fBIFNum ) ) };
     }
 
-    fImage.first = file->read( fSize );
-    if ( fImage.first.length() != fSize )
+    auto data = file->read( fSize );
+    if ( data.length() != fSize )
     {
         return { false, CBIFFile::tr( "Could not read '%1' of data starting at position '%2' to load BIF image #%4 from file '%3'" ).arg( fSize ).arg( std::get< 2 >( fOffset ) ).arg( fn ).arg( std::get< 2 >( fBIFNum ) ) };
     }
 
-    fImage.second = QImage::fromData( fImage.first );
-    if ( fImage.second.isNull() )
+    auto image = QImage::fromData( data );
+    if ( image.isNull() )
     {
         return {false, CBIFFile::tr( "Invalid JPG format for BIF #%2 in file '%2'" ).arg( std::get< 2 >( fBIFNum ) ).arg( fn ) };
     }
+    fImage = { data, image };
     return { true, QString() };
+}
+
+CBIFModel::CBIFModel( QObject *parent /*= nullptr */ ) :
+    QAbstractListModel( parent )
+{
+
+}
+
+void CBIFModel::setBIFFile( CBIFFile *bifFile )
+{
+    beginResetModel();
+    fBIFFile = bifFile;
+    endResetModel();
+}
+
+QVariant CBIFModel::data( const QModelIndex &index, int role /*= Qt::DisplayRole */ ) const
+{
+    if ( !index.isValid() )
+        return QVariant();
+    if ( index.row() > fBIFFile->size() || index.row() < 0 )
+        return QVariant();
+    if ( role == Qt::DisplayRole )
+        return QString( "BIF #%1" ).arg( index.row() );
+    else if ( role == Qt::DecorationRole )
+    {
+        auto image = fBIFFile->image( index.row() );
+        return QPixmap::fromImage( image );
+    }
+    return QVariant();
+}
+
+QImage CBIFModel::image( size_t imageNum )
+{
+    if ( !fBIFFile )
+        return QImage();
+    int insertStart = -1;
+    int insertNum = -1;
+    auto retVal = fBIFFile->image( imageNum, &insertStart, &insertNum );
+    if ( (insertStart != -1 ) && ( insertNum != -1 ) )
+    {
+        beginInsertRows( QModelIndex(), insertStart, insertStart + insertNum  - 1 );
+        endInsertRows();
+    }
+    return retVal;
+}
+
+bool CBIFModel::canFetchMore( const QModelIndex &parent ) const
+{
+    if ( parent.isValid() )
+        return false; // its a list
+    if ( !fBIFFile )
+        return false;
+    return fBIFFile->canLoadMoreImages();
+}
+
+void CBIFModel::fetchMore( const QModelIndex &parent )
+{
+    if ( parent.isValid() )
+        return; // its a list
+    if ( !fBIFFile )
+        return;
+
+    beginInsertRows( QModelIndex(), fBIFFile->lastImageLoaded(), fBIFFile->lastImageLoaded() + fBIFFile->fetchSize() - 1 );
+    fBIFFile->fetchMore();
+    endInsertRows();
 }

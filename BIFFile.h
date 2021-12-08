@@ -28,6 +28,7 @@
 #include <QImage>
 #include <utility>
 #include <optional>
+#include <QAbstractListModel>
 
 class QFile;
 using T32BitValue = std::tuple< QByteArray, QString, uint32_t >;
@@ -40,7 +41,7 @@ struct SBIF
     T32BitValue fBIFNum;
     T32BitValue fOffset;
     uint64_t fSize{ 0 };
-    std::pair< QByteArray, QImage > fImage;
+    std::optional< std::pair< QByteArray, QImage > > fImage;
 };
 
 using TBIFIndex = std::vector< SBIF >; // data read in of ts, pos then a pair of pos, size
@@ -48,7 +49,7 @@ class CBIFFile : public QObject
 {
     Q_OBJECT;
 public:
-    CBIFFile( const QString & bifFile, QObject * parent=nullptr );
+    CBIFFile( const QString & bifFile, bool loadImages, QObject * parent=nullptr );
     virtual ~CBIFFile();
 
     bool isValid() const { return fAOK; }
@@ -63,13 +64,25 @@ public:
     const TBIFIndex & bifs() const { return fBIFs; }
 
     QString fileName() const { return fBIFFile; }
+    std::size_t size() const { return fBIFs.size(); }
+
+    std::pair< bool, QString > loadImage( size_t imageNum, int *insertStart=nullptr, int *numInserted = nullptr );
+    QImage image( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
+
+    int lastImageLoaded() { return fLastImageLoaded; }
+    bool canLoadMoreImages()
+    {
+        return fLastImageLoaded < size();
+    }
+    int fetchSize() const { return 8; }
+    void fetchMore();
 private:
-    void loadBIF();
+    void loadBIF( bool loadImages );
 
     bool checkForOpen();
     bool openFile();
     bool parseHeader();
-    bool parseIndex();
+    bool parseIndex( bool loadImages );
 
     QString prettyPrint( const QByteArray &in ) const;
 
@@ -84,6 +97,26 @@ private:
     T32BitValue fTSMultiplier;
     TBIFIndex fBIFs;
     QByteArray fReserved;
+    int fLastImageLoaded{ 0 };
+};
+
+class CBIFModel : public QAbstractListModel
+{
+    Q_OBJECT;
+public:
+    CBIFModel( QObject * parent  = nullptr );
+
+    void setBIFFile( CBIFFile *bifFile );
+        
+    int rowCount( const QModelIndex & parent ) const { return ( parent.isValid() || !fBIFFile ) ? 0 : fBIFFile->lastImageLoaded(); }
+    virtual QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override;
+
+    QImage image( size_t imageNum );
+protected:
+    virtual bool canFetchMore( const QModelIndex &parent ) const override;
+    virtual void fetchMore( const QModelIndex &parent ) override;
+private:
+    CBIFFile *fBIFFile{ nullptr };
 };
 
 #endif
