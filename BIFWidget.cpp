@@ -27,8 +27,13 @@
 
 #include <QTimer>
 #include <QIcon>
+#include <QMenu>
+#include <QToolBar>
 #include <QAction>
+#include <QSpinBox>
+
 #include "ui_BIFWidget.h"
+
 namespace NBIF
 {
     CBIFWidget::CBIFWidget( QWidget *parent )
@@ -63,6 +68,30 @@ namespace NBIF
 
     CBIFWidget::~CBIFWidget()
     {
+    }
+
+    void CBIFWidget::setSkipInterval( int msec )
+    {
+        slotSetSkipInterval( msec );
+        if ( fSkipIntervalSB )
+            fSkipIntervalSB->setValue( fSkipInterval );
+    }
+
+    void CBIFWidget::slotSetSkipInterval( int numFrames )
+    {
+        fSkipInterval = numFrames;
+    }
+
+    void CBIFWidget::setFrameInterval( int msec )
+    {
+        slotSetFrameInterval( msec );
+    }
+
+    int CBIFWidget::frameInterval() const
+    {
+        if ( !fFrameTimer )
+            return 0;
+        return fFrameTimer->interval();
     }
 
     void CBIFWidget::slotSetFrameInterval( int msec )
@@ -114,6 +143,12 @@ namespace NBIF
     }
 
 
+    void CBIFWidget::setActive( bool isActive )
+    {
+        fToolBar->setVisible( isActive );
+        validatePlayerActions( isActive );
+    }
+
     void CBIFWidget::validatePlayerActions( bool enabled )
     {
         bool aOK = ( enabled && fBIF && fBIF->isValid() );
@@ -139,6 +174,17 @@ namespace NBIF
         enableItem( fImpl->playPauseBtn, aOK );
         enableItem( fImpl->skipForwardToggleBtn, aOK );
         enableItem( fImpl->nextToggleBtn, aOK );
+
+        checkItem( fActionDiscreteLayout, false );
+        checkItem( fActionToggleLayout, false );
+        checkItem( fActionNoLayout, false );
+
+        if ( fButtonLayout == NBIF::EButtonsLayout::eDiscretePlayPause )
+            checkItem( fActionDiscreteLayout, true );
+        else if ( fButtonLayout == NBIF::EButtonsLayout::eTogglePlayPause )
+            checkItem( fActionToggleLayout, true );
+        else if ( fButtonLayout == NBIF::EButtonsLayout::eNoButtons )
+            checkItem( fActionNoLayout, true );
     }
 
     bool CBIFWidget::isPlaying() const
@@ -303,58 +349,57 @@ namespace NBIF
         return fActionSkipForward;
     }
 
-    void CBIFWidget::setButtonsLayout( EButtonsLayout style )
+    QAction *CBIFWidget::actionDiscreteLayout()
     {
-        if ( fButtonStyle == style )
+        if ( !fActionDiscreteLayout )
+        {
+            fActionDiscreteLayout = createAction( QString::fromUtf8( "actionDiscreteLayout" ), QString(), tr( "Discrete Play/Pause Buttons" ), &CBIFWidget::slotPlayerButtonDiscrete );
+            fActionDiscreteLayout->setCheckable( true );
+        }
+        return fActionDiscreteLayout;
+    }
+
+    QAction *CBIFWidget::actionToggleLayout()
+    {
+        if ( !fActionToggleLayout )
+        {
+            fActionToggleLayout = createAction( QString::fromUtf8( "actionToggleLayout" ), QString(), tr( "Single Toggleable Play/Pause Button" ), &CBIFWidget::slotPlayerButtonToggle );
+            fActionToggleLayout->setCheckable( true );
+        }
+        return fActionToggleLayout;
+    }
+
+    QAction *CBIFWidget::actionNoLayout()
+    {
+        if ( !fActionNoLayout )
+        {
+            fActionNoLayout = createAction( QString::fromUtf8( "actionNoLayout" ), QString(), tr( "No Player Buttons" ), &CBIFWidget::slotPlayerButtonNone );
+            fActionNoLayout->setCheckable( true );
+        }
+        return fActionNoLayout;
+    }
+
+    void CBIFWidget::setButtonsLayout( EButtonsLayout layout )
+    {
+        if ( fButtonLayout == layout )
             return;
 
-        fButtonStyle = style;
+        fButtonLayout = layout;
 
-        actionTogglePlayPause()->setVisible( false );
-        actionPause()->setVisible( false );
-        actionPlay()->setVisible( false );
-
-        if ( style == NBIF::EButtonsLayout::eDiscretePlayPause )
-        {
-            actionSkipBackward()->setVisible( true );
-            actionPrev()->setVisible( true );
-
-            actionNext()->setVisible( true );
-            actionSkipForward()->setVisible( true );
-
-            actionPause()->setVisible( true );
-            actionPlay()->setVisible( true );
-        }
-        else if ( style == NBIF::EButtonsLayout::eTogglePlayPause )
-        {
-            actionSkipBackward()->setVisible( true );
-            actionPrev()->setVisible( true );
-
-            actionNext()->setVisible( true );
-            actionSkipForward()->setVisible( true );
-
-            actionTogglePlayPause()->setVisible( true );
-        }
-        else if ( style == NBIF::EButtonsLayout::eNoButtons )
-        {
-            actionSkipBackward()->setVisible( false );
-            actionPrev()->setVisible( false );
-
-            actionNext()->setVisible( false );
-            actionSkipForward()->setVisible( false );
-        }
-
+        updateMenu();
+        updateToolBar();
         layoutButtons();
+        validatePlayerActions();
     }
 
     void CBIFWidget::layoutButtons()
     {
-        if ( fButtonStyle == EButtonsLayout::eNoButtons )
+        if ( fButtonLayout == EButtonsLayout::eNoButtons )
             fImpl->stackedWidget->setVisible( false );
         else
         {
             fImpl->stackedWidget->setVisible( true );
-            fImpl->stackedWidget->setCurrentIndex( static_cast<int>( fButtonStyle ) );
+            fImpl->stackedWidget->setCurrentIndex( static_cast<int>( fButtonLayout ) );
         }
     }
 
@@ -386,5 +431,169 @@ namespace NBIF
         retVal->setObjectName( name );
         setInfo( retVal, iconPath, text, slot );
         return retVal;
+    }
+
+    void CBIFWidget::slotPlayerButtonDiscrete()
+    {
+        setButtonsLayout( NBIF::EButtonsLayout::eDiscretePlayPause );
+    }
+
+    void CBIFWidget::slotPlayerButtonToggle()
+    {
+        setButtonsLayout( NBIF::EButtonsLayout::eTogglePlayPause );
+    }
+
+    void CBIFWidget::slotPlayerButtonNone()
+    {
+        setButtonsLayout( NBIF::EButtonsLayout::eNoButtons );
+    }
+
+    QToolBar *CBIFWidget::toolBar()
+    {
+        if ( !fToolBar )
+        {
+            fToolBar = new QToolBar;
+            fToolBar->setObjectName( "BIF Viewer Toolbar" );
+            fToolBar->setWindowTitle( tr( "BIF Viewer Toolbar" ) );
+
+            updateToolBar();
+            validatePlayerActions();
+        }
+        return fToolBar;
+    }
+
+    QMenu *CBIFWidget::menu()
+    {
+        if ( !fMenu )
+        {
+            fMenu = new QMenu( this );
+            fMenu->setObjectName( "BIF Viewer Menu" );
+            fMenu->setTitle( tr( "BIF Viewer" ) );
+
+            updateMenu();
+            validatePlayerActions();
+        }
+        return fMenu;
+    }
+
+    void CBIFWidget::updateMenu()
+    {
+        if ( !fMenu )
+            return;
+
+        fMenu->clear();
+        auto subMenu = fMenu->addMenu( tr( "BIF Player Type" ) );
+        subMenu->addAction( actionDiscreteLayout() );
+        subMenu->addAction( actionToggleLayout() );
+        subMenu->addAction( actionNoLayout() );
+
+        if ( fButtonLayout == EButtonsLayout::eNoButtons )
+            return;
+
+        updateItemForLayout( fMenu );
+    }
+
+    void CBIFWidget::updateToolBar()
+    {
+        if ( !fToolBar )
+            return;
+
+        fToolBar->clear();
+
+        auto label = new QLabel( tr( "Seconds per Frame:" ) );
+        label->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+        fToolBar->addWidget( label );
+
+        auto frameIntervalSB = new QSpinBox;
+        frameIntervalSB->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+        frameIntervalSB->setSuffix( tr( "ms" ) );
+        frameIntervalSB->setMinimum( 0 );
+        frameIntervalSB->setMaximum( std::numeric_limits< int >::max() );
+        frameIntervalSB->setSingleStep( 50 );
+        connect( frameIntervalSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CBIFWidget::slotSetFrameInterval );
+
+        if ( fFrameTimer )
+            frameIntervalSB->setValue( fFrameTimer->interval() );
+
+        fToolBar->addWidget( frameIntervalSB );
+        fToolBar->addSeparator();
+
+        label = new QLabel( tr( "Frames to Skip:" ) );
+        label->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+        fToolBar->addWidget( label );
+
+        fSkipIntervalSB = new QSpinBox;
+        fSkipIntervalSB->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+        fSkipIntervalSB->setSuffix( tr( "frames" ) );
+        fSkipIntervalSB->setMinimum( 0 );
+        fSkipIntervalSB->setMaximum( std::numeric_limits< int >::max() );
+        fSkipIntervalSB->setSingleStep( 50 );
+        fSkipIntervalSB->setValue( fSkipInterval );
+        connect( fSkipIntervalSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CBIFWidget::slotSetSkipInterval );
+
+        fToolBar->addWidget( fSkipIntervalSB );
+
+        updateItemForLayout( fToolBar );
+    }
+
+    template< typename T>
+    void CBIFWidget::updateItemForLayout( T * item )
+    {
+        if ( fButtonLayout == EButtonsLayout::eNoButtons )
+            return;
+        item->addSeparator();
+
+        item->addAction( actionSkipBackward() );
+        item->addAction( actionPrev() );
+        item->addSeparator();
+        if ( fButtonLayout == EButtonsLayout::eDiscretePlayPause )
+        {
+            item->addAction( actionPause() );
+            item->addAction( actionPlay() );
+        }
+        else if ( fButtonLayout == EButtonsLayout::eTogglePlayPause )
+        {
+            item->addAction( actionTogglePlayPause() );
+        }
+        item->addSeparator();
+        item->addAction( actionNext() );
+        item->addAction( actionSkipForward() );
+    }
+
+
+    template< typename T >
+    void NBIF::CBIFWidget::setPlayPause( T *item, bool playPause )
+    {
+        if ( !item )
+            return;
+
+        if ( playPause )
+            setInfo( item, ":/BIFPlayerResources/play.png", tr( "Play" ), nullptr );
+        else
+            setInfo( item, ":/BIFPlayerResources/pause.png", tr( "Pause" ), nullptr );
+    }
+
+    template< typename T >
+    void NBIF::CBIFWidget::checkItem( T *item, bool checked )
+    {
+        if ( !item )
+            return;
+        item->setChecked( checked );
+    }
+
+    template< typename T >
+    void NBIF::CBIFWidget::setItemVisible( T *item, bool visible )
+    {
+        if ( !item )
+            return;
+        item->setVisible( visible );
+    }
+
+    template< typename T >
+    void NBIF::CBIFWidget::enableItem( T *item, bool enable )
+    {
+        if ( !item )
+            return;
+        item->setEnabled( enable );
     }
 }

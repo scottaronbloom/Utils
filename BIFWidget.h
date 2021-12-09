@@ -33,6 +33,9 @@ class QSpacerItem;
 class QVBoxLayout;
 class QHBoxLayout;
 class QToolButton;
+class QMenu;
+class QToolBar;
+class QSpinBox;
 
 namespace Ui { class CBIFWidget; }
 namespace NBIF
@@ -58,7 +61,11 @@ namespace NBIF
         bool isPlaying() const;
 
         void setButtonsLayout( EButtonsLayout style );
-        EButtonsLayout buttonsLayout()const { return fButtonStyle; }
+        EButtonsLayout buttonsLayout()const { return fButtonLayout; }
+
+        QMenu *menu();
+
+        QToolBar *toolBar();
 
         QAction *actionSkipBackward();
         QAction *actionPrev();
@@ -68,15 +75,23 @@ namespace NBIF
         QAction *actionNext();
         QAction *actionSkipForward();
 
-        int skipInterval() const { return fSkipInterval; }
+        QAction *actionDiscreteLayout();
+        QAction *actionToggleLayout();
+        QAction *actionNoLayout();
+
+        int skipInterval() const { return fSkipInterval; } // frames to skip when stepping
+        void setSkipInterval( int value );
+
+        int frameInterval() const; // time between frames when playing
+        void setFrameInterval( int ms );
+
+        void setActive( bool isActive );
     Q_SIGNALS:
         void sigPaused();
         void sigStarted();
         void sigShowingFrame( uint32_t frameNum );
     public Q_SLOTS:
         void slotTimerExpired();
-        void slotSetFrameInterval( int msec );
-        void slotSetSkipInterval( int numFrames ) { fSkipInterval = numFrames; }
 
         void slotSkipBackard();
         void slotPrev();
@@ -85,35 +100,36 @@ namespace NBIF
         void slotPlay();
         void slotNext();
         void slotSkipForward();
+
+        void slotPlayerButtonDiscrete();
+        void slotPlayerButtonToggle();
+        void slotPlayerButtonNone();
+    private Q_SLOTS:
+        void slotSetSkipInterval( int numFrames );
+        void slotSetFrameInterval( int msec );
     private:
         void showCurrentFrame();
         void setCurrentFrame( int frame );
         void offsetFrame( int offset );
         template< typename T >
-        void setPlayPause( T * item, bool playPause )
-        {
-            if ( !item )
-                return;
-
-            if ( playPause )
-                setInfo( item, ":/BIFPlayerResources/play.png", tr( "Play" ), nullptr );
-            else
-                setInfo( item, ":/BIFPlayerResources/pause.png", tr( "Pause" ), nullptr );
-        }
+        void setPlayPause( T * item, bool playPause );
         template< typename T >
-        void enableItem( T * item, bool enable )
-        {
-            if ( !item )
-                return;
-            item->setEnabled( enable );
-        }
+        void enableItem( T * item, bool enable );
+        template< typename T >
+        void checkItem( T *item, bool checked );
+        template< typename T >
+        void setItemVisible( T *item, bool visible );
+        template< typename T >
+        void updateItemForLayout( T *item );
+        
 
+        void updateToolBar();
+        void updateMenu();
         void layoutButtons();
 
         void setInfo( QAction *item, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() );
         void setInfo( QToolButton *btn, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() );
 
-        QToolButton * createToolButton( const QString & name, const QString & iconPath, const QString & text, void (CBIFWidget::*slot)() );
         QAction * createAction( const QString & name, const QString &iconPath, const QString &text, void (CBIFWidget:: *slot)() );
 
         QTimer *fFrameTimer{ nullptr };
@@ -128,10 +144,21 @@ namespace NBIF
         QAction *fActionNext{ nullptr };
         QAction *fActionSkipForward{ nullptr };
 
+        QAction *fActionDiscreteLayout{ nullptr };
+        QAction *fActionToggleLayout{ nullptr };
+        QAction *fActionNoLayout{ nullptr };
+
         int fSkipInterval{ 5 };
-        EButtonsLayout fButtonStyle{ EButtonsLayout::eTogglePlayPause };
+        EButtonsLayout fButtonLayout{ EButtonsLayout::eTogglePlayPause };
+
+        QMenu *fMenu{ nullptr };
+        QToolBar *fToolBar{ nullptr };
+        QSpinBox *fSkipIntervalSB{ nullptr };
 
         std::unique_ptr< Ui::CBIFWidget > fImpl;
     };
+
+
+
 }
 #endif 
