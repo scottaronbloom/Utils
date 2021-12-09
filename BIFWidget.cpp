@@ -185,19 +185,27 @@ namespace NBIF
 
     void CBIFWidget::setCurrentFrame( int frame )
     {
+        int sz = static_cast<int>( fBIF->bifs().size() );
         if ( frame < 0 )
-            frame = static_cast<int>( fBIF->bifs().size() ) - 1;
-        else if ( frame >= fBIF->bifs().size() )
-            frame = 0;
+            frame = sz + frame;
+        else if ( frame >= sz )
+            frame = frame - sz;
         fCurrentFrame = frame;
     }
 
     void CBIFWidget::offsetFrame( int offset )
     {
         if ( !fCurrentFrame.has_value() )
-            setCurrentFrame( 0 );
+        {
+            if ( offset < 0 )
+                setCurrentFrame( offset + 1 );
+            else
+                setCurrentFrame( offset );
+        }
         else
+        {
             setCurrentFrame( fCurrentFrame.value() + offset );
+        }
     }
 
     void CBIFWidget::clear()
