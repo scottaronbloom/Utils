@@ -120,9 +120,6 @@ namespace NBIF
         std::optional< uint32_t > fCurrentFrame;
         std::shared_ptr< NBIF::CBIFFile > fBIF;
 
-        //QLabel *fImageLabel{ nullptr };
-        //QLabel *fTextLabel{ nullptr };
-
         QAction *fActionSkipBackward{ nullptr };
         QAction *fActionPrev{ nullptr };
         QAction *fActionTogglePlayPause{ nullptr };
@@ -133,12 +130,6 @@ namespace NBIF
 
         int fSkipInterval{ 5 };
         EButtonsLayout fButtonStyle{ EButtonsLayout::eTogglePlayPause };
-        //QVBoxLayout *fMainLayout{ nullptr };
-        //QHBoxLayout *fButtonLayout{ nullptr };
-        //QToolButton *fPlayPauseButton{ nullptr };
-        //QToolButton *fPlayButton{ nullptr };
-        //QToolButton *fPauseButton{ nullptr };
-        //QSpacerItem *fVertSpacer{ nullptr };
 
         std::unique_ptr< Ui::CBIFWidget > fImpl;
     };

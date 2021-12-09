@@ -26,14 +26,8 @@
 #include "SABUtils/QtUtils.h"
 
 #include <QTimer>
-#include <QLabel>
 #include <QIcon>
 #include <QAction>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QSpacerItem>
-#include <QToolButton>
-
 #include "ui_BIFWidget.h"
 namespace NBIF
 {
@@ -369,14 +363,6 @@ namespace NBIF
         if ( slot )
             connect( item, &QToolButton::clicked, this, slot );
     }
-
-    //QToolButton *CBIFWidget::createToolButton( const QString & name, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() )
-    //{
-    //    auto retVal = new QToolButton( this );
-    //    retVal->setObjectName( name );
-    //    setInfo( retVal, iconPath, text, slot );
-    //    return retVal;
-    //}
 
     QAction *CBIFWidget::createAction( const QString & name, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() )
     {
