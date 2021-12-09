@@ -118,19 +118,27 @@ namespace NBIF
     {
         bool aOK = ( enabled && fBIF && fBIF->isValid() );
 
-        enableItem( fActionNext, aOK );
-        enableItem( fActionSkipForward, aOK );
-        enableItem( fActionPrev, aOK );
         enableItem( fActionSkipBackward, aOK );
-        enableItem( fActionTogglePlayPause, aOK );
+        enableItem( fActionPrev, aOK );
         enableItem( fActionPlay, aOK && !isPlaying() );
         enableItem( fActionPause, aOK && isPlaying() );
+        enableItem( fActionTogglePlayPause, aOK );
+        enableItem( fActionNext, aOK );
+        enableItem( fActionSkipForward, aOK );
+
+
+        enableItem( fImpl->skipBackwardDiscreteBtn, aOK );
+        enableItem( fImpl->prevDiscreteBtn, aOK );
         enableItem( fImpl->playBtn, aOK && !isPlaying() );
         enableItem( fImpl->pauseBtn, aOK && isPlaying() );
+        enableItem( fImpl->skipForwardDiscreteBtn, aOK );
+        enableItem( fImpl->nextDiscreteBtn, aOK );
 
-
-        setPlayPause( fActionTogglePlayPause, !isPlaying() );
-        setPlayPause( fImpl->playPauseBtn, !isPlaying() );
+        enableItem( fImpl->skipBackwardToggleBtn, aOK );
+        enableItem( fImpl->prevToggleBtn, aOK );
+        enableItem( fImpl->playPauseBtn, aOK );
+        enableItem( fImpl->skipForwardToggleBtn, aOK );
+        enableItem( fImpl->nextToggleBtn, aOK );
     }
 
     bool CBIFWidget::isPlaying() const
@@ -185,10 +193,10 @@ namespace NBIF
 
     void CBIFWidget::setCurrentFrame( int frame )
     {
-        int sz = static_cast<int>( fBIF->bifs().size() );
+        int sz = fBIF ? static_cast<int>( fBIF->bifs().size() ) : 0;
         if ( frame < 0 )
             frame = sz + frame;
-        else if ( frame >= sz )
+        if ( frame >= sz )
             frame = frame - sz;
         fCurrentFrame = frame;
     }
