@@ -35,6 +35,8 @@
 #include <QColor>
 #include <QTreeView>
 #include <QTimer>
+#include <QLayout>
+
 #ifdef QT_XMLPATTERNS_LIB
 #include <QXmlQuery>
 #endif
@@ -711,6 +713,24 @@ void updateTimer( int delayMS, QTimer *timer )
     timer->setInterval( delayMS );
     if ( isActive )
         timer->start();
+}
+
+void deleteLayoutAndItems( QLayout * layout )
+{
+    if ( !layout )
+        return;
+
+    QLayoutItem *child = nullptr;
+    while ( ( child = layout->takeAt( 0 ) ) != nullptr )
+    {
+        if ( child->widget() )
+            delete child->widget();
+        else if ( child->layout() )
+            deleteLayoutAndItems( child->layout() );
+        delete child;
+    }
+    delete layout;
+    layout = nullptr;
 }
 
 }

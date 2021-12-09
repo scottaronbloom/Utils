@@ -33,6 +33,7 @@ class QModelIndex;
 class QTreeView;
 class QSettings;
 class QTimer;
+class QLayout;
 #ifdef QT_XMLPATTERNS_LIB
 class QXmlQuery;
 #endif
@@ -164,6 +165,8 @@ namespace NQtUtils
     QDate findDate( const QString &dateString );
 
     void updateTimer( int delayMS, QTimer * timer );
+
+    void deleteLayoutAndItems( QLayout * layout );
 }
 
 template< std::size_t I = 0, typename... Tp>
