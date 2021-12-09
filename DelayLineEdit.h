@@ -41,7 +41,7 @@ public:
     explicit CDelayLineEdit( const QString& text, int delayMS, QWidget* parent = nullptr );
 
     virtual ~CDelayLineEdit();
-
+    virtual void keyPressEvent( QKeyEvent *event );
     void setText( const QString &text );
     void setDelay( int delayMS );
 
@@ -60,7 +60,6 @@ Q_SIGNALS:
 public Q_SLOTS:
     void slotTextChanged();
     void slotTextEdited();
-    void slotEditingFinished();
     void slotChangedTimerTimeout();
     void slotEditTimerTimeout();
 

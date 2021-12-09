@@ -23,6 +23,7 @@
 #include "DelayLineEdit.h"
 
 #include <QTimer>
+#include <QKeyEvent>
 #include "QtUtils.h"
 
 CDelayLineEdit::CDelayLineEdit( QWidget* parent ) :
@@ -93,11 +94,14 @@ void CDelayLineEdit::slotTextEdited()
     setLineEditColor( ELineEditStatus::ePending );
 }
 
-void CDelayLineEdit::slotEditingFinished()
+void CDelayLineEdit::keyPressEvent( QKeyEvent * event )
 {
-    fEditingFinished = true;
-    if ( fStatus == ELineEditStatus::eOK )
-        emit sigFinishedEditingAfterDelay();
+    if ( event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return )
+    {
+        fEditingFinished = true;
+        if ( fStatus == ELineEditStatus::eOK )
+            emit sigFinishedEditingAfterDelay();
+    }
 }
 
 void CDelayLineEdit::slotChangedTimerTimeout()
@@ -120,13 +124,11 @@ void CDelayLineEdit::connectToEditor( bool connectOrDisconnect )
     {
         connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
         connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
-        connect( this, &QLineEdit::editingFinished, this, &CDelayLineEdit::slotEditingFinished );
     }
     else
     {
         disconnect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
         disconnect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
-        disconnect( this, &QLineEdit::editingFinished, this, &CDelayLineEdit::slotEditingFinished );
     }
 }
 
