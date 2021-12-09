@@ -24,6 +24,7 @@
 #include "BIFFile.h"
 
 #include <QPixmap>
+#include <QIcon>
 
 namespace NBIF
 {
@@ -55,8 +56,7 @@ namespace NBIF
             return QString( "BIF #%1" ).arg( index.row() );
         else if ( role == Qt::DecorationRole )
         {
-            auto image = fBIFFile->image( index.row() );
-            return QPixmap::fromImage( image );
+            return QIcon( QPixmap::fromImage( fBIFFile->image( index.row() ) ) );
         }
         return QVariant();
     }

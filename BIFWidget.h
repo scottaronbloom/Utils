@@ -25,13 +25,25 @@
 
 #include <QFrame>
 #include <optional>
+#include <memory>
 
 class QAction;
 class QLabel;
+class QSpacerItem;
+class QVBoxLayout;
+class QHBoxLayout;
+class QToolButton;
 
+namespace Ui { class CBIFWidget; }
 namespace NBIF
 {
     class CBIFFile;
+    enum class EButtonsLayout
+    {
+        eTogglePlayPause,
+        eDiscretePlayPause,
+        eNoButtons,
+    };
     class CBIFWidget : public QFrame
     {
         Q_OBJECT
@@ -44,6 +56,9 @@ namespace NBIF
 
         void validatePlayerActions( bool enable = true ); // enables/disables the enabled actions, however if true, only when valid, if false all false
         bool isPlaying() const;
+
+        void setButtonsLayout( EButtonsLayout style );
+        EButtonsLayout buttonsLayout()const { return fButtonStyle; }
 
         QAction *actionSkipBackward();
         QAction *actionPrev();
@@ -74,16 +89,39 @@ namespace NBIF
         void showCurrentFrame();
         void setCurrentFrame( int frame );
         void offsetFrame( int offset );
-        void setPlayPause( QAction *actin, bool playPause );
+        template< typename T >
+        void setPlayPause( T * item, bool playPause )
+        {
+            if ( !item )
+                return;
 
-        void setActionInfo( QAction *action, const QString & iconPath, const QString & text );
+            if ( playPause )
+                setInfo( item, ":/BIFPlayerResources/play.png", tr( "Play" ), nullptr );
+            else
+                setInfo( item, ":/BIFPlayerResources/pause.png", tr( "Pause" ), nullptr );
+        }
+        template< typename T >
+        void enableItem( T * item, bool enable )
+        {
+            if ( !item )
+                return;
+            item->setEnabled( enable );
+        }
+
+        void layoutButtons();
+
+        void setInfo( QAction *item, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() );
+        void setInfo( QToolButton *btn, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() );
+
+        QToolButton * createToolButton( const QString & name, const QString & iconPath, const QString & text, void (CBIFWidget::*slot)() );
+        QAction * createAction( const QString & name, const QString &iconPath, const QString &text, void (CBIFWidget:: *slot)() );
 
         QTimer *fFrameTimer{ nullptr };
         std::optional< uint32_t > fCurrentFrame;
         std::shared_ptr< NBIF::CBIFFile > fBIF;
 
-        QLabel *fImageLabel{ nullptr };
-        QLabel *fTextLabel{ nullptr };
+        //QLabel *fImageLabel{ nullptr };
+        //QLabel *fTextLabel{ nullptr };
 
         QAction *fActionSkipBackward{ nullptr };
         QAction *fActionPrev{ nullptr };
@@ -93,8 +131,16 @@ namespace NBIF
         QAction *fActionNext{ nullptr };
         QAction *fActionSkipForward{ nullptr };
 
-        void enableAction( QAction * action, bool enable );
         int fSkipInterval{ 5 };
+        EButtonsLayout fButtonStyle{ EButtonsLayout::eTogglePlayPause };
+        //QVBoxLayout *fMainLayout{ nullptr };
+        //QHBoxLayout *fButtonLayout{ nullptr };
+        //QToolButton *fPlayPauseButton{ nullptr };
+        //QToolButton *fPlayButton{ nullptr };
+        //QToolButton *fPauseButton{ nullptr };
+        //QSpacerItem *fVertSpacer{ nullptr };
+
+        std::unique_ptr< Ui::CBIFWidget > fImpl;
     };
 }
 #endif 

@@ -23,47 +23,47 @@
 #include "BIFWidget.h"
 #include "BIFFile.h"
 #include "utils.h"
+#include "SABUtils/QtUtils.h"
+
 #include <QTimer>
 #include <QLabel>
 #include <QIcon>
 #include <QAction>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QSpacerItem>
+#include <QToolButton>
 
+#include "ui_BIFWidget.h"
 namespace NBIF
 {
     CBIFWidget::CBIFWidget( QWidget *parent )
-        : QFrame( parent )
+        : QFrame( parent ),
+        fImpl( new Ui::CBIFWidget )
     {
         Q_INIT_RESOURCE( BIFPlayerResources );
-        auto vlayout = new QVBoxLayout( this );
-        vlayout->setObjectName( "vlayout" );
+        fImpl->setupUi( this );
 
-        fImageLabel = new QLabel( this );
-        fImageLabel->setObjectName( QString::fromUtf8( "ImageLabel" ) );
+        setInfo( fImpl->skipBackwardDiscreteBtn, ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ), &CBIFWidget::slotSkipBackard );
+        setInfo( fImpl->prevDiscreteBtn, ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ), &CBIFWidget::slotPrev );
+        setInfo( fImpl->playBtn, QString(), QString(), &CBIFWidget::slotPlay );
+        setPlayPause( fImpl->playBtn, true );
+        setInfo( fImpl->pauseBtn, QString(), QString(), &CBIFWidget::slotPause );
+        setPlayPause( fImpl->pauseBtn, false );
+        setInfo( fImpl->nextDiscreteBtn, ":/BIFPlayerResources/next.png", tr( "Next Frame" ), &CBIFWidget::slotNext );
+        setInfo( fImpl->skipForwardDiscreteBtn, ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ), &CBIFWidget::slotSkipForward );
 
-        QSizePolicy sizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
-        sizePolicy.setHorizontalStretch( 0 );
-        sizePolicy.setVerticalStretch( 0 );
-        sizePolicy.setHeightForWidth( fImageLabel->sizePolicy().hasHeightForWidth() );
-        fImageLabel->setSizePolicy( sizePolicy );
+        setInfo( fImpl->skipBackwardToggleBtn, ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ), &CBIFWidget::slotSkipBackard );
+        setInfo( fImpl->prevToggleBtn, ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ), &CBIFWidget::slotPrev );
+        setInfo( fImpl->playPauseBtn, QString(), QString(), &CBIFWidget::slotTogglePlayPause );
+        setPlayPause( fImpl->playPauseBtn, true );
+        setInfo( fImpl->nextToggleBtn, ":/BIFPlayerResources/next.png", tr( "Next Frame" ), &CBIFWidget::slotNext );
+        setInfo( fImpl->skipForwardToggleBtn, ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ), &CBIFWidget::slotSkipForward );
 
-        fImageLabel->setMinimumSize( QSize( 0, 200 ) );
-        fImageLabel->setBaseSize( QSize( 0, 0 ) );
-        fImageLabel->setAlignment( Qt::AlignBottom | Qt::AlignHCenter );
-        vlayout->addWidget( fImageLabel );
+        layoutButtons();
 
-        fTextLabel = new QLabel( this );
-        fTextLabel->setObjectName( QString::fromUtf8( "TextLabel" ) );
-        vlayout->addWidget( fTextLabel );
-
-        auto verticalSpacer = new QSpacerItem( 17, 336, QSizePolicy::Minimum, QSizePolicy::Expanding );
-
-        vlayout->addItem( verticalSpacer );
-
-        setFrameShape( QFrame::Panel );
-        setFrameShadow( QFrame::Sunken );
-
+        setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
+        
         slotSetFrameInterval( 50 );
     }
 
@@ -95,9 +95,12 @@ namespace NBIF
             return;
 
         auto &&image = fBIF->image( fCurrentFrame.value() );
-        fImageLabel->setPixmap( QPixmap::fromImage( image ) );
+        fImpl->imageLabel->setPixmap( QPixmap::fromImage( image ) );
+        fImpl->imageLabel->setMinimumSize( image.size() );
+        setMinimumWidth( image.width() + layout()->contentsMargins().left() + layout()->contentsMargins().right() );
         emit sigShowingFrame( fCurrentFrame.value() );
-        fTextLabel->setText( tr( "BIF #: %1 Time: %2" ).arg( fCurrentFrame.value() ).arg( NUtils::CTimeString( fCurrentFrame.value() * std::get< 2 >( fBIF->tsMultiplier() ) ).toString( "hh:mm:ss.zzz" ) ) );
+        fImpl->textLabel->setText( tr( "BIF #: %1 Time: %2" ).arg( fCurrentFrame.value() ).arg( NUtils::CTimeString( fCurrentFrame.value() * std::get< 2 >( fBIF->tsMultiplier() ) ).toString( "hh:mm:ss.zzz" ) ) );
+        fImpl->textLabel->setVisible( true );
     }
 
     void CBIFWidget::slotPause()
@@ -121,15 +124,19 @@ namespace NBIF
     {
         bool aOK = ( enabled && fBIF && fBIF->isValid() );
 
-        enableAction( fActionNext, aOK );
-        enableAction( fActionSkipForward, aOK );
-        enableAction( fActionPrev, aOK );
-        enableAction( fActionSkipBackward, aOK );
-        enableAction( fActionTogglePlayPause, aOK );
-        enableAction( fActionPlay, aOK && !isPlaying() );
-        enableAction( fActionPause, aOK && isPlaying() );
+        enableItem( fActionNext, aOK );
+        enableItem( fActionSkipForward, aOK );
+        enableItem( fActionPrev, aOK );
+        enableItem( fActionSkipBackward, aOK );
+        enableItem( fActionTogglePlayPause, aOK );
+        enableItem( fActionPlay, aOK && !isPlaying() );
+        enableItem( fActionPause, aOK && isPlaying() );
+        enableItem( fImpl->playBtn, aOK && !isPlaying() );
+        enableItem( fImpl->pauseBtn, aOK && isPlaying() );
+
 
         setPlayPause( fActionTogglePlayPause, !isPlaying() );
+        setPlayPause( fImpl->playPauseBtn, !isPlaying() );
     }
 
     bool CBIFWidget::isPlaying() const
@@ -199,25 +206,13 @@ namespace NBIF
             setCurrentFrame( fCurrentFrame.value() + offset );
     }
 
-    void CBIFWidget::setActionInfo( QAction *action, const QString & iconPath, const QString & text )
-    {
-        QIcon icon;
-        icon.addFile( iconPath, QSize(), QIcon::Normal, QIcon::Off );
-        action->setIcon( icon );
-        action->setToolTip( text );
-        action->setText( text );
-    }
-
-    void CBIFWidget::enableAction( QAction *action, bool enable )
-    {
-        if ( action )
-            action->setEnabled( enable );
-    }
-
     void CBIFWidget::clear()
     {
-        fImageLabel->setPixmap( QPixmap() );
-        fTextLabel->setText( QString() );
+        fImpl->imageLabel->setPixmap( QPixmap() );
+        fImpl->textLabel->setText( QString() );
+        fImpl->textLabel->setVisible( false );
+        fCurrentFrame.reset();
+        fFrameTimer->stop();
     }
 
     void CBIFWidget::setBIFFile( std::shared_ptr< CBIFFile > bif )
@@ -226,25 +221,11 @@ namespace NBIF
         validatePlayerActions( fBIF && fBIF->isValid() );
     }
 
-    void CBIFWidget::setPlayPause( QAction * action, bool playPause )
-    {
-        if ( !action )
-            return;
-
-        if ( playPause )
-            setActionInfo( action, ":/BIFPlayerResources/play.png", tr( "Play" ) );
-        else
-            setActionInfo( action, ":/BIFPlayerResources/pause.png", tr( "Pause" ) );
-    }
-
     QAction *CBIFWidget::actionSkipBackward()
     {
         if ( !fActionSkipBackward )
         {
-            fActionSkipBackward = new QAction( this );
-            fActionSkipBackward->setObjectName( QString::fromUtf8( "actionSkipBackward" ) );
-            setActionInfo( fActionSkipBackward, ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ) );
-            connect( fActionSkipBackward, &QAction::triggered, this, &CBIFWidget::slotSkipBackard );
+            fActionSkipBackward = createAction( "actionSkipBackward", ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ), &CBIFWidget::slotSkipBackard );
         }
         return fActionSkipBackward;
     }
@@ -253,10 +234,7 @@ namespace NBIF
     {
         if ( !fActionPrev )
         {
-            fActionPrev = new QAction( this );
-            fActionPrev->setObjectName( QString::fromUtf8( "actionPrev" ) );
-            setActionInfo( fActionPrev, ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ) );
-            connect( fActionPrev, &QAction::triggered, this, &CBIFWidget::slotPrev );
+            fActionPrev = createAction( "actionPrev", ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ), &CBIFWidget::slotPrev );
         }
         return fActionPrev;
     }
@@ -265,9 +243,7 @@ namespace NBIF
     {
         if ( !fActionTogglePlayPause )
         {
-            fActionTogglePlayPause = new QAction( this );
-            fActionTogglePlayPause->setObjectName( QString::fromUtf8( "actionTogglePlayPause" ) );
-            connect( fActionTogglePlayPause, &QAction::triggered, this, &CBIFWidget::slotTogglePlayPause );
+            fActionTogglePlayPause = createAction( "actionTogglePlayPause", QString(), QString(), &CBIFWidget::slotTogglePlayPause );
             if ( !asPlayButton.has_value() )
                 setPlayPause( fActionTogglePlayPause, true );
         }
@@ -281,9 +257,7 @@ namespace NBIF
     {
         if ( !fActionPlay )
         {
-            fActionPlay = new QAction( this );
-            fActionPlay->setObjectName( QString::fromUtf8( "actionPlay" ) );
-            connect( fActionPlay, &QAction::triggered, this, &CBIFWidget::slotPlay );
+            fActionPlay = createAction( QString::fromUtf8( "actionPlay" ), QString(), QString(), &CBIFWidget::slotPlay );
             setPlayPause( fActionPlay, true );
         }
 
@@ -294,9 +268,7 @@ namespace NBIF
     {
         if ( !fActionPause )
         {
-            fActionPause = new QAction( this );
-            fActionPause->setObjectName( QString::fromUtf8( "actionPause" ) );
-            connect( fActionPause, &QAction::triggered, this, &CBIFWidget::slotPause );
+            fActionPause = createAction( QString::fromUtf8( "actionPause" ), QString(), QString(), &CBIFWidget::slotPause );
             setPlayPause( fActionPause, false );
         }
 
@@ -307,10 +279,7 @@ namespace NBIF
     {
         if ( !fActionNext )
         {
-            fActionNext = new QAction( this );
-            fActionNext->setObjectName( QString::fromUtf8( "actionNext" ) );
-            setActionInfo( fActionNext, ":/BIFPlayerResources/next.png", tr( "Next Frame" ) );
-            connect( fActionNext, &QAction::triggered, this, &CBIFWidget::slotNext );
+            fActionNext = createAction( QString::fromUtf8( "actionNext" ), ":/BIFPlayerResources/next.png", tr( "Next Frame" ), &CBIFWidget::slotNext );
         }
         return fActionNext;
     }
@@ -319,12 +288,101 @@ namespace NBIF
     {
         if ( !fActionSkipForward )
         {
-            fActionSkipForward = new QAction( this );
-            fActionSkipForward->setObjectName( QString::fromUtf8( "actionSkipForward" ) );
-            setActionInfo( fActionSkipForward, ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ) );
-            connect( fActionSkipForward, &QAction::triggered, this, &CBIFWidget::slotSkipForward );
+            fActionSkipForward = createAction( QString::fromUtf8( "actionSkipForward" ), ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ), &CBIFWidget::slotSkipForward );
         }
         return fActionSkipForward;
     }
 
+    void CBIFWidget::setButtonsLayout( EButtonsLayout style )
+    {
+        if ( fButtonStyle == style )
+            return;
+
+        fButtonStyle = style;
+
+        actionTogglePlayPause()->setVisible( false );
+        actionPause()->setVisible( false );
+        actionPlay()->setVisible( false );
+
+        if ( style == NBIF::EButtonsLayout::eDiscretePlayPause )
+        {
+            actionSkipBackward()->setVisible( true );
+            actionPrev()->setVisible( true );
+
+            actionNext()->setVisible( true );
+            actionSkipForward()->setVisible( true );
+
+            actionPause()->setVisible( true );
+            actionPlay()->setVisible( true );
+        }
+        else if ( style == NBIF::EButtonsLayout::eTogglePlayPause )
+        {
+            actionSkipBackward()->setVisible( true );
+            actionPrev()->setVisible( true );
+
+            actionNext()->setVisible( true );
+            actionSkipForward()->setVisible( true );
+
+            actionTogglePlayPause()->setVisible( true );
+        }
+        else if ( style == NBIF::EButtonsLayout::eNoButtons )
+        {
+            actionSkipBackward()->setVisible( false );
+            actionPrev()->setVisible( false );
+
+            actionNext()->setVisible( false );
+            actionSkipForward()->setVisible( false );
+        }
+
+        layoutButtons();
+    }
+
+    void CBIFWidget::layoutButtons()
+    {
+        if ( fButtonStyle == EButtonsLayout::eNoButtons )
+            fImpl->stackedWidget->setVisible( false );
+        else
+        {
+            fImpl->stackedWidget->setVisible( true );
+            fImpl->stackedWidget->setCurrentIndex( static_cast<int>( fButtonStyle ) );
+        }
+    }
+
+    void CBIFWidget::setInfo( QAction *item, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() )
+    {
+        QIcon icon;
+        icon.addFile( iconPath, QSize(), QIcon::Normal, QIcon::Off );
+        item->setIcon( icon );
+        item->setToolTip( text );
+        item->setText( text );
+        if ( slot )
+            connect( item, &QAction::triggered, this, slot );
+    }
+
+    void CBIFWidget::setInfo( QToolButton *item, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() )
+    {
+        QIcon icon;
+        icon.addFile( iconPath, QSize(), QIcon::Normal, QIcon::Off );
+        item->setIcon( icon );
+        item->setToolTip( text );
+        item->setText( text );
+        if ( slot )
+            connect( item, &QToolButton::clicked, this, slot );
+    }
+
+    //QToolButton *CBIFWidget::createToolButton( const QString & name, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() )
+    //{
+    //    auto retVal = new QToolButton( this );
+    //    retVal->setObjectName( name );
+    //    setInfo( retVal, iconPath, text, slot );
+    //    return retVal;
+    //}
+
+    QAction *CBIFWidget::createAction( const QString & name, const QString &iconPath, const QString &text, void (CBIFWidget::*slot)() )
+    {
+        auto retVal = new QAction( this );
+        retVal->setObjectName( name );
+        setInfo( retVal, iconPath, text, slot );
+        return retVal;
+    }
 }
