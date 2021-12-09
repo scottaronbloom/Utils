@@ -102,6 +102,7 @@ void CDelayLineEdit::keyPressEvent( QKeyEvent * event )
         if ( fStatus == ELineEditStatus::eOK )
             emit sigFinishedEditingAfterDelay();
     }
+    QLineEdit::keyPressEvent( event );
 }
 
 void CDelayLineEdit::slotChangedTimerTimeout()
