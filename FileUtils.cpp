@@ -410,7 +410,7 @@ QString fileSizeString( uint64_t size, bool prettyPrint, bool byteSize, uint8_t 
     auto suffixes = std::vector< QString >( { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" } );
 
     auto base = static_cast<uint64_t>( byteSize ? 1024 : 1000 );
-    auto suffixPos = 0;
+    auto suffixPos = 0U;
     while( ( size > ( base * base ) ) && ( suffixPos < suffixes.size() ) )
     {
         auto remainder = size % base;
