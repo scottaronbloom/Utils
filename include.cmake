@@ -93,6 +93,7 @@ set(project_H
 
 set(qtproject_UIS
     ScrollMessageBox.ui
+    BIFWidget.ui
 )
 
 
