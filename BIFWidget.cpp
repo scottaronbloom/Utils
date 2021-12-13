@@ -23,7 +23,7 @@
 #include "BIFWidget.h"
 #include "BIFFile.h"
 #include "utils.h"
-#include "SABUtils/QtUtils.h"
+#include "QtUtils.h"
 
 #include <QTimer>
 #include <QIcon>
@@ -158,6 +158,8 @@ namespace NBIF
         enableItem( fActionPlay, aOK && !isPlaying() );
         enableItem( fActionPause, aOK && isPlaying() );
         enableItem( fActionTogglePlayPause, aOK );
+        setPlayPause(fImpl->playPauseBtn, !isPlaying());
+        setPlayPause(fActionTogglePlayPause, !isPlaying());
         enableItem( fActionNext, aOK );
         enableItem( fActionSkipForward, aOK );
 
