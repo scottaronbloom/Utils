@@ -25,12 +25,18 @@
 #include "utils.h"
 #include "QtUtils.h"
 
+#include "SABUtils/bif/BIFPlugin.h"
+
 #include <QTimer>
 #include <QIcon>
 #include <QMenu>
 #include <QToolBar>
 #include <QAction>
 #include <QSpinBox>
+#include <QMovie>
+#include <QDir>
+#include <QPluginLoader>
+#include <QLibrary>
 
 #include "ui_BIFWidget.h"
 
@@ -42,6 +48,11 @@ namespace NBIF
     {
         Q_INIT_RESOURCE( BIFPlayerResources );
         fImpl->setupUi( this );
+
+        fMovie = std::make_shared< QMovie >();
+        connect(fMovie.get(), &QMovie::frameChanged, this, &CBIFWidget::slotFrameChanged);
+        connect(fMovie.get(), &QMovie::stateChanged, this, &CBIFWidget::slotMovieStateChanged);
+        fImpl->imageLabel->setMovie(fMovie.get());
 
         setInfo( fImpl->skipBackwardDiscreteBtn, ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ), &CBIFWidget::slotSkipBackard );
         setInfo( fImpl->prevDiscreteBtn, ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ), &CBIFWidget::slotPrev );
@@ -62,96 +73,159 @@ namespace NBIF
         layoutButtons();
 
         setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
-        
-        slotSetFrameInterval( 50 );
     }
 
     CBIFWidget::~CBIFWidget()
     {
     }
 
-    void CBIFWidget::setSkipInterval( int msec )
+    void CBIFWidget::setNumFramesToSkip( int numFrames )
     {
-        slotSetSkipInterval( msec );
-        if ( fSkipIntervalSB )
-            fSkipIntervalSB->setValue( fSkipInterval );
+        slotSetNumFramesToSkip(numFrames);
+        if ( fNumFramesToSkipSB )
+            fNumFramesToSkipSB->setValue( fNumFramesToSkip );
     }
 
-    void CBIFWidget::slotSetSkipInterval( int numFrames )
+    void CBIFWidget::slotSetNumFramesToSkip( int numFrames )
     {
-        fSkipInterval = numFrames;
+        fNumFramesToSkip = numFrames;
     }
 
-    void CBIFWidget::setFrameInterval( int msec )
+    void CBIFWidget::setSpeedMultiplier( int speedMultipler)
     {
-        slotSetFrameInterval( msec );
+        slotSetPlayerSpeed(speedMultipler);
+        if (fPlayerSpeedMultiplerSB)
+            fPlayerSpeedMultiplerSB->setValue(speedMultipler);
     }
 
-    int CBIFWidget::frameInterval() const
+    int CBIFWidget::playerSpeedMultiplier() const
     {
-        if ( !fFrameTimer )
-            return 0;
-        return fFrameTimer->interval();
+        return fMovie->speed() / 100;
     }
 
-    void CBIFWidget::slotSetFrameInterval( int msec )
+    void CBIFWidget::slotSetPlayerSpeed( int speedMultipler)
     {
-        if ( !fFrameTimer )
+        bool wasPlaying = this->isPlaying();
+        fMovie->setPaused(true);
+        fMovie->setSpeed(speedMultipler * 100);
+        if (wasPlaying)
         {
-            fFrameTimer = new QTimer( this );
-            fFrameTimer->setSingleShot( false );
-            connect( fFrameTimer, &QTimer::timeout, this, &CBIFWidget::slotTimerExpired );
+            updateMovieSpeed();
+            fMovie->setPaused(false);
         }
-        bool wasRunning = isPlaying();
-        fFrameTimer->stop();
-        fFrameTimer->setInterval( msec );
-        if ( wasRunning )
-            fFrameTimer->start();
     }
 
-    void CBIFWidget::showCurrentFrame()
+
+    void CBIFWidget::setPlayCount( int playCount )
     {
-        if ( !fBIF )
-            return;
+        slotSetPlayCount(playCount);
+    }
 
-        if ( !fCurrentFrame.has_value() )
+    int CBIFWidget::playCount() const
+    {
+        return fPlayCountSB ? fPlayCountSB->value() : -1;
+    }
+    void CBIFWidget::slotSetPlayCount(int playCount)
+    {
+        if ( isPlaying() )
             return;
+        setBIFPluginPlayCount(playCount);
+        fMovie->stop();
+        fMovie->jumpToFrame(0);
+    }
 
-        auto &&image = fBIF->image( fCurrentFrame.value() );
-        fImpl->imageLabel->setPixmap( QPixmap::fromImage( image ) );
-        fImpl->imageLabel->setMinimumSize( image.size() );
-        setMinimumWidth( image.width() + layout()->contentsMargins().left() + layout()->contentsMargins().right() );
-        emit sigShowingFrame( fCurrentFrame.value() );
-        fImpl->textLabel->setText( tr( "BIF #: %1 Time: %2" ).arg( fCurrentFrame.value() ).arg( NUtils::CTimeString( fCurrentFrame.value() * std::get< 2 >( fBIF->tsMultiplier() ) ).toString( "hh:mm:ss.zzz" ) ) );
-        fImpl->textLabel->setVisible( true );
+    void CBIFWidget::slotFrameChanged()
+    {
+        slotMovieStateChanged();
+        if (isValid())
+        {
+            auto labelText = tr("Frame #: %1 Time: %2").arg(fMovie->currentFrameNumber()).arg(NUtils::CTimeString(fMovie->currentFrameNumber() * std::get< 2 >(fBIF->tsMultiplier())).toString("hh:mm:ss.zzz"));
+            if (isPlaying())
+                labelText += tr("\nPlaying at %3 fps").arg(computeFPS(), 5, 'f', 3);
+
+            fImpl->textLabel->setText(labelText);
+            fImpl->textLabel->setVisible(true);
+        }
+        else
+            fImpl->textLabel->setVisible(false);
+    }
+
+    void CBIFWidget::slotMovieStateChanged()
+    {
+        if (isPlaying())
+            emit sigPlayingStarted();
+        validatePlayerActions(fMovie->currentFrameNumber() != -1);
+    }
+
+    void CBIFWidget::slotSkipBackard()
+    {
+        slotPause();
+        offsetFrameBy(-fNumFramesToSkip);
+    }
+
+    void CBIFWidget::slotPrev()
+    {
+        slotPause();
+        offsetFrameBy(-1);
+    }
+
+    void CBIFWidget::slotTogglePlayPause()
+    {
+        if (isPlaying())
+            slotPause();
+        else
+            slotPlay();
     }
 
     void CBIFWidget::slotPause()
     {
-        fFrameTimer->stop();
-        emit sigPaused();
-
+        fMovie->setPaused(true);
         validatePlayerActions();
+        slotFrameChanged();
     }
 
     void CBIFWidget::slotPlay()
     {
-        fFrameTimer->start();
-        emit sigStarted();
+        updateMovieSpeed();
 
+        if (fMovie->state() == QMovie::NotRunning)
+            fMovie->jumpToFrame(0);
+        fMovie->setPaused(false);
         validatePlayerActions();
     }
 
+    void CBIFWidget::slotNext()
+    {
+        slotPause();
+        offsetFrameBy(1);
+    }
+
+    void CBIFWidget::slotSkipForward()
+    {
+        slotPause();
+        offsetFrameBy(fNumFramesToSkip);
+    }
 
     void CBIFWidget::setActive( bool isActive )
     {
-        fToolBar->setVisible( isActive );
+        if ( fToolBar )
+            fToolBar->setVisible( isActive );
         validatePlayerActions( isActive );
     }
 
-    void CBIFWidget::validatePlayerActions( bool enabled )
+    QString CBIFWidget::fileName() const
     {
-        bool aOK = ( enabled && fBIF && fBIF->isValid() );
+        return fMovie->fileName();
+    }
+
+    bool CBIFWidget::isValid() const
+    {
+        return fBIF && fBIF->isValid() && fMovie->isValid();
+    }
+
+    void CBIFWidget::validatePlayerActions(bool enabled)
+    {
+        bool aOK = ( enabled && fBIF && fBIF->isValid() && fMovie->isValid() );
 
         enableItem( fActionSkipBackward, aOK );
         enableItem( fActionPrev, aOK );
@@ -177,91 +251,40 @@ namespace NBIF
         enableItem( fImpl->skipForwardToggleBtn, aOK );
         enableItem( fImpl->nextToggleBtn, aOK );
 
+        enableItem(fPlayCountSB, aOK && !isPlaying() );
         checkItem( fActionDiscreteLayout, false );
         checkItem( fActionToggleLayout, false );
         checkItem( fActionNoLayout, false );
 
-        if ( fButtonLayout == NBIF::EButtonsLayout::eDiscretePlayPause )
+        if ( fButtonLayout == EButtonsLayout::eDiscretePlayPause )
             checkItem( fActionDiscreteLayout, true );
-        else if ( fButtonLayout == NBIF::EButtonsLayout::eTogglePlayPause )
+        else if ( fButtonLayout == EButtonsLayout::eTogglePlayPause )
             checkItem( fActionToggleLayout, true );
-        else if ( fButtonLayout == NBIF::EButtonsLayout::eNoButtons )
+        else if ( fButtonLayout == EButtonsLayout::eNoButtons )
             checkItem( fActionNoLayout, true );
     }
 
     bool CBIFWidget::isPlaying() const
     {
-        return fFrameTimer && fFrameTimer->isActive();
+        return (fMovie->state() == QMovie::Running);
     }
 
-    void CBIFWidget::slotPrev()
+    void CBIFWidget::offsetFrameBy(int offset)
     {
-        slotPause();
-        offsetFrame( -1 );
-        showCurrentFrame();
-    }
-
-    void CBIFWidget::slotNext()
-    {
-        slotPause();
-        offsetFrame( 1 );
-        showCurrentFrame();
-    }
-
-    void CBIFWidget::slotSkipBackard()
-    {
-        slotPause();
-        offsetFrame( -fSkipInterval );
-        showCurrentFrame();
-    }
-
-    void CBIFWidget::slotSkipForward()
-    {
-        slotPause();
-        offsetFrame( fSkipInterval );
-        showCurrentFrame();
-    }
-
-    void CBIFWidget::slotTimerExpired()
-    {
-        if ( !fCurrentFrame.has_value() )
-            setCurrentFrame( 0 );
-        showCurrentFrame();
-        offsetFrame( 1 );
-    }
-
-
-    void CBIFWidget::slotTogglePlayPause()
-    {
-        if ( isPlaying() )
-            slotPause();
-        else
-            slotPlay();
+        auto curr = fMovie->currentFrameNumber();
+        if (curr < 0)
+            curr = 0;
+        setCurrentFrame(curr + offset);
     }
 
     void CBIFWidget::setCurrentFrame( int frame )
     {
-        int sz = fBIF ? static_cast<int>( fBIF->bifs().size() ) : 0;
-        if ( frame < 0 )
+        int sz = fMovie->frameCount();
+        if (frame < 0)
             frame = sz + frame;
-        if ( frame >= sz )
+        if (frame >= sz)
             frame = frame - sz;
-        fCurrentFrame = frame;
-    }
-
-    void CBIFWidget::offsetFrame( int offset )
-    {
-        if ( !fCurrentFrame.has_value() )
-        {
-            if ( offset < 0 )
-                setCurrentFrame( offset + 1 );
-            else
-                setCurrentFrame( offset );
-        }
-        else
-        {
-            setCurrentFrame( fCurrentFrame.value() + offset );
-        }
+        fMovie->jumpToFrame(frame);
     }
 
     void CBIFWidget::clear()
@@ -269,14 +292,19 @@ namespace NBIF
         fImpl->imageLabel->setPixmap( QPixmap() );
         fImpl->textLabel->setText( QString() );
         fImpl->textLabel->setVisible( false );
-        fCurrentFrame.reset();
-        fFrameTimer->stop();
     }
 
-    void CBIFWidget::setBIFFile( std::shared_ptr< CBIFFile > bif )
+    std::shared_ptr< CBIFFile > CBIFWidget::setFileName( const QString & fileName )
     {
-        fBIF = bif;
-        validatePlayerActions( fBIF && fBIF->isValid() );
+        if (fileName.isEmpty())
+            fBIF.reset();
+        else
+            fBIF = std::make_shared< NBIF::CBIFFile >(fileName, false);
+
+        fMovie->setFileName( fBIF ? fBIF->fileName() : QString() );
+        fImpl->imageLabel->setMovie(fMovie.get());
+        validatePlayerActions( fBIF && fBIF->isValid() && fMovie->isValid() );
+        return fBIF;
     }
 
     QAction *CBIFWidget::actionSkipBackward()
@@ -437,17 +465,17 @@ namespace NBIF
 
     void CBIFWidget::slotPlayerButtonDiscrete()
     {
-        setButtonsLayout( NBIF::EButtonsLayout::eDiscretePlayPause );
+        setButtonsLayout( EButtonsLayout::eDiscretePlayPause );
     }
 
     void CBIFWidget::slotPlayerButtonToggle()
     {
-        setButtonsLayout( NBIF::EButtonsLayout::eTogglePlayPause );
+        setButtonsLayout( EButtonsLayout::eTogglePlayPause );
     }
 
     void CBIFWidget::slotPlayerButtonNone()
     {
-        setButtonsLayout( NBIF::EButtonsLayout::eNoButtons );
+        setButtonsLayout( EButtonsLayout::eNoButtons );
     }
 
     QToolBar *CBIFWidget::toolBar()
@@ -497,45 +525,60 @@ namespace NBIF
 
     void CBIFWidget::updateToolBar()
     {
-        if ( !fToolBar )
+        if (!fToolBar)
             return;
 
         fToolBar->clear();
 
-        auto label = new QLabel( tr( "Seconds per Frame:" ) );
-        label->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
-        fToolBar->addWidget( label );
+        auto label = new QLabel(tr("Player Speed Multiplier:"));
+        label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        fToolBar->addWidget(label);
 
-        auto frameIntervalSB = new QSpinBox;
-        frameIntervalSB->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
-        frameIntervalSB->setSuffix( tr( "ms" ) );
-        frameIntervalSB->setMinimum( 0 );
-        frameIntervalSB->setMaximum( std::numeric_limits< int >::max() );
-        frameIntervalSB->setSingleStep( 50 );
-        connect( frameIntervalSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CBIFWidget::slotSetFrameInterval );
+        fPlayerSpeedMultiplerSB = new QSpinBox;
+        fPlayerSpeedMultiplerSB->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        fPlayerSpeedMultiplerSB->setSuffix(tr("x"));
+        fPlayerSpeedMultiplerSB->setMinimum(0);
+        fPlayerSpeedMultiplerSB->setMaximum(10000);
+        fPlayerSpeedMultiplerSB->setSingleStep(50);
+        connect(fPlayerSpeedMultiplerSB, qOverload< int >(&QSpinBox::valueChanged), this, &CBIFWidget::slotSetPlayerSpeed);
 
-        if ( fFrameTimer )
-            frameIntervalSB->setValue( fFrameTimer->interval() );
+        fPlayerSpeedMultiplerSB->setValue(playerSpeedMultiplier());
 
-        fToolBar->addWidget( frameIntervalSB );
+        fToolBar->addWidget(fPlayerSpeedMultiplerSB); // takes ownership
         fToolBar->addSeparator();
 
-        label = new QLabel( tr( "Frames to Skip:" ) );
-        label->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
-        fToolBar->addWidget( label );
+        label = new QLabel(tr("Frames to Skip:"));
+        label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        fToolBar->addWidget(label);
 
-        fSkipIntervalSB = new QSpinBox;
-        fSkipIntervalSB->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
-        fSkipIntervalSB->setSuffix( tr( "frames" ) );
-        fSkipIntervalSB->setMinimum( 0 );
-        fSkipIntervalSB->setMaximum( std::numeric_limits< int >::max() );
-        fSkipIntervalSB->setSingleStep( 50 );
-        fSkipIntervalSB->setValue( fSkipInterval );
-        connect( fSkipIntervalSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CBIFWidget::slotSetSkipInterval );
+        fNumFramesToSkipSB = new QSpinBox;
+        fNumFramesToSkipSB->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        fNumFramesToSkipSB->setSuffix(tr(" frames"));
+        fNumFramesToSkipSB->setMinimum(0);
+        fNumFramesToSkipSB->setMaximum(1000);
+        fNumFramesToSkipSB->setSingleStep(50);
+        fNumFramesToSkipSB->setValue(fNumFramesToSkip);
+        connect(fNumFramesToSkipSB, qOverload< int >(&QSpinBox::valueChanged), this, &CBIFWidget::slotSetNumFramesToSkip);
+        fToolBar->addWidget(fNumFramesToSkipSB);
+        fToolBar->addSeparator();
 
-        fToolBar->addWidget( fSkipIntervalSB );
+        label = new QLabel(tr("Number of Times to Play?"));
+        label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        fToolBar->addWidget(label);
 
-        updateItemForLayout( fToolBar );
+        fPlayCountSB = new QSpinBox;
+        fPlayCountSB->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        //fPlayCountSB->setSuffix(tr(""));
+        fPlayCountSB->setSpecialValueText("Inifinite");
+        fPlayCountSB->setMinimum(0);
+        fPlayCountSB->setMaximum(std::numeric_limits< int >::max());
+        fPlayCountSB->setSingleStep(1);
+        fPlayCountSB->setValue(0);
+        connect(fPlayCountSB, qOverload< int >(&QSpinBox::valueChanged), this, &CBIFWidget::slotSetPlayCount);
+        fToolBar->addWidget(fPlayCountSB);
+        fToolBar->addSeparator();
+
+        updateItemForLayout(fToolBar);
     }
 
     template< typename T>
@@ -564,7 +607,7 @@ namespace NBIF
 
 
     template< typename T >
-    void NBIF::CBIFWidget::setPlayPause( T *item, bool playPause )
+    void CBIFWidget::setPlayPause( T *item, bool playPause )
     {
         if ( !item )
             return;
@@ -576,7 +619,7 @@ namespace NBIF
     }
 
     template< typename T >
-    void NBIF::CBIFWidget::checkItem( T *item, bool checked )
+    void CBIFWidget::checkItem( T *item, bool checked )
     {
         if ( !item )
             return;
@@ -584,7 +627,7 @@ namespace NBIF
     }
 
     template< typename T >
-    void NBIF::CBIFWidget::setItemVisible( T *item, bool visible )
+    void CBIFWidget::setItemVisible( T *item, bool visible )
     {
         if ( !item )
             return;
@@ -592,10 +635,76 @@ namespace NBIF
     }
 
     template< typename T >
-    void NBIF::CBIFWidget::enableItem( T *item, bool enable )
+    void CBIFWidget::enableItem( T *item, bool enable )
     {
         if ( !item )
             return;
         item->setEnabled( enable );
     }
+
+    void CBIFWidget::setBIFPluginPlayCount(int playCount)
+    {
+        QDir pluginsDir(QCoreApplication::applicationDirPath());
+        pluginsDir.cd("imageformats");
+        const QStringList entries = pluginsDir.entryList(QDir::Files);
+        for (const QString & fileName : entries)
+        {
+            if (fileName.startsWith("bif"))
+            {
+                auto absPath = pluginsDir.absoluteFilePath(fileName);
+                QPluginLoader pluginLoader(absPath);
+                auto bifPlugin = dynamic_cast<CBIFPlugin *>(pluginLoader.instance());
+                if (bifPlugin)
+                {
+                    QLibrary lib(absPath);
+                    using TSetLoopCount = void(*)(int);
+
+                    auto setLoopCount = (TSetLoopCount)lib.resolve("setLoopCount");
+                    if (setLoopCount)
+                        setLoopCount(playCount);
+                }
+                break;
+            }
+        }
+    }
+
+    double CBIFWidget::computeFPS() const
+    {
+        if (!fBIF)
+            return 0;
+        auto baseMSecPerFrame = 1.0 * fBIF->imageDelay();
+        auto scaledMSecPerFrame = baseMSecPerFrame * 100 / fMovie->speed();
+
+        auto secPerFrame = scaledMSecPerFrame / 1000;
+        auto fps = 1.0 / (1.0 * secPerFrame);
+        return fps;
+    }
+
+    void CBIFWidget::updateMovieSpeed()
+    {
+        auto curr = fMovie->currentFrameNumber();
+        fMovie->jumpToFrame(curr + 1);
+        fMovie->jumpToFrame(curr);
+    }
+
+    QSize CBIFWidget::sizeHint() const
+    {
+        if (!isValid())
+            return QWidget::sizeHint();
+
+        auto retVal = fBIF->imageSize();
+        retVal += QSize(6, 3);
+        if (fImpl->textLabel->isVisible())
+        {
+            auto subSizeHint = fImpl->textLabel->sizeHint();
+            retVal.setWidth(std::max(subSizeHint.width(), retVal.width()));
+            retVal.setHeight(retVal.height() + subSizeHint.height());
+            retVal += QSize(0, 3);
+        }
+        auto subSizeHint = fImpl->skipBackwardToggleBtn->sizeHint();
+        retVal.setWidth(std::max(6*subSizeHint.width(), retVal.width()));
+        retVal.setHeight(retVal.height() + subSizeHint.height());
+        return retVal;
+    }
+
 }

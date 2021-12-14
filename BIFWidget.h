@@ -47,6 +47,7 @@ namespace NBIF
         eDiscretePlayPause,
         eNoButtons,
     };
+
     class CBIFWidget : public QFrame
     {
         Q_OBJECT
@@ -55,16 +56,29 @@ namespace NBIF
         ~CBIFWidget();
 
         void clear();
-        void setBIFFile( std::shared_ptr< CBIFFile > bif );
+        std::shared_ptr< CBIFFile > setFileName( const QString & fileName );
+        QString fileName() const;
+        bool isValid() const;
+
+        QSize sizeHint() const override;
 
         void validatePlayerActions( bool enable = true ); // enables/disables the enabled actions, however if true, only when valid, if false all false
         bool isPlaying() const;
+        void setActive(bool isActive);
 
         void setButtonsLayout( EButtonsLayout style );
         EButtonsLayout buttonsLayout()const { return fButtonLayout; }
 
-        QMenu *menu();
+        int numFramesToSkip() const { return fNumFramesToSkip; } // frames to skip when stepping
+        void setNumFramesToSkip(int value);
 
+        int playerSpeedMultiplier() const;
+        void setSpeedMultiplier(int ms);
+
+        int playCount() const;
+        void setPlayCount(int playCount);
+
+        QMenu *menu();
         QToolBar *toolBar();
 
         QAction *actionSkipBackward();
@@ -78,21 +92,9 @@ namespace NBIF
         QAction *actionDiscreteLayout();
         QAction *actionToggleLayout();
         QAction *actionNoLayout();
-
-        int skipInterval() const { return fSkipInterval; } // frames to skip when stepping
-        void setSkipInterval( int value );
-
-        int frameInterval() const; // time between frames when playing
-        void setFrameInterval( int ms );
-
-        void setActive( bool isActive );
     Q_SIGNALS:
-        void sigPaused();
-        void sigStarted();
-        void sigShowingFrame( uint32_t frameNum );
+        void sigPlayingStarted();
     public Q_SLOTS:
-        void slotTimerExpired();
-
         void slotSkipBackard();
         void slotPrev();
         void slotTogglePlayPause();
@@ -105,12 +107,17 @@ namespace NBIF
         void slotPlayerButtonToggle();
         void slotPlayerButtonNone();
     private Q_SLOTS:
-        void slotSetSkipInterval( int numFrames );
-        void slotSetFrameInterval( int msec );
+        void slotSetNumFramesToSkip( int numFrames );
+        void slotSetPlayerSpeed(int playerSpeed);
+        void slotSetPlayCount(int playCount);
+        void slotMovieStateChanged();
+        void slotFrameChanged();
     private:
-        void showCurrentFrame();
+        void setBIFPluginPlayCount(int playCount);
+        double computeFPS() const;
+
+        void offsetFrameBy(int offset);
         void setCurrentFrame( int frame );
-        void offsetFrame( int offset );
         template< typename T >
         void setPlayPause( T * item, bool playPause );
         template< typename T >
@@ -121,6 +128,8 @@ namespace NBIF
         void setItemVisible( T *item, bool visible );
         template< typename T >
         void updateItemForLayout( T *item );
+
+        void updateMovieSpeed();
         
 
         void updateToolBar();
@@ -132,8 +141,6 @@ namespace NBIF
 
         QAction * createAction( const QString & name, const QString &iconPath, const QString &text, void (CBIFWidget:: *slot)() );
 
-        QTimer *fFrameTimer{ nullptr };
-        std::optional< uint32_t > fCurrentFrame;
         std::shared_ptr< NBIF::CBIFFile > fBIF;
 
         QAction *fActionSkipBackward{ nullptr };
@@ -148,13 +155,17 @@ namespace NBIF
         QAction *fActionToggleLayout{ nullptr };
         QAction *fActionNoLayout{ nullptr };
 
-        int fSkipInterval{ 5 };
         EButtonsLayout fButtonLayout{ EButtonsLayout::eTogglePlayPause };
 
         QMenu *fMenu{ nullptr };
         QToolBar *fToolBar{ nullptr };
-        QSpinBox *fSkipIntervalSB{ nullptr };
 
+        QSpinBox * fPlayerSpeedMultiplerSB{ nullptr };
+        QSpinBox * fNumFramesToSkipSB{ nullptr };
+        int fNumFramesToSkip{ 5 };
+        QSpinBox * fPlayCountSB{ nullptr };
+
+        std::shared_ptr < QMovie > fMovie;
         std::unique_ptr< Ui::CBIFWidget > fImpl;
     };
 

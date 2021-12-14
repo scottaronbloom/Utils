@@ -50,7 +50,7 @@ namespace NBIF
     {
         if ( !index.isValid() )
             return QVariant();
-        if ( index.row() > fBIFFile->size() || index.row() < 0 )
+        if ( index.row() > fBIFFile->imageCount() || index.row() < 0 )
             return QVariant();
         if ( role == Qt::DisplayRole )
             return QString( "BIF #%1" ).arg( index.row() );
@@ -67,7 +67,7 @@ namespace NBIF
             return QImage();
         int insertStart = -1;
         int insertNum = -1;
-        auto retVal = fBIFFile->image( imageNum, &insertStart, &insertNum );
+        auto retVal = fBIFFile->imageToFrame( imageNum, &insertStart, &insertNum );
         if ( ( insertStart != -1 ) && ( insertNum != -1 ) )
         {
             beginInsertRows( QModelIndex(), insertStart, insertStart + insertNum - 1 );

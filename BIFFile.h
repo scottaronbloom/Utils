@@ -39,7 +39,7 @@ namespace NBIF
         SBIF( T32BitValue ts, T32BitValue offset, SBIF *prev );
 
         bool isLastFrame() const;
-        [[nodiscard]] std::pair< bool, QString > loadImage( QFile *file, const QString &fn );
+        [[nodiscard]] std::pair< bool, QString > loadImage( QIODevice * device, const QString &fn );
         T32BitValue fBIFNum;
         T32BitValue fOffset;
         uint64_t fSize{ 0 };
@@ -47,51 +47,79 @@ namespace NBIF
     };
 
     using TBIFIndex = std::vector< SBIF >; // data read in of ts, pos then a pair of pos, size
-    class CBIFFile : public QObject
+    class CBIFFile
     {
-        Q_OBJECT;
     public:
-        CBIFFile( const QString &bifFile, bool loadImages, QObject *parent = nullptr );
+        enum class EState
+        {
+            eReady, // start
+            eDeviceOpen, // after file open, and iodevice set
+            eReadHeaderBase,
+            eReadHeaderIndex,
+            eReadingImages,
+            eError
+        };
+
+        CBIFFile( const QString &bifFile, bool loadImages ); // looad the file and go
+        CBIFFile(); // used for IOHandlerStream
         virtual ~CBIFFile();
 
-        bool isValid() const { return fAOK; }
+        EState state() const { return fState; }
+        bool isValid() const { return state() != EState::eError; }
         QString errorString() const { return fErrorString; }
+
+        static bool validateMagicNumber(const QByteArray & magicNumber);
+
+        std::pair< bool, QImage > read(QIODevice * device, int frameNumber);
+        bool readHeader(QIODevice * device);
 
         QString magicNumber() const { return prettyPrint( fMagicNumber ); } // returns pretty print of the data
         const T32BitValue &version() const { return fVersion; }
         const T32BitValue &numImages() const { return fNumImages; }
-        const T32BitValue &tsMultiplier() const { return fTSMultiplier; }
+        const T32BitValue & tsMultiplier() const { return fTSMultiplier; }
         QString reserved() const { return prettyPrint( fReserved ); }
 
         const TBIFIndex &bifs() const { return fBIFs; }
 
         QString fileName() const { return fBIFFile; }
-        std::size_t size() const { return fBIFs.size(); }
 
-        std::pair< bool, QString > loadImage( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
-        QImage image( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
+        std::size_t imageCount() const { return fBIFs.size(); }
+        uint32_t imageDelay() const { return std::get< 2 >(tsMultiplier()); } // number of ms to delay per image
+        QSize imageSize() const;
+
+        std::pair< bool, QString > loadImage( size_t imageNum, bool loadUntilFrame, int *insertStart = nullptr, int *numInserted = nullptr );
+        QImage imageToFrame( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
+        QImage image( size_t imageNum );
 
         int lastImageLoaded() { return fLastImageLoaded; }
         bool canLoadMoreImages()
         {
-            return fLastImageLoaded < size();
+            return fLastImageLoaded < imageCount();
         }
         int fetchSize() const { return 8; }
         void fetchMore();
+
+        void setLoopCount(int loopCount) { fLoopCount = loopCount; } // default is-1 which is infinite
+        int loopCount() { return fLoopCount; }
     private:
-        void loadBIF( bool loadImages );
+        QIODevice * device() const;
+        void loadBIFFromFile(bool loadImages);
+        void loadBIFFromIODevice(bool loadImages);
 
         bool checkForOpen();
         bool openFile();
-        bool parseHeader();
-        bool parseIndex( bool loadImages );
+        bool parseHeader( bool loadImages );
+
+        bool parseIndex();
+        bool loadImages();
 
         QString prettyPrint( const QByteArray &in ) const;
 
-        T32BitValue getValue( const QByteArray &in, std::optional< QString > desc );
+        T32BitValue getValue( const QByteArray &in, std::optional< QString > desc, bool & aOK );
         QFile *fFile{ nullptr };
+        QIODevice * fIODevice{ nullptr };
         QString fBIFFile;
-        bool fAOK{ false };
+        EState fState{ EState::eReady };
         QString fErrorString;
         QByteArray fMagicNumber;
         T32BitValue fVersion;
@@ -100,6 +128,7 @@ namespace NBIF
         TBIFIndex fBIFs;
         QByteArray fReserved;
         int fLastImageLoaded{ 0 };
+        int fLoopCount{ -1 }; // infinite = -1
     };
 }
 

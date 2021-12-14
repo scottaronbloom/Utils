@@ -56,7 +56,6 @@ set(qtproject_CPPMOC_SRCS
 
 set(qtproject_H
     AutoWaitCursor.h
-    BIFFile.h
     BIFModel.h
     BIFWidget.h
     ButtonEnabler.h
@@ -76,6 +75,7 @@ set(qtproject_H
 
 set(project_H
     AutoFetch.h
+    BIFFile.h
     utils.h
     FileUtils.h
     FromString.h
@@ -92,8 +92,8 @@ set(project_H
 )
 
 set(qtproject_UIS
-    ScrollMessageBox.ui
     BIFWidget.ui
+    ScrollMessageBox.ui
 )
 
 
