@@ -84,7 +84,7 @@ IF(GIT_EXE_EXECUTABLE)
 		message( STATUS "Generating version file ${OUTFILE}" )
 
 		set(VERSION_FILE_MAJOR_VERSION ${major})
-		set(VERSION_FILE_MINOR_VERSION ${major})
+		set(VERSION_FILE_MINOR_VERSION ${minor})
 		set(VERSION_FILE_PATCH_VERSION ${${prefix}_REV})
 		set(VERSION_FILE_DIFF          ${${prefix}_DIFF})
 		set(VERSION_FILE_APP_NAME      ${appName})
