@@ -1,0 +1,51 @@
+// The MIT License( MIT )
+//
+// Copyright( c ) 2020-2021 Scott Aron Bloom
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files( the "Software" ), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sub-license, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#ifndef __VERSION_H
+#define __VERSION_H
+
+#include <string>
+
+namespace NVersion
+{
+    inline const int         MAJOR_VERSION = @VERSION_FILE_MAJOR_VERSION@;
+    inline const int         MINOR_VERSION = @VERSION_FILE_MINOR_VERSION@;
+    inline const std::string PATCH_VERSION = @VERSION_FILE_PATCH_VERSION@;
+    inline const bool        MODIFIED      = @VERSION_FILE_DIFF@;
+    inline const std::string APP_NAME      = "@VERSION_FILE_APP_NAME@";
+    inline const std::string VENDOR        = "@VERSION_FILE_VENDOR@";
+    inline const std::string HOMEPAGE      = "@VERSION_FILE_HOMEPAGE@";
+    inline const std::string EMAIL         = "@VERSION_FILE_EMAIL@";
+
+    inline std::string getVersionString(bool full) 
+    { 
+        auto retVal = std::to_string( MAJOR_VERSION ) + "." + std::to_string( MINOR_VERSION );
+        if ( full )
+            retVal += "." + PATCH_VERSION;
+        if ( MODIFIED )
+            retVal += "*";
+        return retVal;
+    }
+}
+
+#endif
+
