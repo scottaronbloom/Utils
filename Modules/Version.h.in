@@ -29,7 +29,7 @@ namespace NVersion
 {
     inline const int         MAJOR_VERSION = @VERSION_FILE_MAJOR_VERSION@;
     inline const int         MINOR_VERSION = @VERSION_FILE_MINOR_VERSION@;
-    inline const std::string PATCH_VERSION = @VERSION_FILE_PATCH_VERSION@;
+    inline const std::string PATCH_VERSION = "@VERSION_FILE_PATCH_VERSION@"; // string from git
     inline const bool        MODIFIED      = @VERSION_FILE_DIFF@;
     inline const std::string APP_NAME      = "@VERSION_FILE_APP_NAME@";
     inline const std::string VENDOR        = "@VERSION_FILE_VENDOR@";

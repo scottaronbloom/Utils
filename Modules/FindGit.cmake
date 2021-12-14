@@ -31,7 +31,7 @@ IF(GIT_EXE_EXECUTABLE)
 		EXECUTE_PROCESS(
 			COMMAND 
 				${GIT_EXE_EXECUTABLE} -C "${dir}" 
-					log --pretty=format:"%h" -n 1 
+					log --pretty=format:%h -n 1 
 					OUTPUT_VARIABLE ${prefix}_REV 
 					ERROR_QUIET
 					OUTPUT_STRIP_TRAILING_WHITESPACE
