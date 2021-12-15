@@ -31,6 +31,7 @@ set(qtproject_SRCS
     DelayLineEdit.cpp
     DelaySpinBox.cpp
     utils.cpp
+    FileCompare.cpp
     FileUtils.cpp
     FromString.cpp
     JsonUtils.cpp
@@ -77,6 +78,7 @@ set(project_H
     AutoFetch.h
     BIFFile.h
     utils.h
+    FileCompare.h
     FileUtils.h
     FromString.h
     JsonUtils.h

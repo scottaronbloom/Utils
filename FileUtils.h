@@ -56,7 +56,6 @@ namespace NFileUtils
     bool renameFile(const std::string & oldfileName, const std::string & newFileName, bool force=false); 
     int changeDir(const std::string & newDir);
     std::string getWd();
-    bool get_line_from_file(FILE *fp,std::string & line, int& line_no );
     std::string tilda2Home( const std::string & fileName ); 
     std::string JoinPaths( const std::string & dir, const std::string & file );
     bool mkdir( std::string & dir, bool makeParents=true ); // dir gets set to absolute path
@@ -98,7 +97,8 @@ namespace NFileUtils
     QStringList dumpResources( bool ignoreInternal = true );
     QStringList dumpResources( const QDir & xDir, bool ignoreInternal=true );
 
-    std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps( const QString &path );
+    std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet );
+    std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path );
     QDateTime oldestTimeStamp( const QString &path ); // returns the oldest time based on QFileDevice::FileTime types
     bool setTimeStamp(const QString& path, const QFileInfo & srcPath, QString * msg = nullptr ); // uses the ts info on srcPath setting it on path for all filetimes
     bool setTimeStamp(const QString& path, const QDateTime& ts, bool allTimeStamps, QString* msg = nullptr); // if ts is not valid uses current dt, if allTimeStamps is false use FileModificationTime
@@ -109,5 +109,23 @@ namespace NFileUtils
 
     QString fileSizeString( const QFileInfo & fi, bool prettyPrint = true, bool byteBased=true, uint8_t precision=1 ); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
     QString fileSizeString( uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision=1 );
+
+    enum class EAttribute
+    {
+        eArchive,
+        eHidden,
+        eSystem,
+        eReadOnly
+    };
+    bool fileHasAttribute(const QFileInfo & file, EAttribute attribute);
+        
+    bool isArchiveFile(const QFileInfo & file);
+    bool isHiddenFile(const QFileInfo & file);
+    bool isSystemFile(const QFileInfo & file);
+    bool isReadOnlyFile(const QFileInfo & file);
+
+    bool compareTimeStamp(const QDateTime & lhs, const QDateTime & rhs, int toleranceInSecs);
+    bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck);
+    bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck);
 }
 #endif

@@ -359,6 +359,37 @@ QString fileSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, ui
     return fileSizeString( fi.size(), prettyPrint, byteSize, precision );
 }
 
+bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck)
+{
+    return compareTimeStamp(lhs, rhs, toleranceInSecs,std::list< QFileDevice::FileTime >{ timeToCheck });
+}
+
+bool compareTimeStamp( const QDateTime & lhs, const QDateTime & rhs, int toleranceInSecs )
+{
+    if (lhs == rhs)
+        return true;
+
+    return std::abs(lhs.secsTo(rhs)) <= toleranceInSecs;
+}
+
+bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck)
+{
+    auto lhsTimeStamps = timeStamps(lhs.absoluteFilePath(), timeStampsToCheck);
+    auto rhsTimeStamps = timeStamps(rhs.absoluteFilePath(), timeStampsToCheck);
+    if (lhsTimeStamps.size() != rhsTimeStamps.size())
+        return false;
+    for( auto && ii : lhsTimeStamps )
+    {
+        auto jj = rhsTimeStamps.find(ii.first);
+        if (jj == rhsTimeStamps.end())
+            return false;
+
+        if (!compareTimeStamp(ii.second, (*jj).second, toleranceInSecs))
+            return false;
+    }
+    return true;
+}
+
 template< typename T >
 std::pair< T, T > correctFixedPointRemainder( T inValue, uint8_t precisionIn, uint8_t precisionOut )
 {
@@ -689,7 +720,7 @@ bool remove( const QString & entry )
         if ( aOK )
         {
             QDir dir( fi.absoluteFilePath() );
-#ifdef _WIN32
+#ifdef Q_OS_WIN
             QString fileName = dir.absolutePath().replace( "/", "\\" );
             aOK = ::RemoveDirectoryW( ( LPCWSTR )fileName.utf16() ) != 0;
 #else
@@ -740,7 +771,7 @@ QString canonicalFilePath( const QString & fileName )
     else
     {
         retVal = fi.canonicalFilePath();
-#ifdef _WIN32
+#ifdef Q_OS_WIN
         if ( !retVal.isEmpty() && ( retVal.length() < 2 || retVal[ 1 ] != ':' ) )
         {
             if ( retVal.mid( 0, 3 ).toLower() == "unc" )
@@ -1101,11 +1132,11 @@ bool setTimeStamp(const QString& path, const QDateTime& dt, bool allTimeStamps, 
         return setTimeStamp(path, dt, msg);
 
     bool retVal = setTimeStamp( path, dt, QFileDevice::FileAccessTime, msg);
-#ifdef _WIN32
+#ifdef Q_OS_WIN
     retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileBirthTime, msg);
 #endif
 
-#ifndef _WIN32
+#ifndef Q_OS_WIN
     retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileMetadataChangeTime, msg);
 #endif
     retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileModificationTime, msg);
@@ -1298,13 +1329,13 @@ bool setTimeStamp(const QString& path, const QFileInfo & reference, QString* msg
     if (ts.isValid())
         aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileAccessTime, msg);
 
-#ifdef _WIN32
+#ifdef Q_OS_WIN
     ts = refFile.fileTime(QFileDevice::FileBirthTime);
     if (ts.isValid())
         aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileBirthTime, msg);
 #endif
 
-#ifndef _WIN32
+#ifndef Q_OS_WIN
     ts = refFile.fileTime(QFileDevice::FileMetadataChangeTime);
     if (ts.isValid())
         aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileMetadataChangeTime, msg);
@@ -1329,34 +1360,35 @@ bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::
     return aOK;
 }
 
-std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps( const QString & path )
+std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet )
 {
-    auto fi = QFileInfo( path );
-    if ( !fi.exists() )
+    auto fi = QFileInfo(path);
+    if (!fi.exists())
         return {};
-
     std::unordered_map< QFileDevice::FileTime, QDateTime > retVal;
-    
-    auto currTime = fi.fileTime( QFile::FileAccessTime );
-    //qDebug() << "AccessTime: " << currTime;
-    retVal[QFile::FileAccessTime] = currTime;
 
-#ifdef _WIN32
-    currTime = fi.fileTime( QFile::FileBirthTime );
-    //qDebug() << "BirthTime: " << currTime;
-    retVal[QFile::FileBirthTime] = currTime;
-#endif
+    for (auto && ii : timeStampsToGet)
+    {
+        auto currTime = fi.fileTime(ii);
+        //qDebug() << "AccessTime: " << currTime;
+        retVal[ii] = currTime;
+    }
 
-#ifndef _WIN32
-    currTime = fi.fileTime( QFile::FileMetadataChangeTime );
-    //qDebug() << "MetaChangeTime: " << temp;
-    retVal[QFile::FileMetadataChangeTime] = currTime;
-#endif
-
-    currTime = fi.fileTime( QFile::FileModificationTime );
-    //qDebug() << "ModChangeTime: " << currTime;
-    retVal[QFile::FileModificationTime] = currTime;
     return retVal;
+}
+
+std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path)
+{
+    std::list< QFileDevice::FileTime > timeStampsToGet;
+
+    timeStampsToGet.push_back(QFile::FileAccessTime);
+#ifdef Q_OS_WIN
+    timeStampsToGet.push_back(QFile::FileBirthTime);
+#else
+    timeStampsToGet.push_back(QFile::FileMetadataChangeTime);
+#endif
+    timeStampsToGet.push_back(QFile::FileModificationTime);
+    return timeStamps(path, timeStampsToGet);
 }
 
 QDateTime oldestTimeStamp( const QString & path )
@@ -1371,6 +1403,71 @@ QDateTime oldestTimeStamp( const QString & path )
     }
     return retVal;
 }
+
+bool fileHasAttribute(const QFileInfo & file, EAttribute attribute )
+{
+    bool retVal = false;
+#ifdef Q_OS_WIN
+    DWORD winAttribute = 0;
+    switch( attribute )
+    {
+    case EAttribute::eArchive: 
+        winAttribute = FILE_ATTRIBUTE_ARCHIVE;
+        break;
+    case EAttribute::eReadOnly:
+        winAttribute = FILE_ATTRIBUTE_READONLY;
+        break;
+    case EAttribute::eSystem:
+        winAttribute = FILE_ATTRIBUTE_SYSTEM;
+        break;
+    case EAttribute::eHidden:
+        winAttribute = FILE_ATTRIBUTE_HIDDEN;
+        break;
+    default:
+        retVal = false;
+        break;
+    }
+    auto fileName = file.absoluteFilePath();
+    DWORD attr = GetFileAttributesW((WCHAR *)fileName.utf16());
+    if (attr != INVALID_FILE_ATTRIBUTES)
+        retVal = (attr & winAttribute) != 0;
+#else
+    switch (attribute)
+    {
+    case EAttribute::eReadOnly:
+        retVal = !file.isReadable();
+        break;
+    case EAttribute::eHidden:
+        retVal = file.fileName().startsWith(".");
+        break;
+    default:
+        retVal = false;
+        break;
+    }
+#endif
+    return retVal;
+}
+
+bool isArchiveFile( const QFileInfo & file )
+{
+    return fileHasAttribute(file, EAttribute::eArchive);
+}
+
+bool isSystemFile(const QFileInfo & file)
+{
+    return fileHasAttribute(file, EAttribute::eSystem);
+}
+
+bool isHiddenFile(const QFileInfo & file)
+{
+    return fileHasAttribute(file, EAttribute::eHidden);
+}
+
+bool isReadOnlyFile(const QFileInfo & file)
+{
+    return fileHasAttribute(file, EAttribute::eReadOnly);
+}
+
 }
 
 
