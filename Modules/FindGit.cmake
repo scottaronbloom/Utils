@@ -99,12 +99,12 @@ IF(GIT_EXE_EXECUTABLE)
 			"${TMP_OUTFILE}"
 		)
 
-        InstallFile( ${TMP_OUTFILE} ${OUTFILE} )
+        InstallFile( ${TMP_OUTFILE} ${OUTFILE} REMOVE_ORIG ) # creates a dependency on TMP_OUTFILE
         set_property( 
             DIRECTORY ${dir} 
             APPEND
             PROPERTY CMAKE_CONFIGURE_DEPENDS
-            ${OUTFILE};${inFile}
+            ${OUTFILE}
             )
 
 	ENDMACRO()

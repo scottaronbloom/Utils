@@ -1,13 +1,24 @@
 #include(CMakeParseArguments)
 
 FUNCTION (InstallFile inFile outFile)
+    set( options REMOVE_ORIG )
+    set( oneValueArgs )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
     if( IS_DIRECTORY ${outFile} )
         get_filename_component( baseName ${inFile} NAME)
         SET( outFile ${outFile}/${baseName})
     endif()
         
     get_filename_component( baseName ${outFile} NAME)
-        
+    configure_file( ${inFile} ${outFile} COPYONLY ) # creates a dependency on TMP_OUTFILE
+    if ( _REMOVE_ORIG )
+        file(REMOVE ${inFile})
+    ENDIF()
+
+    #configure file does all the work, but I want to see what happened
     IF ( EXISTS ${outFile} )
         EXECUTE_PROCESS( 
             COMMAND ${CMAKE_COMMAND} -E compare_files ${inFile} ${outFile} 
@@ -18,13 +29,11 @@ FUNCTION (InstallFile inFile outFile)
 
         IF ( ${filesDifferent} )
             MESSAGE( "${baseName} has been updated." )
-            FILE( RENAME ${inFile} ${outFile}  )
         else()
             MESSAGE( "${baseName} is up to date." )
         ENDIF()
     ELSE ()
         MESSAGE( "${baseName} has been updated." )
-        FILE( RENAME ${inFile} ${outFile}  )
     ENDIF ()
 ENDFUNCTION()
 
