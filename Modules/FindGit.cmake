@@ -5,6 +5,8 @@ FIND_PROGRAM(GIT_EXE_EXECUTABLE git
 	DOC "GIT command line client")
 MARK_AS_ADVANCED(GIT_EXE_EXECUTABLE)
 
+find_package(InstallFile REQUIRED)
+
 IF(GIT_EXE_EXECUTABLE)
 	SET(GIT_EXE_FOUND TRUE)
 	SET(GIT_FOUND TRUE)
@@ -76,7 +78,7 @@ IF(GIT_EXE_EXECUTABLE)
 		SET(ENV{LC_ALL} ${_GIT_SAVED_LC_ALL})
 	ENDMACRO()
 
-	MACRO(CreateVersion prefix inFile major minor appName vendor homepage email)
+	MACRO(CreateVersion prefix dir inFile major minor appName vendor homepage email)
 
 		set(OUTFILE "${CMAKE_BINARY_DIR}/Version.h")
 		set(TMP_OUTFILE ${OUTFILE}.tmp)
@@ -97,24 +99,14 @@ IF(GIT_EXE_EXECUTABLE)
 			"${TMP_OUTFILE}"
 		)
 
-		IF ( EXISTS ${OUTFILE} )
-			EXECUTE_PROCESS( 
-				COMMAND ${CMAKE_COMMAND} -E compare_files ${TMP_OUTFILE} ${OUTFILE} 
-				RESULT_VARIABLE versionChanged
-				OUTPUT_QUIET 
-				ERROR_QUIET
-			)
-			IF ( ${versionChanged} )
-				FILE( RENAME ${TMP_OUTFILE} ${OUTFILE}  )
-			ENDIF()
-		ELSE ()
-			FILE( RENAME ${TMP_OUTFILE} ${OUTFILE}  )
-		ENDIF ()
-		
-		SET( CMAKE_CONFIGURE_DEPENDS 
-			${OUTFILE}
-			${CMAKE_CONFIGURE_DEPENDS}
-		)
+        InstallFile( ${TMP_OUTFILE} ${OUTFILE} )
+        set_property( 
+            DIRECTORY ${dir} 
+            APPEND
+            PROPERTY CMAKE_CONFIGURE_DEPENDS
+            ${OUTFILE};${inFile}
+            )
+
 	ENDMACRO()
 ENDIF(GIT_EXE_EXECUTABLE)
 
