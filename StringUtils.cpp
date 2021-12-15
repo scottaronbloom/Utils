@@ -2618,7 +2618,7 @@ namespace NStringUtils
         return true;
     }
 
-    QString titleCase( const QString &string, bool first )
+    QString titleCase( const QString &string, bool first, bool ignoreAllCase )
     {
         if ( string.isEmpty() )
             return string;
@@ -2632,7 +2632,7 @@ namespace NStringUtils
                 break;
             }
         }
-        if ( allCap )
+        if ( !ignoreAllCase && allCap )
             return string;
 
         auto keepLower = unimportantWords();
@@ -2643,22 +2643,22 @@ namespace NStringUtils
         return retVal;
     }
 
-    QString titleCase( const QString &string )
+    QString titleCase( const QString &string, bool ignoreAllCase)
     {
-        return titleCase( string, false );
+        return titleCase( string, false, ignoreAllCase );
     }
 
-    QString transformTitle( const QString &title )
+    QString transformTitle( const QString &title, bool ignoreAllCase)
     {
         auto retVal = title;
         retVal = retVal.replace( '.', ' ' ).trimmed();
         auto tmp = retVal.split( ' ' );
-        for ( auto ii = tmp.begin(); ii != tmp.end(); ++ii )
+        for ( auto && ii = tmp.begin(); ii != tmp.end(); ++ii )
         {
-            *ii = titleCase( *ii, ii == tmp.begin() );
+            *ii = titleCase( *ii, ii == tmp.begin(), ignoreAllCase);
         }
 
-        return retVal;
+        return tmp.join(" ");
     }
 }
 

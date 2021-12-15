@@ -435,8 +435,8 @@ namespace NStringUtils
     bool isSpecialRegExChar( char ch, bool includeDotSlash=true );
     bool isSpecialRegExChar( const QChar & ch, bool includeDotSlash=true );
 
-    QString transformTitle( const QString & title );
-    QString titleCase( const QString &string );
+    QString transformTitle( const QString & title, bool ignoreAllCase=true );
+    QString titleCase( const QString &string, bool ignoreAllCase = true);
     const std::unordered_set< QString > &unimportantWords();
 
     std::unordered_set< QString > getImportantWords( const QString &string, bool stripPunctuation );
