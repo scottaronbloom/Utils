@@ -32,6 +32,8 @@ class QAbstractItemModel;
 class QModelIndex;
 class QTreeView;
 class QSettings;
+class QPlainTextEdit;
+class QTextStream;
 class QTimer;
 class QLayout;
 #ifdef QT_XMLPATTERNS_LIB
@@ -169,7 +171,7 @@ namespace NQtUtils
     void deleteLayoutAndItems( QLayout * layout );
 	
 
-	void appendToLog( QPlainTextEdit * te, const QString & txt, QString & prevText, bool & replaceNextLine, QTextStream * ts=nullptr );
+	void appendToLog( QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts=nullptr );
 }
 
 template< std::size_t I = 0, typename... Tp>
