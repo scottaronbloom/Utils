@@ -733,4 +733,84 @@ void deleteLayoutAndItems( QLayout * layout )
     layout = nullptr;
 }
 
+        void appendToLog( QPlainTextEdit * te, const QString & txt, QTextStream * ts )
+        {
+            static QString sPrevText;
+            static bool sReplaceNextLine = false;
+
+            if( ts )
+                *ts << txt;
+            auto lineStart = 0;
+            if ( txt == "\n" || txt == "\r\n" )
+            {
+                te->appendPlainText( sPrevText + txt );
+                lineStart = txt.length();
+            }
+            else
+            {
+                auto regEx = QRegularExpression( "[\r\n]" );
+                auto pos = txt.indexOf( regEx, lineStart );
+                while ( pos != -1 )
+                {
+                    if ( sReplaceNextLine )
+                    {
+                        sReplaceNextLine = false;
+                        te->moveCursor( QTextCursor::End, QTextCursor::MoveAnchor );
+                        te->moveCursor( QTextCursor::StartOfLine, QTextCursor::MoveAnchor );
+                        te->moveCursor( QTextCursor::End, QTextCursor::KeepAnchor );
+                        te->textCursor().removeSelectedText();
+                        te->textCursor().deletePreviousChar();
+                        te->moveCursor( QTextCursor::End );
+                    }
+
+                    QString tmp = txt.mid( lineStart, pos - lineStart );
+
+                    bool changeLineStart = false;
+                    int skip = 1;
+                    if ( txt.at( pos ) == '\n' ) // just reset lineStart;
+                    {
+                        changeLineStart = true;
+                    }
+                    else if ( txt.at( pos ) == '\r' )
+                    {
+                        // if its "\r\n" treat it just like a "\n"
+                        if ( ( pos + 1 ) < txt.length() && txt.at( pos + 1 ) == '\n' )
+                        {
+                            changeLineStart = true;
+                            skip = 2;
+                        }
+                        else // just a \r throw the line out
+                        {
+                            // skip this line
+                            changeLineStart = true;
+                            sReplaceNextLine = true;
+                        }
+                    }
+                    else
+                    {
+                        changeLineStart = false;
+                    }
+
+                    QString subStr = sPrevText + txt.mid( lineStart, pos - lineStart );
+                    if ( !subStr.isEmpty() )
+                    {
+                        //qDebug() << subStr;
+                        te->appendPlainText( subStr );
+                        sPrevText.clear();
+                    }
+                    else
+                    {
+                        te->appendPlainText( "\n" );
+                        sPrevText.clear();
+                    }
+
+                    if ( changeLineStart )
+                        lineStart = pos + skip;
+
+                    pos = txt.indexOf( regEx, pos + skip );
+                }
+            }
+            sPrevText = txt.mid( lineStart );
+            te->moveCursor( QTextCursor::End );
+        }
 }

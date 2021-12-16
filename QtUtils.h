@@ -167,6 +167,9 @@ namespace NQtUtils
     void updateTimer( int delayMS, QTimer * timer );
 
     void deleteLayoutAndItems( QLayout * layout );
+	
+
+	void appendToLog( QPlainTextEdit * te, const QString & txt, QString & prevText, bool & replaceNextLine, QTextStream * ts=nullptr );
 }
 
 template< std::size_t I = 0, typename... Tp>
