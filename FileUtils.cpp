@@ -1360,6 +1360,14 @@ bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::
     return aOK;
 }
 
+QDateTime timeStamp(const QString & path, QFileDevice::FileTime whichTimeStamp )
+{
+    auto fi = QFileInfo(path);
+    if (!fi.exists())
+        return {};
+    return fi.fileTime(whichTimeStamp);
+}
+
 std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet )
 {
     auto fi = QFileInfo(path);

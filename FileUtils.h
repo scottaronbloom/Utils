@@ -99,7 +99,8 @@ namespace NFileUtils
 
     std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet );
     std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path );
-    QDateTime oldestTimeStamp( const QString &path ); // returns the oldest time based on QFileDevice::FileTime types
+    QDateTime timeStamp(const QString & path, QFileDevice::FileTime=QFileDevice::FileTime::FileModificationTime);
+    QDateTime oldestTimeStamp( const QString &path ); // returns the oldest time based on QFile Device::FileTime types
     bool setTimeStamp(const QString& path, const QFileInfo & srcPath, QString * msg = nullptr ); // uses the ts info on srcPath setting it on path for all filetimes
     bool setTimeStamp(const QString& path, const QDateTime& ts, bool allTimeStamps, QString* msg = nullptr); // if ts is not valid uses current dt, if allTimeStamps is false use FileModificationTime
     bool setTimeStamp(const QString& path, const QDateTime & ts, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // if ts is not valid uses current dt
