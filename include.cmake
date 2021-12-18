@@ -30,6 +30,7 @@ set(qtproject_SRCS
     DelayComboBox.cpp
     DelayLineEdit.cpp
     DelaySpinBox.cpp
+    DoubleProgressDlg.cpp
     utils.cpp
     FileCompare.cpp
     FileUtils.cpp
@@ -50,6 +51,7 @@ set(qtproject_SRCS
     UtilityModels.cpp
     UtilityViews.cpp
     VSInstallUtils.cpp
+    StayAwake.cpp   
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -63,6 +65,7 @@ set(qtproject_H
     DelayComboBox.h
     DelayLineEdit.h
     DelaySpinBox.h
+    DoubleProgressDlg.h
     MD5.h
     SpinBox64.h
     SpinBox64U.h
@@ -91,6 +94,7 @@ set(project_H
     WordExp.h
     QtDumper.h
     VSInstallUtils.h
+    StayAwake.h   
 )
 
 set(qtproject_UIS
