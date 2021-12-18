@@ -31,7 +31,6 @@ class QString;
 #include <QObject>
 #include <QFileInfo>
 
-namespace Verific{ class verific_stream; }
 namespace NUtils
 {
     QByteArray getMd5( const QByteArray & data );
