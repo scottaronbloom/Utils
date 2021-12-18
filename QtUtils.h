@@ -54,23 +54,23 @@ namespace NQtUtils
 {
     struct CCaseInsensitiveHash
     {
-        size_t operator()( const QString& str ) const;
+        size_t operator()( const QString & str ) const;
     };
 
     struct CCaseInsensitiveEqual
     {
-        size_t operator()( const QString& lhs, const QString& rhs ) const;
+        size_t operator()( const QString & lhs, const QString & rhs ) const;
     };
 
     using TCaseInsensitiveHash = std::unordered_set< QString, CCaseInsensitiveHash, CCaseInsensitiveEqual >;
 
     template< typename T >
-    QList< T > replaceInList( const QList< T > & inList, int xFirst, int xCount, const QList< T > & values, int xNum=-1 )
+    QList< T > replaceInList( const QList< T > & inList, int xFirst, int xCount, const QList< T > & values, int xNum = -1 )
     {
         auto prefix = inList.mid( 0, xFirst );
-        auto mid    = values.mid( 0, xNum );
+        auto mid = values.mid( 0, xNum );
         auto suffix = inList.mid( xFirst + xCount );
-        
+
         auto lRetVal = prefix + mid + suffix;
         return lRetVal;
     }
@@ -78,17 +78,17 @@ namespace NQtUtils
     QString allFilesFilter();
     QString defaultFileDialogDir();
 
-#ifdef QT_XMLPATTERNS_LIB
+    #ifdef QT_XMLPATTERNS_LIB
     QString getString( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     QStringList getStringList( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     std::set< QString > getStringSet( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     int getInt( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
-    bool getBool( QXmlQuery & query, const QString & queryString, bool defaultVal=false );
+    bool getBool( QXmlQuery & query, const QString & queryString, bool defaultVal = false );
     double getDouble( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
     std::list< std::pair< QString, QString > > getStringPairs( QXmlQuery & query, const QString & queryString1, const QString & queryString2, bool * aOK = nullptr );
     std::list< std::list< QString > > getStrings( QXmlQuery & query, const QStringList & xmlPaths, bool * aOK = nullptr );
     QString getFile( QXmlQuery & query, const QDir & relToDir, const QString & queryString, bool * aOK = nullptr );
-#endif
+    #endif
 
     int getInt( const QString & str, bool * aOK );
     int getInt( const QStringRef & str, bool * aOK );
@@ -106,11 +106,11 @@ namespace NQtUtils
     double getDouble( const QString & str, QXmlStreamReader & reader );
     double getDouble( const QStringRef & str, QXmlStreamReader & reader );
 
-    bool getBool( const QString & str, bool defaultVal=false ); // default returned when string is empty
-    bool getBool( const QStringRef & str, bool defaultVal=false );
+    bool getBool( const QString & str, bool defaultVal = false ); // default returned when string is empty
+    bool getBool( const QStringRef & str, bool defaultVal = false );
 
-    QString getFile( const QString & relToDir, QXmlStreamReader & reader, QString * origFile=nullptr );
-    QString getFile( const QDir & relToDir, QXmlStreamReader & reader, QString * origFile=nullptr );
+    QString getFile( const QString & relToDir, QXmlStreamReader & reader, QString * origFile = nullptr );
+    QString getFile( const QDir & relToDir, QXmlStreamReader & reader, QString * origFile = nullptr );
     QString getFile( const QDir & relToDir, const QString & file );
 
     QDateTime getDateTime( const QStringRef & str, QXmlStreamReader & reader, bool optional );
@@ -121,7 +121,7 @@ namespace NQtUtils
     std::set< T > toSet( const QSet< T > & values )
     {
         std::set< T > retVal;
-        for( auto val : values )
+        for ( auto val : values )
             retVal.insert( val );
         return retVal;
     }
@@ -130,7 +130,7 @@ namespace NQtUtils
     std::set< T > toSet( const QList< T > & values )
     {
         std::set< T > retVal;
-        for( auto val : values )
+        for ( auto val : values )
             retVal.insert( val );
         return retVal;
     }
@@ -138,7 +138,7 @@ namespace NQtUtils
     class noCaseQStringCmp
     {
     public:
-        bool operator() (const QString & s1, const QString & s2) const
+        bool operator() ( const QString & s1, const QString & s2 ) const
         {
             return s1.compare( s2, Qt::CaseInsensitive ) < 0;
         }
@@ -155,23 +155,23 @@ namespace NQtUtils
     int itemCount( QAbstractItemModel * model, bool rowCountOnly );
 
     QStringList getHeadersForModel( QAbstractItemModel * model );
-    void writeModel( QAbstractItemModel * model, 
-                     QXmlStreamWriter & writer, 
-                     const QString & keyName, 
-                     const QString & plauralSuffix, 
-                     const std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) > & writeRow = 
-                           std::function<void(QAbstractItemModel * model, QXmlStreamWriter &writer, const QString & keyName, int rowNum ) >() );
+    void writeModel( QAbstractItemModel * model,
+                     QXmlStreamWriter & writer,
+                     const QString & keyName,
+                     const QString & plauralSuffix,
+                     const std::function<void( QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum ) > & writeRow =
+                     std::function<void( QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum ) >() );
 
-    void expandAll( QAbstractItemModel *model, const QModelIndex &index, QTreeView *view );
+    void expandAll( QAbstractItemModel * model, const QModelIndex & index, QTreeView * view );
 
-    QDate findDate( const QString &dateString );
+    QDate findDate( const QString & dateString );
 
     void updateTimer( int delayMS, QTimer * timer );
 
     void deleteLayoutAndItems( QLayout * layout );
-	
 
-	void appendToLog( QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts=nullptr );
+
+    void appendToLog( QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts = nullptr );
 }
 
 template< std::size_t I = 0, typename... Tp>
