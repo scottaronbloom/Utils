@@ -22,3 +22,35 @@
 
 
 #include "StayAwake.h"
+#include <QThread>
+
+#include <qt_windows.h>
+
+#ifdef Q_OS_WINDOWS
+namespace NUtils
+{
+    void CStayAwake::run()
+    {
+        bool success = false;
+        while ( !fStopped )
+        {
+            if ( fKeepScreenOn )
+                success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED | ES_DISPLAY_REQUIRED );
+            else
+                success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED );
+            Q_ASSERT( success );
+            if ( !success )
+                break;
+            QThread::sleep( 2 );
+        }
+        if ( success )
+            success = SetThreadExecutionState( ES_CONTINUOUS );
+    }
+
+    void CStayAwake::stop()
+    {
+        fStopped = true;
+    }
+}
+
+#endif

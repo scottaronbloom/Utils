@@ -19,3 +19,30 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#ifndef __STAYAWAKE_H
+#define __STAYAWAKE_H
+#include <QRunnable>
+
+#ifdef Q_OS_WINDOWS
+namespace NUtils
+{
+    class CStayAwake : public QRunnable
+    {
+    public:
+        CStayAwake( bool keepScreenOn ) :
+            fKeepScreenOn( keepScreenOn ),
+            QRunnable()
+        {
+        };
+
+        virtual void run() override;
+        void stop();
+
+    private:
+        bool fKeepScreenOn{ false };
+        bool fStopped{ false };
+    };
+}
+#endif
+
+#endif
