@@ -37,6 +37,7 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QLibrary>
+#include <QFileDialog>
 
 #include "ui_BIFWidget.h"
 
@@ -409,6 +410,17 @@ namespace NBIF
         return fActionNoLayout;
     }
 
+    QAction * CBIFWidget::actionSaveAsGIF()
+    {
+        if ( !fActionSaveAsGIF )
+        {
+            fActionSaveAsGIF = createAction( QString::fromUtf8( "actionSaveAsGIF" ), QString(), tr( "Save As GIF..." ), &CBIFWidget::slotSaveAsGIF );
+        }
+        return fActionSaveAsGIF;
+    }
+    
+
+
     void CBIFWidget::setButtonsLayout( EButtonsLayout layout )
     {
         if ( fButtonLayout == layout )
@@ -516,6 +528,8 @@ namespace NBIF
         subMenu->addAction( actionDiscreteLayout() );
         subMenu->addAction( actionToggleLayout() );
         subMenu->addAction( actionNoLayout() );
+        fMenu->addSeparator();
+        fMenu->addAction( actionSaveAsGIF() );
 
         if ( fButtonLayout == EButtonsLayout::eNoButtons )
             return;
@@ -707,4 +721,19 @@ namespace NBIF
         return retVal;
     }
 
+    void CBIFWidget::slotSaveAsGIF()
+    {
+        if ( !fBIF || (fBIF->imageCount() == 0) )
+            return;
+
+        auto image = fBIF->image( 5 );
+        if ( image.isNull() )
+            return;
+
+        auto fn = QFileDialog::getSaveFileName( this, tr( "GIF File Name" ), QString(), tr( "GIF Files (*.gif);;All Files (*.*)" ) );
+        if ( fn.isEmpty() )
+            return;
+
+        image.save( fn );
+    }
 }

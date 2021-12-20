@@ -92,6 +92,8 @@ namespace NBIF
         QAction *actionDiscreteLayout();
         QAction *actionToggleLayout();
         QAction *actionNoLayout();
+
+        QAction * actionSaveAsGIF();
     Q_SIGNALS:
         void sigPlayingStarted();
     public Q_SLOTS:
@@ -106,6 +108,8 @@ namespace NBIF
         void slotPlayerButtonDiscrete();
         void slotPlayerButtonToggle();
         void slotPlayerButtonNone();
+
+        void slotSaveAsGIF();
     private Q_SLOTS:
         void slotSetNumFramesToSkip( int numFrames );
         void slotSetPlayerSpeed(int playerSpeed);
@@ -154,6 +158,7 @@ namespace NBIF
         QAction *fActionDiscreteLayout{ nullptr };
         QAction *fActionToggleLayout{ nullptr };
         QAction *fActionNoLayout{ nullptr };
+        QAction * fActionSaveAsGIF{ nullptr };
 
         EButtonsLayout fButtonLayout{ EButtonsLayout::eTogglePlayPause };
 
