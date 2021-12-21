@@ -26,6 +26,8 @@
 #include "QtUtils.h"
 
 #include "SABUtils/bif/BIFPlugin.h"
+#include "SABUtils/gif/gif-h/gif.h"
+#include "SABUtils/GIFWriter.h"
 
 #include <QTimer>
 #include <QIcon>
@@ -730,10 +732,21 @@ namespace NBIF
         if ( image.isNull() )
             return;
 
-        auto fn = QFileDialog::getSaveFileName( this, tr( "GIF File Name" ), QString(), tr( "GIF Files (*.gif);;All Files (*.*)" ) );
-        if ( fn.isEmpty() )
-            return;
 
-        image.save( fn );
+        //auto fn = QFileDialog::getSaveFileName( this, tr( "GIF File Name" ), QString(), tr( "GIF Files (*.gif);;All Files (*.*)" ) );
+        //if ( fn.isEmpty() )
+        //    return;
+
+        image.save( "new.gif" );
+
+        {
+            GifWriter writer = { 0 };
+            GifBegin( &writer, "old.gif", image.width(), image.height(), 2, 8, true );
+            auto imageData = NUtils::CGIFWriter::imageToPixels( image );
+            GifWriteFrame( &writer, imageData, image.width(), image.height(), 2, 8, true );
+            GifEnd( &writer );
+            delete[] imageData;
+        }
+
     }
 }

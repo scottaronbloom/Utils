@@ -20,12 +20,14 @@ FUNCTION (InstallFile inFile outFile)
 
     #configure file does all the work, but I want to see what happened
     IF ( EXISTS ${outFile} )
+        MESSAGE( STATUS "File ${outFile} exists" )
         EXECUTE_PROCESS( 
             COMMAND ${CMAKE_COMMAND} -E compare_files ${inFile} ${outFile} 
             RESULT_VARIABLE filesDifferent
             OUTPUT_QUIET 
             ERROR_QUIET
         )
+        MESSAGE( STATUS "filesDifferent: ${filesDifferent}" )
 
         IF ( ${filesDifferent} )
             MESSAGE( "${baseName} has been updated." )

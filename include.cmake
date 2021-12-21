@@ -31,6 +31,7 @@ set(qtproject_SRCS
     DelayLineEdit.cpp
     DelaySpinBox.cpp
     DoubleProgressDlg.cpp
+    GIFWriter.cpp
     utils.cpp
     FileCompare.cpp
     FileUtils.cpp
@@ -80,6 +81,7 @@ set(qtproject_H
 set(project_H
     AutoFetch.h
     BIFFile.h
+    GIFWriter.h
     utils.h
     FileCompare.h
     FileUtils.h
