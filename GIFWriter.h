@@ -39,15 +39,17 @@ namespace NUtils
         ~SGIFPalette();
 
         void getChangedPixels( const uint8_t * prevImage, uint8_t * currImage, int & numPixels );
-        void splitPalette( const uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum );
+        void splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum );
+
+        std::tuple< uint8_t, int, int > compuiteRGBRanges( int numPixels, const uint8_t * image, int splitELT, int firstELT, int lastELT );
 
         void setRGBToMinMax( const uint8_t * image, int numPixels, int location, bool min );
         void setRGBToAverage( const uint8_t * image, int numPixels, int location );
 
-        int partition( int left, int right, const int elt, int pivot );
-        void partitionByMedian( int left, int right, int com, int neededCenter );
+        int partition( uint8_t * image, int left, int right, const int elt, int pivot );
+        void partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter );
         void closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const;
-        void swap( int pix1, int pix2 );
+        void swap( uint8_t * image, int pix1, int pix2 );
 
         bool write( QDataStream & ds );
             
@@ -57,18 +59,25 @@ namespace NUtils
         void setBlue( int location, uint8_t val );
         void setGreen( int location, uint8_t val );
 
-        uint8_t fRed[256];
-        uint8_t fGreen[256];
-        uint8_t fBlue[256];
+        void dumpIt();
+        QString dumpText() const;
+        void dumpImage( const uint8_t * arr, int size ) const;
+        QString dumpArray( const uint8_t * arr, int size, int rowCount = 20 ) const;
+        QString dumpArray( const uint8_t * arr, const uint8_t * baseArray, int size, int rowCount=20 ) const;
+
+        uint8_t fRed[256]{ 0 };
+        uint8_t fGreen[256]{ 0 };
+        uint8_t fBlue[256]{ 0 };
 
         // from online
         // use a kd tree over the RGB space in a heap fashion
         // left of child node is nodeNum * 2, right is NodeNum*2+1
         // nodes 256-2511 are the leaves containing a color
-        uint8_t fTreeSplitELT[256];
-        uint8_t fTreeSplit[256];
+        uint8_t fTreeSplitELT[256]{ 0 };
+        uint8_t fTreeSplit[256]{ 0 };
         bool fDither{ false };
         uint8_t * fTmpImage{ nullptr };
+        int fImageWidth{ 0 };
     };
    
     class CGIFWriter

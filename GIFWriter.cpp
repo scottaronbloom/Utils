@@ -532,6 +532,7 @@ namespace NUtils
         fBitDepth( bitDepth ),
         fDither( dither )
     {
+        fImageWidth = image.width();
         fTmpImage = CGIFWriter::imageToPixels( image );
         int numPixels = image.width() * image.height();
 
@@ -555,17 +556,25 @@ namespace NUtils
             delete[] fTmpImage;
     }
 
-    void SGIFPalette::splitPalette( const uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum )
+    void SGIFPalette::splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum )
     {
-        qDebug().noquote().nospace() << "GifSplitPalette: "
-            << " NumPixels: " << numPixels
-            << " firstElt: " << firstELT
-            << " lastElt: " << lastELT
-            << " splitElt: " << splitELT
-            << " splitDist: " << splitDIST
-            << " treeNode: " << treeNodeNum
-            << " buildForDither: " << fDither
-            ;
+        static int hitCount = 0;
+
+        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
+        //    << " GifSplitPalette: "
+        //    << " NumPixels: " << numPixels
+        //    << " firstElt: " << firstELT
+        //    << " lastElt: " << lastELT
+        //    << " splitElt: " << splitELT
+        //    << " splitDist: " << splitDIST
+        //    << " treeNode: " << treeNodeNum
+        //    << " buildForDither: " << fDither
+        //    ;
+
+        //dumpArray( image, numPixels * 4 );
+        if ( hitCount == 7 )
+            int xyz = 0;
+        //dump();
 
         if ( (lastELT <= firstELT) || (numPixels == 0) )
             return;
@@ -589,6 +598,23 @@ namespace NUtils
             return;
         }
 
+        uint8_t splitOffset = -1;
+        int subPixelsA = -1;
+        int subPixelsB = -1;
+        std::tie( splitOffset, subPixelsA, subPixelsB ) = compuiteRGBRanges( numPixels, image, splitELT, firstELT, lastELT );
+
+    
+        partitionByMedian( image, 0, numPixels, splitOffset, subPixelsA );
+
+        fTreeSplitELT[treeNodeNum] = splitOffset;
+        fTreeSplit[treeNodeNum] = image[subPixelsA * 4 + splitOffset];
+
+        splitPalette( image, subPixelsA, firstELT, splitELT, splitELT - splitDIST, splitDIST / 2, treeNodeNum * 2 );
+        splitPalette( image + subPixelsA * 4, subPixelsB, splitELT, lastELT, splitELT + splitDIST, splitDIST / 2, (treeNodeNum * 2) + 1 );
+    }
+    
+    std::tuple< uint8_t, int, int > SGIFPalette::compuiteRGBRanges( int numPixels, const uint8_t * image, int splitELT, int firstELT, int lastELT )
+    {
         uint8_t minR = 255;
         uint8_t minG = 255;
         uint8_t minB = 255;
@@ -625,67 +651,107 @@ namespace NUtils
 
         auto subPixelsA = numPixels * (splitELT - firstELT) / (lastELT - firstELT);
         auto subPixelsB = numPixels - subPixelsA;
-
-        partitionByMedian( 0, numPixels, splitOffset, subPixelsA );
-
-        fTreeSplitELT[treeNodeNum] = splitOffset;
-        fTreeSplit[treeNodeNum] = image[subPixelsA * 4 + splitOffset];
-
-        splitPalette( image, subPixelsA, firstELT, splitELT, splitELT - splitDIST, splitDIST / 2, treeNodeNum * 2 );
-        splitPalette( image + subPixelsA * 4, subPixelsB, splitELT, lastELT, splitELT + splitDIST, splitDIST / 2, (treeNodeNum * 2) + 1 );
+        return std::make_tuple( splitOffset, subPixelsA, subPixelsB );
     }
-    
-    void SGIFPalette::swap( int pix1, int pix2 )
+
+    void SGIFPalette::swap( uint8_t * image, int lhs, int rhs )
     {
+        //static int hitCount = 0;
+        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
+        //    << " swap: "
+        //    << " pixA: " << lhs
+        //    << " pixB: " << rhs
+        //    ;
+
+        //qDebug().noquote().nospace() << "BEFORE:";
+        //qDebug().noquote().nospace() << "ImageA: " << dumpArray( fTmpImage + lhs * 4, 4 );
+        //qDebug().noquote().nospace() << "ImageB: " << dumpArray( fTmpImage + rhs * 4, 4 );
+
         for( int ii = 0; ii <= 3; ++ii )
-            std::swap( fTmpImage[(pix1 * 4)+ii], fTmpImage[(pix2 * 4) + ii] );
+            std::swap( image[(lhs * 4)+ii], image[(rhs * 4) + ii] );
+
+        //qDebug().noquote().nospace() << "AFTER:";
+        //qDebug().noquote().nospace() << "ImageA: " << dumpArray( fTmpImage + lhs * 4, 4 );
+        //qDebug().noquote().nospace() << "ImageB: " << dumpArray( fTmpImage + rhs * 4, 4 );
     }
 
-    int SGIFPalette::partition( int left, int right, const int elt, int pivot )
+    int SGIFPalette::partition( uint8_t * image, int left, int right, const int elt, int pivot )
     {
-        auto pivotValue = fTmpImage[(pivot * 4) + elt];
-        swap( pivot, right - 1 );
+        static int hitCount = 0;
+        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
+        //    << " partition: "
+        //    << " left: " << left
+        //    << " right: " << right
+        //    << " elt: " << elt
+        //    << " pivot: " << pivot
+        //    ;
+        //dump();
+        //qDebug().noquote().nospace() << "Before Image: " << dumpArray( image + left, (right - left + 1)*4, ((right - left)*4)/ 5 );
+        if ( hitCount == 90 )
+            int xyz = 0;
+
+        //qDebug().noquote().nospace() << "Around pivot point: " << dumpArray( image + std::max( 0, (pivot*4) - 10 ) + left, 20, 20 );
+        auto pivotValue = image[(pivot * 4) + elt];
+        swap( image, pivot, right - 1 );
         auto storedIndex = left;
         bool split = false;
         for ( int ii = left; ii < right - 1; ++ii )
         {
-            auto val = fTmpImage[(ii * 4) + elt];
+            auto val = image[(ii * 4) + elt];
             if ( val < pivotValue )
             {
-                swap( ii, storedIndex );
+                swap( image, ii, storedIndex );
                 ++storedIndex;
             }
             else if ( val == pivotValue )
             {
                 if ( split )
                 {
-                    swap( ii, storedIndex );
+                    swap( image, ii, storedIndex );
                     ++storedIndex;
                 }
                 split = !split;
             }
         }
-        swap( storedIndex, right - 1 );
+        swap( image, storedIndex, right - 1 );
+        //qDebug().noquote().nospace() << "After Image: " << dumpArray( image + left, (right - left + 1)*4, ((right - left) *4 )/ 5 );
         return storedIndex;
     }
 
-    void SGIFPalette::partitionByMedian( int left, int right, int com, int neededCenter )
+    void SGIFPalette::partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter )
     {
+        static int hitCount = 0;
+        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
+        //    << " GifPartitionByMedian: "
+        //    << " left: " << left
+        //    << " right: " << right
+        //    << " com: " << com
+        //    << " neededCenter: " << neededCenter
+        //    ;
+        if ( hitCount == 94 )
+            int xyz = 0;
+        //dumpImage( image + left, (right - left + 1) * 4 );
+        //dump();
+
         if ( left < right-1 )
         {
             auto pivot = left + (right - left) / 2;
-            pivot = partition( left, right, com, pivot );
+            pivot = partition( image, left, right, com, pivot );
             if ( pivot > neededCenter )
-                partitionByMedian( left, pivot, com, neededCenter );
+                partitionByMedian( image, left, pivot, com, neededCenter );
 
             if (pivot < neededCenter )
-                partitionByMedian( pivot + 1, right, com, neededCenter );
+                partitionByMedian( image, pivot + 1, right, com, neededCenter );
         }
     }
 
 
     void SGIFPalette::setRGBToAverage( const uint8_t * image, int numPixels, int location )
     {
+        //qDebug().noquote().nospace() << "Before Set to Average:";
+        //dump();
+        //qDebug().noquote().nospace() << dumpArray( image, numPixels*4, fImageWidth );
+
         uint64_t r = 0;
         uint64_t g = 0;
         uint64_t b = 0;
@@ -708,6 +774,10 @@ namespace NUtils
         setRed( location, r );
         setGreen( location, g );
         setBlue( location, b );
+
+        //qDebug().noquote().nospace() << "After Set to Average:";
+        //dump();
+        //qDebug().noquote().nospace() << dumpArray( image, numPixels * 4, fImageWidth );
     }
 
     void SGIFPalette::closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const
@@ -755,6 +825,9 @@ namespace NUtils
 
     void SGIFPalette::setRGBToMinMax( const uint8_t * image, int numPixels, int location, bool min )
     {
+        //qDebug().noquote().nospace() << "Before Set to " << (min ? "Min" : "Max") << ": ";
+        //dump();
+        //qDebug().noquote().nospace() << dumpArray( image, numPixels*4, fImageWidth );
         uint8_t r = min ? 255 : 0;
         uint8_t g = min ? 255 : 0;
         uint8_t b = min ? 255 : 0;
@@ -772,6 +845,10 @@ namespace NUtils
         setRed(location, r );
         setGreen( location, g );
         setBlue( location, b );
+
+        //qDebug().noquote().nospace() << "After: ";
+        //dump();
+        //qDebug().noquote().nospace() << dumpArray( image, numPixels*4, fImageWidth );
     }
 
     void SGIFPalette::getChangedPixels( const uint8_t * prevImage, uint8_t * currImage, int & numPixels )
@@ -825,22 +902,73 @@ namespace NUtils
         static int hitCount = 0;
         if ( hitCount == 3 )
             int xyz = 0;
-        hitCount++;
 
-        qDebug().noquote().nospace() << "RED: location: " << location << " value: " << val;
+        //qDebug().noquote().nospace() << "HitCount: " << hitCount << " RED: location: " << location << " value: " << val;
         fRed[location] = val;
+        hitCount++;
     }
 
     void SGIFPalette::setBlue( int location, uint8_t val )
     {
-        qDebug().noquote().nospace() << "BLUE: location: " << location << " value: " << val;
+        //qDebug().noquote().nospace() << "BLUE: location: " << location << " value: " << val;
         fBlue[location] = val;
     }
 
     void SGIFPalette::setGreen( int location, uint8_t val )
     {
-        qDebug().noquote().nospace() << "GREEN: location: " << location << " value: " << val;
+        //qDebug().noquote().nospace() << "GREEN: location: " << location << " value: " << val;
         fGreen[location] = val;
+    }
+    
+    void SGIFPalette::dumpIt()
+    {
+        qDebug().noquote().nospace() << dumpText();
+    }
+
+    QString SGIFPalette::dumpText() const
+    {
+        QString retVal;
+        retVal = "Red:\n" + dumpArray( fRed, fRed, 256 ) + "\n"
+            + "Blue:\n" + dumpArray( fBlue, fBlue, 256 ) + "\n"
+            + "Green:\n" + dumpArray( fGreen, fGreen, 256 ) + "\n"
+            ;
+        return retVal;
+    }
+
+    void SGIFPalette::dumpImage( const uint8_t * arr, int size ) const
+    {
+        qDebug().nospace().noquote() << dumpArray( arr, size, fImageWidth );
+    }
+
+    QString SGIFPalette::dumpArray( const uint8_t * arr, int size, int rowCount /*= 20 */ ) const
+    {
+        return dumpArray( arr, fTmpImage, size, rowCount );
+    }
+
+    QString SGIFPalette::dumpArray( const uint8_t * arr, const uint8_t * baseArray, int size, int rowCount/*=20 */ ) const
+    {
+        static int hitCount = 0;
+        auto retVal = QString( "HitCount: %1 - Array: 0x%2\n" ).arg( hitCount++ ).arg( arr - baseArray, 8, 16, QChar( '0' ) );
+
+        int colCount = 0;
+        for ( int ii = 0; ii < size; ++ii )
+        {
+            if ( colCount == 0 )
+                retVal += QString( "0x%1-0x%2: " ).arg( ii, 3, 16, QChar( '0' ) ).arg( ii + 20, 3, 16, QChar( '0' ) ).toUpper();
+            else
+                retVal += " ";
+
+            auto curr = QString( "%1" ).arg( arr[ii], 2, 16, QChar( '0' ) ).toUpper();
+            retVal += curr;
+
+            if ( colCount == rowCount - 1 )
+            {
+                retVal += "\n";
+                colCount = -1;
+            }
+            colCount++;
+        }
+        return retVal;
     }
 }
 
