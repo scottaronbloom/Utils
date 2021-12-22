@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 #include "DoubleProgressDlg.h"
-#include "ui_DoubleProgressDlg.h"
 
 #include <QScopedValueRollback>
 #include <QTimer>
