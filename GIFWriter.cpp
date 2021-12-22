@@ -27,6 +27,72 @@
 #include <QDebug>
 namespace NUtils
 {
+    template< typename T >
+    void dumpRow( int currRow, const char * title, const T * array, int width, int height, int rowOffset = 0 )
+    {
+        if ( currRow < 0 )
+            return;
+        if ( currRow >= height )
+            return;
+
+        auto rowBytes = width * 4;
+        auto numBytes = rowBytes * height;
+        auto offset = currRow * rowBytes + rowOffset;
+        if ( (offset + rowBytes) > numBytes )
+            return;
+
+        qDebug().noquote().nospace() << "Row: " << currRow << " : Offset: " << offset << ":\n" << 
+            SGIFPalette::dumpArray( title, (const uint8_t *)array + offset, (const uint8_t *)array, rowBytes, 40, true );
+
+    }
+
+    struct SGIFPalette
+    {
+        SGIFPalette( const uint8_t * prevImage, const QImage & image, uint8_t bitDepth, bool dither );
+        ~SGIFPalette();
+
+        void getChangedPixels( const uint8_t * prevImage, uint8_t * currImage, int & numPixels );
+        void splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum );
+
+        std::tuple< uint8_t, int, int > compuiteRGBRanges( int numPixels, const uint8_t * image, int splitELT, int firstELT, int lastELT );
+
+        void setRGBToMinMax( const uint8_t * image, int numPixels, int location, bool min );
+        void setRGBToAverage( const uint8_t * image, int numPixels, int location );
+
+        int partition( uint8_t * image, int left, int right, const int elt, int pivot );
+        void partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter );
+        void closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const;
+        void swap( uint8_t * image, int pix1, int pix2 );
+
+        bool write( QDataStream & ds );
+
+        uint8_t fBitDepth{ 8 };
+
+        void setRed( int location, uint8_t val );
+        void setBlue( int location, uint8_t val );
+        void setGreen( int location, uint8_t val );
+
+        void dumpIt();
+        QString dumpText() const;
+        void dumpImage( const uint8_t * arr, int size ) const;
+        QString dumpArray( const char * title, const uint8_t * arr, int size, int colsPerRow = 20, bool asRGB = false ) const;
+        static QString dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, int colsPerRow = 20, bool asRGB = false );
+
+        uint8_t fRed[256]{ 0 };
+        uint8_t fGreen[256]{ 0 };
+        uint8_t fBlue[256]{ 0 };
+
+        // from online
+        // use a kd tree over the RGB space in a heap fashion
+        // left of child node is nodeNum * 2, right is NodeNum*2+1
+        // nodes 256-2511 are the leaves containing a color
+        uint8_t fTreeSplitELT[256]{ 0 };
+        uint8_t fTreeSplit[256]{ 0 };
+        bool fDither{ false };
+        uint8_t * fTmpImage{ nullptr };
+        int fImageWidth{ 0 };
+    };
+
     int CGIFWriter::kTransparentIndex{ 0 };
 
     CGIFWriter::CGIFWriter()
@@ -37,6 +103,7 @@ namespace NUtils
         CGIFWriter( new QFile( filename ) )
     {
         fDeleteDevice = true;
+        fDevice->open( QIODevice::WriteOnly | QIODevice::Truncate );
     }
 
     CGIFWriter::CGIFWriter( QIODevice * device ) :
@@ -68,6 +135,11 @@ namespace NUtils
         fDeleteDevice = false;
     }
 
+    void CGIFWriter::close()
+    {
+        fDevice->close();
+    }
+
     bool CGIFWriter::status() const
     {
         return status( fDataStream );
@@ -75,7 +147,7 @@ namespace NUtils
 
     bool CGIFWriter::status( const QDataStream & ds )
     {
-        return ds.status() == QDataStream::Ok;
+        return ds.status() == QDataStream::Ok && ds.device()->isOpen() && ds.device()->isWritable();
     }
 
     bool CGIFWriter::writeChar( uint8_t ch )
@@ -134,6 +206,9 @@ namespace NUtils
         if ( fHeaderWritten )
             return true;
 
+        if ( !status() )
+            return false;
+
         if ( !fDevice )
             return false;
 
@@ -141,15 +216,18 @@ namespace NUtils
             return false;
 
         fFirstFrame = true;
-        fPrevFrameData = new uint8_t[numPixels() * (uint8_t)4];
+        auto numBytes = numPixels() * (uint8_t)4;
+        fPrevFrameData = new uint8_t[numBytes];
+        std::memset( fPrevFrameData, 0, numBytes );
 
-        writeString( "GIF89a" );
+        writeString( "GIF" ); // signature
+        writeString( "89a" ); // version
         writeInt( fCurrImage.width() );
         writeInt( fCurrImage.height() );
 
         writeChar( 0xf0 ); // global color table of 2 entries
         writeChar( 0x0 ); // background color
-        writeChar( 0x0 ); // pixes are squares, its in the format....
+        writeChar( 0x0 ); // pixel aspect ratio
 
         // global palette
         // color 0 is black
@@ -162,17 +240,15 @@ namespace NUtils
         writeChar( 0x0 );
         writeChar( 0x0 );
 
-        if ( fIsMultiFrame )
-        {
-            writeChar( 0x21 ); // extension block
-            writeChar( 0xff ); // its an app specific extension
-            writeChar( 11 ); // length 11
-            writeString( "NETSCAPE2.0" );
-            writeChar( 3 ); // 3 bytes of NETSCAPE2.0 data
-            writeChar( 1 ); // interwebs say so
-            writeInt( fNumberOfLoops );
-            writeChar( 0 ); // end of extension block
-        }
+        writeChar( 0x21 ); // extension block
+        writeChar( 0xff ); // its an app specific extension
+        writeChar( 11 ); // length 11
+        writeString( "NETSCAPE2.0" );
+        writeChar( 3 ); // 3 bytes of NETSCAPE2.0 data
+        writeChar( 1 ); // interwebs say so
+        writeInt( fLoopCount );
+        writeChar( 0 ); // end of extension block
+
         fHeaderWritten = true;
         return status();
     }
@@ -194,22 +270,22 @@ namespace NUtils
 
     bool CGIFWriter::writeImage( const QImage & frame )
     {
-        return writeImage( frame, {} );
+        return writeImage( frame, fDelay, true );
     }
 
-    bool CGIFWriter::writeImage( const QImage & image, std::optional< uint32_t > delay )
+    bool CGIFWriter::writeImage( const QImage & image, uint32_t delay, bool lastFrame )
     {
-        if ( delay.has_value() )
-            fDelay = delay;
-        if ( fDelay.has_value() )
-        {
-            if ( !fIsMultiFrame )
-                return false;
-        }
+        fDelay = delay;
+
         fCurrImage = image;
         writeHeader();
+        if ( !status() )
+            return false;
+
         writeCurrImage();
-        writeEnd();
+        
+        if ( lastFrame )
+            writeEnd();
 
         return status();
     }
@@ -258,10 +334,10 @@ namespace NUtils
 
         auto numPixels = this->numPixels();
        
-        auto quantPixels = new int32_t[sizeof( int32_t ) * numPixels * 4 ];
+        auto quantPixels = new int32_t[sizeof( int32_t ) * numPixels * 4 ]; // has to support more than 8 bits
         auto imagePixels = CGIFWriter::imageToPixels( fCurrImage );
 
-        for ( int ii = 0; ii < numPixels; ++ii )
+        for ( int ii = 0; ii < 4*numPixels; ++ii )
         {
             auto pix = imagePixels[ii];
             auto pix256 = static_cast<uint32_t>(pix) * 256;
@@ -274,7 +350,7 @@ namespace NUtils
             {
                 auto pixelNumber = (currRow * fCurrImage.width()) + currCol;
                 auto byteNumber = 4 * pixelNumber;
-                auto nextPixel = quantPixels + byteNumber;
+                int32_t * nextPixel = quantPixels + byteNumber;
                 const auto lastPix = prevImage ? ( prevImage + byteNumber ) : nullptr;
 
                 uint32_t rr = (nextPixel[0] + 127) / 256;
@@ -284,10 +360,10 @@ namespace NUtils
                 if ( prevImage && 
                      (pixelCompare( prevImage, { rr, gg, bb } ) ) )
                 {
-                    fPrevFrameData[0] = rr;
-                    fPrevFrameData[1] = gg;
-                    fPrevFrameData[2] = bb;
-                    fPrevFrameData[3] = kTransparentIndex;
+                    nextPixel[0] = rr;
+                    nextPixel[1] = gg;
+                    nextPixel[2] = bb;
+                    nextPixel[3] = kTransparentIndex;
                     continue;
                 }
 
@@ -296,8 +372,8 @@ namespace NUtils
                 fPalette->closestColor( rr, gg, bb, 1, bestIndex, bestDifference );
 
                 int32_t rErr = nextPixel[0] - (int32_t)fPalette->fRed[bestIndex] * 256;
-                int32_t gErr = nextPixel[0] - (int32_t)fPalette->fGreen[bestIndex] * 256;
-                int32_t bErr = nextPixel[0] - (int32_t)fPalette->fBlue[bestIndex] * 256;
+                int32_t gErr = nextPixel[1] - (int32_t)fPalette->fGreen[bestIndex] * 256;
+                int32_t bErr = nextPixel[2] - (int32_t)fPalette->fBlue[bestIndex] * 256;
 
                 nextPixel[0] = fPalette->fRed[bestIndex];
                 nextPixel[1] = fPalette->fGreen[bestIndex];
@@ -310,30 +386,36 @@ namespace NUtils
                 auto quantLoc5 = pixelNumber + fCurrImage.width();     // next row
                 auto quantLoc1 = pixelNumber + fCurrImage.width() + 1; // next row righ
 
-                updateQuant( quantPixels, quantLoc7, rErr, gErr, bErr );
-                updateQuant( quantPixels, quantLoc3, rErr, gErr, bErr );
-                updateQuant( quantPixels, quantLoc5, rErr, gErr, bErr );
-                updateQuant( quantPixels, quantLoc1, rErr, gErr, bErr );
+                updateQuant( quantPixels, quantLoc7, rErr, gErr, bErr, 7 );
+                updateQuant( quantPixels, quantLoc3, rErr, gErr, bErr, 3 );
+                updateQuant( quantPixels, quantLoc5, rErr, gErr, bErr, 5 );
+                updateQuant( quantPixels, quantLoc1, rErr, gErr, bErr, 1 );
             }
-
         }
 
+        int numBytes = 0;
         for ( int ii = 0; ii < numPixels * 4; ++ii )
         {
             fPrevFrameData[ii] = static_cast<uint8_t>(quantPixels[ii]);
+            numBytes++;
         }
+
         delete[] imagePixels;
         delete[] quantPixels;
     }
 
-    void CGIFWriter::updateQuant( int32_t * quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr )
+    void CGIFWriter::updateQuant( int32_t * quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr, int quantMultiplier )
     {
         if ( loc < numPixels() )
         {
-            auto pixel = quantPixels + loc;
-            pixel[0] += std::max( -pixel[0], rErr * 7 / 16 );
-            pixel[1] += std::max( -pixel[1], gErr * 7 / 16 );
-            pixel[2] += std::max( -pixel[2], bErr * 7 / 16 );
+            auto pixel = quantPixels + 4*loc;
+            rErr = rErr * quantMultiplier / 16;
+            gErr = gErr * quantMultiplier / 16;
+            bErr = bErr * quantMultiplier / 16;
+
+            pixel[0] += std::max( -pixel[0], rErr );
+            pixel[1] += std::max( -pixel[1], gErr );
+            pixel[2] += std::max( -pixel[2], bErr );
         }
     }
 
@@ -387,6 +469,7 @@ namespace NUtils
 
         void write( uint32_t bit )
         {
+            //qDebug().noquote().nospace() << "WriteBit: " << bit;
             bit = bit & 1;
             bit = bit << fBitIndex;
             fByte |= bit;
@@ -398,19 +481,33 @@ namespace NUtils
                 fBitIndex = 0;
                 fByte = 0;
             }
+            //dump();
         }
 
         void write()
         {
+            //qDebug().noquote().nospace() << "WriteChunk: " << fBitIndex << " " << fByte << " " << fChunkIndex;
             CGIFWriter::writeChar( fChunkIndex, fDataStream );
             CGIFWriter::writeRaw( (const char *)fChunk, fChunkIndex, fDataStream );
 
             fBitIndex = 0;
             fByte = 0;
             fChunkIndex = 0;
+            //dump();
         }
 
-        bool write( uint32_t code, uint32_t length )
+        void writeFooter( int currCode, uint32_t codeSize, uint32_t clearCode, int minCodeSize )
+        {
+            write( currCode, codeSize );
+            write( clearCode, codeSize );
+            write( clearCode + 1, minCodeSize + 1 );
+            while ( fBitIndex )
+                write( 0 );
+            if ( fChunkIndex )
+                write();
+        }
+
+        void write( uint32_t code, uint32_t length )
         {
             for ( uint32_t ii = 0; ii < length; ++ii )
             {
@@ -421,10 +518,14 @@ namespace NUtils
                     write();
                 }
             }
-            return CGIFWriter::status( fDataStream );
+            //dump();
         }
 
-
+        void dump() const
+        {
+            qDebug().noquote().nospace() << "dump: " << fBitIndex << " " << fByte << " " << fChunkIndex;
+            qDebug().noquote().nospace() << SGIFPalette::dumpArray( "Palette Status", fChunk, fChunk, 256, 32, true );
+        }
 
         QDataStream & fDataStream;
         uint8_t fBitIndex{ 0 };
@@ -433,7 +534,7 @@ namespace NUtils
         uint8_t fChunk[256] = { 0 };
     };
 
-    bool CGIFWriter::writeLZW( uint32_t left, uint32_t top ) 
+    bool CGIFWriter::writeLZW( uint32_t left, uint32_t top, const uint8_t * imagePixels )
     {
         if ( !status() )
             return false;
@@ -442,8 +543,7 @@ namespace NUtils
         writeChar( 0xf9 );
         writeChar( 0x04 );
         writeChar( 0x05 );
-        if ( hasDelay() )
-            writeInt( delay() );
+        writeInt( delay() );
         writeChar( kTransparentIndex );
         writeChar( 0 );
 
@@ -465,12 +565,11 @@ namespace NUtils
         std::vector< SLZWNode > codeTree( 4096 );
         int currCode = -1;
         uint32_t codeSize = minCodeSize + 1;
-        uint32_t maxCode = clearCode;
+        uint32_t maxCode = clearCode+1;
 
         SBitStatus bitStatus( fDataStream );
         bitStatus.write( clearCode, codeSize );
 
-        auto imagePixels = imageToPixels( fCurrImage );
         auto height = fCurrImage.height();
         auto width = fCurrImage.width();
         for ( int currRow = 0; currRow < height; ++currRow )
@@ -481,6 +580,7 @@ namespace NUtils
                 auto byteNumber = 4 * pixelNumber;
 
                 auto nextValue = fFlipImage ? imagePixels[((height - 1 - currRow) * width + currCol) * 4 + 3] : imagePixels[byteNumber + 3];
+
                 if ( currCode < 0 )
                 {
                     currCode = nextValue;
@@ -506,7 +606,11 @@ namespace NUtils
                     currCode = nextValue;
                 }
             }
+            if ( currRow % 10 == 0 )
+                int xyz = 0;
         }
+        bitStatus.writeFooter( currCode, codeSize, clearCode, minCodeSize );
+        writeChar( 0 );
         return status();
     }
 
@@ -525,7 +629,7 @@ namespace NUtils
         else
             thresholdImage( prevImage );
 
-        return writeLZW( 0, 0 );
+        return writeLZW( 0, 0, fPrevFrameData );
     }
 
     SGIFPalette::SGIFPalette( const uint8_t * prevImage, const QImage & image, uint8_t bitDepth, bool dither ) :
@@ -558,24 +662,6 @@ namespace NUtils
 
     void SGIFPalette::splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum )
     {
-        static int hitCount = 0;
-
-        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
-        //    << " GifSplitPalette: "
-        //    << " NumPixels: " << numPixels
-        //    << " firstElt: " << firstELT
-        //    << " lastElt: " << lastELT
-        //    << " splitElt: " << splitELT
-        //    << " splitDist: " << splitDIST
-        //    << " treeNode: " << treeNodeNum
-        //    << " buildForDither: " << fDither
-        //    ;
-
-        //dumpArray( image, numPixels * 4 );
-        if ( hitCount == 7 )
-            int xyz = 0;
-        //dump();
-
         if ( (lastELT <= firstELT) || (numPixels == 0) )
             return;
         if ( lastELT == (firstELT + 1) )
@@ -656,41 +742,12 @@ namespace NUtils
 
     void SGIFPalette::swap( uint8_t * image, int lhs, int rhs )
     {
-        //static int hitCount = 0;
-        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
-        //    << " swap: "
-        //    << " pixA: " << lhs
-        //    << " pixB: " << rhs
-        //    ;
-
-        //qDebug().noquote().nospace() << "BEFORE:";
-        //qDebug().noquote().nospace() << "ImageA: " << dumpArray( fTmpImage + lhs * 4, 4 );
-        //qDebug().noquote().nospace() << "ImageB: " << dumpArray( fTmpImage + rhs * 4, 4 );
-
         for( int ii = 0; ii <= 3; ++ii )
             std::swap( image[(lhs * 4)+ii], image[(rhs * 4) + ii] );
-
-        //qDebug().noquote().nospace() << "AFTER:";
-        //qDebug().noquote().nospace() << "ImageA: " << dumpArray( fTmpImage + lhs * 4, 4 );
-        //qDebug().noquote().nospace() << "ImageB: " << dumpArray( fTmpImage + rhs * 4, 4 );
     }
 
     int SGIFPalette::partition( uint8_t * image, int left, int right, const int elt, int pivot )
     {
-        static int hitCount = 0;
-        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
-        //    << " partition: "
-        //    << " left: " << left
-        //    << " right: " << right
-        //    << " elt: " << elt
-        //    << " pivot: " << pivot
-        //    ;
-        //dump();
-        //qDebug().noquote().nospace() << "Before Image: " << dumpArray( image + left, (right - left + 1)*4, ((right - left)*4)/ 5 );
-        if ( hitCount == 90 )
-            int xyz = 0;
-
-        //qDebug().noquote().nospace() << "Around pivot point: " << dumpArray( image + std::max( 0, (pivot*4) - 10 ) + left, 20, 20 );
         auto pivotValue = image[(pivot * 4) + elt];
         swap( image, pivot, right - 1 );
         auto storedIndex = left;
@@ -714,25 +771,11 @@ namespace NUtils
             }
         }
         swap( image, storedIndex, right - 1 );
-        //qDebug().noquote().nospace() << "After Image: " << dumpArray( image + left, (right - left + 1)*4, ((right - left) *4 )/ 5 );
         return storedIndex;
     }
 
     void SGIFPalette::partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter )
     {
-        static int hitCount = 0;
-        //qDebug().noquote().nospace() << "HitCount: " << hitCount++
-        //    << " GifPartitionByMedian: "
-        //    << " left: " << left
-        //    << " right: " << right
-        //    << " com: " << com
-        //    << " neededCenter: " << neededCenter
-        //    ;
-        if ( hitCount == 94 )
-            int xyz = 0;
-        //dumpImage( image + left, (right - left + 1) * 4 );
-        //dump();
-
         if ( left < right-1 )
         {
             auto pivot = left + (right - left) / 2;
@@ -748,10 +791,6 @@ namespace NUtils
 
     void SGIFPalette::setRGBToAverage( const uint8_t * image, int numPixels, int location )
     {
-        //qDebug().noquote().nospace() << "Before Set to Average:";
-        //dump();
-        //qDebug().noquote().nospace() << dumpArray( image, numPixels*4, fImageWidth );
-
         uint64_t r = 0;
         uint64_t g = 0;
         uint64_t b = 0;
@@ -774,10 +813,6 @@ namespace NUtils
         setRed( location, r );
         setGreen( location, g );
         setBlue( location, b );
-
-        //qDebug().noquote().nospace() << "After Set to Average:";
-        //dump();
-        //qDebug().noquote().nospace() << dumpArray( image, numPixels * 4, fImageWidth );
     }
 
     void SGIFPalette::closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const
@@ -815,7 +850,7 @@ namespace NUtils
             else
             {
                 closestColor( rr, gg, bb, (treeNodeNumber * 2) + 1, bestIndex, bestDifference );
-                if ( bestDifference > (splitPos - splitCompare) )
+                if ( bestDifference > (splitCompare - splitPos ) )
                 {
                     closestColor( rr, gg, bb, treeNodeNumber * 2, bestIndex, bestDifference );
                 }
@@ -825,9 +860,6 @@ namespace NUtils
 
     void SGIFPalette::setRGBToMinMax( const uint8_t * image, int numPixels, int location, bool min )
     {
-        //qDebug().noquote().nospace() << "Before Set to " << (min ? "Min" : "Max") << ": ";
-        //dump();
-        //qDebug().noquote().nospace() << dumpArray( image, numPixels*4, fImageWidth );
         uint8_t r = min ? 255 : 0;
         uint8_t g = min ? 255 : 0;
         uint8_t b = min ? 255 : 0;
@@ -845,10 +877,6 @@ namespace NUtils
         setRed(location, r );
         setGreen( location, g );
         setBlue( location, b );
-
-        //qDebug().noquote().nospace() << "After: ";
-        //dump();
-        //qDebug().noquote().nospace() << dumpArray( image, numPixels*4, fImageWidth );
     }
 
     void SGIFPalette::getChangedPixels( const uint8_t * prevImage, uint8_t * currImage, int & numPixels )
@@ -899,24 +927,16 @@ namespace NUtils
 
     void SGIFPalette::setRed( int location, uint8_t val )
     {
-        static int hitCount = 0;
-        if ( hitCount == 3 )
-            int xyz = 0;
-
-        //qDebug().noquote().nospace() << "HitCount: " << hitCount << " RED: location: " << location << " value: " << val;
         fRed[location] = val;
-        hitCount++;
     }
 
     void SGIFPalette::setBlue( int location, uint8_t val )
     {
-        //qDebug().noquote().nospace() << "BLUE: location: " << location << " value: " << val;
         fBlue[location] = val;
     }
 
     void SGIFPalette::setGreen( int location, uint8_t val )
     {
-        //qDebug().noquote().nospace() << "GREEN: location: " << location << " value: " << val;
         fGreen[location] = val;
     }
     
@@ -928,40 +948,67 @@ namespace NUtils
     QString SGIFPalette::dumpText() const
     {
         QString retVal;
-        retVal = "Red:\n" + dumpArray( fRed, fRed, 256 ) + "\n"
-            + "Blue:\n" + dumpArray( fBlue, fBlue, 256 ) + "\n"
-            + "Green:\n" + dumpArray( fGreen, fGreen, 256 ) + "\n"
+        retVal = "Red:\n" + dumpArray( "Palette Red", fRed, fRed, 256 ) + "\n"
+            + "Blue:\n" + dumpArray( "Palette Blue", fBlue, fBlue, 256 ) + "\n"
+            + "Green:\n" + dumpArray( "Palette Green", fGreen, fGreen, 256 ) + "\n"
             ;
         return retVal;
     }
 
     void SGIFPalette::dumpImage( const uint8_t * arr, int size ) const
     {
-        qDebug().nospace().noquote() << dumpArray( arr, size, fImageWidth );
+        qDebug().nospace().noquote() << dumpArray( "Palette", arr, size, fImageWidth );
     }
 
-    QString SGIFPalette::dumpArray( const uint8_t * arr, int size, int rowCount /*= 20 */ ) const
+    QString SGIFPalette::dumpArray( const char * title, const uint8_t * arr, int size, int colsPerRow /*= 20 */, bool asRGB) const
     {
-        return dumpArray( arr, fTmpImage, size, rowCount );
+        return dumpArray( title, arr, fTmpImage, size, colsPerRow, asRGB );
     }
 
-    QString SGIFPalette::dumpArray( const uint8_t * arr, const uint8_t * baseArray, int size, int rowCount/*=20 */ ) const
+    QString getHexValue( intptr_t value )
+    {
+        auto retVal = QString( "%1" ).arg( value, 5, 16, QChar( '0' ) ).toUpper();
+        retVal = "0x" + retVal;
+        return retVal;
+    }
+
+    QString SGIFPalette::dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, int colsPerRow/*=20 */, bool asRGB )
     {
         static int hitCount = 0;
-        auto retVal = QString( "HitCount: %1 - Array: 0x%2\n" ).arg( hitCount++ ).arg( arr - baseArray, 8, 16, QChar( '0' ) );
-
+        auto retVal = QString( "HitCount: %1 - %2 - Array: 0x%3\n" ).arg( hitCount++ ).arg( title ).arg( arr - baseArray, 8, 16, QChar( '0' ) );
+        if ( asRGB )
+            colsPerRow /= 4;
         int colCount = 0;
+        int pixelMultiplier = 1;
+        if ( asRGB )
+            pixelMultiplier = 4;
         for ( int ii = 0; ii < size; ++ii )
         {
+            auto offset = &arr[ii] - baseArray;
+            auto memZero = (intptr_t)&arr[ii];
             if ( colCount == 0 )
-                retVal += QString( "0x%1-0x%2: " ).arg( ii, 3, 16, QChar( '0' ) ).arg( ii + 20, 3, 16, QChar( '0' ) ).toUpper();
+                retVal += QString( "%1-%2: " ).arg( getHexValue( offset ) ).arg( getHexValue( memZero ) );
             else
                 retVal += " ";
 
-            auto curr = QString( "%1" ).arg( arr[ii], 2, 16, QChar( '0' ) ).toUpper();
+            QString curr;
+            if ( asRGB && ( ( ii+ 3 ) < size ) )
+            {
+                curr = QString( "Col: %1 - Offset: %2 - " ).arg( ii / 4 ).arg( ii );
+
+                curr += QString( "%1" ).arg( arr[ii + 0], 2, 16, QChar( '0' ) ).toUpper();
+                curr += QString( "%1" ).arg( arr[ii + 1], 2, 16, QChar( '0' ) ).toUpper();
+                curr += QString( "%1" ).arg( arr[ii + 2], 2, 16, QChar( '0' ) ).toUpper();
+                curr += QString( "%1" ).arg( arr[ii + 3], 2, 16, QChar( '0' ) ).toUpper();
+                ii += 3;
+            }
+            else
+            {
+                 curr = QString( "%1" ).arg( arr[ii], 2, 16, QChar( '0' ) ).toUpper();
+            }
             retVal += curr;
 
-            if ( colCount == rowCount - 1 )
+            if ( colCount == colsPerRow - 1 )
             {
                 retVal += "\n";
                 colCount = -1;

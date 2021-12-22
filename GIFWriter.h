@@ -33,82 +33,38 @@ class QIODevice;
 
 namespace NUtils
 {
-    struct SGIFPalette
-    {
-        SGIFPalette( const uint8_t * prevImage, const QImage & image, uint8_t bitDepth, bool dither );
-        ~SGIFPalette();
-
-        void getChangedPixels( const uint8_t * prevImage, uint8_t * currImage, int & numPixels );
-        void splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum );
-
-        std::tuple< uint8_t, int, int > compuiteRGBRanges( int numPixels, const uint8_t * image, int splitELT, int firstELT, int lastELT );
-
-        void setRGBToMinMax( const uint8_t * image, int numPixels, int location, bool min );
-        void setRGBToAverage( const uint8_t * image, int numPixels, int location );
-
-        int partition( uint8_t * image, int left, int right, const int elt, int pivot );
-        void partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter );
-        void closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const;
-        void swap( uint8_t * image, int pix1, int pix2 );
-
-        bool write( QDataStream & ds );
-            
-        uint8_t fBitDepth{ 8 };
-
-        void setRed( int location, uint8_t val );
-        void setBlue( int location, uint8_t val );
-        void setGreen( int location, uint8_t val );
-
-        void dumpIt();
-        QString dumpText() const;
-        void dumpImage( const uint8_t * arr, int size ) const;
-        QString dumpArray( const uint8_t * arr, int size, int rowCount = 20 ) const;
-        QString dumpArray( const uint8_t * arr, const uint8_t * baseArray, int size, int rowCount=20 ) const;
-
-        uint8_t fRed[256]{ 0 };
-        uint8_t fGreen[256]{ 0 };
-        uint8_t fBlue[256]{ 0 };
-
-        // from online
-        // use a kd tree over the RGB space in a heap fashion
-        // left of child node is nodeNum * 2, right is NodeNum*2+1
-        // nodes 256-2511 are the leaves containing a color
-        uint8_t fTreeSplitELT[256]{ 0 };
-        uint8_t fTreeSplit[256]{ 0 };
-        bool fDither{ false };
-        uint8_t * fTmpImage{ nullptr };
-        int fImageWidth{ 0 };
-    };
+    struct SGIFPalette;
    
     class CGIFWriter
     {
     public:
-        CGIFWriter();
-        ~CGIFWriter();
-
         static int kTransparentIndex;
 
+        CGIFWriter();
         CGIFWriter( const QString & filename );
         CGIFWriter( QIODevice * device );
 
+        ~CGIFWriter();
+
         void setFileName( const QString & fileName );
         void setDevice( QIODevice * device );
+        void close();
 
-        // must be called before first writeImage!! 
-        // numberOfLoops = 0 means infinite
-        void setIsMultiFrame( bool value, uint16_t numberOfLoops=0)
+        uint16_t loopCount() const { return fLoopCount; }
+        void setLoopCount( uint16_t loopCount )
         {
-            fNumberOfLoops = numberOfLoops;
-            fIsMultiFrame = value;
-        } 
-        bool isMultiFrame() const { return fIsMultiFrame; } // must be set before first writeImage!!
+            fLoopCount = loopCount;
+        }
+
+        bool writeHeader();
 
         bool writeImage( const QImage & frame );
-        bool writeImage( const QImage & image, std::optional< uint32_t > delay ); // isMultiFrame must be true if delay has value
+        bool writeImage( const QImage & image, uint32_t delay, bool lastImage ); // isMultiFrame must be true if delay has value
 
-        bool hasDelay() const { return fDelay.has_value(); }
+        bool writeEnd();
+
         void setDelay( int delay ) { fDelay = delay; }
-        uint32_t delay() const { return fDelay.has_value() ? fDelay.value() : std::numeric_limits< uint32_t >::max(); }
+        uint32_t delay() const { return fDelay; }
 
         void setDither( bool dither ) { fDither = dither; } // default false
         bool dither() const { return fDither; }
@@ -135,23 +91,18 @@ namespace NUtils
         bool writeInt( uint16_t value );
         bool writeString( const char * str );
         bool writeRaw( const char * str, int len );
-        bool writeEnd();
         [[nodiscard]] bool status() const;
-
         void ditherImage( const uint8_t * prevImage );
-        void updateQuant( int32_t * quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr );
+        void updateQuant( int32_t * quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr, int quantMultiplier );
         void thresholdImage( const uint8_t * prevImage );
-        bool writeLZW( uint32_t left, uint32_t top );
-
-        bool writeHeader();
+        bool writeLZW( uint32_t left, uint32_t top, const uint8_t * prevImage );
 
         int numPixels() const;
 
         bool fDeleteDevice{ false };
         bool fHeaderWritten{ false };
-        bool fIsMultiFrame{ false };
         bool fFirstFrame{ true };
-        uint16_t fNumberOfLoops{ 0 }; // infinite
+        uint16_t fLoopCount{ 0 }; // infinite
         QIODevice * fDevice{ nullptr };
         QImage fCurrImage;
         QDataStream fDataStream;
@@ -159,7 +110,7 @@ namespace NUtils
         uint8_t fBitDepth{ 8 };
         bool fDither{ false };
         bool fFlipImage{ false };
-        std::optional< uint32_t > fDelay;
+        uint32_t fDelay{ 5 };
 
         std::unique_ptr< SGIFPalette > fPalette;
     };
