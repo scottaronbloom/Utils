@@ -28,7 +28,6 @@
 #include "GIFWriter.h"
 #include "GIFWriterOptions.h"
 #include "bif/BIFPlugin.h"
-#include "gif/gif-h/gif.h"
 
 #include <QTimer>
 #include <QIcon>
