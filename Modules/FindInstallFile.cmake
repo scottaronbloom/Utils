@@ -7,10 +7,18 @@ FUNCTION (InstallFile inFile outFile)
 
     cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
+    #MESSAGE( STATUS "inFile=${inFile}" )
+    #MESSAGE( STATUS "outFile=${outFile}" )
+
     if( IS_DIRECTORY ${outFile} )
+        #MESSAGE( STATUS "${outFile} IS DIR" )
         get_filename_component( baseName ${inFile} NAME)
+        #MESSAGE( STATUS "basename=${baseName}" )
         SET( outFile ${outFile}/${baseName})
     endif()
+
+    #MESSAGE( STATUS "inFile=${inFile}" )
+    #MESSAGE( STATUS "outFile=${outFile}" )
         
     get_filename_component( baseName ${outFile} NAME)
     configure_file( ${inFile} ${outFile} COPYONLY ) # creates a dependency on TMP_OUTFILE
