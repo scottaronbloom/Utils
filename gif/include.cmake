@@ -36,7 +36,6 @@ set(qtproject_H
 set(project_H
     GIFIOHandler.h
     ../GIFWriter.h
-    gif-h/gif.h
 )
 
 set(qtproject_UIS
