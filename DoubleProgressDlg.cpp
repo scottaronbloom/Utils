@@ -27,6 +27,11 @@
 #include <QDebug>
 #include <QShortcut>
 #include <QStyle>
+#include <QLabel>
+#include <QPushButton>
+#include <QEvent>
+#include <QCoreApplication>
+#include <QProgressBar>
 
 const int gDefaultMinimumDuration{ 4000 };
 const int gMinWaitTime{ 50 };
