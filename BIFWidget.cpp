@@ -25,9 +25,10 @@
 #include "utils.h"
 #include "QtUtils.h"
 
-#include "SABUtils/bif/BIFPlugin.h"
-#include "SABUtils/gif/gif-h/gif.h"
-#include "SABUtils/GIFWriter.h"
+#include "GIFWriter.h"
+#include "GIFWriterOptions.h"
+#include "bif/BIFPlugin.h"
+#include "gif/gif-h/gif.h"
 
 #include <QTimer>
 #include <QIcon>
@@ -42,6 +43,7 @@
 #include <QFileDialog>
 
 #include "ui_BIFWidget.h"
+
 
 namespace NBIF
 {
@@ -94,7 +96,7 @@ namespace NBIF
         fNumFramesToSkip = numFrames;
     }
 
-    void CBIFWidget::setSpeedMultiplier( int speedMultipler)
+    void CBIFWidget::setSpeedMultiplier( int speedMultipler )
     {
         slotSetPlayerSpeed(speedMultipler);
         if (fPlayerSpeedMultiplerSB)
@@ -109,15 +111,16 @@ namespace NBIF
     void CBIFWidget::slotSetPlayerSpeed( int speedMultipler)
     {
         bool wasPlaying = this->isPlaying();
+        int delay = fMovie->nextFrameDelay();
         fMovie->setPaused(true);
         fMovie->setSpeed(speedMultipler * 100);
+        delay = fMovie->nextFrameDelay();
         if (wasPlaying)
         {
             updateMovieSpeed();
             fMovie->setPaused(false);
         }
     }
-
 
     void CBIFWidget::setPlayCount( int playCount )
     {
@@ -258,6 +261,7 @@ namespace NBIF
         checkItem( fActionDiscreteLayout, false );
         checkItem( fActionToggleLayout, false );
         checkItem( fActionNoLayout, false );
+        enableItem( fActionSaveAsGIF, fBIF.operator bool() );
 
         if ( fButtonLayout == EButtonsLayout::eDiscretePlayPause )
             checkItem( fActionDiscreteLayout, true );
@@ -728,15 +732,17 @@ namespace NBIF
         if ( !fBIF || (fBIF->imageCount() == 0) )
             return;
 
-        auto image = fBIF->image( 5 );
-        if ( image.isNull() )
-            return;
-
-
-        //auto fn = QFileDialog::getSaveFileName( this, tr( "GIF File Name" ), QString(), tr( "GIF Files (*.gif);;All Files (*.*)" ) );
-        //if ( fn.isEmpty() )
-        //    return;
-
-        image.save( "gif.gif" );
+        NUtils::CGIFWriterOptions dlg( this );
+        dlg.setBIF( fBIF );
+        dlg.setSpeedMultipler( fPlayerSpeedMultiplerSB->value() );
+        dlg.setFlipImage( gifFlipImage() );
+        dlg.setLoopCount( gifLoopCount() );
+        dlg.setDither( gifDitherImage() );
+        if ( dlg.exec() == QDialog::Accepted )
+        {
+            setGIFDitherImage( dlg.dither() );
+            setGIFFlipImage( dlg.flipImage() );
+            setGIFLoopCount( dlg.loopCount() );
+        }
     }
 }

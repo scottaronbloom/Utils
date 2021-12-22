@@ -78,6 +78,15 @@ namespace NBIF
         int playCount() const;
         void setPlayCount(int playCount);
 
+        void setGIFFlipImage( bool flipImage ) { fGIFFlipImage = flipImage; }
+        bool gifFlipImage() const { return fGIFFlipImage; }
+
+        void setGIFDitherImage( bool ditherImage ) { fGIFDitherImage = ditherImage; }
+        bool gifDitherImage() const { return fGIFDitherImage; }
+
+        void setGIFLoopCount( int loopCount ) { fGIFLoopCount = loopCount; }
+        int gifLoopCount() const { return fGIFLoopCount; }
+
         QMenu *menu();
         QToolBar *toolBar();
 
@@ -170,6 +179,9 @@ namespace NBIF
         int fNumFramesToSkip{ 5 };
         QSpinBox * fPlayCountSB{ nullptr };
 
+        bool fGIFFlipImage{ false };
+        bool fGIFDitherImage{ true };
+        int fGIFLoopCount{ 0 };
         std::shared_ptr < QMovie > fMovie;
         std::unique_ptr< Ui::CBIFWidget > fImpl;
     };
