@@ -82,8 +82,7 @@ bool CGIFIOHandler::write(const QImage & image)
     writer.setDither( true );
     writer.setFlipImage( false );
     writer.setBitDepth( 8 );
-    writer.setIsMultiFrame( true );
-    writer.setDelay( 2 );
+    writer.setDelay( 0 );
     return writer.writeImage( image );
 }
 
