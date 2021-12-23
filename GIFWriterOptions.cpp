@@ -23,6 +23,8 @@
 #include "GIFWriterOptions.h"
 #include "BIFFile.h"
 #include "GIFWriter.h"
+#include "gif/gif-h/gif.h"
+#include "QtUtils.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -52,17 +54,14 @@ namespace NUtils
 
     CGIFWriterOptions::CGIFWriterOptions( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent ) :
         CGIFWriterOptions( bifFile, 2, parent )
-    {
-    }
+    {}
 
     CGIFWriterOptions::CGIFWriterOptions( QWidget * parent ) :
         CGIFWriterOptions( {}, parent )
-    {
-    }
+    {}
 
     CGIFWriterOptions::~CGIFWriterOptions()
-    {
-    }
+    {}
 
     void CGIFWriterOptions::setBIF( std::shared_ptr< NBIF::CBIFFile > bifFile )
     {
@@ -75,8 +74,8 @@ namespace NUtils
         fImpl->endFrame->setMaximum( 1 );
         if ( fBIF )
         {
-            fImpl->endFrame->setMaximum( (int)fBIF->imageCount());
-            fImpl->endFrame->setValue( (int)fBIF->imageCount());
+            fImpl->endFrame->setMaximum( (int)fBIF->imageCount() );
+            fImpl->endFrame->setValue( (int)fBIF->imageCount() );
             auto fi = QFileInfo( fBIF->fileName() );
             auto fn = QFileInfo( fi.absolutePath() + "/" + fi.completeBaseName() + ".gif" ).absoluteFilePath();
             fImpl->fileName->setText( fn );
@@ -188,6 +187,9 @@ namespace NUtils
         if ( fn.isEmpty() )
             return true;
 
+        if ( !fBIF )
+            return false;
+
         if ( QFileInfo( fn ).exists() )
         {
             if ( QMessageBox::warning( this, tr( "File already exists" ), tr( "'%1' already exists, are you sure?" ).arg( QFileInfo( fn ).fileName() ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
@@ -196,12 +198,25 @@ namespace NUtils
             }
         }
 
-        CGIFWriter writer( fn );
-        writer.setDither( dither() );
-        writer.setFlipImage( flipImage() );
-        writer.setBitDepth( 8 );
-        writer.setLoopCount( loopCount() );
-        writer.setDelay( delay() );
+        std::unique_ptr< CGIFWriter > newWriter;
+        std::unique_ptr< GifWriter > oldWriter;
+        if ( fImpl->useNew->isChecked() )
+        {
+            newWriter = std::make_unique< CGIFWriter >( fn );
+            newWriter->setDither( dither() );
+            newWriter->setFlipImage( flipImage() );
+            newWriter->setBitDepth( 8 );
+            newWriter->setLoopCount( loopCount() );
+            newWriter->setDelay( delay() );
+        }
+        else
+        {
+            oldWriter = std::make_unique< GifWriter >();
+            oldWriter->firstFrame = false;
+            oldWriter->f = nullptr;
+            oldWriter->oldImage = nullptr;
+            GifBegin( oldWriter.get(), qPrintable( fn ), fBIF->imageSize().width(), fBIF->imageSize().height(), delay(), 8, dither(), loopCount() );
+        }
 
         bool wasCancelled = false;
         QProgressDialog dlg( this );
@@ -211,7 +226,7 @@ namespace NUtils
         dlg.setWindowModality( Qt::WindowModal );
         dlg.show();
 
-        for ( int ii = startFrame()-1; !wasCancelled && ii <= endFrame()-1; ++ii )
+        for ( int ii = startFrame() - 1; !wasCancelled && ii <= endFrame() - 1; ++ii )
         {
             dlg.setValue( ii );
             QApplication::processEvents();
@@ -226,17 +241,28 @@ namespace NUtils
             }
 
             wasCancelled = dlg.wasCanceled();
-            if ( !writer.writeImage( image, {}, false ) )
+            if ( newWriter )
             {
-                if ( QMessageBox::warning( this, tr( "Problem writing frame" ), tr( "Image #%1 was not written.  Continue?" ).arg( ii ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
-                    return false;
+                if ( !newWriter->writeImage( image, {}, false ) )
+                {
+                    if ( QMessageBox::warning( this, tr( "Problem writing frame" ), tr( "Image #%1 was not written.  Continue?" ).arg( ii ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
+                        return false;
+                }
+            }
+            else
+            {
+                auto imageData = NQtUtils::imageToPixels( image );
+                GifWriteFrame( oldWriter.get(), imageData, image.width(), image.height(), delay(), 8, dither() );
+                delete[] imageData;
             }
         }
-        if ( !wasCancelled )
-            writer.writeEnd();
+
+        if ( newWriter )
+            newWriter->writeEnd();
         else
+            GifEnd( oldWriter.get() );
+        if ( wasCancelled )
         {
-            writer.close();
             QFile::remove( fn );
         }
         return !wasCancelled;
