@@ -44,11 +44,11 @@ namespace NUtils
 
         ~CGIFWriterDlg();
 
-        void setSpeedMultipler( int multiplier );
-
         void setBIF( std::shared_ptr< NBIF::CBIFFile > bifFile );
         std::shared_ptr< NBIF::CBIFFile > bifFile() const { return fBIF; }
 
+        // speed multiplier uses the delay built into the BIF file
+        void setSpeedMultipler( int multiplier ); // delay or multiplier (setting the bif as well) override each other, last one set wins
         void setDelay( int msec );
         int delay() const;
 

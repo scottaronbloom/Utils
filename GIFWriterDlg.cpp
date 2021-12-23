@@ -126,7 +126,8 @@ namespace NUtils
 
     void CGIFWriterDlg::setDelay( int delay )
     {
-        fImpl->delay->setValue( delay );
+        if ( delay != -1 )
+            fImpl->delay->setValue( delay );
     }
 
     int CGIFWriterDlg::delay() const
@@ -140,7 +141,7 @@ namespace NUtils
             return;
         auto delay = fBIF->imageDelay(); // delay per frame;
         delay /= fMultipler;
-        fImpl->delay->setValue( delay );
+        setDelay( delay );
     }
 
     void CGIFWriterDlg::setDither( bool dither )

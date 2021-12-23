@@ -734,6 +734,7 @@ namespace NBIF
         NUtils::CGIFWriterDlg dlg( this );
         dlg.setBIF( fBIF );
         dlg.setSpeedMultipler( fPlayerSpeedMultiplerSB->value() );
+        dlg.setDelay( gifDelay() );
         dlg.setFlipImage( gifFlipImage() );
         dlg.setLoopCount( gifLoopCount() );
         dlg.setDither( gifDitherImage() );
@@ -747,6 +748,7 @@ namespace NBIF
             setGIFLoopCount( dlg.loopCount() );
             setGIFStartFrame( dlg.startFrame() );
             setGIFEndFrame( dlg.endFrame() );
+            setGIFDelay( dlg.delay() );
         }
     }
 }

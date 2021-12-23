@@ -93,6 +93,9 @@ namespace NBIF
         void setGIFEndFrame( int endFrame ) { fGIFEndFrame = endFrame; }
         int gifEndFrame() const { return fGIFEndFrame; }
 
+        void setGIFDelay( int Delay ) { fGIFDelay = Delay; }
+        int gifDelay() const { return fGIFDelay; }
+
         QMenu *menu();
         QToolBar *toolBar();
 
@@ -190,6 +193,7 @@ namespace NBIF
         int fGIFLoopCount{ 0 };
         int fGIFStartFrame{ -1 };
         int fGIFEndFrame{ -1 };
+        int fGIFDelay{ -1 };
 
         std::shared_ptr < QMovie > fMovie;
         std::unique_ptr< Ui::CBIFWidget > fImpl;
