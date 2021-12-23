@@ -87,6 +87,12 @@ namespace NBIF
         void setGIFLoopCount( int loopCount ) { fGIFLoopCount = loopCount; }
         int gifLoopCount() const { return fGIFLoopCount; }
 
+        void setGIFStartFrame( int startFrame ) { fGIFStartFrame = startFrame; }
+        int gifStartFrame() const { return fGIFStartFrame; }
+
+        void setGIFEndFrame( int endFrame ) { fGIFEndFrame = endFrame; }
+        int gifEndFrame() const { return fGIFEndFrame; }
+
         QMenu *menu();
         QToolBar *toolBar();
 
@@ -182,6 +188,9 @@ namespace NBIF
         bool fGIFFlipImage{ false };
         bool fGIFDitherImage{ true };
         int fGIFLoopCount{ 0 };
+        int fGIFStartFrame{ -1 };
+        int fGIFEndFrame{ -1 };
+
         std::shared_ptr < QMovie > fMovie;
         std::unique_ptr< Ui::CBIFWidget > fImpl;
     };

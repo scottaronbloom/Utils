@@ -61,12 +61,14 @@ namespace NUtils
         void setLoopCount( int loopCount );
         int loopCount() const;
 
-        virtual void accept() override;
-
-        int numFramesToSave() const;
-
+        void setStartFrame( int startFrame );
         int startFrame() const;
+
+        void setEndFrame( int endFrame );
         int endFrame() const;
+
+        virtual void accept() override;
+        int numFramesToSave() const;
 
         void setUseNew( bool useNew );
         bool useNew() const;

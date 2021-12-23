@@ -192,9 +192,23 @@ namespace NUtils
         return endFrame() - startFrame() + 1;
     }
 
+    void CGIFWriterDlg::setStartFrame( int startFrame )
+    {
+        if ( startFrame == -1 )
+            return;
+        return fImpl->startFrame->setValue( startFrame );
+    }
+
     int CGIFWriterDlg::startFrame() const
     {
         return fImpl->startFrame->value();
+    }
+
+    void CGIFWriterDlg::setEndFrame( int endFrame )
+    {
+        if ( endFrame == -1 )
+            return;
+        return fImpl->endFrame->setValue( endFrame );
     }
 
     int CGIFWriterDlg::endFrame() const

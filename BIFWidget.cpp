@@ -737,12 +737,16 @@ namespace NBIF
         dlg.setFlipImage( gifFlipImage() );
         dlg.setLoopCount( gifLoopCount() );
         dlg.setDither( gifDitherImage() );
+        dlg.setStartFrame( gifStartFrame() );
+        dlg.setEndFrame( gifEndFrame() );
         dlg.setUseNew( true );
         if ( dlg.exec() == QDialog::Accepted )
         {
             setGIFDitherImage( dlg.dither() );
             setGIFFlipImage( dlg.flipImage() );
             setGIFLoopCount( dlg.loopCount() );
+            setGIFStartFrame( dlg.startFrame() );
+            setGIFEndFrame( dlg.endFrame() );
         }
     }
 }
