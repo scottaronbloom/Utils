@@ -175,13 +175,18 @@ namespace NQtUtils
     [[nodiscard]] uint8_t * imageToPixels( const QImage & image ); // allocates the space, user is responsible for memory deletion using array delete
 
     QString getHexValue( intptr_t value );
+    QString dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, bool asRGB = false, int colsPerRow=20 );
+
     template< typename T >
-    void dumpRow( int currRow, const char * title, const T * array, int width, int height, int rowOffset = 0 )
+    void dumpRow( int currRow, const char * title, const T * array, int width, int height, int colsPerRow, const T * baseArray, int rowOffset )
     {
         if ( currRow < 0 )
             return;
         if ( currRow >= height )
             return;
+
+        if ( baseArray == nullptr )
+            baseArray = array;
 
         auto rowBytes = width * 4;
         auto numBytes = rowBytes * height;
@@ -190,11 +195,11 @@ namespace NQtUtils
             return;
 
         qDebug().noquote().nospace() << "Row: " << currRow << " : Offset: " << offset << ":\n" <<
-            SGIFPalette::dumpArray( title, (const uint8_t *)array + offset, (const uint8_t *)array, rowBytes, 40, true );
+            dumpArray( title, (const uint8_t *)array + offset, (const uint8_t *)baseArray, rowBytes, true, colsPerRow );
 
     }
-    void dumpImage( const uint8_t * arr, int size, int width, int height, const uint8_t * baseArray=nullptr );
-    QString dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, bool asRGB = false, int colsPerRow=20 );
+
+    void dumpImage( const char * title, const uint8_t * arr, int width, int height, const uint8_t * baseArray = nullptr );
 }
 
 template< std::size_t I = 0, typename... Tp>

@@ -595,6 +595,7 @@ namespace NUtils
         else
             thresholdImage( prevImage );
 
+        NQtUtils::dumpImage( "Post Dither", fPrevFrameData, fCurrImage.width(), fCurrImage.height() );
         return writeLZW( 0, 0, fPrevFrameData );
     }
 

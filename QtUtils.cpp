@@ -874,4 +874,11 @@ namespace NQtUtils
         }
         return retVal;
     }
+    void dumpImage( const char * title, const uint8_t * arr, int width, int height, const uint8_t * baseArray /*= nullptr */ )
+    {
+        for ( int ii = 0; ii < height; ++ii )
+        {
+            dumpRow( ii, title, arr, width, height, width / 4, baseArray, 0 );
+        }
+    }
 }
