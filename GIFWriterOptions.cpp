@@ -51,6 +51,7 @@ namespace NUtils
         setFlipImage( false );
         setLoopCount( 0 );
 
+        connect( fImpl->useNew, &QCheckBox::clicked, this, &CGIFWriterOptions::slotUpdateFileName );
 #ifndef _DEBUG
         fImpl->useNew->setVisible( false );
 #endif
@@ -83,11 +84,24 @@ namespace NUtils
         {
             fImpl->endFrame->setMaximum( (int)fBIF->imageCount() );
             fImpl->endFrame->setValue( (int)fBIF->imageCount() );
-            auto fi = QFileInfo( fBIF->fileName() );
-            auto fn = QFileInfo( fi.absolutePath() + "/" + fi.completeBaseName() + ".gif" ).absoluteFilePath();
-            fImpl->fileName->setText( fn );
+            slotUpdateFileName();
             updateDelay();
         }
+    }
+
+    void CGIFWriterOptions::slotUpdateFileName()
+    {
+        QString fn;
+        if ( fBIF )
+        {
+            auto fi = QFileInfo( fBIF->fileName() );
+            fn = QFileInfo( fi.absolutePath() + "/" + fi.completeBaseName() ).absoluteFilePath();
+            if ( !useNew() )
+                fn += ".old";
+            fn += ".gif";
+        }
+
+        fImpl->fileName->setText( fn );
     }
 
     void CGIFWriterOptions::slotStartFrameChanged()
@@ -188,9 +202,15 @@ namespace NUtils
         return fImpl->endFrame->value();
     }
 
+    bool  CGIFWriterOptions::useNew() const
+    {
+        return fImpl->useNew->isChecked();
+    }
+
     void CGIFWriterOptions::setUseNew( bool useNew )
     {
         fImpl->useNew->setChecked( useNew );
+        slotUpdateFileName();
     }
 
     bool CGIFWriterOptions::saveToGIF()

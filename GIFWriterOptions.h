@@ -69,12 +69,14 @@ namespace NUtils
         int endFrame() const;
 
         void setUseNew( bool useNew );
+        bool useNew() const;
     Q_SIGNALS:
     public Q_SLOTS:
         void slotSelectGIFFile();
         void slotStartFrameChanged();
         void slotEndFrameChanged();
     private Q_SLOTS:
+        void slotUpdateFileName();
     private:
         void updateDelay();
         bool saveToGIF();
