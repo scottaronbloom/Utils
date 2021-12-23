@@ -58,8 +58,6 @@ namespace NUtils
 
         void dumpIt();
         QString dumpText() const;
-        void dumpImage( const uint8_t * arr, int size ) const;
-        QString dumpArray( const char * title, const uint8_t * arr, int size, int colsPerRow = 20, bool asRGB = false ) const;
 
         uint8_t fRed[256]{ 0 };
         uint8_t fGreen[256]{ 0 };
@@ -406,7 +404,7 @@ namespace NUtils
             }
             else
             {
-                uint32_t bestIndex = kTransparentIndex;
+                uint32_t bestIndex = 1;
                 uint32_t bestDifference = 1000000;
                 fPalette->closestColor( imageLoc[0], imageLoc[1], imageLoc[2], 1, bestIndex, bestDifference );
                 outLoc[0] = fPalette->fRed[bestIndex];
@@ -588,14 +586,13 @@ namespace NUtils
         auto prevImage = fFirstFrame ? nullptr : fPrevFrameData;
         fFirstFrame = false;
 
-        fPalette = std::make_unique< SGIFPalette >( prevImage, fCurrImage, fBitDepth, dither() );
+        fPalette = std::make_unique< SGIFPalette >( dither() ? nullptr : prevImage, fCurrImage, fBitDepth, dither() );
 
         if ( dither() )
             ditherImage( prevImage );
         else
             thresholdImage( prevImage );
 
-        NQtUtils::dumpImage( "Post Dither", fPrevFrameData, fCurrImage.width(), fCurrImage.height() );
         return writeLZW( 0, 0, fPrevFrameData );
     }
 
@@ -608,6 +605,7 @@ namespace NUtils
         int numPixels = image.width() * image.height();
 
         getChangedPixels( prevImage, fTmpImage, numPixels );
+
         const auto lastELT = 1 << bitDepth;
         const auto splitELT = lastELT / 2;
         const auto splitDist = splitELT / 2;
@@ -852,19 +850,22 @@ namespace NUtils
             return;
 
         int retVal = 0;
-        auto writeImagePos = currImage;
+
+        auto writePos = currImage;
 
         for ( int ii = 0; ii < numPixels; ++ii )
         {
             if ( !CGIFWriter::pixelCompare( prevImage, currImage, ii ) )
             {
-                writeImagePos[0] = currImage[ii];
-                writeImagePos[1] = currImage[ii + 1];
-                writeImagePos[2] = currImage[ii + 2];
+                writePos[0] = currImage[ii];
+                writePos[1] = currImage[ii + 1];
+                writePos[2] = currImage[ii + 2];
 
-                writeImagePos += 4;
                 ++retVal;
+                writePos += 4;
             }
+            prevImage += 4;
+            currImage += 4;
         }
         numPixels = retVal;
     }
@@ -920,16 +921,6 @@ namespace NUtils
             + "Green:\n" + NQtUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
             ;
         return retVal;
-    }
-
-    void SGIFPalette::dumpImage( const uint8_t * arr, int size ) const
-    {
-        qDebug().nospace().noquote() << dumpArray( "Palette", arr, size, fImageWidth );
-    }
-
-    QString SGIFPalette::dumpArray( const char * title, const uint8_t * arr, int size, int colsPerRow /*= 20 */, bool asRGB) const
-    {
-        return NQtUtils::dumpArray( title, arr, fTmpImage, size, colsPerRow, asRGB );
     }
 }
 
