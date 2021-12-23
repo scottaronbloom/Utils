@@ -299,7 +299,7 @@ namespace NUtils
             else
             {
                 auto imageData = NQtUtils::imageToPixels( image );
-                GifWriteFrame( oldWriter.get(), imageData, image.width(), image.height(), delay(), 8, dither() );
+                GifWriteFrame( oldWriter.get(), imageData, image.width(), image.height(), delay(), flipImage(), 8, dither() );
                 delete[] imageData;
             }
         }
