@@ -23,19 +23,7 @@
 #include "GIFWriterOptions.h"
 #include "BIFFile.h"
 #include "GIFWriter.h"
-//#include "SABUtils/bif/BIFPlugin.h"
-//#include "SABUtils/gif/gif-h/gif.h"
-//
-//#include <QTimer>
-//#include <QIcon>
-//#include <QMenu>
-//#include <QToolBar>
-//#include <QAction>
-//#include <QSpinBox>
-//#include <QMovie>
-//#include <QDir>
-//#include <QPluginLoader>
-//#include <QLibrary>
+
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
