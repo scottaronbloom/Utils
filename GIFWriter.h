@@ -75,7 +75,6 @@ namespace NUtils
         void setBitDepth( uint8_t bitDepth ) { fBitDepth = bitDepth; }
         uint8_t bitDepth() const { return fBitDepth; }
 
-        static [[nodiscard]] uint8_t * imageToPixels( const QImage & image ); // allocates the space, user is responsible for memory deletion using array delete
         static bool pixelCompare( const uint8_t * lhs, const uint8_t * rhs, int pixelNum );
         static bool pixelCompare( const uint8_t * lhs, const uint8_t * rhs ); // pixel is at its 0,1,2
         static bool pixelCompare( const uint8_t * lhs, const std::initializer_list< uint32_t > & rhs ); // pixel is at its 0,1,2 of lhs

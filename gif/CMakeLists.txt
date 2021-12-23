@@ -58,6 +58,7 @@ add_library(gif SHARED
 target_link_libraries( gif
     Qt5::Widgets
     Qt5::Core
+    SABUtils
 )
 
 set_target_properties( gif PROPERTIES FOLDER SharedLibs )

@@ -23,7 +23,6 @@
 set(qtproject_SRCS
     GIFPlugin.cpp
     GIFIOHandler.cpp
-    ../GIFWriter.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -35,7 +34,6 @@ set(qtproject_H
 
 set(project_H
     GIFIOHandler.h
-    ../GIFWriter.h
 )
 
 set(qtproject_UIS

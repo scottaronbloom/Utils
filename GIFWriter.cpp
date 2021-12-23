@@ -21,10 +21,13 @@
 // SOFTWARE.
 
 #include "GIFWriter.h"
+#include "QtUtils.h"
+
 #include <QString>
 #include <QFile>
 #include <QDataStream>
 #include <QDebug>
+
 namespace NUtils
 {
     template< typename T >
@@ -290,16 +293,6 @@ namespace NUtils
         return status();
     }
 
-    uint8_t * CGIFWriter::imageToPixels( const QImage & image ) // allocates the space, user is responsible for memory deletion using array delete
-    {
-        Q_ASSERT( sizeof( uchar ) == sizeof( uint8_t ) );
-
-        auto imageSize = static_cast<size_t>(image.width() * image.height() * 4 * sizeof( uint8_t ));
-        auto retVal = new uint8_t[imageSize];
-        std::memcpy( retVal, image.bits(), imageSize );
-        return retVal;
-    }
-
     bool CGIFWriter::pixelCompare( const uint8_t * lhs, const uint8_t * rhs, int pixelNum )
     {
         return (lhs[pixelNum] == rhs[pixelNum])
@@ -335,7 +328,7 @@ namespace NUtils
         auto numPixels = this->numPixels();
        
         auto quantPixels = new int32_t[sizeof( int32_t ) * numPixels * 4 ]; // has to support more than 8 bits
-        auto imagePixels = CGIFWriter::imageToPixels( fCurrImage );
+        auto imagePixels = NQtUtils::imageToPixels( fCurrImage );
 
         for ( int ii = 0; ii < 4*numPixels; ++ii )
         {
@@ -423,7 +416,7 @@ namespace NUtils
     {
         auto numPixels = this->numPixels();
 
-        auto imagePixels = CGIFWriter::imageToPixels( fCurrImage );
+        auto imagePixels = NQtUtils::imageToPixels( fCurrImage );
 
         auto imageLoc = imagePixels;
         auto lastLoc = prevImage;
@@ -637,7 +630,7 @@ namespace NUtils
         fDither( dither )
     {
         fImageWidth = image.width();
-        fTmpImage = CGIFWriter::imageToPixels( image );
+        fTmpImage = NQtUtils::imageToPixels( image );
         int numPixels = image.width() * image.height();
 
         getChangedPixels( prevImage, fTmpImage, numPixels );

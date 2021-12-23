@@ -243,17 +243,3 @@ namespace NUtils
     }
 }
 
-//
-//if ( fn.isEmpty() )
-//return;
-//
-////GifWriter writer = { 0 };
-////GifBegin( &writer, "gif.gif", image.width(), image.height(), 2, 8, true );
-////auto imageData = NUtils::CGIFWriter::imageToPixels( image );
-////GifWriteFrame( &writer, imageData, image.width(), image.height(), 2, 8, true );
-
-////GifEnd( &writer );
-////delete[] imageData;
-//
-//image.save( fn );
-

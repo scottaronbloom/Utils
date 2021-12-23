@@ -170,8 +170,9 @@ namespace NQtUtils
 
     void deleteLayoutAndItems( QLayout * layout );
 
-
     void appendToLog( QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts = nullptr );
+
+    [[nodiscard]] uint8_t * imageToPixels( const QImage & image ); // allocates the space, user is responsible for memory deletion using array delete
 }
 
 template< std::size_t I = 0, typename... Tp>

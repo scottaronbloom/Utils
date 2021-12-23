@@ -811,4 +811,14 @@ namespace NQtUtils
         previousText.first = txt.mid(lineStart);
         te->moveCursor(QTextCursor::End);
     }
+
+    uint8_t * imageToPixels( const QImage & image ) // allocates the space, user is responsible for memory deletion using array delete
+    {
+        Q_ASSERT( sizeof( uchar ) == sizeof( uint8_t ) );
+
+        auto imageSize = static_cast<size_t>(image.width() * image.height() * 4 * sizeof( uint8_t ));
+        auto retVal = new uint8_t[imageSize];
+        std::memcpy( retVal, image.bits(), imageSize );
+        return retVal;
+    }
 }
