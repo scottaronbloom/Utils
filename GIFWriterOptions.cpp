@@ -50,6 +50,10 @@ namespace NUtils
         setDither( true );
         setFlipImage( false );
         setLoopCount( 0 );
+
+#ifndef _DEBUG
+        fImpl->useNew->setVisible( false );
+#endif
     }
 
     CGIFWriterOptions::CGIFWriterOptions( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent ) :
@@ -182,6 +186,11 @@ namespace NUtils
     int CGIFWriterOptions::endFrame() const
     {
         return fImpl->endFrame->value();
+    }
+
+    void CGIFWriterOptions::setUseNew( bool useNew )
+    {
+        fImpl->useNew->setChecked( useNew );
     }
 
     bool CGIFWriterOptions::saveToGIF()

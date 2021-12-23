@@ -67,6 +67,8 @@ namespace NUtils
 
         int startFrame() const;
         int endFrame() const;
+
+        void setUseNew( bool useNew );
     Q_SIGNALS:
     public Q_SLOTS:
         void slotSelectGIFFile();

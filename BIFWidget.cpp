@@ -737,6 +737,7 @@ namespace NBIF
         dlg.setFlipImage( gifFlipImage() );
         dlg.setLoopCount( gifLoopCount() );
         dlg.setDither( gifDitherImage() );
+        dlg.setUseNew( false );
         if ( dlg.exec() == QDialog::Accepted )
         {
             setGIFDitherImage( dlg.dither() );
