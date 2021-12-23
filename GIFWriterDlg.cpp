@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "GIFWriterOptions.h"
+#include "GIFWriterDlg.h"
 #include "BIFFile.h"
 #include "GIFWriter.h"
 #include "gif/gif-h/gif.h"
@@ -31,47 +31,47 @@
 #include <QFileInfo>
 #include <QProgressDialog>
 
-#include "ui_GIFWriterOptions.h"
+#include "ui_GIFWriterDlg.h"
 
 namespace NUtils
 {
-    CGIFWriterOptions::CGIFWriterOptions( std::shared_ptr< NBIF::CBIFFile > bifFile, int delayInMSec, QWidget * parent ) :
+    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, int delayInMSec, QWidget * parent ) :
         QDialog( parent ),
-        fImpl( new Ui::CGIFWriterOptions )
+        fImpl( new Ui::CGIFWriterDlg )
     {
         Q_INIT_RESOURCE( BIFPlayerResources );
         fImpl->setupUi( this );
 
-        connect( fImpl->selectGIFFile, &QToolButton::clicked, this, &CGIFWriterOptions::slotSelectGIFFile );
-        connect( fImpl->startFrame, qOverload< int >( &QSpinBox::valueChanged ), this, &CGIFWriterOptions::slotStartFrameChanged );
-        connect( fImpl->endFrame, qOverload< int >( &QSpinBox::valueChanged ), this, &CGIFWriterOptions::slotEndFrameChanged );
+        connect( fImpl->selectGIFFile, &QToolButton::clicked, this, &CGIFWriterDlg::slotSelectGIFFile );
+        connect( fImpl->startFrame, qOverload< int >( &QSpinBox::valueChanged ), this, &CGIFWriterDlg::slotStartFrameChanged );
+        connect( fImpl->endFrame, qOverload< int >( &QSpinBox::valueChanged ), this, &CGIFWriterDlg::slotEndFrameChanged );
         setBIF( bifFile );
         setDelay( delayInMSec );
         setDither( true );
         setFlipImage( false );
         setLoopCount( 0 );
 
-        connect( fImpl->useNew, &QCheckBox::clicked, this, &CGIFWriterOptions::slotUpdateFileName );
+        connect( fImpl->useNew, &QCheckBox::clicked, this, &CGIFWriterDlg::slotUpdateFileName );
 #ifndef _DEBUG
         fImpl->useNew->setVisible( false );
 #endif
     }
 
-    CGIFWriterOptions::CGIFWriterOptions( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent ) :
-        CGIFWriterOptions( bifFile, 2, parent )
+    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent ) :
+        CGIFWriterDlg( bifFile, 2, parent )
     {
     }
 
-    CGIFWriterOptions::CGIFWriterOptions( QWidget * parent ) :
-        CGIFWriterOptions( {}, parent )
+    CGIFWriterDlg::CGIFWriterDlg( QWidget * parent ) :
+        CGIFWriterDlg( {}, parent )
     {
     }
 
-    CGIFWriterOptions::~CGIFWriterOptions()
+    CGIFWriterDlg::~CGIFWriterDlg()
     {
     }
 
-    void CGIFWriterOptions::setBIF( std::shared_ptr< NBIF::CBIFFile > bifFile )
+    void CGIFWriterDlg::setBIF( std::shared_ptr< NBIF::CBIFFile > bifFile )
     {
         fBIF = bifFile;
         fImpl->startFrame->setValue( 1 );
@@ -89,7 +89,7 @@ namespace NUtils
         }
     }
 
-    void CGIFWriterOptions::slotUpdateFileName()
+    void CGIFWriterDlg::slotUpdateFileName()
     {
         QString fn;
         if ( fBIF )
@@ -104,37 +104,37 @@ namespace NUtils
         fImpl->fileName->setText( fn );
     }
 
-    void CGIFWriterOptions::slotStartFrameChanged()
+    void CGIFWriterDlg::slotStartFrameChanged()
     {
         fImpl->endFrame->setMinimum( fImpl->startFrame->value() );
         if ( fImpl->startFrame->value() >= fImpl->endFrame->value() )
             fImpl->endFrame->setValue( fImpl->startFrame->value() );
     }
 
-    void CGIFWriterOptions::slotEndFrameChanged()
+    void CGIFWriterDlg::slotEndFrameChanged()
     {
         fImpl->startFrame->setMaximum( fImpl->endFrame->value() );
         if ( fImpl->endFrame->value() <= fImpl->startFrame->value() )
             fImpl->endFrame->setValue( fImpl->startFrame->value() );
     }
 
-    void CGIFWriterOptions::setSpeedMultipler( int multiplier )
+    void CGIFWriterDlg::setSpeedMultipler( int multiplier )
     {
         fMultipler = multiplier;
         updateDelay();
     }
 
-    void CGIFWriterOptions::setDelay( int delay )
+    void CGIFWriterDlg::setDelay( int delay )
     {
         fImpl->delay->setValue( delay );
     }
 
-    int CGIFWriterOptions::delay() const
+    int CGIFWriterDlg::delay() const
     {
         return fImpl->delay->value();
     }
 
-    void CGIFWriterOptions::updateDelay()
+    void CGIFWriterDlg::updateDelay()
     {
         if ( !fBIF )
             return;
@@ -143,37 +143,37 @@ namespace NUtils
         fImpl->delay->setValue( delay );
     }
 
-    void CGIFWriterOptions::setDither( bool dither )
+    void CGIFWriterDlg::setDither( bool dither )
     {
         fImpl->dither->setChecked( dither );
     }
 
-    bool CGIFWriterOptions::dither() const
+    bool CGIFWriterDlg::dither() const
     {
         return fImpl->dither->isChecked();
     }
 
-    void CGIFWriterOptions::setFlipImage( bool flipImage )
+    void CGIFWriterDlg::setFlipImage( bool flipImage )
     {
         fImpl->flipImage->setChecked( flipImage );
     }
 
-    bool CGIFWriterOptions::flipImage() const
+    bool CGIFWriterDlg::flipImage() const
     {
         return fImpl->flipImage->isChecked();
     }
 
-    void CGIFWriterOptions::setLoopCount( int loopCount )
+    void CGIFWriterDlg::setLoopCount( int loopCount )
     {
         fImpl->loopCount->setValue( loopCount );
     }
 
-    int CGIFWriterOptions::loopCount() const
+    int CGIFWriterDlg::loopCount() const
     {
         return fImpl->loopCount->value();
     }
 
-    void CGIFWriterOptions::slotSelectGIFFile()
+    void CGIFWriterDlg::slotSelectGIFFile()
     {
         auto fn = QFileDialog::getSaveFileName( this, tr( "GIF File Name" ), fImpl->fileName->text(), tr( "GIF Files (*.gif);;All Files (*.*)" ) );
         if ( fn.isEmpty() )
@@ -181,39 +181,39 @@ namespace NUtils
         fImpl->fileName->setText( fn );
     }
 
-    void CGIFWriterOptions::accept()
+    void CGIFWriterDlg::accept()
     {
         if ( saveToGIF() )
             QDialog::accept();
     }
 
-    int CGIFWriterOptions::numFramesToSave() const
+    int CGIFWriterDlg::numFramesToSave() const
     {
         return endFrame() - startFrame() + 1;
     }
 
-    int CGIFWriterOptions::startFrame() const
+    int CGIFWriterDlg::startFrame() const
     {
         return fImpl->startFrame->value();
     }
 
-    int CGIFWriterOptions::endFrame() const
+    int CGIFWriterDlg::endFrame() const
     {
         return fImpl->endFrame->value();
     }
 
-    bool  CGIFWriterOptions::useNew() const
+    bool  CGIFWriterDlg::useNew() const
     {
         return fImpl->useNew->isChecked();
     }
 
-    void CGIFWriterOptions::setUseNew( bool useNew )
+    void CGIFWriterDlg::setUseNew( bool useNew )
     {
         fImpl->useNew->setChecked( useNew );
         slotUpdateFileName();
     }
 
-    bool CGIFWriterOptions::saveToGIF()
+    bool CGIFWriterDlg::saveToGIF()
     {
         auto fn = fImpl->fileName->text();
         if ( fn.isEmpty() )

@@ -32,7 +32,7 @@ set(qtproject_SRCS
     DelaySpinBox.cpp
     DoubleProgressDlg.cpp
     GIFWriter.cpp
-    GIFWriterOptions.cpp
+    GIFWriterDlg.cpp
     utils.cpp
     FileCompare.cpp
     FileUtils.cpp
@@ -68,7 +68,7 @@ set(qtproject_H
     DelayLineEdit.h
     DelaySpinBox.h
     DoubleProgressDlg.h
-    GIFWriterOptions.h
+    GIFWriterDlg.h
     MD5.h
     SpinBox64.h
     SpinBox64U.h
@@ -103,7 +103,7 @@ set(project_H
 
 set(qtproject_UIS
     BIFWidget.ui
-    GIFWriterOptions.ui
+    GIFWriterDlg.ui
     ScrollMessageBox.ui
 )
 

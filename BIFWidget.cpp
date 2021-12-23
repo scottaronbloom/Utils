@@ -26,7 +26,7 @@
 #include "QtUtils.h"
 
 #include "GIFWriter.h"
-#include "GIFWriterOptions.h"
+#include "GIFWriterDlg.h"
 #include "bif/BIFPlugin.h"
 
 #include <QTimer>
@@ -731,7 +731,7 @@ namespace NBIF
         if ( !fBIF || (fBIF->imageCount() == 0) )
             return;
 
-        NUtils::CGIFWriterOptions dlg( this );
+        NUtils::CGIFWriterDlg dlg( this );
         dlg.setBIF( fBIF );
         dlg.setSpeedMultipler( fPlayerSpeedMultiplerSB->value() );
         dlg.setFlipImage( gifFlipImage() );

@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef _GIFWRITEROPTIONS_H
-#define _GIFWRITEROPTIONS_H
+#ifndef _GIFWRITERDLG_H
+#define _GIFWRITERDLG_H
 
 #include <QDialog>
 #include <memory>
@@ -31,18 +31,18 @@ namespace NBIF
     class CBIFFile;
 }
 
-namespace Ui { class CGIFWriterOptions; }
+namespace Ui { class CGIFWriterDlg; }
 namespace NUtils
 {
-    class CGIFWriterOptions : public QDialog
+    class CGIFWriterDlg : public QDialog
     {
         Q_OBJECT
     public:
-        CGIFWriterOptions( QWidget * parent = nullptr);
-        CGIFWriterOptions::CGIFWriterOptions( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent=nullptr );
-        CGIFWriterOptions::CGIFWriterOptions( std::shared_ptr< NBIF::CBIFFile > bifFile, int delayInMSec, QWidget * parent=nullptr );
+        CGIFWriterDlg( QWidget * parent = nullptr);
+        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent=nullptr );
+        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, int delayInMSec, QWidget * parent=nullptr );
 
-        ~CGIFWriterOptions();
+        ~CGIFWriterDlg();
 
         void setSpeedMultipler( int multiplier );
 
@@ -84,7 +84,7 @@ namespace NUtils
         int fMultipler{ 1 };
 
         std::shared_ptr< NBIF::CBIFFile > fBIF;
-        std::unique_ptr< Ui::CGIFWriterOptions > fImpl;
+        std::unique_ptr< Ui::CGIFWriterDlg > fImpl;
     };
 }
 #endif 

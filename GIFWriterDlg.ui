@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CGIFWriterOptions</class>
- <widget class="QDialog" name="CGIFWriterOptions">
+ <class>CGIFWriterDlg</class>
+ <widget class="QDialog" name="CGIFWriterDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -173,7 +173,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CGIFWriterOptions</receiver>
+   <receiver>CGIFWriterDlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -189,7 +189,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CGIFWriterOptions</receiver>
+   <receiver>CGIFWriterDlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
