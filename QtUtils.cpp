@@ -844,7 +844,7 @@ namespace NQtUtils
             auto offset = &arr[ii] - baseArray;
             auto memZero = (intptr_t)&arr[ii];
             if ( colCount == 0 )
-                retVal += QString( "%1-%2: " ).arg( getHexValue( offset ) ).arg( getHexValue( memZero ) );
+                retVal += QString( "%1-%2: " ).arg( getHexValue( offset ) );// .arg( getHexValue( memZero ) );
             else
                 retVal += " ";
 
@@ -876,6 +876,9 @@ namespace NQtUtils
     }
     void dumpImage( const char * title, const uint8_t * arr, int width, int height, const uint8_t * baseArray /*= nullptr */ )
     {
+        if ( !arr )
+            return;
+
         for ( int ii = 0; ii < height; ++ii )
         {
             dumpRow( ii, title, arr, width, height, width / 4, baseArray, 0 );
