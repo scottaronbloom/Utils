@@ -173,6 +173,28 @@ namespace NQtUtils
     void appendToLog( QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts = nullptr );
 
     [[nodiscard]] uint8_t * imageToPixels( const QImage & image ); // allocates the space, user is responsible for memory deletion using array delete
+
+    QString getHexValue( intptr_t value );
+    template< typename T >
+    void dumpRow( int currRow, const char * title, const T * array, int width, int height, int rowOffset = 0 )
+    {
+        if ( currRow < 0 )
+            return;
+        if ( currRow >= height )
+            return;
+
+        auto rowBytes = width * 4;
+        auto numBytes = rowBytes * height;
+        auto offset = currRow * rowBytes + rowOffset;
+        if ( (offset + rowBytes) > numBytes )
+            return;
+
+        qDebug().noquote().nospace() << "Row: " << currRow << " : Offset: " << offset << ":\n" <<
+            SGIFPalette::dumpArray( title, (const uint8_t *)array + offset, (const uint8_t *)array, rowBytes, 40, true );
+
+    }
+    void dumpImage( const uint8_t * arr, int size, int width, int height, const uint8_t * baseArray=nullptr );
+    QString dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, bool asRGB = false, int colsPerRow=20 );
 }
 
 template< std::size_t I = 0, typename... Tp>

@@ -290,7 +290,7 @@ namespace NUtils
             wasCancelled = dlg.wasCanceled();
             if ( newWriter )
             {
-                if ( !newWriter->writeImage( image, {}, false ) )
+                if ( !newWriter->writeImage( image, false ) )
                 {
                     if ( QMessageBox::warning( this, tr( "Problem writing frame" ), tr( "Image #%1 was not written.  Continue?" ).arg( ii ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
                         return false;

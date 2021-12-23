@@ -58,8 +58,7 @@ namespace NUtils
 
         bool writeHeader();
 
-        bool writeImage( const QImage & frame );
-        bool writeImage( const QImage & image, uint32_t delay, bool lastImage ); // isMultiFrame must be true if delay has value
+        bool writeImage( const QImage & image, bool lastImage=true ); 
 
         bool writeEnd();
 

@@ -821,4 +821,57 @@ namespace NQtUtils
         std::memcpy( retVal, image.bits(), imageSize );
         return retVal;
     }
+
+    QString getHexValue( intptr_t value )
+    {
+        auto retVal = QString( "%1" ).arg( value, 5, 16, QChar( '0' ) ).toUpper();
+        retVal = "0x" + retVal;
+        return retVal;
+    }
+
+    QString dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, bool asRGB /*= false*/, int colsPerRow /*= 20*/ )
+    {
+        static int hitCount = 0;
+        auto retVal = QString( "HitCount: %1 - %2 - Array: 0x%3\n" ).arg( hitCount++ ).arg( title ).arg( arr - baseArray, 8, 16, QChar( '0' ) );
+        if ( asRGB )
+            colsPerRow /= 4;
+        int colCount = 0;
+        int pixelMultiplier = 1;
+        if ( asRGB )
+            pixelMultiplier = 4;
+        for ( int ii = 0; ii < size; ++ii )
+        {
+            auto offset = &arr[ii] - baseArray;
+            auto memZero = (intptr_t)&arr[ii];
+            if ( colCount == 0 )
+                retVal += QString( "%1-%2: " ).arg( getHexValue( offset ) ).arg( getHexValue( memZero ) );
+            else
+                retVal += " ";
+
+            QString curr;
+            if ( asRGB && ((ii + 3) < size) )
+            {
+                curr = QString( "Col: %1 - Offset: %2 - " ).arg( ii / 4 ).arg( ii );
+
+                curr += QString( "%1" ).arg( arr[ii + 0], 2, 16, QChar( '0' ) ).toUpper();
+                curr += QString( "%1" ).arg( arr[ii + 1], 2, 16, QChar( '0' ) ).toUpper();
+                curr += QString( "%1" ).arg( arr[ii + 2], 2, 16, QChar( '0' ) ).toUpper();
+                curr += QString( "%1" ).arg( arr[ii + 3], 2, 16, QChar( '0' ) ).toUpper();
+                ii += 3;
+            }
+            else
+            {
+                curr = QString( "%1" ).arg( arr[ii], 2, 16, QChar( '0' ) ).toUpper();
+            }
+            retVal += curr;
+
+            if ( colCount == colsPerRow - 1 )
+            {
+                retVal += "\n";
+                colCount = -1;
+            }
+            colCount++;
+        }
+        return retVal;
+    }
 }

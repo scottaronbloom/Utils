@@ -30,25 +30,6 @@
 
 namespace NUtils
 {
-    template< typename T >
-    void dumpRow( int currRow, const char * title, const T * array, int width, int height, int rowOffset = 0 )
-    {
-        if ( currRow < 0 )
-            return;
-        if ( currRow >= height )
-            return;
-
-        auto rowBytes = width * 4;
-        auto numBytes = rowBytes * height;
-        auto offset = currRow * rowBytes + rowOffset;
-        if ( (offset + rowBytes) > numBytes )
-            return;
-
-        qDebug().noquote().nospace() << "Row: " << currRow << " : Offset: " << offset << ":\n" << 
-            SGIFPalette::dumpArray( title, (const uint8_t *)array + offset, (const uint8_t *)array, rowBytes, 40, true );
-
-    }
-
     struct SGIFPalette
     {
         SGIFPalette( const uint8_t * prevImage, const QImage & image, uint8_t bitDepth, bool dither );
@@ -79,7 +60,6 @@ namespace NUtils
         QString dumpText() const;
         void dumpImage( const uint8_t * arr, int size ) const;
         QString dumpArray( const char * title, const uint8_t * arr, int size, int colsPerRow = 20, bool asRGB = false ) const;
-        static QString dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, int colsPerRow = 20, bool asRGB = false );
 
         uint8_t fRed[256]{ 0 };
         uint8_t fGreen[256]{ 0 };
@@ -271,15 +251,8 @@ namespace NUtils
         return fCurrImage.width() * fCurrImage.height();
     }
 
-    bool CGIFWriter::writeImage( const QImage & frame )
+    bool CGIFWriter::writeImage( const QImage & image, bool lastFrame )
     {
-        return writeImage( frame, fDelay, true );
-    }
-
-    bool CGIFWriter::writeImage( const QImage & image, uint32_t delay, bool lastFrame )
-    {
-        fDelay = delay;
-
         fCurrImage = image;
         writeHeader();
         if ( !status() )
@@ -517,7 +490,7 @@ namespace NUtils
         void dump() const
         {
             qDebug().noquote().nospace() << "dump: " << fBitIndex << " " << fByte << " " << fChunkIndex;
-            qDebug().noquote().nospace() << SGIFPalette::dumpArray( "Palette Status", fChunk, fChunk, 256, 32, true );
+            qDebug().noquote().nospace() << NQtUtils::dumpArray( "Palette Status", fChunk, fChunk, 256, true, 32  );
         }
 
         QDataStream & fDataStream;
@@ -941,9 +914,9 @@ namespace NUtils
     QString SGIFPalette::dumpText() const
     {
         QString retVal;
-        retVal = "Red:\n" + dumpArray( "Palette Red", fRed, fRed, 256 ) + "\n"
-            + "Blue:\n" + dumpArray( "Palette Blue", fBlue, fBlue, 256 ) + "\n"
-            + "Green:\n" + dumpArray( "Palette Green", fGreen, fGreen, 256 ) + "\n"
+        retVal = "Red:\n" + NQtUtils::dumpArray( "Palette Red", fRed, fRed, 256, true ) + "\n"
+            + "Blue:\n" + NQtUtils::dumpArray( "Palette Blue", fBlue, fBlue, 256, true ) + "\n"
+            + "Green:\n" + NQtUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
             ;
         return retVal;
     }
@@ -955,60 +928,7 @@ namespace NUtils
 
     QString SGIFPalette::dumpArray( const char * title, const uint8_t * arr, int size, int colsPerRow /*= 20 */, bool asRGB) const
     {
-        return dumpArray( title, arr, fTmpImage, size, colsPerRow, asRGB );
-    }
-
-    QString getHexValue( intptr_t value )
-    {
-        auto retVal = QString( "%1" ).arg( value, 5, 16, QChar( '0' ) ).toUpper();
-        retVal = "0x" + retVal;
-        return retVal;
-    }
-
-    QString SGIFPalette::dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, int colsPerRow/*=20 */, bool asRGB )
-    {
-        static int hitCount = 0;
-        auto retVal = QString( "HitCount: %1 - %2 - Array: 0x%3\n" ).arg( hitCount++ ).arg( title ).arg( arr - baseArray, 8, 16, QChar( '0' ) );
-        if ( asRGB )
-            colsPerRow /= 4;
-        int colCount = 0;
-        int pixelMultiplier = 1;
-        if ( asRGB )
-            pixelMultiplier = 4;
-        for ( int ii = 0; ii < size; ++ii )
-        {
-            auto offset = &arr[ii] - baseArray;
-            auto memZero = (intptr_t)&arr[ii];
-            if ( colCount == 0 )
-                retVal += QString( "%1-%2: " ).arg( getHexValue( offset ) ).arg( getHexValue( memZero ) );
-            else
-                retVal += " ";
-
-            QString curr;
-            if ( asRGB && ( ( ii+ 3 ) < size ) )
-            {
-                curr = QString( "Col: %1 - Offset: %2 - " ).arg( ii / 4 ).arg( ii );
-
-                curr += QString( "%1" ).arg( arr[ii + 0], 2, 16, QChar( '0' ) ).toUpper();
-                curr += QString( "%1" ).arg( arr[ii + 1], 2, 16, QChar( '0' ) ).toUpper();
-                curr += QString( "%1" ).arg( arr[ii + 2], 2, 16, QChar( '0' ) ).toUpper();
-                curr += QString( "%1" ).arg( arr[ii + 3], 2, 16, QChar( '0' ) ).toUpper();
-                ii += 3;
-            }
-            else
-            {
-                 curr = QString( "%1" ).arg( arr[ii], 2, 16, QChar( '0' ) ).toUpper();
-            }
-            retVal += curr;
-
-            if ( colCount == colsPerRow - 1 )
-            {
-                retVal += "\n";
-                colCount = -1;
-            }
-            colCount++;
-        }
-        return retVal;
+        return NQtUtils::dumpArray( title, arr, fTmpImage, size, colsPerRow, asRGB );
     }
 }
 
