@@ -54,14 +54,17 @@ namespace NUtils
 
     CGIFWriterOptions::CGIFWriterOptions( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent ) :
         CGIFWriterOptions( bifFile, 2, parent )
-    {}
+    {
+    }
 
     CGIFWriterOptions::CGIFWriterOptions( QWidget * parent ) :
         CGIFWriterOptions( {}, parent )
-    {}
+    {
+    }
 
     CGIFWriterOptions::~CGIFWriterOptions()
-    {}
+    {
+    }
 
     void CGIFWriterOptions::setBIF( std::shared_ptr< NBIF::CBIFFile > bifFile )
     {
