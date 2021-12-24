@@ -734,14 +734,17 @@ namespace NQtUtils
         layout = nullptr;
     }
 
-    void appendToLog(QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts )
+    void appendToLog(QPlainTextEdit * textEdit, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts )
     {
+        if ( !textEdit )
+            return;
+
         if (ts)
             *ts << txt;
         auto lineStart = 0;
         if (txt == "\n" || txt == "\r\n")
         {
-            te->appendPlainText(previousText.first + txt);
+            textEdit->appendPlainText(previousText.first + txt);
             lineStart = txt.length();
         }
         else
@@ -753,12 +756,12 @@ namespace NQtUtils
                 if (previousText.second)
                 {
                     previousText.second = false;
-                    te->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
-                    te->moveCursor(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
-                    te->moveCursor(QTextCursor::End, QTextCursor::KeepAnchor);
-                    te->textCursor().removeSelectedText();
-                    te->textCursor().deletePreviousChar();
-                    te->moveCursor(QTextCursor::End);
+                    textEdit->moveCursor(QTextCursor::End, QTextCursor::MoveAnchor);
+                    textEdit->moveCursor(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+                    textEdit->moveCursor(QTextCursor::End, QTextCursor::KeepAnchor);
+                    textEdit->textCursor().removeSelectedText();
+                    textEdit->textCursor().deletePreviousChar();
+                    textEdit->moveCursor(QTextCursor::End);
                 }
 
                 QString tmp = txt.mid(lineStart, pos - lineStart);
@@ -793,12 +796,12 @@ namespace NQtUtils
                 if (!subStr.isEmpty())
                 {
                     //qDebug() << subStr;
-                    te->appendPlainText(subStr);
+                    textEdit->appendPlainText(subStr);
                     previousText.first.clear();
                 }
                 else
                 {
-                    te->appendPlainText("\n");
+                    textEdit->appendPlainText("\n");
                     previousText.first.clear();
                 }
 
@@ -809,7 +812,7 @@ namespace NQtUtils
             }
         }
         previousText.first = txt.mid(lineStart);
-        te->moveCursor(QTextCursor::End);
+        textEdit->moveCursor(QTextCursor::End);
     }
 
     uint8_t * imageToPixels( const QImage & image ) // allocates the space, user is responsible for memory deletion using array delete
