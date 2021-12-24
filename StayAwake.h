@@ -33,6 +33,7 @@ namespace NUtils
             fKeepScreenOn( keepScreenOn ),
             QRunnable()
         {
+            setAutoDelete( false );
         };
 
         virtual void run() override;

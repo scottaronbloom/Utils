@@ -34,17 +34,30 @@ namespace NUtils
         bool success = false;
         while ( !fStopped )
         {
-            if ( fKeepScreenOn )
-                success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED | ES_DISPLAY_REQUIRED );
-            else
-                success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED );
-            Q_ASSERT( success );
-            if ( !success )
-                break;
+            try
+            {
+                if ( fKeepScreenOn )
+                    success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED | ES_DISPLAY_REQUIRED );
+                else
+                    success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED );
+                Q_ASSERT( success );
+                if ( !success )
+                    break;
+            }
+            catch ( ... )
+            {
+                success = false;
+            }
             QThread::sleep( 2 );
         }
-        if ( success )
-            success = SetThreadExecutionState( ES_CONTINUOUS );
+        try
+        {
+            if ( success )
+                success = SetThreadExecutionState( ES_CONTINUOUS );
+        }
+        catch ( ... )
+        {
+        }
     }
 
     void CStayAwake::stop()
