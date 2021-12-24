@@ -109,6 +109,8 @@ set(qtproject_UIS
 
 
 set(qtproject_QRC
+    resources/SABUtils.qrc
     BIFPlayerResources/BIFPlayerResources.qrc
 )
 file(GLOB qtproject_QRC_SOURCES "BIFPlayerResources/*")
+file(GLOB qtproject_QRC_SOURCES "resources/*")
