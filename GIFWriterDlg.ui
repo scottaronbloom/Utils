@@ -66,8 +66,8 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../UI/application.qrc">
-         <normaloff>:/resources/open.png</normaloff>:/resources/open.png</iconset>
+        <iconset resource="resources/SABUtils.qrc">
+         <normaloff>:/SABUtilsResources/open.png</normaloff>:/SABUtilsResources/open.png</iconset>
        </property>
       </widget>
      </item>
@@ -167,7 +167,7 @@
   <tabstop>flipImage</tabstop>
  </tabstops>
  <resources>
-  <include location="../UI/application.qrc"/>
+  <include location="resources/SABUtils.qrc"/>
  </resources>
  <connections>
   <connection>
