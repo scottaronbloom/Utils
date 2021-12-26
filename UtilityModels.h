@@ -118,6 +118,7 @@ public:
     void addRow(){ CStringTupleModel::addRow(); }
 
     void setValues( const QList< QPair< QString, QString > > & values );
+    void setValues( const QVariantMap & values );
     QString getPair( int ii ) const; // key=value
     QPair< QString, QString > at( int ii ) const;
     QList< QPair< QString, QString > > data() const;

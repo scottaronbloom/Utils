@@ -720,6 +720,14 @@ void CKeyValuePairModel::setValues( const QList< QPair< QString, QString > > & v
     CStringTupleModel::setValues( newValues );
 }
 
+void CKeyValuePairModel::setValues( const QVariantMap & values )
+{
+    QList< QStringList > newValues;
+    for ( auto && ii = values.cbegin(); ii != values.cend(); ++ii )
+        newValues << (QStringList() << ii.key() << ii.value().toString());
+    CStringTupleModel::setValues( newValues );
+}
+
 
 void CKeyValuePairModel::addRow( const QString & key, const QString & value )
 {
