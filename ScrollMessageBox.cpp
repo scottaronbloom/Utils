@@ -27,79 +27,83 @@
 #include <QAbstractButton>
 #include <QMessageBox>
 
-CScrollMessageBox::CScrollMessageBox( QWidget *parent ) :
-    QDialog( parent ),
-    fImpl( new Ui::CScrollMessageBox )
+namespace NSABUtils
 {
-    fImpl->setupUi( this );
 
-    setWindowFlags( this->windowFlags() & ~Qt::WindowContextHelpButtonHint );
-
-    QSizePolicy sizePolicy( QSizePolicy::Minimum, QSizePolicy::Preferred );
-    sizePolicy.setHorizontalStretch( 0 );
-    sizePolicy.setVerticalStretch( 0 );
-    sizePolicy.setHeightForWidth( fImpl->iconLabel->sizePolicy().hasHeightForWidth() );
-
-    fImpl->iconLabel->setSizePolicy( sizePolicy );
-    fImpl->iconLabel->setVisible( false );
-
-    setIconLabel( QMessageBox::Information );
-
-    connect( fImpl->buttonBox, &QDialogButtonBox::clicked, this, &CScrollMessageBox::slotButtonClicked );
-
-}
-
-CScrollMessageBox::CScrollMessageBox( const QString & title, const QString & label, QWidget *parent )
-    : CScrollMessageBox( parent )
-{
-    setLabel( label );
-    setTitle( title );
-}
-
-CScrollMessageBox::~CScrollMessageBox()
-{
-}
-
-void CScrollMessageBox::setTitle( const QString & text )
-{
-    setWindowTitle( text );
-}
-
-void CScrollMessageBox::setLabel( const QString & text )
-{
-    fImpl->label->setText( text );
-}
-
-void CScrollMessageBox::setPlainText( const QString & text )
-{
-    fImpl->message->setPlainText( text );
-}
-
-void CScrollMessageBox::setHtmlText( const QString & text )
-{
-    fImpl->message->setHtml( text );
-}
-
-void CScrollMessageBox::setIconLabel( const QMessageBox::Icon & icon )
-{
-    fImpl->iconLabel->setVisible( true );
-    auto pm = QMessageBox::standardIcon( icon );
-    fImpl->iconLabel->setPixmap( pm );
-    fImpl->iconLabel->setVisible( !pm.isNull() );
-    if ( icon == QMessageBox::Icon::Critical )
-        QApplication::beep();
-}
-
-void CScrollMessageBox::setButtons( QDialogButtonBox::StandardButtons buttons )
-{
-    fImpl->buttonBox->setStandardButtons( buttons );
-}
-
-void CScrollMessageBox::slotButtonClicked( QAbstractButton * btn )
-{
-    if ( ( fImpl->buttonBox->buttonRole( btn ) == QDialogButtonBox::ApplyRole ) || ( fImpl->buttonBox->buttonRole( btn ) == QDialogButtonBox::YesRole ))
+    CScrollMessageBox::CScrollMessageBox(QWidget *parent) :
+        QDialog(parent),
+        fImpl(new Ui::CScrollMessageBox)
     {
-        accept();
-    }
-}
+        fImpl->setupUi(this);
 
+        setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+        QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(fImpl->iconLabel->sizePolicy().hasHeightForWidth());
+
+        fImpl->iconLabel->setSizePolicy(sizePolicy);
+        fImpl->iconLabel->setVisible(false);
+
+        setIconLabel(QMessageBox::Information);
+
+        connect(fImpl->buttonBox, &QDialogButtonBox::clicked, this, &CScrollMessageBox::slotButtonClicked);
+
+    }
+
+    CScrollMessageBox::CScrollMessageBox(const QString & title, const QString & label, QWidget *parent)
+        : CScrollMessageBox(parent)
+    {
+        setLabel(label);
+        setTitle(title);
+    }
+
+    CScrollMessageBox::~CScrollMessageBox()
+    {
+    }
+
+    void CScrollMessageBox::setTitle(const QString & text)
+    {
+        setWindowTitle(text);
+    }
+
+    void CScrollMessageBox::setLabel(const QString & text)
+    {
+        fImpl->label->setText(text);
+    }
+
+    void CScrollMessageBox::setPlainText(const QString & text)
+    {
+        fImpl->message->setPlainText(text);
+    }
+
+    void CScrollMessageBox::setHtmlText(const QString & text)
+    {
+        fImpl->message->setHtml(text);
+    }
+
+    void CScrollMessageBox::setIconLabel(const QMessageBox::Icon & icon)
+    {
+        fImpl->iconLabel->setVisible(true);
+        auto pm = QMessageBox::standardIcon(icon);
+        fImpl->iconLabel->setPixmap(pm);
+        fImpl->iconLabel->setVisible(!pm.isNull());
+        if (icon == QMessageBox::Icon::Critical)
+            QApplication::beep();
+    }
+
+    void CScrollMessageBox::setButtons(QDialogButtonBox::StandardButtons buttons)
+    {
+        fImpl->buttonBox->setStandardButtons(buttons);
+    }
+
+    void CScrollMessageBox::slotButtonClicked(QAbstractButton * btn)
+    {
+        if ((fImpl->buttonBox->buttonRole(btn) == QDialogButtonBox::ApplyRole) || (fImpl->buttonBox->buttonRole(btn) == QDialogButtonBox::YesRole))
+        {
+            accept();
+        }
+    }
+
+}

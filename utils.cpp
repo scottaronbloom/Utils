@@ -29,7 +29,7 @@
 #include <QLocale>
 #include <QDateTime>
 
-namespace NUtils
+namespace NSABUtils
 {
     int fromChar( char ch, int base, bool& aOK )
     {
@@ -139,7 +139,7 @@ namespace NUtils
         int64_t value = 0;
         for ( int64_t ii = numDigits - 1; ii >= 0; --ii )
         {
-            sumOfPowers += NUtils::power( rawDigits[ ii ], numDigits );
+            sumOfPowers += NSABUtils::power( rawDigits[ ii ], numDigits );
 
             value = ( value * base ) + rawDigits[ ii ];
         }
@@ -246,7 +246,7 @@ namespace NUtils
     {
         auto sum = getSumOfFactors( num, true );
         auto factors = std::vector< int64_t >( { sum.second.begin(), sum.second.end() } );
-        auto isSemiPerfect = NUtils::isSemiPerfect( factors, factors.size(), num );
+        auto isSemiPerfect = NSABUtils::isSemiPerfect( factors, factors.size(), num );
         return std::make_pair( isSemiPerfect, sum.second );
     }
 

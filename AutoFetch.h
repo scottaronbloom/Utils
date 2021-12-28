@@ -26,12 +26,12 @@
 #include <QObject>
 class QTreeView;
 
-namespace NQtUtils
+namespace NSABUtils
 {
     class CAutoFetchMore : public QObject
     {
     public:
-        CAutoFetchMore( QTreeView * view );
+        CAutoFetchMore(QTreeView * view);
     };
 }
 #endif

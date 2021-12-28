@@ -28,7 +28,7 @@
 #include <QDataStream>
 #include <QDebug>
 
-namespace NUtils
+namespace NSABUtils
 {
     struct SGIFPalette
     {
@@ -299,7 +299,7 @@ namespace NUtils
         auto numPixels = this->numPixels();
        
         auto quantPixels = new int32_t[sizeof( int32_t ) * numPixels * 4 ]; // has to support more than 8 bits
-        auto imagePixels = NQtUtils::imageToPixels( fCurrImage );
+        auto imagePixels = NSABUtils::imageToPixels( fCurrImage );
 
         for ( int ii = 0; ii < 4*numPixels; ++ii )
         {
@@ -387,7 +387,7 @@ namespace NUtils
     {
         auto numPixels = this->numPixels();
 
-        auto imagePixels = NQtUtils::imageToPixels( fCurrImage );
+        auto imagePixels = NSABUtils::imageToPixels( fCurrImage );
 
         auto imageLoc = imagePixels;
         auto lastLoc = prevImage;
@@ -488,7 +488,7 @@ namespace NUtils
         void dump() const
         {
             qDebug().noquote().nospace() << "dump: " << fBitIndex << " " << fByte << " " << fChunkIndex;
-            qDebug().noquote().nospace() << NQtUtils::dumpArray( "Palette Status", fChunk, fChunk, 256, true, 32  );
+            qDebug().noquote().nospace() << NSABUtils::dumpArray( "Palette Status", fChunk, fChunk, 256, true, 32  );
         }
 
         QDataStream & fDataStream;
@@ -601,7 +601,7 @@ namespace NUtils
         fDither( dither )
     {
         fImageWidth = image.width();
-        fTmpImage = NQtUtils::imageToPixels( image );
+        fTmpImage = NSABUtils::imageToPixels( image );
         int numPixels = image.width() * image.height();
 
         getChangedPixels( prevImage, fTmpImage, numPixels );
@@ -916,9 +916,9 @@ namespace NUtils
     QString SGIFPalette::dumpText() const
     {
         QString retVal;
-        retVal = "Red:\n" + NQtUtils::dumpArray( "Palette Red", fRed, fRed, 256, true ) + "\n"
-            + "Blue:\n" + NQtUtils::dumpArray( "Palette Blue", fBlue, fBlue, 256, true ) + "\n"
-            + "Green:\n" + NQtUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
+        retVal = "Red:\n"   + NSABUtils::dumpArray( "Palette Red",   fRed,   fRed,   256, true ) + "\n"
+              +  "Blue:\n"  + NSABUtils::dumpArray( "Palette Blue",  fBlue,  fBlue,  256, true ) + "\n"
+              +  "Green:\n" + NSABUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
             ;
         return retVal;
     }

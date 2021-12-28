@@ -24,37 +24,40 @@
 #include "StringUtils.h"
 #include <QHash>
 
-namespace NStringUtils
+namespace NSABUtils
 {
-    size_t noCaseStringHash::operator()( const std::string& s ) const
+    namespace NStringUtils
     {
-        std::hash<std::string> hash_fn;
-        return hash_fn( tolower( s ) );
+        size_t noCaseStringHash::operator()(const std::string& s) const
+        {
+            std::hash<std::string> hash_fn;
+            return hash_fn(tolower(s));
+        }
+
+        bool noCaseStringCmp::operator() (const std::string& s1, const std::string& s2) const
+        {
+            return strCaseCmp(s1, s2) < 0;
+        }
+
+        bool noCaseStringEq::operator() (const std::string& s1, const std::string& s2) const
+        {
+            return strCaseCmp(s1, s2) == 0;
+        }
+
+        size_t noCaseQStringHash::operator()(const QString & s) const
+        {
+            return static_cast<size_t>(qHash(s));
+        }
+
+        bool noCaseQStringCmp::operator() (const QString & s1, const QString & s2) const
+        {
+            return s1.compare(s2, Qt::CaseInsensitive) < 0;
+        }
+
+        bool noCaseQStringEq::operator() (const QString & s1, const QString & s2) const
+        {
+            return s1.compare(s2, Qt::CaseInsensitive) == 0;
+        }
     }
 
-    bool noCaseStringCmp::operator() ( const std::string& s1, const std::string& s2 ) const
-    {
-        return strCaseCmp( s1, s2 ) < 0;
-    }
-
-    bool noCaseStringEq::operator() ( const std::string& s1, const std::string& s2 ) const
-    {
-        return strCaseCmp( s1, s2 ) == 0;
-    }
-
-    size_t noCaseQStringHash::operator()( const QString & s ) const
-    {
-        return static_cast<size_t>( qHash( s ) );
-    }
-
-    bool noCaseQStringCmp::operator() ( const QString & s1, const QString & s2 ) const
-    {
-        return s1.compare( s2, Qt::CaseInsensitive ) < 0;
-    }
-
-    bool noCaseQStringEq::operator() ( const QString & s1, const QString & s2 ) const
-    {
-        return s1.compare( s2, Qt::CaseInsensitive ) == 0;
-    }
 }
-

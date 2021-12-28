@@ -31,21 +31,21 @@ class QString;
 #include <QObject>
 #include <QFileInfo>
 
-namespace NUtils
+namespace NSABUtils
 {
-    QByteArray getMd5( const QByteArray & data );
-    QString getMd5( const QFileInfo & fi );
-    QString getMd5( const QString & data, bool isFileName=false );
-    std::string getMd5( const std::string & data, bool isFileName=false );
-    QByteArray formatMd5( const QByteArray & digest, bool isHex );
+    QByteArray getMd5(const QByteArray & data);
+    QString getMd5(const QFileInfo & fi);
+    QString getMd5(const QString & data, bool isFileName = false);
+    std::string getMd5(const std::string & data, bool isFileName = false);
+    QByteArray formatMd5(const QByteArray & digest, bool isHex);
 
 
     class CComputeMD5 : public QObject, public QRunnable
     {
         Q_OBJECT;
     public:
-        CComputeMD5( const QString& fileName ) :
-            fFileInfo( fileName )
+        CComputeMD5(const QString& fileName) :
+            fFileInfo(fileName)
         {
         };
 
@@ -57,11 +57,11 @@ namespace NUtils
 
         void stop() { slotStop(); }
     Q_SIGNALS:
-        void sigStarted( unsigned long long threadID, const QDateTime& dt, const QString& filename );
-        void sigFinishedReading( unsigned long long threadID, const QDateTime& dt, const QString& filename );
-        void sigReadPositionStatus( unsigned long long threadID, const QDateTime &dt, const QString &filename, qint64 pos );
-        void sigFinishedComputing( unsigned long long threadID, const QDateTime &dt, const QString &filename );
-        void sigFinished( unsigned long long threadID, const QDateTime& dt, const QString& filename, const QString & md5 );
+        void sigStarted(unsigned long long threadID, const QDateTime& dt, const QString& filename);
+        void sigFinishedReading(unsigned long long threadID, const QDateTime& dt, const QString& filename);
+        void sigReadPositionStatus(unsigned long long threadID, const QDateTime &dt, const QString &filename, qint64 pos);
+        void sigFinishedComputing(unsigned long long threadID, const QDateTime &dt, const QString &filename);
+        void sigFinished(unsigned long long threadID, const QDateTime& dt, const QString& filename, const QString & md5);
     public Q_SLOTS:
         void slotStop();
     private:

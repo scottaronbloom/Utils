@@ -36,18 +36,23 @@
 #endif
 #endif
 
-class BIF_PLUGIN_DECLSPEC CBIFPlugin : public QImageIOPlugin
+namespace NSABUtils
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "bif.json")
-public:
-    CBIFPlugin();
-    ~CBIFPlugin();
+    namespace NBIF
+    {
+        class BIF_PLUGIN_DECLSPEC CPlugin : public QImageIOPlugin
+        {
+            Q_OBJECT
+                Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "bif.json")
+        public:
+            CPlugin();
+            ~CPlugin();
 
-    Capabilities capabilities(QIODevice *device, const QByteArray &format) const override;
-    QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const override;
-
-};
+            Capabilities capabilities(QIODevice *device, const QByteArray &format) const override;
+            QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const override;
+        };
+    }
+}
 
 namespace NBIFPlugin
 {

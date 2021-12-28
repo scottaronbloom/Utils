@@ -28,23 +28,26 @@
 #include <QAbstractButton>
 #include <QTimer>
 
-CTableWidgetWithSelectCommand::CTableWidgetWithSelectCommand( QWidget * parent ) :
-    QTableWidget( parent )
+namespace NSABUtils
 {
-}
+    CTableWidgetWithSelectCommand::CTableWidgetWithSelectCommand(QWidget * parent) :
+        QTableWidget(parent)
+    {
+    }
 
-QItemSelectionModel::SelectionFlags CTableWidgetWithSelectCommand::selectionCommand( const QModelIndex &index, const QEvent *event /*= 0*/ ) const
-{
-    return QTableWidget::selectionCommand( index, event );
-}
+    QItemSelectionModel::SelectionFlags CTableWidgetWithSelectCommand::selectionCommand(const QModelIndex &index, const QEvent *event /*= 0*/) const
+    {
+        return QTableWidget::selectionCommand(index, event);
+    }
 
 
-CTableViewWithSelectCommand::CTableViewWithSelectCommand( QWidget * parent ) :
-    QTableView( parent )
-{
-}
+    CTableViewWithSelectCommand::CTableViewWithSelectCommand(QWidget * parent) :
+        QTableView(parent)
+    {
+    }
 
-QItemSelectionModel::SelectionFlags CTableViewWithSelectCommand::selectionCommand( const QModelIndex &index, const QEvent *event /*= 0*/ ) const
-{
-    return QTableView::selectionCommand( index, event );
+    QItemSelectionModel::SelectionFlags CTableViewWithSelectCommand::selectionCommand(const QModelIndex &index, const QEvent *event /*= 0*/) const
+    {
+        return QTableView::selectionCommand(index, event);
+    }
 }

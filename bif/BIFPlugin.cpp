@@ -25,40 +25,45 @@
 #include "BIFIOHandler.h"
 #include "SABUtils/BIFFile.h"
 
-CBIFPlugin::CBIFPlugin()
+namespace NSABUtils
 {
-}
-
-CBIFPlugin::~CBIFPlugin()
-{
-}
-
-QImageIOPlugin::Capabilities CBIFPlugin::capabilities(QIODevice *device, const QByteArray &format) const
-{
-    if (format == "bif" || ( device && device->isReadable() && CBIFIOHandler::canRead(device) ) )
-        return Capabilities(CanRead);
-    return {};
-}
-
-namespace NBIFPlugin
-{
-    static std::list<CBIFIOHandler * > sHandlers;
-    static int sLoopCount{ -1 };
-    void setLoopCount(int loopCount)
+    namespace NBIF
     {
-        sLoopCount = loopCount;
-        for (auto && ii : sHandlers)
-            ii->setLoopCount(loopCount);
+        CPlugin::CPlugin()
+        {
+        }
+
+        CPlugin::~CPlugin()
+        {
+        }
+
+        QImageIOPlugin::Capabilities CPlugin::capabilities(QIODevice *device, const QByteArray &format) const
+        {
+            if (format == "bif" || (device && device->isReadable() && CIOHandler::canRead(device)))
+                return Capabilities(CanRead);
+            return {};
+        }
+
+        namespace NBIFPlugin
+        {
+            static std::list<CIOHandler * > sHandlers;
+            static int sLoopCount{ -1 };
+            void setLoopCount(int loopCount)
+            {
+                sLoopCount = loopCount;
+                for (auto && ii : sHandlers)
+                    ii->setLoopCount(loopCount);
+            }
+        }
+
+        QImageIOHandler *CPlugin::create(QIODevice *device, const QByteArray &format) const
+        {
+            auto handler = new CIOHandler;
+            handler->setDevice(device);
+            handler->setFormat(format);
+            handler->setLoopCount(NBIFPlugin::sLoopCount);
+            NBIFPlugin::sHandlers.push_back(handler);
+            return handler;
+        }
     }
 }
-
-QImageIOHandler *CBIFPlugin::create(QIODevice *device, const QByteArray &format) const
-{
-    auto handler = new CBIFIOHandler;
-    handler->setDevice(device);
-    handler->setFormat(format);
-    handler->setLoopCount(NBIFPlugin::sLoopCount);
-    NBIFPlugin::sHandlers.push_back(handler);
-    return handler;
-}
-

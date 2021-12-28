@@ -29,9 +29,12 @@
 
 class QProcess;
 
-namespace NVSInstallUtils
+namespace NSABUtils
 {
-    using TInstalledVisualStudios = std::pair < std::map< QString, QString >, QStringList >;
-    std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios( QProcess * process, bool * retry );
+    namespace NVSInstallUtils
+    {
+        using TInstalledVisualStudios = std::pair < std::map< QString, QString >, QStringList >;
+        std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios(QProcess * process, bool * retry);
+    }
 }
 #endif

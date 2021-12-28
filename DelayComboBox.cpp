@@ -23,50 +23,52 @@
 #include "DelayComboBox.h"
 #include "DelayLineEdit.h"
 
-CDelayComboBox::CDelayComboBox( QWidget *parent /*= nullptr */ ) :
-    QComboBox( parent )
+namespace NSABUtils
 {
-    auto le = new CDelayLineEdit;
-    setLineEdit( le );
-    connect( le, &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
-}
-
-CDelayLineEdit *CDelayComboBox::lineEdit() const
-{
-    return dynamic_cast<CDelayLineEdit *>( QComboBox::lineEdit() );
-}
-
-void CDelayComboBox::setDelay( int delayMS )
-{
-    lineEdit()->setDelay( delayMS );
-}
-
-void CDelayComboBox::setIsOKFunction( std::function< bool( const QString &text ) > func, const QString &errorMsg /*= {} */ )
-{
-    lineEdit()->setIsOKFunction( func, errorMsg );
-}
-
-QStringList CDelayComboBox::getAllText() const
-{
-    auto retVal = QStringList() << currentText();
-    for ( int ii = 0; ii < this->count(); ++ii )
+    CDelayComboBox::CDelayComboBox(QWidget *parent /*= nullptr */) :
+        QComboBox(parent)
     {
-        retVal << itemText( ii );
+        auto le = new CDelayLineEdit;
+        setLineEdit(le);
+        connect(le, &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay);
     }
-    return retVal;
-}
 
-void CDelayComboBox::addCurrentItem()
-{
-    auto currText = currentText();
-    if ( currText.isEmpty() )
-        return;
-
-    disconnect( lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
-
-    int index = -1;
-    switch ( insertPolicy() )
+    CDelayLineEdit *CDelayComboBox::lineEdit() const
     {
+        return dynamic_cast<CDelayLineEdit *>(QComboBox::lineEdit());
+    }
+
+    void CDelayComboBox::setDelay(int delayMS)
+    {
+        lineEdit()->setDelay(delayMS);
+    }
+
+    void CDelayComboBox::setIsOKFunction(std::function< bool(const QString &text) > func, const QString &errorMsg /*= {} */)
+    {
+        lineEdit()->setIsOKFunction(func, errorMsg);
+    }
+
+    QStringList CDelayComboBox::getAllText() const
+    {
+        auto retVal = QStringList() << currentText();
+        for (int ii = 0; ii < this->count(); ++ii)
+        {
+            retVal << itemText(ii);
+        }
+        return retVal;
+    }
+
+    void CDelayComboBox::addCurrentItem()
+    {
+        auto currText = currentText();
+        if (currText.isEmpty())
+            return;
+
+        disconnect(lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay);
+
+        int index = -1;
+        switch (insertPolicy())
+        {
         case QComboBox::InsertAtTop:
             index = 0;
             break;
@@ -76,55 +78,55 @@ void CDelayComboBox::addCurrentItem()
         case QComboBox::InsertAtCurrent:
         case QComboBox::InsertAfterCurrent:
         case QComboBox::InsertBeforeCurrent:
-            if ( !count() || ( currentIndex() != -1 ) )
+            if (!count() || (currentIndex() != -1))
                 index = 0;
-            else if ( insertPolicy() == QComboBox::InsertAtCurrent )
-                setItemText( currentIndex(), currText );
-            else if ( insertPolicy() == QComboBox::InsertAfterCurrent )
+            else if (insertPolicy() == QComboBox::InsertAtCurrent)
+                setItemText(currentIndex(), currText);
+            else if (insertPolicy() == QComboBox::InsertAfterCurrent)
                 index = currentIndex() + 1;
-            else if ( insertPolicy() == QComboBox::InsertBeforeCurrent )
+            else if (insertPolicy() == QComboBox::InsertBeforeCurrent)
                 index = currentIndex();
             break;
         case QComboBox::InsertAlphabetically:
             index = 0;
-            for ( int i = 0; i < count(); i++, index++ )
+            for (int i = 0; i < count(); i++, index++)
             {
-                if ( currText.toLower() < itemText( i ).toLower() )
+                if (currText.toLower() < itemText(i).toLower())
                     break;
             }
             break;
         default:
             break;
-    }
-    if ( index >= 0 )
-    {
-        bool add = true;
-        if ( !duplicatesEnabled() )
+        }
+        if (index >= 0)
         {
-            for ( int ii = 0; ii < count(); ++ii )
+            bool add = true;
+            if (!duplicatesEnabled())
             {
-                if ( itemText( ii ) == currText )
+                for (int ii = 0; ii < count(); ++ii)
                 {
-                    if ( ii == index )
+                    if (itemText(ii) == currText)
                     {
-                        add = false;
-                        break;
+                        if (ii == index)
+                        {
+                            add = false;
+                            break;
+                        }
+                        removeItem(ii);
+                        ii--;
                     }
-                    removeItem( ii );
-                    ii--;
                 }
+            }
+
+            if (add)
+            {
+                insertItem(index, currText);
+                setCurrentIndex(index);
             }
         }
 
-        if ( add )
-        {
-            insertItem( index, currText );
-            setCurrentIndex( index );
-        }
+        connect(lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay);
     }
 
-    connect( lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
 }
-
-
 

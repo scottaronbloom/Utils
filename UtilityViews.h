@@ -28,22 +28,25 @@
 
 class QAbstractButton;
 
-class CTableWidgetWithSelectCommand : public QTableWidget
+namespace NSABUtils
 {
-    Q_OBJECT;
-public:
-    explicit CTableWidgetWithSelectCommand( QWidget * parent );
-    virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index,
-                                                                 const QEvent *event = 0) const override;
-};
+    class CTableWidgetWithSelectCommand : public QTableWidget
+    {
+        Q_OBJECT;
+    public:
+        explicit CTableWidgetWithSelectCommand(QWidget * parent);
+        virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index,
+            const QEvent *event = 0) const override;
+    };
 
-class CTableViewWithSelectCommand : public QTableView
-{
-    Q_OBJECT;
-public:
-    explicit CTableViewWithSelectCommand( QWidget * parent );
-    virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index,
-                                                                 const QEvent *event = 0) const override;
-};
+    class CTableViewWithSelectCommand : public QTableView
+    {
+        Q_OBJECT;
+    public:
+        explicit CTableViewWithSelectCommand(QWidget * parent);
+        virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index,
+            const QEvent *event = 0) const override;
+    };
+}
 
 #endif

@@ -24,48 +24,50 @@
 
 #include <QSpinBox>
 class QTimer;
-
-class CDelaySpinBox : public QSpinBox
+namespace NSABUtils
 {
-    Q_OBJECT;
-public:
-    explicit CDelaySpinBox( QWidget *parent = nullptr );
-    explicit CDelaySpinBox( int delayMS, QWidget *parent = nullptr );
-    ~CDelaySpinBox();
 
-    void setDelay( int delayMS );
+    class CDelaySpinBox : public QSpinBox
+    {
+        Q_OBJECT;
+    public:
+        explicit CDelaySpinBox(QWidget *parent = nullptr);
+        explicit CDelaySpinBox(int delayMS, QWidget *parent = nullptr);
+        ~CDelaySpinBox();
 
-    void setValue( int val );
+        void setDelay(int delayMS);
 
-Q_SIGNALS:
-    void sigValueChangedAfterDelay( int );
-    void sigEditingFinishedAfterDelay();
+        void setValue(int val);
+
+    Q_SIGNALS:
+        void sigValueChangedAfterDelay(int);
+        void sigEditingFinishedAfterDelay();
 
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    void sigTextChangedAfterDelay( const QString & );
+        void sigTextChangedAfterDelay(const QString &);
 #endif
 
-public Q_SLOTS:
-    void slotValueChanged();
-    void slotEditingFinished();
+    public Q_SLOTS:
+        void slotValueChanged();
+        void slotEditingFinished();
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    void slotTextChanged();
+        void slotTextChanged();
 #endif
 
-    void slotValueChangedTimerTimeout();
-    void slotEditingFinishedTimerTimeout();
+        void slotValueChangedTimerTimeout();
+        void slotEditingFinishedTimerTimeout();
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    void slotTextChangedTimerTimeout();
+        void slotTextChangedTimerTimeout();
 #endif
 
-private:
-    int fDelayMS{ 500 };
-    QTimer *fValueChangedTimer{ nullptr };
-    QTimer *fEditFinishedTimer{ nullptr };
+    private:
+        int fDelayMS{ 500 };
+        QTimer *fValueChangedTimer{ nullptr };
+        QTimer *fEditFinishedTimer{ nullptr };
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    QTimer *fTextChangedTimer{ nullptr };
+        QTimer *fTextChangedTimer{ nullptr };
 #endif
-};
-
+    };
+}
 #endif
 

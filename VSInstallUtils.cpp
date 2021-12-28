@@ -32,77 +32,80 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
-namespace NVSInstallUtils
+namespace NSABUtils
 {
-    std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios( QProcess * process, bool * retry )
+    namespace NVSInstallUtils
     {
-        if ( retry )
-            *retry = false;
-        QString errorMsg;
-        std::map< QString, QString > retVal;
-        if ( !process || ( process->state() != QProcess::ProcessState::NotRunning ) )
+        std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios(QProcess * process, bool * retry)
         {
-            if ( retry )
-                *retry = true;
-            return { false, QString(), { retVal, QStringList() }  };
+            if (retry)
+                *retry = false;
+            QString errorMsg;
+            std::map< QString, QString > retVal;
+            if (!process || (process->state() != QProcess::ProcessState::NotRunning))
+            {
+                if (retry)
+                    *retry = true;
+                return { false, QString(), { retVal, QStringList() } };
+            }
+
+            auto programFiles = qgetenv("PROGRAMFILES(x86)");
+            if (programFiles.isEmpty())
+                programFiles = qgetenv("PROGRAMFILES");
+
+            if (programFiles.isEmpty())
+                return { false, QString(), { retVal, QStringList() } };
+            if (!QFileInfo(programFiles).exists())
+                return { false, QString(), { retVal, QStringList() } };
+
+            auto vsWhere = QDir(programFiles).absoluteFilePath("Microsoft Visual Studio/Installer/vswhere.exe");
+            if (!QFileInfo(programFiles).exists())
+                return { false, QString(), { retVal, QStringList() } };
+
+            if (!process)
+                return { false, QString(), { retVal, QStringList() } };
+
+            CAutoWaitCursor awc;
+            QStringList args = QStringList()
+                << "-requires"
+                << "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+                << "-format"
+                << "json";
+
+            //process.setProcessChannelMode(QProcess::MergedChannels);
+            process->start(vsWhere, args);
+            if (!process->waitForFinished(-1) || (process->exitStatus() != QProcess::NormalExit) || (process->exitCode() != 0))
+            {
+                return { false, QString("Error: '%1' Could not run vswhere and determine VS installations").arg(QString(process->readAllStandardError())), { retVal, QStringList() } };
+            }
+            auto data = process->readAll();
+
+            auto vsInstallsDoc = QJsonDocument::fromJson(data);
+
+            if (!vsInstallsDoc.isArray())
+                return { false, QString("Error: Invalid format from vswhere"), { retVal, QStringList() } };
+
+            std::map< QString, QString > installedVS;
+            QStringList displayNames;
+
+            QJsonArray vsInstalls = vsInstallsDoc.array();
+            for (int ii = 0; ii < vsInstalls.size(); ++ii)
+            {
+                auto vsInstall = vsInstalls[ii].toObject();
+                if (!vsInstall.contains("displayName") || !vsInstall["displayName"].isString())
+                    continue;
+
+                if (!vsInstall.contains("installationPath") || !vsInstall["installationPath"].isString())
+                    continue;
+
+                auto dispName = vsInstall["displayName"].toString();
+                auto path = vsInstall["installationPath"].toString();
+
+                installedVS[dispName] = path;
+                displayNames << dispName;
+            }
+
+            return { true, QString(), { installedVS, displayNames } };
         }
-
-        auto programFiles = qgetenv( "PROGRAMFILES(x86)" );
-        if ( programFiles.isEmpty() )
-            programFiles = qgetenv( "PROGRAMFILES" );
-
-        if ( programFiles.isEmpty() )
-            return { false, QString(), { retVal, QStringList() } };
-        if ( !QFileInfo( programFiles ).exists() )
-            return { false, QString(), { retVal, QStringList() } };
-
-        auto vsWhere = QDir( programFiles ).absoluteFilePath( "Microsoft Visual Studio/Installer/vswhere.exe" );
-        if ( !QFileInfo( programFiles ).exists() )
-            return { false, QString(), { retVal, QStringList() } };
-
-        if ( !process )
-            return { false, QString(), { retVal, QStringList() } };
-
-        CAutoWaitCursor awc;
-        QStringList args = QStringList()
-            << "-requires"
-            << "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
-            << "-format"
-            << "json";
-
-        //process.setProcessChannelMode(QProcess::MergedChannels);
-        process->start( vsWhere, args );
-        if ( !process->waitForFinished( -1 ) || ( process->exitStatus() != QProcess::NormalExit ) || ( process->exitCode() != 0 ) )
-        {
-            return { false, QString( "Error: '%1' Could not run vswhere and determine VS installations" ).arg( QString( process->readAllStandardError() ) ), { retVal, QStringList() } };
-        }
-        auto data = process->readAll();
-
-        auto vsInstallsDoc = QJsonDocument::fromJson( data );
-
-        if ( !vsInstallsDoc.isArray() )
-            return { false, QString( "Error: Invalid format from vswhere" ), { retVal, QStringList() } };
-
-        std::map< QString, QString > installedVS;
-        QStringList displayNames;
-
-        QJsonArray vsInstalls= vsInstallsDoc.array();
-        for ( int ii = 0; ii < vsInstalls.size(); ++ii )
-        {
-            auto vsInstall = vsInstalls[ii].toObject();
-            if ( !vsInstall.contains( "displayName" ) || !vsInstall["displayName"].isString() )
-                continue;
-
-            if ( !vsInstall.contains( "installationPath" ) || !vsInstall["installationPath"].isString() )
-                continue;
-
-            auto dispName = vsInstall["displayName"].toString();
-            auto path     = vsInstall["installationPath"].toString();
-
-            installedVS[dispName] = path;
-            displayNames << dispName;
-        }
-
-        return { true, QString(), { installedVS, displayNames } };
     }
 }

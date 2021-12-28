@@ -27,28 +27,30 @@
 #include <memory>
 
 class QFile;
-namespace NBIF
+namespace NSABUtils
 {
-    class CBIFFile;
-    class CBIFModel : public QAbstractListModel
+    namespace NBIF
     {
-        Q_OBJECT;
-    public:
-        CBIFModel( QObject *parent = nullptr );
+        class CFile;
+        class CModel : public QAbstractListModel
+        {
+            Q_OBJECT;
+        public:
+            CModel(QObject *parent = nullptr);
 
-        void setBIFFile( std::shared_ptr< CBIFFile > bifFile );
+            void setBIFFile(std::shared_ptr< CFile > bifFile);
 
-        virtual int rowCount( const QModelIndex &parent ) const override;
-        virtual QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override;
+            virtual int rowCount(const QModelIndex &parent) const override;
+            virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-        QImage image( size_t imageNum );
-    protected:
-        virtual bool canFetchMore( const QModelIndex &parent ) const override;
-        virtual void fetchMore( const QModelIndex &parent ) override;
-    private:
-        std::shared_ptr< CBIFFile > fBIFFile;
-    };
+            QImage image(size_t imageNum);
+        protected:
+            virtual bool canFetchMore(const QModelIndex &parent) const override;
+            virtual void fetchMore(const QModelIndex &parent) override;
+        private:
+            std::shared_ptr< CFile > fBIFFile;
+        };
+    }
 }
-
 #endif
 

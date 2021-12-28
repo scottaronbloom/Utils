@@ -50,26 +50,26 @@ class QXmlQuery;
 #include <QTextStream>
 #include <unordered_set>
 
-namespace NQtUtils
+namespace NSABUtils
 {
     struct CCaseInsensitiveHash
     {
-        size_t operator()( const QString & str ) const;
+        size_t operator()(const QString & str) const;
     };
 
     struct CCaseInsensitiveEqual
     {
-        size_t operator()( const QString & lhs, const QString & rhs ) const;
+        size_t operator()(const QString & lhs, const QString & rhs) const;
     };
 
     using TCaseInsensitiveHash = std::unordered_set< QString, CCaseInsensitiveHash, CCaseInsensitiveEqual >;
 
     template< typename T >
-    QList< T > replaceInList( const QList< T > & inList, int xFirst, int xCount, const QList< T > & values, int xNum = -1 )
+    QList< T > replaceInList(const QList< T > & inList, int xFirst, int xCount, const QList< T > & values, int xNum = -1)
     {
-        auto prefix = inList.mid( 0, xFirst );
-        auto mid = values.mid( 0, xNum );
-        auto suffix = inList.mid( xFirst + xCount );
+        auto prefix = inList.mid(0, xFirst);
+        auto mid = values.mid(0, xNum);
+        auto suffix = inList.mid(xFirst + xCount);
 
         auto lRetVal = prefix + mid + suffix;
         return lRetVal;
@@ -78,128 +78,128 @@ namespace NQtUtils
     QString allFilesFilter();
     QString defaultFileDialogDir();
 
-    #ifdef QT_XMLPATTERNS_LIB
-    QString getString( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
-    QStringList getStringList( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
-    std::set< QString > getStringSet( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
-    int getInt( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
-    bool getBool( QXmlQuery & query, const QString & queryString, bool defaultVal = false );
-    double getDouble( QXmlQuery & query, const QString & queryString, bool * aOK = nullptr );
-    std::list< std::pair< QString, QString > > getStringPairs( QXmlQuery & query, const QString & queryString1, const QString & queryString2, bool * aOK = nullptr );
-    std::list< std::list< QString > > getStrings( QXmlQuery & query, const QStringList & xmlPaths, bool * aOK = nullptr );
-    QString getFile( QXmlQuery & query, const QDir & relToDir, const QString & queryString, bool * aOK = nullptr );
-    #endif
+#ifdef QT_XMLPATTERNS_LIB
+    QString getString(QXmlQuery & query, const QString & queryString, bool * aOK = nullptr);
+    QStringList getStringList(QXmlQuery & query, const QString & queryString, bool * aOK = nullptr);
+    std::set< QString > getStringSet(QXmlQuery & query, const QString & queryString, bool * aOK = nullptr);
+    int getInt(QXmlQuery & query, const QString & queryString, bool * aOK = nullptr);
+    bool getBool(QXmlQuery & query, const QString & queryString, bool defaultVal = false);
+    double getDouble(QXmlQuery & query, const QString & queryString, bool * aOK = nullptr);
+    std::list< std::pair< QString, QString > > getStringPairs(QXmlQuery & query, const QString & queryString1, const QString & queryString2, bool * aOK = nullptr);
+    std::list< std::list< QString > > getStrings(QXmlQuery & query, const QStringList & xmlPaths, bool * aOK = nullptr);
+    QString getFile(QXmlQuery & query, const QDir & relToDir, const QString & queryString, bool * aOK = nullptr);
+#endif
 
-    int getInt( const QString & str, bool * aOK );
-    int getInt( const QStringRef & str, bool * aOK );
-    int getInt( const QString & str );
-    int getInt( const QStringRef & str );
-    int getInt( const QString & str, QXmlStreamReader & reader );
-    int getInt( const QStringRef & str, QXmlStreamReader & reader );
-    int getInt( const QString & str, int defaultValue, QXmlStreamReader & reader );
-    int getInt( const QStringRef & str, int defaultValue, QXmlStreamReader & reader );
+    int getInt(const QString & str, bool * aOK);
+    int getInt(const QStringRef & str, bool * aOK);
+    int getInt(const QString & str);
+    int getInt(const QStringRef & str);
+    int getInt(const QString & str, QXmlStreamReader & reader);
+    int getInt(const QStringRef & str, QXmlStreamReader & reader);
+    int getInt(const QString & str, int defaultValue, QXmlStreamReader & reader);
+    int getInt(const QStringRef & str, int defaultValue, QXmlStreamReader & reader);
 
-    double getDouble( const QString & str, bool * aOK );
-    double getDouble( const QString & str );
-    double getDouble( const QStringRef & str, bool * aOK );
-    double getDouble( const QStringRef & str );
-    double getDouble( const QString & str, QXmlStreamReader & reader );
-    double getDouble( const QStringRef & str, QXmlStreamReader & reader );
+    double getDouble(const QString & str, bool * aOK);
+    double getDouble(const QString & str);
+    double getDouble(const QStringRef & str, bool * aOK);
+    double getDouble(const QStringRef & str);
+    double getDouble(const QString & str, QXmlStreamReader & reader);
+    double getDouble(const QStringRef & str, QXmlStreamReader & reader);
 
-    bool getBool( const QString & str, bool defaultVal = false ); // default returned when string is empty
-    bool getBool( const QStringRef & str, bool defaultVal = false );
+    bool getBool(const QString & str, bool defaultVal = false); // default returned when string is empty
+    bool getBool(const QStringRef & str, bool defaultVal = false);
 
-    QString getFile( const QString & relToDir, QXmlStreamReader & reader, QString * origFile = nullptr );
-    QString getFile( const QDir & relToDir, QXmlStreamReader & reader, QString * origFile = nullptr );
-    QString getFile( const QDir & relToDir, const QString & file );
+    QString getFile(const QString & relToDir, QXmlStreamReader & reader, QString * origFile = nullptr);
+    QString getFile(const QDir & relToDir, QXmlStreamReader & reader, QString * origFile = nullptr);
+    QString getFile(const QDir & relToDir, const QString & file);
 
-    QDateTime getDateTime( const QStringRef & str, QXmlStreamReader & reader, bool optional );
-    QDateTime getDateTime( const QString & str, QXmlStreamReader & reader, bool optional );
-    QDateTime getDateTime( const QString & str );
+    QDateTime getDateTime(const QStringRef & str, QXmlStreamReader & reader, bool optional);
+    QDateTime getDateTime(const QString & str, QXmlStreamReader & reader, bool optional);
+    QDateTime getDateTime(const QString & str);
 
     template< typename T >
-    std::set< T > toSet( const QSet< T > & values )
+    std::set< T > toSet(const QSet< T > & values)
     {
         std::set< T > retVal;
-        for ( auto val : values )
-            retVal.insert( val );
+        for (auto val : values)
+            retVal.insert(val);
         return retVal;
     }
 
     template< typename T >
-    std::set< T > toSet( const QList< T > & values )
+    std::set< T > toSet(const QList< T > & values)
     {
         std::set< T > retVal;
-        for ( auto val : values )
-            retVal.insert( val );
+        for (auto val : values)
+            retVal.insert(val);
         return retVal;
     }
 
     class noCaseQStringCmp
     {
     public:
-        bool operator() ( const QString & s1, const QString & s2 ) const
+        bool operator() (const QString & s1, const QString & s2) const
         {
-            return s1.compare( s2, Qt::CaseInsensitive ) < 0;
+            return s1.compare(s2, Qt::CaseInsensitive) < 0;
         }
     };
 
-    QStringList splitLineCSV( const QString & line );
-    size_t SizeOf( const QString & str );
-    size_t SizeOf( const QDateTime & str );
-    QString fromHtmlEscaped( const QString & str );
+    QStringList splitLineCSV(const QString & line);
+    size_t SizeOf(const QString & str);
+    size_t SizeOf(const QDateTime & str);
+    QString fromHtmlEscaped(const QString & str);
 
-    void move( QSettings & settings, const QString & subGroup, const QString & key, bool overwrite );
-    void copy( QSettings & from, QSettings & to, bool overwrite );
+    void move(QSettings & settings, const QString & subGroup, const QString & key, bool overwrite);
+    void copy(QSettings & from, QSettings & to, bool overwrite);
 
-    int itemCount( QAbstractItemModel * model, bool rowCountOnly );
+    int itemCount(QAbstractItemModel * model, bool rowCountOnly);
 
-    QStringList getHeadersForModel( QAbstractItemModel * model );
-    void writeModel( QAbstractItemModel * model,
-                     QXmlStreamWriter & writer,
-                     const QString & keyName,
-                     const QString & plauralSuffix,
-                     const std::function<void( QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum ) > & writeRow =
-                     std::function<void( QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum ) >() );
+    QStringList getHeadersForModel(QAbstractItemModel * model);
+    void writeModel(QAbstractItemModel * model,
+        QXmlStreamWriter & writer,
+        const QString & keyName,
+        const QString & plauralSuffix,
+        const std::function<void(QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum) > & writeRow =
+        std::function<void(QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum) >());
 
-    void expandAll( QAbstractItemModel * model, const QModelIndex & index, QTreeView * view );
+    void expandAll(QAbstractItemModel * model, const QModelIndex & index, QTreeView * view);
 
-    QDate findDate( const QString & dateString );
+    QDate findDate(const QString & dateString);
 
-    void updateTimer( int delayMS, QTimer * timer );
+    void updateTimer(int delayMS, QTimer * timer);
 
-    void deleteLayoutAndItems( QLayout * layout );
+    void deleteLayoutAndItems(QLayout * layout);
 
-    void appendToLog( QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts = nullptr );
+    void appendToLog(QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts = nullptr);
 
-    [[nodiscard]] uint8_t * imageToPixels( const QImage & image ); // allocates the space, user is responsible for memory deletion using array delete
+    [[nodiscard]] uint8_t * imageToPixels(const QImage & image); // allocates the space, user is responsible for memory deletion using array delete
 
-    QString getHexValue( intptr_t value );
-    QString dumpArray( const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, bool asRGB = false, int colsPerRow=20 );
+    QString getHexValue(intptr_t value);
+    QString dumpArray(const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, bool asRGB = false, int colsPerRow = 20);
 
     template< typename T >
-    void dumpRow( int currRow, const char * title, const T * array, int width, int height, int colsPerRow, const T * baseArray, int rowOffset )
+    void dumpRow(int currRow, const char * title, const T * array, int width, int height, int colsPerRow, const T * baseArray, int rowOffset)
     {
-        if ( currRow < 0 )
+        if (currRow < 0)
             return;
-        if ( currRow >= height )
+        if (currRow >= height)
             return;
 
-        if ( baseArray == nullptr )
+        if (baseArray == nullptr)
             baseArray = array;
 
         auto rowBytes = width * 4;
         auto numBytes = rowBytes * height;
         auto offset = currRow * rowBytes + rowOffset;
-        if ( (offset + rowBytes) > numBytes )
+        if ((offset + rowBytes) > numBytes)
             return;
 
         qDebug().noquote().nospace() << "Row: " << currRow << " : Offset: " << offset << ":\n" <<
-            dumpArray( title, (const uint8_t *)array + offset, (const uint8_t *)baseArray, rowBytes, true, colsPerRow );
+            dumpArray(title, (const uint8_t *)array + offset, (const uint8_t *)baseArray, rowBytes, true, colsPerRow);
 
     }
 
-    void dumpImage( const char * title, const uint8_t * arr, int width, int height, const uint8_t * baseArray = nullptr );
+    void dumpImage(const char * title, const uint8_t * arr, int width, int height, const uint8_t * baseArray = nullptr);
 }
 
 template< std::size_t I = 0, typename... Tp>

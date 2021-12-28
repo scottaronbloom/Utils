@@ -33,100 +33,103 @@ class QDateTime;
 class QString;
 class QDir;
 
-namespace NFileUtils
+namespace NSABUtils
 {
-    void extractFilePath( const std::string & pathName,std::string * dirPath = nullptr, std::string * fileName = nullptr, std::string * ext = nullptr);
-    bool extCompare( const std::string & pattern, const std::string & extension, bool wildcards );
-    bool fileCompare( const std::string & pattern, const std::string & filename, bool wildcards );
-
-    std::string changeExtension( const std::string & pathName, const std::string & newExt );
-    bool isAbsPath( const std::string & pathName );
-    bool isRelativePath( const std::string & pathName );
-    std::string getAbsoluteFilePath( const std::string & relativePath );
-    std::string getAbsoluteFilePath( const std::string & directory, const std::string & relativePath );
-    QString getRelativePath( const QDir & dir, const QString & absPath );
-    std::string getRelativePath( const std::string & absPath, const std::string & dir=std::string() );
-    std::string getFileName( const std::string & fileName );
-    QString driveSpec( const QString &path );
-    bool exists(const std::string & path);
-    bool isReadable( const std::string & path );
-    bool isRegularFile( const std::string & path );
-    bool isDirectory( const std::string & path ); 
-    bool removeFile(const std::string & fileName);
-    bool renameFile(const std::string & oldfileName, const std::string & newFileName, bool force=false); 
-    int changeDir(const std::string & newDir);
-    std::string getWd();
-    std::string tilda2Home( const std::string & fileName ); 
-    std::string JoinPaths( const std::string & dir, const std::string & file );
-    bool mkdir( std::string & dir, bool makeParents=true ); // dir gets set to absolute path
-    bool mkdir( const std::string & dir, bool makeParents=true ); //
-    bool pathCompare( const std::string & lhs, const std::string & rhs );  // return is lhs is the same path as rhs
-    std::string normalizePath( const std::string & path, const std::string & relToDir=std::string() ); // removes ".." and "." replaces all "\" with "/"
-
-    bool remove( const std::string & item );
-    bool removeInsideOfDir( const QString & dirStr );
-    bool removeInsideOfDir( const std::string & dir );
-    bool copy( const std::string & fileName, const std::string & newFileName );
-    QString canonicalFilePath( const QString & fileName );
-    std::string canonicalFilePath( const std::string & fileName );
-
-    // %FN for filename, %TS for timestamp
-    // empty -> %FN.bak
-    bool backup( const std::string & fileName, const std::string & msg, bool useTrash=false, const std::string & format=std::string(), bool moveFile=true );
-    bool backup( const QString & fileName, const std::string & msg, bool useTrash=false, const std::string & format=std::string(), bool moveFile=true );
-
-    std::list< std::string > getSubDirs( const std::string & dir, bool recursive, bool includeTopDir ); 
-    std::list< std::string > getDirsFromPath( const std::string & searchPath );
-    std::string getPathFromDirs( const std::list< std::string > & dirs );
-
-    bool moveToTrash( const QString & fileName );
-    bool moveToTrash( const std::string & fileName );
-
-    bool isBinaryFile( const std::string & fileName ); // if any char in the first 100 characters is non std::isprint return true
-    bool isBinaryFile( const std::string & fileName, const std::string & relToDir ); // if any char in the first 100 characters is non std::isprint return true
-
-    // searches for environmental vars inside filenames of the form
-    // $foo or %foo% \$foo \%foo\%
-    // the variable itself can be surrounded by {} or () or \{\} \(\)
-    //
-    // it gets the prefix (before the start) extracts the variable name and then recursively calls itself 
-    // on the suffix.
-    QString expandEnvVars( const QString & fileName, std::set< QString > * envVars = nullptr );
-    QString gSoftenPath( const QString & xFileName, const std::set< QString > & xEnvVars, bool forceUnix = false ); // force unix just helps in unit testing
-
-    QStringList dumpResources( bool ignoreInternal = true );
-    QStringList dumpResources( const QDir & xDir, bool ignoreInternal=true );
-
-    std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet );
-    std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path );
-    QDateTime timeStamp(const QString & path, QFileDevice::FileTime=QFileDevice::FileTime::FileModificationTime);
-    QDateTime oldestTimeStamp( const QString &path ); // returns the oldest time based on QFile Device::FileTime types
-    bool setTimeStamp(const QString& path, const QFileInfo & srcPath, QString * msg = nullptr ); // uses the ts info on srcPath setting it on path for all filetimes
-    bool setTimeStamp(const QString& path, const QDateTime& ts, bool allTimeStamps, QString* msg = nullptr); // if ts is not valid uses current dt, if allTimeStamps is false use FileModificationTime
-    bool setTimeStamp(const QString& path, const QDateTime & ts, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // if ts is not valid uses current dt
-    bool setTimeStamp(const QString& path, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // uses QDateTime::currentDateTime
-    bool setTimeStamp(const QString& path, bool allTimeStamps, QString* msg = nullptr); // uses QDateTime::currentDateTime
-    bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > & timeStamps, QString *msg = nullptr ); 
-
-    QString fileSizeString( const QFileInfo & fi, bool prettyPrint = true, bool byteBased=true, uint8_t precision=1 ); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
-    QString fileSizeString( uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision=1 );
-
-    enum class EAttribute
+    namespace NFileUtils
     {
-        eArchive,
-        eHidden,
-        eSystem,
-        eReadOnly
-    };
-    bool fileHasAttribute(const QFileInfo & file, EAttribute attribute);
-        
-    bool isArchiveFile(const QFileInfo & file);
-    bool isHiddenFile(const QFileInfo & file);
-    bool isSystemFile(const QFileInfo & file);
-    bool isReadOnlyFile(const QFileInfo & file);
+        void extractFilePath(const std::string & pathName, std::string * dirPath = nullptr, std::string * fileName = nullptr, std::string * ext = nullptr);
+        bool extCompare(const std::string & pattern, const std::string & extension, bool wildcards);
+        bool fileCompare(const std::string & pattern, const std::string & filename, bool wildcards);
 
-    bool compareTimeStamp(const QDateTime & lhs, const QDateTime & rhs, int toleranceInSecs);
-    bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck);
-    bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck);
+        std::string changeExtension(const std::string & pathName, const std::string & newExt);
+        bool isAbsPath(const std::string & pathName);
+        bool isRelativePath(const std::string & pathName);
+        std::string getAbsoluteFilePath(const std::string & relativePath);
+        std::string getAbsoluteFilePath(const std::string & directory, const std::string & relativePath);
+        QString getRelativePath(const QDir & dir, const QString & absPath);
+        std::string getRelativePath(const std::string & absPath, const std::string & dir = std::string());
+        std::string getFileName(const std::string & fileName);
+        QString driveSpec(const QString &path);
+        bool exists(const std::string & path);
+        bool isReadable(const std::string & path);
+        bool isRegularFile(const std::string & path);
+        bool isDirectory(const std::string & path);
+        bool removeFile(const std::string & fileName);
+        bool renameFile(const std::string & oldfileName, const std::string & newFileName, bool force = false);
+        int changeDir(const std::string & newDir);
+        std::string getWd();
+        std::string tilda2Home(const std::string & fileName);
+        std::string JoinPaths(const std::string & dir, const std::string & file);
+        bool mkdir(std::string & dir, bool makeParents = true); // dir gets set to absolute path
+        bool mkdir(const std::string & dir, bool makeParents = true); //
+        bool pathCompare(const std::string & lhs, const std::string & rhs);  // return is lhs is the same path as rhs
+        std::string normalizePath(const std::string & path, const std::string & relToDir = std::string()); // removes ".." and "." replaces all "\" with "/"
+
+        bool remove(const std::string & item);
+        bool removeInsideOfDir(const QString & dirStr);
+        bool removeInsideOfDir(const std::string & dir);
+        bool copy(const std::string & fileName, const std::string & newFileName);
+        QString canonicalFilePath(const QString & fileName);
+        std::string canonicalFilePath(const std::string & fileName);
+
+        // %FN for filename, %TS for timestamp
+        // empty -> %FN.bak
+        bool backup(const std::string & fileName, const std::string & msg, bool useTrash = false, const std::string & format = std::string(), bool moveFile = true);
+        bool backup(const QString & fileName, const std::string & msg, bool useTrash = false, const std::string & format = std::string(), bool moveFile = true);
+
+        std::list< std::string > getSubDirs(const std::string & dir, bool recursive, bool includeTopDir);
+        std::list< std::string > getDirsFromPath(const std::string & searchPath);
+        std::string getPathFromDirs(const std::list< std::string > & dirs);
+
+        bool moveToTrash(const QString & fileName);
+        bool moveToTrash(const std::string & fileName);
+
+        bool isBinaryFile(const std::string & fileName); // if any char in the first 100 characters is non std::isprint return true
+        bool isBinaryFile(const std::string & fileName, const std::string & relToDir); // if any char in the first 100 characters is non std::isprint return true
+
+        // searches for environmental vars inside filenames of the form
+        // $foo or %foo% \$foo \%foo\%
+        // the variable itself can be surrounded by {} or () or \{\} \(\)
+        //
+        // it gets the prefix (before the start) extracts the variable name and then recursively calls itself 
+        // on the suffix.
+        QString expandEnvVars(const QString & fileName, std::set< QString > * envVars = nullptr);
+        QString gSoftenPath(const QString & xFileName, const std::set< QString > & xEnvVars, bool forceUnix = false); // force unix just helps in unit testing
+
+        QStringList dumpResources(bool ignoreInternal = true);
+        QStringList dumpResources(const QDir & xDir, bool ignoreInternal = true);
+
+        std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet);
+        std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path);
+        QDateTime timeStamp(const QString & path, QFileDevice::FileTime = QFileDevice::FileTime::FileModificationTime);
+        QDateTime oldestTimeStamp(const QString &path); // returns the oldest time based on QFile Device::FileTime types
+        bool setTimeStamp(const QString& path, const QFileInfo & srcPath, QString * msg = nullptr); // uses the ts info on srcPath setting it on path for all filetimes
+        bool setTimeStamp(const QString& path, const QDateTime& ts, bool allTimeStamps, QString* msg = nullptr); // if ts is not valid uses current dt, if allTimeStamps is false use FileModificationTime
+        bool setTimeStamp(const QString& path, const QDateTime & ts, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // if ts is not valid uses current dt
+        bool setTimeStamp(const QString& path, QFileDevice::FileTime ft = QFileDevice::FileTime::FileModificationTime, QString* msg = nullptr); // uses QDateTime::currentDateTime
+        bool setTimeStamp(const QString& path, bool allTimeStamps, QString* msg = nullptr); // uses QDateTime::currentDateTime
+        bool setTimeStamps(const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > & timeStamps, QString *msg = nullptr);
+
+        QString fileSizeString(const QFileInfo & fi, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
+        QString fileSizeString(uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1);
+
+        enum class EAttribute
+        {
+            eArchive,
+            eHidden,
+            eSystem,
+            eReadOnly
+        };
+        bool fileHasAttribute(const QFileInfo & file, EAttribute attribute);
+
+        bool isArchiveFile(const QFileInfo & file);
+        bool isHiddenFile(const QFileInfo & file);
+        bool isSystemFile(const QFileInfo & file);
+        bool isReadOnlyFile(const QFileInfo & file);
+
+        bool compareTimeStamp(const QDateTime & lhs, const QDateTime & rhs, int toleranceInSecs);
+        bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck);
+        bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck);
+    }
 }
 #endif

@@ -24,53 +24,56 @@
 #include <QTimer>
 #include <QMetaMethod>
 
-CMenuBarEx::CMenuBarEx(QWidget* parent)
-    : QMenuBar(parent)
+namespace NSABUtils
 {
-    fTimer = new QTimer( this );
-    fTimer->setInterval( 500 );
-    fTimer->setSingleShot( true );
-    connect( fTimer, &QTimer::timeout, this, &CMenuBarEx::slotMenuTimerExpired );
-}
-
-CMenuBarEx::~CMenuBarEx()
-{
-}
-
-void CMenuBarEx::updateConnections()
-{
-    auto actions = this->actions();
-    for ( auto &&currAction : actions )
+    CMenuBarEx::CMenuBarEx(QWidget* parent)
+        : QMenuBar(parent)
     {
-        auto currMenu = currAction->menu();
-        if ( !currMenu )
-            continue;
-
-        disconnect( currMenu, &QMenu::aboutToShow, this, &CMenuBarEx::slotMenuToShow );
-        connect( currMenu, &QMenu::aboutToShow, this, &CMenuBarEx::slotMenuToShow );
-
-        disconnect( currMenu, &QMenu::aboutToHide, this, &CMenuBarEx::slotMenuToHide );
-        connect( currMenu, &QMenu::aboutToHide, this, &CMenuBarEx::slotMenuToHide );
+        fTimer = new QTimer(this);
+        fTimer->setInterval(500);
+        fTimer->setSingleShot(true);
+        connect(fTimer, &QTimer::timeout, this, &CMenuBarEx::slotMenuTimerExpired);
     }
-}
 
-void CMenuBarEx::slotMenuToShow()
-{
-    fTimer->stop();
-    if ( fEngaged )
-        return;
-    fEngaged = true;
-    emit sigAboutToEngage();
-}
+    CMenuBarEx::~CMenuBarEx()
+    {
+    }
 
-void CMenuBarEx::slotMenuToHide()
-{
-    fTimer->stop();
-    fTimer->start();
-}
+    void CMenuBarEx::updateConnections()
+    {
+        auto actions = this->actions();
+        for (auto &&currAction : actions)
+        {
+            auto currMenu = currAction->menu();
+            if (!currMenu)
+                continue;
 
-void CMenuBarEx::slotMenuTimerExpired()
-{
-    fEngaged = false;
-    emit sigFinishedEngagement();
+            disconnect(currMenu, &QMenu::aboutToShow, this, &CMenuBarEx::slotMenuToShow);
+            connect(currMenu, &QMenu::aboutToShow, this, &CMenuBarEx::slotMenuToShow);
+
+            disconnect(currMenu, &QMenu::aboutToHide, this, &CMenuBarEx::slotMenuToHide);
+            connect(currMenu, &QMenu::aboutToHide, this, &CMenuBarEx::slotMenuToHide);
+        }
+    }
+
+    void CMenuBarEx::slotMenuToShow()
+    {
+        fTimer->stop();
+        if (fEngaged)
+            return;
+        fEngaged = true;
+        emit sigAboutToEngage();
+    }
+
+    void CMenuBarEx::slotMenuToHide()
+    {
+        fTimer->stop();
+        fTimer->start();
+    }
+
+    void CMenuBarEx::slotMenuTimerExpired()
+    {
+        fEngaged = false;
+        emit sigFinishedEngagement();
+    }
 }

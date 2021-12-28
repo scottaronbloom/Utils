@@ -42,7 +42,7 @@
 #include <QXmlQuery>
 #endif
 
-namespace NQtUtils
+namespace NSABUtils
 {
     QString allFilesFilter()
     {

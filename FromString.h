@@ -25,41 +25,43 @@
 
 #include <string>
 #include <sstream>
-
-template <class T>
-bool fromString( T & retVal, const char * arg )
+namespace NSABUtils
 {
-    if ( !arg || !*arg )
-        return false;
-    std::stringstream ss( arg );
-    ss >> retVal;
-    char c;
-    if ( ss.fail() || ss.get(c) )
-        return false;
-    return true;
+
+    template <class T>
+    bool fromString(T & retVal, const char * arg)
+    {
+        if (!arg || !*arg)
+            return false;
+        std::stringstream ss(arg);
+        ss >> retVal;
+        char c;
+        if (ss.fail() || ss.get(c))
+            return false;
+        return true;
+    }
+
+    template <class T>
+    bool fromString(T & retVal, const std::string & arg)
+    {
+        return fromString(retVal, arg.c_str());
+    }
+
+    bool fromString(long & retVal, const char * arg, int base);
+    bool fromString(long & retVal, const std::string & arg, int base);
+    bool fromString(long & retVal, const std::string & arg);
+
+    bool fromString(int & retVal, const char * arg, int base);
+    bool fromString(int & retVal, const char * arg);
+    bool fromString(int & retVal, const std::string & arg, int base);
+    bool fromString(int & retVal, const std::string & arg);
+
+    bool fromString(double & retVal, const std::string & arg);
+    bool fromString(double & retVal, const char * arg);
+    bool fromString(float & retVal, const std::string & arg);
+    bool fromString(float & retVal, const char * arg);
+    bool fromString(bool & retVal, const char * arg);
+    bool fromString(bool & retVal, const std::string & arg);
 }
-
-template <class T>
-bool fromString( T & retVal, const std::string & arg )
-{
-    return fromString( retVal, arg.c_str() );
-}
-
-bool fromString( long & retVal, const char * arg, int base );
-bool fromString( long & retVal, const std::string & arg, int base );
-bool fromString( long & retVal, const std::string & arg );
-
-bool fromString( int & retVal, const char * arg, int base );
-bool fromString( int & retVal, const char * arg );
-bool fromString( int & retVal, const std::string & arg, int base );
-bool fromString( int & retVal, const std::string & arg );
-
-bool fromString( double & retVal, const std::string & arg );
-bool fromString( double & retVal, const char * arg );
-bool fromString( float & retVal, const std::string & arg );
-bool fromString( float & retVal, const char * arg );
-bool fromString( bool & retVal, const char * arg );
-bool fromString( bool & retVal, const std::string & arg );
-
 #endif 
 

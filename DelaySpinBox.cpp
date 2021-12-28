@@ -21,105 +21,109 @@
 // SOFTWARE.
 
 #include "DelaySpinBox.h"
-#include <QTimer>
 #include "QtUtils.h"
 
-CDelaySpinBox::CDelaySpinBox( QWidget *parent ) :
-    CDelaySpinBox( 250, parent )
-{
-}
+#include <QTimer>
 
-CDelaySpinBox::CDelaySpinBox( int delayMS, QWidget * parent ) :
-    QSpinBox( parent )
+namespace NSABUtils
 {
+    CDelaySpinBox::CDelaySpinBox(QWidget *parent) :
+        CDelaySpinBox(250, parent)
+    {
+    }
+
+    CDelaySpinBox::CDelaySpinBox(int delayMS, QWidget * parent) :
+        QSpinBox(parent)
+    {
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    connect( this, &QSpinBox::textChanged, this, &CDelaySpinBox::slotTextChanged );
+        connect(this, &QSpinBox::textChanged, this, &CDelaySpinBox::slotTextChanged);
 #endif
-    connect( this, QOverload<int>::of( &QSpinBox::valueChanged ), this, &CDelaySpinBox::slotValueChanged );
-    connect( this, &QSpinBox::editingFinished, this, &CDelaySpinBox::slotEditingFinished );
+        connect(this, QOverload<int>::of(&QSpinBox::valueChanged), this, &CDelaySpinBox::slotValueChanged);
+        connect(this, &QSpinBox::editingFinished, this, &CDelaySpinBox::slotEditingFinished);
 
-    fValueChangedTimer = new QTimer( this );
-    fValueChangedTimer->setSingleShot( true );
-    connect( fValueChangedTimer, &QTimer::timeout, this, &CDelaySpinBox::slotValueChangedTimerTimeout );
+        fValueChangedTimer = new QTimer(this);
+        fValueChangedTimer->setSingleShot(true);
+        connect(fValueChangedTimer, &QTimer::timeout, this, &CDelaySpinBox::slotValueChangedTimerTimeout);
 
-    fEditFinishedTimer = new QTimer( this );
-    fEditFinishedTimer->setSingleShot( true );
-    connect( fEditFinishedTimer, &QTimer::timeout, this, &CDelaySpinBox::slotEditingFinishedTimerTimeout );
-
-#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    fTextChangedTimer = new QTimer( this );
-    fTextChangedTimer->setSingleShot( true );
-    connect( fTextChangedTimer, &QTimer::timeout, this, &CDelaySpinBox::slotTextChangedTimerTimeout );
-#endif
-
-    setDelay( delayMS );
-}
-
-CDelaySpinBox::~CDelaySpinBox()
-{
-}
-
-void CDelaySpinBox::setValue( int value )
-{
-#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    disconnect( this, &QSpinBox::textChanged, this, &CDelaySpinBox::slotTextChanged );
-#endif
-
-    disconnect( this, QOverload<int>::of( &QSpinBox::valueChanged ), this, &CDelaySpinBox::slotValueChanged );
-    disconnect( this, &QSpinBox::editingFinished, this, &CDelaySpinBox::slotEditingFinished );
-
-    QSpinBox::setValue( value );
+        fEditFinishedTimer = new QTimer(this);
+        fEditFinishedTimer->setSingleShot(true);
+        connect(fEditFinishedTimer, &QTimer::timeout, this, &CDelaySpinBox::slotEditingFinishedTimerTimeout);
 
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    connect( this, &QSpinBox::textChanged, this, &CDelaySpinBox::slotTextChanged );
+        fTextChangedTimer = new QTimer(this);
+        fTextChangedTimer->setSingleShot(true);
+        connect(fTextChangedTimer, &QTimer::timeout, this, &CDelaySpinBox::slotTextChangedTimerTimeout);
 #endif
-    connect( this, QOverload<int>::of( &QSpinBox::valueChanged ), this, &CDelaySpinBox::slotValueChanged );
-    connect( this, &QSpinBox::editingFinished, this, &CDelaySpinBox::slotEditingFinished );
-}
 
-void CDelaySpinBox::setDelay( int delayMS )
-{
-    fDelayMS = delayMS;
-    NQtUtils::updateTimer( fDelayMS, fValueChangedTimer);
-    NQtUtils::updateTimer( fDelayMS, fEditFinishedTimer );
+        setDelay(delayMS);
+    }
+
+    CDelaySpinBox::~CDelaySpinBox()
+    {
+    }
+
+    void CDelaySpinBox::setValue(int value)
+    {
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-    NQtUtils::updateTimer( fDelayMS, fTextChangedTimer );
-#endif
-}
-
-void CDelaySpinBox::slotValueChanged()
-{
-    fValueChangedTimer->stop();
-    fValueChangedTimer->start();
-}
-
-#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-void CDelaySpinBox::slotTextChanged()
-{
-    fTextChangedTimer->stop();
-    fTextChangedTimer->start();
-}
+        disconnect(this, &QSpinBox::textChanged, this, &CDelaySpinBox::slotTextChanged);
 #endif
 
-void CDelaySpinBox::slotEditingFinished()
-{
-    fEditFinishedTimer->stop();
-    fEditFinishedTimer->start();
-}
+        disconnect(this, QOverload<int>::of(&QSpinBox::valueChanged), this, &CDelaySpinBox::slotValueChanged);
+        disconnect(this, &QSpinBox::editingFinished, this, &CDelaySpinBox::slotEditingFinished);
 
-void CDelaySpinBox::slotValueChangedTimerTimeout()
-{
-    emit sigValueChangedAfterDelay( value() );
-}
+        QSpinBox::setValue(value);
 
 #if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-void CDelaySpinBox::slotTextChangedTimerTimeout()
-{
-    emit sigTextChangedAfterDelay( text() );
-}
+        connect(this, &QSpinBox::textChanged, this, &CDelaySpinBox::slotTextChanged);
+#endif
+        connect(this, QOverload<int>::of(&QSpinBox::valueChanged), this, &CDelaySpinBox::slotValueChanged);
+        connect(this, &QSpinBox::editingFinished, this, &CDelaySpinBox::slotEditingFinished);
+    }
+
+    void CDelaySpinBox::setDelay(int delayMS)
+    {
+        fDelayMS = delayMS;
+        NSABUtils::updateTimer(fDelayMS, fValueChangedTimer);
+        NSABUtils::updateTimer(fDelayMS, fEditFinishedTimer);
+#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+        NSABUtils::updateTimer(fDelayMS, fTextChangedTimer);
+#endif
+    }
+
+    void CDelaySpinBox::slotValueChanged()
+    {
+        fValueChangedTimer->stop();
+        fValueChangedTimer->start();
+    }
+
+#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+    void CDelaySpinBox::slotTextChanged()
+    {
+        fTextChangedTimer->stop();
+        fTextChangedTimer->start();
+    }
 #endif
 
-void CDelaySpinBox::slotEditingFinishedTimerTimeout()
-{
-    emit sigEditingFinishedAfterDelay();
+    void CDelaySpinBox::slotEditingFinished()
+    {
+        fEditFinishedTimer->stop();
+        fEditFinishedTimer->start();
+    }
+
+    void CDelaySpinBox::slotValueChangedTimerTimeout()
+    {
+        emit sigValueChangedAfterDelay(value());
+    }
+
+#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+    void CDelaySpinBox::slotTextChangedTimerTimeout()
+    {
+        emit sigTextChangedAfterDelay(text());
+    }
+#endif
+
+    void CDelaySpinBox::slotEditingFinishedTimerTimeout()
+    {
+        emit sigEditingFinishedAfterDelay();
+    }
 }

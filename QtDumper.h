@@ -3,6 +3,8 @@
 
 class QWidget;
 class QStandardItemModel;
-
-void    dumpWidgetAndChildren( const QWidget* widget, QStandardItemModel* model );
+namespace NSABUtils
+{
+    void dumpWidgetAndChildren(const QWidget* widget, QStandardItemModel* model);
+}
 #endif

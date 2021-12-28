@@ -23,47 +23,50 @@
 #include "AutoWaitCursor.h"
 #include <QApplication>
 
-CAutoWaitCursor::CAutoWaitCursor( QObject * revertOnShowWidget ) :
-    QObject( nullptr ),
-    fRestoreOnOpenWidget( revertOnShowWidget )
+namespace NSABUtils
 {
-    QCursor * cursor = QApplication::overrideCursor();
-    QApplication::setOverrideCursor( Qt::BusyCursor );
-    if ( !cursor )
-        qApp->processEvents();
-    if ( revertOnShowWidget )
-    {
-        revertOnShowWidget->installEventFilter( this );
-    }
-    qApp->processEvents();
-}
 
-bool CAutoWaitCursor::eventFilter(QObject *obj, QEvent *event)
-{
-    if ( obj == fRestoreOnOpenWidget ) 
+    CAutoWaitCursor::CAutoWaitCursor(QObject * revertOnShowWidget) :
+        QObject(nullptr),
+        fRestoreOnOpenWidget(revertOnShowWidget)
     {
-        if (event->type() == QEvent::Show ) 
+        QCursor * cursor = QApplication::overrideCursor();
+        QApplication::setOverrideCursor(Qt::BusyCursor);
+        if (!cursor)
+            qApp->processEvents();
+        if (revertOnShowWidget)
         {
-            restore();
+            revertOnShowWidget->installEventFilter(this);
         }
+        qApp->processEvents();
     }
-    return QObject::eventFilter(obj, event);
+
+    bool CAutoWaitCursor::eventFilter(QObject *obj, QEvent *event)
+    {
+        if (obj == fRestoreOnOpenWidget)
+        {
+            if (event->type() == QEvent::Show)
+            {
+                restore();
+            }
+        }
+        return QObject::eventFilter(obj, event);
+    }
+
+    CAutoWaitCursor::~CAutoWaitCursor()
+    {
+        restore();
+    }
+
+    void CAutoWaitCursor::restore()
+    {
+        QApplication::restoreOverrideCursor();
+        qApp->processEvents();
+    }
+
+    bool CAutoWaitCursor::active()
+    {
+        return QApplication::overrideCursor() != nullptr;
+    }
+
 }
-
-CAutoWaitCursor::~CAutoWaitCursor()
-{
-    restore();
-}
-
-void CAutoWaitCursor::restore()
-{
-    QApplication::restoreOverrideCursor();
-    qApp->processEvents();
-}
-
-bool CAutoWaitCursor::active()
-{
-    return QApplication::overrideCursor() != nullptr;
-}
-
-

@@ -28,102 +28,105 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
-void ToJson( const QStringList& value, QJsonValue & val )
+namespace NSABUtils
 {
-    QJsonArray retVal;
-    for ( auto&& ii : value )
+    void ToJson(const QStringList& value, QJsonValue & val)
     {
-        QJsonValue curr;
-        ToJson( ii, curr );
-        retVal.append( curr );
+        QJsonArray retVal;
+        for (auto&& ii : value)
+        {
+            QJsonValue curr;
+            ToJson(ii, curr);
+            retVal.append(curr);
+        }
+        val = retVal;
     }
-    val = retVal;
-}
 
-void FromJson( QStringList& value, const QJsonValue & val )
-{
-    value.clear();
-    if ( !val.isArray() )
-        return;
-    auto array = val.toArray();
-    for ( int ii = 0; ii < array.count(); ++ii )
+    void FromJson(QStringList& value, const QJsonValue & val)
     {
-        value << array.at( ii ).toString();
-    }
-}
-
-void FromJson( bool& value, const QJsonValue & val )
-{
-    value = false;
-    if ( !val.isObject() && !val.isBool() )
-        return;
-
-    auto realVal = val;
-    if ( val.isObject() )
-    {
-        if ( !val.toObject().contains( "value" ) )
+        value.clear();
+        if (!val.isArray())
             return;
-        realVal = val.toObject()["value"];
+        auto array = val.toArray();
+        for (int ii = 0; ii < array.count(); ++ii)
+        {
+            value << array.at(ii).toString();
+        }
     }
-    value = realVal.toBool();
-}
 
-void FromJson( double& value, const QJsonValue & val )
-{
-    value = 0.0;
-    if ( !val.isObject() && !val.isDouble() )
-        return;
-
-    auto realVal = val;
-    if ( val.isObject() )
+    void FromJson(bool& value, const QJsonValue & val)
     {
-        if ( !val.toObject().contains( "value" ) )
+        value = false;
+        if (!val.isObject() && !val.isBool())
             return;
-        realVal = val.toObject()["value"];
+
+        auto realVal = val;
+        if (val.isObject())
+        {
+            if (!val.toObject().contains("value"))
+                return;
+            realVal = val.toObject()["value"];
+        }
+        value = realVal.toBool();
     }
-    value = realVal.toDouble();
-}
 
-void FromJson( QString& value, const QJsonValue & val )
-{
-    value.clear();
-
-    auto realVal = val;
-    if ( val.isObject() )
+    void FromJson(double& value, const QJsonValue & val)
     {
-        if ( !val.toObject().contains( "value" ) )
+        value = 0.0;
+        if (!val.isObject() && !val.isDouble())
             return;
-        realVal = val.toObject()["value"];
+
+        auto realVal = val;
+        if (val.isObject())
+        {
+            if (!val.toObject().contains("value"))
+                return;
+            realVal = val.toObject()["value"];
+        }
+        value = realVal.toDouble();
     }
-    value = realVal.toString();
-}
 
-
-void FromJson( int& value, const QJsonValue & val )
-{
-    value = 0;
-    if ( !val.isObject() && !val.isString() && !val.isDouble() )
-        return;
-
-    auto realVal = val;
-    if ( val.isObject() )
+    void FromJson(QString& value, const QJsonValue & val)
     {
-        if ( !val.toObject().contains( "value" ) )
+        value.clear();
+
+        auto realVal = val;
+        if (val.isObject())
+        {
+            if (!val.toObject().contains("value"))
+                return;
+            realVal = val.toObject()["value"];
+        }
+        value = realVal.toString();
+    }
+
+
+    void FromJson(int& value, const QJsonValue & val)
+    {
+        value = 0;
+        if (!val.isObject() && !val.isString() && !val.isDouble())
             return;
-        realVal = val.toObject()["value"];
-    }
 
-    if ( !realVal.isString() && !realVal.isDouble() )
-        return;
-    if ( realVal.isString() )
-    {
-        bool aOK;
-        int tmp = realVal.toString().toInt( &aOK );
-        if ( aOK )
-            value = tmp;
-    }
-    if ( realVal.isDouble() )
-    {
-        value = static_cast<int>( val.toDouble() );
+        auto realVal = val;
+        if (val.isObject())
+        {
+            if (!val.toObject().contains("value"))
+                return;
+            realVal = val.toObject()["value"];
+        }
+
+        if (!realVal.isString() && !realVal.isDouble())
+            return;
+        if (realVal.isString())
+        {
+            bool aOK;
+            int tmp = realVal.toString().toInt(&aOK);
+            if (aOK)
+                value = tmp;
+        }
+        if (realVal.isDouble())
+        {
+            value = static_cast<int>(val.toDouble());
+        }
     }
 }

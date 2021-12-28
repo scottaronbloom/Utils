@@ -30,7 +30,7 @@
 #include <QDebug>
 #include <QAbstractEventDispatcher>
 
-namespace NUtils
+namespace NSABUtils
 {
     QByteArray formatMd5( const QByteArray & digest, bool isHex )
     {

@@ -26,51 +26,51 @@
 #include <QDialog>
 #include <memory>
 
-namespace NBIF
+namespace NSABUtils
 {
-    class CBIFFile;
-}
+    namespace NBIF
+    {
+        class CFile;
+    }
 
-namespace Ui { class CGIFWriterDlg; }
-namespace NUtils
-{
+    namespace Ui { class CGIFWriterDlg; }
     class CGIFWriterDlg : public QDialog
     {
         Q_OBJECT
     public:
-        CGIFWriterDlg( QWidget * parent = nullptr);
-        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent=nullptr );
-        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, int delayInMSec, QWidget * parent=nullptr );
+        CGIFWriterDlg(QWidget * parent = nullptr);
+        CGIFWriterDlg::CGIFWriterDlg(std::shared_ptr< NBIF::CFile > bifFile, QWidget * parent = nullptr);
+        CGIFWriterDlg::CGIFWriterDlg(std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget * parent = nullptr);
 
         ~CGIFWriterDlg();
 
-        void setBIF( std::shared_ptr< NBIF::CBIFFile > bifFile );
-        std::shared_ptr< NBIF::CBIFFile > bifFile() const { return fBIF; }
+        void setBIF(std::shared_ptr< NBIF::CFile > bifFile);
+        std::shared_ptr< NBIF::CFile > bifFile() const { return fBIF; }
 
         // speed multiplier uses the delay built into the BIF file
-        void setSpeedMultipler( int multiplier ); // delay or multiplier (setting the bif as well) override each other, last one set wins
-        void setDelay( int msec );
+        void setSpeedMultipler(int multiplier); // delay or multiplier (setting the bif as well) override each other, last one set wins
+        void setDelay(int msec);
         int delay() const;
 
-        void setDither( bool dither );
+        void setDither(bool dither);
         bool dither() const;
 
-        void setFlipImage( bool flipImage );
+        void setFlipImage(bool flipImage);
         bool flipImage() const;
 
-        void setLoopCount( int loopCount );
+        void setLoopCount(int loopCount);
         int loopCount() const;
 
-        void setStartFrame( int startFrame );
+        void setStartFrame(int startFrame);
         int startFrame() const;
 
-        void setEndFrame( int endFrame );
+        void setEndFrame(int endFrame);
         int endFrame() const;
 
         virtual void accept() override;
         int numFramesToSave() const;
 
-        void setUseNew( bool useNew );
+        void setUseNew(bool useNew);
         bool useNew() const;
     Q_SIGNALS:
     public Q_SLOTS:
@@ -85,7 +85,7 @@ namespace NUtils
 
         int fMultipler{ 1 };
 
-        std::shared_ptr< NBIF::CBIFFile > fBIF;
+        std::shared_ptr< NBIF::CFile > fBIF;
         std::unique_ptr< Ui::CGIFWriterDlg > fImpl;
     };
 }

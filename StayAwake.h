@@ -24,7 +24,7 @@
 #include <QRunnable>
 
 #ifdef Q_OS_WINDOWS
-namespace NUtils
+namespace NSABUtils
 {
     class CStayAwake : public QRunnable
     {

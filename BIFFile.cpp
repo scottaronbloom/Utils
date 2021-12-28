@@ -23,418 +23,420 @@
 #include "BIFFile.h"
 #include <QFile>
 #include <QFile>
-
-namespace NBIF
+namespace NSABUtils
 {
-    CBIFFile::CBIFFile( const QString &bifFile, bool loadImages ) :
-        fBIFFile( bifFile )
+    namespace NBIF
     {
-        loadBIFFromFile( loadImages );
-    }
-
-    CBIFFile::CBIFFile()
-    {
-    }
-
-    CBIFFile::~CBIFFile()
-    {
-        if (fFile)
-            delete fFile;
-    }
-
-    void CBIFFile::loadBIFFromFile( bool loadImages )
-    {
-        if ( !openFile() )
-            return;
-
-        loadBIFFromIODevice(loadImages);
-        if (fFile && loadImages)
-            fFile->close();
-    }
-
-    void CBIFFile::loadBIFFromIODevice(bool loadImages)
-    {
-        if (!checkForOpen())
-            return;
-
-        if (!parseHeader( loadImages ) )
-            return;
-    }
-
-    std::pair< bool, QImage > CBIFFile::read(QIODevice * device, int frameNum)
-    {
-        fIODevice = device;
-        if (!device)
-            return { false, {} };
-        loadBIFFromIODevice(false);
-        if (fState != EState::eReadingImages)
-            return { false, {} };
-
-        auto image = this->image(frameNum);
-        return { !image.isNull() && (fState == EState::eReadingImages), image };
-    }
-
-    bool CBIFFile::readHeader(QIODevice * device)
-    {
-        fIODevice = device;
-        if (!device)
-            return false;
-        return parseHeader(false);
-    }
-
-    QSize CBIFFile::imageSize() const
-    {
-        if ( fState != EState::eReadingImages )
-            return QSize();
-        if (fBIFs.empty())
-            return QSize();
-        if (!fBIFs[0].fImage.has_value())
-            return QSize();
-        return fBIFs[0].fImage.value().second.size();
-    }
-
-    bool CBIFFile::checkForOpen()
-    {
-        if (fState == EState::eDeviceOpen)
-            return true;
-
-        if (fState == EState::eReady)
+        CFile::CFile(const QString &bifFile, bool loadImages) :
+            fBIFFile(bifFile)
         {
-            if (fIODevice && fIODevice->isOpen() && fIODevice->isReadable())
+            loadBIFFromFile(loadImages);
+        }
+
+        CFile::CFile()
+        {
+        }
+
+        CFile::~CFile()
+        {
+            if (fFile)
+                delete fFile;
+        }
+
+        void CFile::loadBIFFromFile(bool loadImages)
+        {
+            if (!openFile())
+                return;
+
+            loadBIFFromIODevice(loadImages);
+            if (fFile && loadImages)
+                fFile->close();
+        }
+
+        void CFile::loadBIFFromIODevice(bool loadImages)
+        {
+            if (!checkForOpen())
+                return;
+
+            if (!parseHeader(loadImages))
+                return;
+        }
+
+        std::pair< bool, QImage > CFile::read(QIODevice * device, int frameNum)
+        {
+            fIODevice = device;
+            if (!device)
+                return { false, {} };
+            loadBIFFromIODevice(false);
+            if (fState != EState::eReadingImages)
+                return { false, {} };
+
+            auto image = this->image(frameNum);
+            return { !image.isNull() && (fState == EState::eReadingImages), image };
+        }
+
+        bool CFile::readHeader(QIODevice * device)
+        {
+            fIODevice = device;
+            if (!device)
+                return false;
+            return parseHeader(false);
+        }
+
+        QSize CFile::imageSize() const
+        {
+            if (fState != EState::eReadingImages)
+                return QSize();
+            if (fBIFs.empty())
+                return QSize();
+            if (!fBIFs[0].fImage.has_value())
+                return QSize();
+            return fBIFs[0].fImage.value().second.size();
+        }
+
+        bool CFile::checkForOpen()
+        {
+            if (fState == EState::eDeviceOpen)
+                return true;
+
+            if (fState == EState::eReady)
             {
-                fState = EState::eDeviceOpen;
+                if (fIODevice && fIODevice->isOpen() && fIODevice->isReadable())
+                {
+                    fState = EState::eDeviceOpen;
+                }
+                else
+                {
+                    fState = EState::eError;
+                    fErrorString = QObject::tr("File '%1' not open yet").arg(fBIFFile);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        bool CFile::parseHeader(bool loadImages)
+        {
+            if (!checkForOpen())
+                return false;
+
+            if (fState == EState::eError)
+                return false;
+            if (fState != EState::eDeviceOpen)
+                return true;// already been read
+
+            fState = EState::eError;
+            device()->seek(0);
+            auto header = device()->read(64); // reads 64 bytes of data, the complete header minus the index
+
+            if (header.length() != 64)
+            {
+                fErrorString = QObject::tr("Could not read in header");
+                return false;
+            }
+
+            fMagicNumber = header.left(8);
+            if (!validateMagicNumber(fMagicNumber))
+            {
+                fErrorString = QObject::tr("Invalid Magic Number");
+                return false;
+            }
+
+            bool aOK;
+            fVersion = getValue(header.mid(8, 4), "Version", aOK);
+            if (!aOK)
+                return false;
+
+            fNumImages = getValue(header.mid(12, 4), "Number of Images", aOK);
+            if (!aOK)
+                return false;
+
+            fTSMultiplier = getValue(header.mid(16, 4), "Timestamp Multiplier (ms/frame)", aOK);
+            if (!aOK)
+                return false;
+
+            fReserved = header.mid(20, 44);
+            if (fReserved.length() != 44)
+            {
+                fErrorString = QObject::tr("Invalid header, reserved space isn't complete");
+                return false;
+            }
+            if (fReserved != QByteArray(44, '\0'))
+            {
+                fErrorString = QObject::tr("Invalid header, reserved space isn't 44 bytes of zero");
+                return false;
+            }
+
+            fState = EState::eReadHeaderBase;
+            if (!parseIndex())
+                return false;
+            if (loadImages)
+            {
+                return this->loadImages();
             }
             else
             {
-                fState = EState::eError;
-                fErrorString = QObject::tr("File '%1' not open yet").arg(fBIFFile);
+                return loadImage(0, true).first; // always load one so size can be returned
+            }
+            return false;
+        }
+
+        bool CFile::validateMagicNumber(const QByteArray & magicNumber)
+        {
+            static auto sMagicNumber = QByteArray("\x89\x42\x49\x46\x0d\x0a\x1a\x0a");
+
+            return (magicNumber == sMagicNumber);
+        }
+
+        bool CFile::parseIndex()
+        {
+            if (fState != EState::eReadHeaderBase)
+                return false;
+
+            fState = EState::eError;
+
+            auto numEntries = std::get< 2 >(fNumImages) + 1;
+            auto numBytes = numEntries * 8;
+
+            auto indexData = device()->read(numBytes);
+            if (indexData.length() != numBytes)
+            {
+                fErrorString = QObject::tr("Index data truncated");
                 return false;
             }
-        }
-        return true;
-    }
-
-    bool CBIFFile::parseHeader( bool loadImages )
-    {
-        if ( !checkForOpen() )
-            return false;
-
-        if (fState == EState::eError)
-            return false;
-        if (fState != EState::eDeviceOpen)
-            return true;// already been read
-
-        fState = EState::eError;
-        device()->seek(0);
-        auto header = device()->read( 64 ); // reads 64 bytes of data, the complete header minus the index
-
-        if ( header.length() != 64 )
-        {
-            fErrorString = QObject::tr( "Could not read in header" );
-            return false;
-        }
-
-        fMagicNumber = header.left(8);
-        if (!validateMagicNumber(fMagicNumber))
-        {
-            fErrorString = QObject::tr("Invalid Magic Number");
-            return false;
-        }
-
-        bool aOK;
-        fVersion = getValue( header.mid( 8, 4 ), "Version", aOK );
-        if (!aOK)
-            return false;
-
-        fNumImages = getValue( header.mid( 12, 4 ), "Number of Images", aOK );
-        if (!aOK)
-            return false;
-
-        fTSMultiplier = getValue( header.mid( 16, 4 ), "Timestamp Multiplier (ms/frame)", aOK );
-        if (!aOK)
-            return false;
-
-        fReserved = header.mid( 20, 44 );
-        if ( fReserved.length() != 44 )
-        {
-            fErrorString = QObject::tr( "Invalid header, reserved space isn't complete" );
-            return false;
-        }
-        if ( fReserved != QByteArray( 44, '\0' ) )
-        {
-            fErrorString = QObject::tr( "Invalid header, reserved space isn't 44 bytes of zero" );
-            return false;
-        }
-
-        fState = EState::eReadHeaderBase;
-        if (!parseIndex())
-            return false;
-        if (loadImages)
-        {
-            return this->loadImages();
-        }
-        else
-        {
-            return loadImage(0, true).first; // always load one so size can be returned
-        }
-        return false;
-    }
-
-    bool CBIFFile::validateMagicNumber(const QByteArray & magicNumber)
-    {
-        static auto sMagicNumber = QByteArray("\x89\x42\x49\x46\x0d\x0a\x1a\x0a");
-
-        return (magicNumber == sMagicNumber);
-    }
-
-    bool CBIFFile::parseIndex()
-    {
-        if ( fState != EState::eReadHeaderBase )
-            return false;
-
-        fState = EState::eError;
-
-        auto numEntries = std::get< 2 >(fNumImages) + 1;
-        auto numBytes = numEntries * 8;
-
-        auto indexData = device()->read(numBytes);
-        if (indexData.length() != numBytes)
-        {
-            fErrorString = QObject::tr("Index data truncated");
-            return false;
-        }
-        fBIFs.reserve(numEntries);
-        SBIF * prev = nullptr;
-        for (uint32_t ii = 0; ii < numEntries; ++ii)
-        {
-            auto tsPos = (ii * 8);
-            auto offsetPos = 4 + (ii * 8);
-            bool aOK;
-            auto frameNum = getValue(indexData.mid(tsPos, 4), QObject::tr("BIF Index ts# %1").arg(ii), aOK);
-            if (!aOK)
-                return false;
-
-            auto absOffset = getValue(indexData.mid(offsetPos, 4), QObject::tr("BIF Index abs offset# %1").arg(ii), aOK);
-            if (!aOK)
-                return false;
-
-            fBIFs.push_back(SBIF(frameNum, absOffset, prev));
-            prev = &fBIFs.at(ii);
-        }
-
-        if (!fBIFs.back().isLastFrame())
-        {
-            fErrorString = QObject::tr("BIF entry #%1 in file '%2' is not the End of BIFs token").arg(fBIFs.size()).arg(fBIFFile);
-            return false;
-        }
-        fBIFs.pop_back();
-        fState = EState::eReadHeaderIndex;
-        return true;
-    }
-
-    bool CBIFFile::loadImages()
-    {
-        if (fState != EState::eReadHeaderIndex)
-            return false;
-
-        for (uint32_t ii = 0; ii < fBIFs.size() - 1; ++ii)
-        {
-            auto aOK = loadImage(ii, true);
-            if (!aOK.first)
+            fBIFs.reserve(numEntries);
+            SBIFImage * prev = nullptr;
+            for (uint32_t ii = 0; ii < numEntries; ++ii)
             {
-                fErrorString = aOK.second;
+                auto tsPos = (ii * 8);
+                auto offsetPos = 4 + (ii * 8);
+                bool aOK;
+                auto frameNum = getValue(indexData.mid(tsPos, 4), QObject::tr("BIF Index ts# %1").arg(ii), aOK);
+                if (!aOK)
+                    return false;
+
+                auto absOffset = getValue(indexData.mid(offsetPos, 4), QObject::tr("BIF Index abs offset# %1").arg(ii), aOK);
+                if (!aOK)
+                    return false;
+
+                fBIFs.push_back(SBIFImage(frameNum, absOffset, prev));
+                prev = &fBIFs.at(ii);
+            }
+
+            if (!fBIFs.back().isLastFrame())
+            {
+                fErrorString = QObject::tr("BIF entry #%1 in file '%2' is not the End of BIFs token").arg(fBIFs.size()).arg(fBIFFile);
                 return false;
             }
-        }
-        return fState == EState::eReadingImages;
-    }
-
-    std::pair< bool, QString > CBIFFile::loadImage( size_t frameNum, bool loadImageToFrame, int *insertStart, int *numInserted )
-    {
-        if ( frameNum >= fBIFs.size() )
-            return{ false, "Invalid argument" };
-
-        auto aOK = std::make_pair( true, QString() );
-
-        bool addingImages = ( fLastImageLoaded <= frameNum );
-        if ( addingImages )
-        {
-            if ( insertStart )
-                *insertStart = fLastImageLoaded;
-            if ( numInserted )
-                *numInserted = static_cast<int>( frameNum - fLastImageLoaded ) + 1;
+            fBIFs.pop_back();
+            fState = EState::eReadHeaderIndex;
+            return true;
         }
 
-        if (loadImageToFrame)
+        bool CFile::loadImages()
         {
-            while (fLastImageLoaded <= frameNum)
+            if (fState != EState::eReadHeaderIndex)
+                return false;
+
+            for (uint32_t ii = 0; ii < fBIFs.size() - 1; ++ii)
             {
-                auto curr = fBIFs[fLastImageLoaded].loadImage(device(), fBIFFile);
-                if (!curr.first)
+                auto aOK = loadImage(ii, true);
+                if (!aOK.first)
+                {
+                    fErrorString = aOK.second;
+                    return false;
+                }
+            }
+            return fState == EState::eReadingImages;
+        }
+
+        std::pair< bool, QString > CFile::loadImage(size_t frameNum, bool loadImageToFrame, int *insertStart, int *numInserted)
+        {
+            if (frameNum >= fBIFs.size())
+                return{ false, "Invalid argument" };
+
+            auto aOK = std::make_pair(true, QString());
+
+            bool addingImages = (fLastImageLoaded <= frameNum);
+            if (addingImages)
+            {
+                if (insertStart)
+                    *insertStart = fLastImageLoaded;
+                if (numInserted)
+                    *numInserted = static_cast<int>(frameNum - fLastImageLoaded) + 1;
+            }
+
+            if (loadImageToFrame)
+            {
+                while (fLastImageLoaded <= frameNum)
+                {
+                    auto curr = fBIFs[fLastImageLoaded].loadImage(device(), fBIFFile);
+                    if (!curr.first)
+                    {
+                        fState = EState::eError;
+                        aOK.first = false;
+                        aOK.second = curr.second;
+                        return aOK;
+                    }
+                    fLastImageLoaded++;
+                }
+                fState = EState::eReadingImages;
+                return aOK;
+            }
+            else
+            {
+                auto curr = fBIFs[frameNum].loadImage(device(), fBIFFile);
+                return curr;
+            }
+        }
+
+        QImage CFile::imageToFrame(size_t imageNum, int *insertStart, int *numInserted)
+        {
+            if (!loadImage(imageNum, true, insertStart, numInserted).first || !fBIFs[imageNum].fImage.has_value())
+                return QImage();
+
+            return fBIFs[imageNum].fImage.value().second;
+        }
+
+        QImage CFile::image(size_t imageNum)
+        {
+            if (!loadImage(imageNum, false).first || !fBIFs[imageNum].fImage.has_value())
+                return QImage();
+
+            return fBIFs[imageNum].fImage.value().second;
+        }
+
+        void CFile::fetchMore()
+        {
+            size_t remainder = imageCount() - fLastImageLoaded;
+            int itemsToFetch = std::min(8ULL, remainder);
+            if (itemsToFetch == 0)
+                return;
+
+            for (size_t ii = 0; ii < itemsToFetch; ++ii)
+            {
+                loadImage(fLastImageLoaded, true);
+            }
+        }
+
+        T32BitValue CFile::getValue(const QByteArray & in, std::optional< QString > desc, bool & aOK)
+        {
+            aOK = false;
+            if (in.length() > 4)
+            {
+                if (desc.has_value())
                 {
                     fState = EState::eError;
-                    aOK.first = false;
-                    aOK.second = curr.second;
-                    return aOK;
+                    fErrorString = QObject::tr("Invalid '%1' field").arg(desc.value());
                 }
-                fLastImageLoaded++;
+                return { QByteArray(), QString(), -1 };
             }
-            fState = EState::eReadingImages;
-            return aOK;
-        }
-        else
-        {
-            auto curr = fBIFs[frameNum].loadImage(device(), fBIFFile);
-            return curr;
-        }
-    }
 
-    QImage CBIFFile::imageToFrame( size_t imageNum, int *insertStart, int *numInserted )
-    {
-        if ( !loadImage( imageNum, true, insertStart, numInserted ).first || !fBIFs[imageNum].fImage.has_value() )
-            return QImage();
-
-        return fBIFs[imageNum].fImage.value().second;
-    }
-
-    QImage CBIFFile::image(size_t imageNum)
-    {
-        if (!loadImage(imageNum, false).first || !fBIFs[imageNum].fImage.has_value())
-            return QImage();
-
-        return fBIFs[imageNum].fImage.value().second;
-    }
-
-    void CBIFFile::fetchMore()
-    {
-        size_t remainder = imageCount() - fLastImageLoaded;
-        int itemsToFetch = std::min( 8ULL, remainder );
-        if ( itemsToFetch == 0 )
-            return;
-
-        for ( size_t ii = 0; ii < itemsToFetch; ++ii )
-        {
-            loadImage( fLastImageLoaded, true );
-        }
-    }
-
-    T32BitValue CBIFFile::getValue(const QByteArray & in, std::optional< QString > desc, bool & aOK)
-    {
-        aOK = false;
-        if ( in.length() > 4 )
-        {
-            if ( desc.has_value() )
+            uint32_t retVal = 0;
+            for (auto ii = 0; ii < in.length(); ++ii)
             {
-                fState = EState::eError;
-                fErrorString = QObject::tr( "Invalid '%1' field" ).arg( desc.value() );
+                auto curr = static_cast<uint8_t>(in.at(ii)) << (8 * ii);
+                retVal |= curr;
             }
-            return { QByteArray(), QString(), -1 };
+            aOK = true;
+            return { in, prettyPrint(in), retVal };
         }
 
-        uint32_t retVal = 0;
-        for ( auto ii = 0; ii < in.length(); ++ii )
+        QString CFile::prettyPrint(const QByteArray &in) const
         {
-            auto curr = static_cast<uint8_t>( in.at( ii ) ) << ( 8 * ii );
-            retVal |= curr;
+            QString retVal;
+            retVal.reserve(in.length() * 3);
+            bool first = true;
+            for (auto ii : in)
+            {
+                if (!first)
+                    retVal += " ";
+                retVal += QString("%1").arg(static_cast<uint8_t>(ii), 2, 16, QChar('0')).toUpper();
+                first = false;
+            }
+            return retVal;
         }
-        aOK = true;
-        return { in, prettyPrint( in ), retVal };
-    }
 
-    QString CBIFFile::prettyPrint( const QByteArray &in ) const
-    {
-        QString retVal;
-        retVal.reserve( in.length() * 3 );
-        bool first = true;
-        for ( auto ii : in )
+        QIODevice * CFile::device() const
         {
-            if ( !first )
-                retVal += " ";
-            retVal += QString( "%1" ).arg( static_cast<uint8_t>( ii ), 2, 16, QChar( '0' ) ).toUpper();
-            first = false;
+            if (fFile)
+                return fFile;
+            return fIODevice;
         }
-        return retVal;
-    }
 
-    QIODevice * CBIFFile::device() const
-    {
-        if (fFile)
-            return fFile;
-        return fIODevice;
-    }
-
-    bool CBIFFile::openFile()
-    {
-        fState = EState::eError;
-        if ( fBIFFile.isEmpty() )
+        bool CFile::openFile()
         {
-            fErrorString = QObject::tr( "Filename not set" );
-            return false;
+            fState = EState::eError;
+            if (fBIFFile.isEmpty())
+            {
+                fErrorString = QObject::tr("Filename not set");
+                return false;
+            }
+
+            fFile = new QFile(fBIFFile, nullptr);
+            if (!fFile->exists())
+            {
+                fErrorString = QObject::tr("File '%1' does not exist");
+                return false;
+            }
+
+            if (!fFile->open(QFile::ReadOnly))
+            {
+                fErrorString = QObject::tr("Could not open '%1' for reading, please check permissions");
+                return false;
+            }
+
+            fIODevice = fFile;
+            fState = EState::eDeviceOpen;
+
+            return true;
         }
 
-        fFile = new QFile( fBIFFile, nullptr );
-        if ( !fFile->exists() )
+        SBIFImage::SBIFImage(T32BitValue num, T32BitValue offset, SBIFImage *prev) :
+            fBIFNum(num),
+            fOffset(offset)
         {
-            fErrorString = QObject::tr( "File '%1' does not exist" );
-            return false;
+            if (prev)
+            {
+                auto prevAbsPos = std::get< 2 >(prev->fOffset);
+                auto currAbsPos = std::get< 2 >(fOffset);
+                prev->fSize = currAbsPos - prevAbsPos;
+            }
+            Q_ASSERT(std::get< 2 >(fOffset));
         }
 
-        if ( !fFile->open( QFile::ReadOnly ) )
+        bool SBIFImage::isLastFrame() const
         {
-            fErrorString = QObject::tr( "Could not open '%1' for reading, please check permissions" );
-            return false;
+            return (std::get< 2 >(fBIFNum) == -1);
         }
 
-        fIODevice = fFile;
-        fState = EState::eDeviceOpen;
-
-        return true;
-    }
-
-    SBIF::SBIF( T32BitValue num, T32BitValue offset, SBIF *prev ) :
-        fBIFNum( num ),
-        fOffset( offset )
-    {
-        if ( prev )
+        std::pair< bool, QString > SBIFImage::loadImage(QIODevice *ioDevice, const QString &fn)
         {
-            auto prevAbsPos = std::get< 2 >( prev->fOffset );
-            auto currAbsPos = std::get< 2 >( fOffset );
-            prev->fSize = currAbsPos - prevAbsPos;
-        }
-        Q_ASSERT( std::get< 2 >( fOffset ) );
-    }
+            if (fImage.has_value())
+                return { true, QString() };
+            if (!ioDevice || !ioDevice->isOpen() || !ioDevice->isReadable())
+            {
+                return { false, QObject::tr("File '%1' not open yet").arg(fn) };
+            }
 
-    bool SBIF::isLastFrame() const
-    {
-        return ( std::get< 2 >( fBIFNum ) == -1 );
-    }
+            if (!ioDevice->seek(std::get< 2 >(fOffset)))
+            {
+                return { false, QObject::tr("Could not seek to position '%1' in file '%2' to load BIF image #%3").arg(std::get< 2 >(fOffset)).arg(fn).arg(std::get< 2 >(fBIFNum)) };
+            }
 
-    std::pair< bool, QString > SBIF::loadImage( QIODevice *ioDevice, const QString &fn )
-    {
-        if ( fImage.has_value() )
+            auto data = ioDevice->read(fSize);
+            if (data.length() != fSize)
+            {
+                return { false, QObject::tr("Could not read '%1' of data starting at position '%2' to load BIF image #%4 from file '%3'").arg(fSize).arg(std::get< 2 >(fOffset)).arg(fn).arg(std::get< 2 >(fBIFNum)) };
+            }
+
+            auto image = QImage::fromData(data);
+            if (image.isNull())
+            {
+                return { false, QObject::tr("Invalid JPG format for BIF #%2 in file '%2'").arg(std::get< 2 >(fBIFNum)).arg(fn) };
+            }
+            fImage = { data, image };
             return { true, QString() };
-        if ( !ioDevice || !ioDevice->isOpen() || !ioDevice->isReadable() )
-        {
-            return { false, QObject::tr( "File '%1' not open yet" ).arg( fn ) };
         }
-
-        if ( !ioDevice->seek( std::get< 2 >( fOffset ) ) )
-        {
-            return { false, QObject::tr( "Could not seek to position '%1' in file '%2' to load BIF image #%3" ).arg( std::get< 2 >( fOffset ) ).arg( fn ).arg( std::get< 2 >( fBIFNum ) ) };
-        }
-
-        auto data = ioDevice->read( fSize );
-        if ( data.length() != fSize )
-        {
-            return { false, QObject::tr( "Could not read '%1' of data starting at position '%2' to load BIF image #%4 from file '%3'" ).arg( fSize ).arg( std::get< 2 >( fOffset ) ).arg( fn ).arg( std::get< 2 >( fBIFNum ) ) };
-        }
-
-        auto image = QImage::fromData( data );
-        if ( image.isNull() )
-        {
-            return { false, QObject::tr( "Invalid JPG format for BIF #%2 in file '%2'" ).arg( std::get< 2 >( fBIFNum ) ).arg( fn ) };
-        }
-        fImage = { data, image };
-        return { true, QString() };
     }
 }

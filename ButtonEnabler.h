@@ -28,24 +28,26 @@ class QAbstractItemView;
 class QAbstractButton;
 class QItemSelection;
 class QLineEdit;
-
-class CButtonEnabler : public QObject
+namespace NSABUtils
 {
-Q_OBJECT;
-public:
-    CButtonEnabler( QAbstractItemView * view, QAbstractButton * btn, QObject * parent=nullptr );
-    CButtonEnabler( QLineEdit * le, QAbstractButton * btn, QObject * parent=nullptr );
+    class CButtonEnabler : public QObject
+    {
+        Q_OBJECT;
+    public:
+        CButtonEnabler(QAbstractItemView * view, QAbstractButton * btn, QObject * parent = nullptr);
+        CButtonEnabler(QLineEdit * le, QAbstractButton * btn, QObject * parent = nullptr);
 
-    void setLineEditIsFile(){ fLineEditIsFile = true; };
-public slots:
-    void slotReset();
+        void setLineEditIsFile() { fLineEditIsFile = true; };
+    public slots:
+        void slotReset();
 
-private slots:
-    void slotSelectionChanged( const QItemSelection  & selected, const QItemSelection  & );
-    void slotTextChanged( const QString & changed );
-private:
-    QAbstractButton * fButton;
-    bool fLineEditIsFile{ true };
-};
+    private slots:
+        void slotSelectionChanged(const QItemSelection  & selected, const QItemSelection  &);
+        void slotTextChanged(const QString & changed);
+    private:
+        QAbstractButton * fButton;
+        bool fLineEditIsFile{ true };
+    };
+}
 #endif
 

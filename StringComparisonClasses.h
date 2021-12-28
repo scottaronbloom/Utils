@@ -25,44 +25,46 @@
 
 #include <string>
 #include <QString>
-namespace NStringUtils
+namespace NSABUtils
 {
-    // Functors
-    // Functor noCaseStringCmp: case-less string comparisons
-    class noCaseStringCmp
+    namespace NStringUtils
     {
-    public:
-        bool operator() ( const std::string& s1, const std::string& s2 ) const;
-    };
+        // Functors
+        // Functor noCaseStringCmp: case-less string comparisons
+        class noCaseStringCmp
+        {
+        public:
+            bool operator() (const std::string& s1, const std::string& s2) const;
+        };
 
-    class noCaseStringEq
-    {
-    public:
-        bool operator() ( const std::string& s1, const std::string& s2 ) const;
-    };
+        class noCaseStringEq
+        {
+        public:
+            bool operator() (const std::string& s1, const std::string& s2) const;
+        };
 
-    struct noCaseStringHash
-    {
-        size_t operator()( const std::string& s ) const;
-    };
+        struct noCaseStringHash
+        {
+            size_t operator()(const std::string& s) const;
+        };
 
-    class noCaseQStringCmp
-    {
-    public:
-        bool operator() ( const QString & s1, const QString & s2 ) const;
-    };
+        class noCaseQStringCmp
+        {
+        public:
+            bool operator() (const QString & s1, const QString & s2) const;
+        };
 
-    class noCaseQStringEq
-    {
-    public:
-        bool operator() ( const QString & s1, const QString & s2 ) const;
-    };
+        class noCaseQStringEq
+        {
+        public:
+            bool operator() (const QString & s1, const QString & s2) const;
+        };
 
-    struct noCaseQStringHash
-    {
-        size_t operator()( const QString & s ) const;
-    };
+        struct noCaseQStringHash
+        {
+            size_t operator()(const QString & s) const;
+        };
+    }
 }
-
 #endif 
 

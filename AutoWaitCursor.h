@@ -25,19 +25,21 @@
 
 
 #include <QObject>
-class CAutoWaitCursor : public QObject // allows for delete later
+namespace NSABUtils
 {
-    Q_OBJECT;
-public:
-    CAutoWaitCursor( QObject * revertOnOpen = nullptr );
-    ~CAutoWaitCursor();
+    class CAutoWaitCursor : public QObject // allows for delete later
+    {
+        Q_OBJECT;
+    public:
+        CAutoWaitCursor(QObject * revertOnOpen = nullptr);
+        ~CAutoWaitCursor();
 
-    void restore();
+        void restore();
 
-    bool eventFilter( QObject *, QEvent * );
-    static bool active();
-private:
-    QObject * fRestoreOnOpenWidget;
-};
-
+        bool eventFilter(QObject *, QEvent *);
+        static bool active();
+    private:
+        QObject * fRestoreOnOpenWidget;
+    };
+}
 #endif

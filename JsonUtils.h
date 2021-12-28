@@ -29,137 +29,139 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-template< typename T >
-void ToJson( const T& value, QJsonValue& obj )
+namespace NSABUtils
 {
-    obj = QJsonValue( value );
-}
-
-void ToJson( const QStringList& value, QJsonValue& obj );
-
-template< typename T >
-void ToJson( const std::list< T > & value, QJsonValue& obj )
-{
-    QJsonArray retVal;
-    for ( auto && ii : value )
+    template< typename T >
+    void ToJson(const T& value, QJsonValue& obj)
     {
-        QJsonValue curr;
-        ToJson( ii, curr );
-        retVal.append( curr );
+        obj = QJsonValue(value);
     }
-    obj = retVal;
-}
 
-template< typename T >
-void ToJson( const std::set< T >& value, QJsonValue& obj )
-{
-    QJsonArray retVal;
-    for ( auto&& ii : value )
+    void ToJson(const QStringList& value, QJsonValue& obj);
+
+    template< typename T >
+    void ToJson(const std::list< T > & value, QJsonValue& obj)
     {
-        QJsonValue curr;
-        ToJson( ii, curr );
-        retVal.append( curr );
+        QJsonArray retVal;
+        for (auto && ii : value)
+        {
+            QJsonValue curr;
+            ToJson(ii, curr);
+            retVal.append(curr);
+        }
+        obj = retVal;
     }
-    obj = retVal;
-}
-template< typename T1, typename T2 >
-void ToJson( const std::pair< T1, T2 >& value, QJsonValue& obj )
-{
-    QJsonArray retVal;
 
-    QJsonValue first;
-    ToJson( value.first, first );
-    retVal.append( first );
-
-    QJsonValue second;
-    ToJson( value.second, second );
-    retVal.append( second );
-
-    obj = retVal;
-}
-
-template< typename T2 >
-void ToJson( const std::unordered_map< QString, T2 >& value, QJsonValue& obj )
-{
-    QJsonObject retVal;
-    for ( auto&& ii : value )
+    template< typename T >
+    void ToJson(const std::set< T >& value, QJsonValue& obj)
     {
-        QJsonValue curr;
-        ToJson( ii.second, curr );
-        retVal[ii.first] = curr;
+        QJsonArray retVal;
+        for (auto&& ii : value)
+        {
+            QJsonValue curr;
+            ToJson(ii, curr);
+            retVal.append(curr);
+        }
+        obj = retVal;
     }
-    obj = retVal;
-}
-
-void FromJson( QStringList& value, const QJsonValue& obj );
-void FromJson( bool& value, const QJsonValue& obj );
-void FromJson( double& value, const QJsonValue& obj );
-void FromJson( QString& value, const QJsonValue& obj );
-void FromJson( int& value, const QJsonValue& obj );
-
-template< typename T >
-void FromJson( std::list< T >& value, const QJsonValue& obj )
-{
-    value.clear();
-    if ( !obj.isArray() )
-        return;
-    auto array = obj.toArray();
-    for ( int ii = 0; ii < array.count(); ++ii )
+    template< typename T1, typename T2 >
+    void ToJson(const std::pair< T1, T2 >& value, QJsonValue& obj)
     {
-        QJsonValue currValue = array.at( ii );
-        T currObj;
-        FromJson( currObj, currValue );
-        value.push_back( currObj );
-    }
-}
+        QJsonArray retVal;
 
-template< typename T >
-void FromJson( std::set< T >& value, const QJsonValue& obj )
-{
-    value.clear();
-    if ( !obj.isArray() )
-        return;
-    auto array = obj.toArray();
-    for ( int ii = 0; ii < array.count(); ++ii )
+        QJsonValue first;
+        ToJson(value.first, first);
+        retVal.append(first);
+
+        QJsonValue second;
+        ToJson(value.second, second);
+        retVal.append(second);
+
+        obj = retVal;
+    }
+
+    template< typename T2 >
+    void ToJson(const std::unordered_map< QString, T2 >& value, QJsonValue& obj)
     {
-        QJsonValue currValue = array.at( ii );
-        T currObj;
-        FromJson( currObj, currValue );
-        value.insert( currObj );
+        QJsonObject retVal;
+        for (auto&& ii : value)
+        {
+            QJsonValue curr;
+            ToJson(ii.second, curr);
+            retVal[ii.first] = curr;
+        }
+        obj = retVal;
     }
-}
 
-template< typename T1, typename T2 >
-void FromJson( std::pair< T1, T2 >& value, const QJsonValue& obj )
-{
-    value = std::make_pair( T1(), T2() );
-    if ( !obj.isArray() )
-        return;
-    auto array = obj.toArray();
-    if ( array.count() != 2 )
-        return;
-    auto first = array.at( 0 );
-    FromJson( value.first, first );
+    void FromJson(QStringList& value, const QJsonValue& obj);
+    void FromJson(bool& value, const QJsonValue& obj);
+    void FromJson(double& value, const QJsonValue& obj);
+    void FromJson(QString& value, const QJsonValue& obj);
+    void FromJson(int& value, const QJsonValue& obj);
 
-    auto second = array.at( 1 );
-    FromJson( value.second, second );
-}
-
-template< typename T2 >
-void FromJson( std::unordered_map< QString, T2 >& value, const QJsonValue& obj )
-{
-    value.clear();
-    if ( !obj.isObject() )
-        return;
-    auto map = obj.toObject();
-    for ( auto && ii = map.constBegin(); ii != map.constEnd(); ++ii )
+    template< typename T >
+    void FromJson(std::list< T >& value, const QJsonValue& obj)
     {
-        auto key = ii.key();
-        auto currValue = ii.value();
-        T2 currObj;
-        FromJson( currObj, currValue );
-        value[key] = currObj;
+        value.clear();
+        if (!obj.isArray())
+            return;
+        auto array = obj.toArray();
+        for (int ii = 0; ii < array.count(); ++ii)
+        {
+            QJsonValue currValue = array.at(ii);
+            T currObj;
+            FromJson(currObj, currValue);
+            value.push_back(currObj);
+        }
+    }
+
+    template< typename T >
+    void FromJson(std::set< T >& value, const QJsonValue& obj)
+    {
+        value.clear();
+        if (!obj.isArray())
+            return;
+        auto array = obj.toArray();
+        for (int ii = 0; ii < array.count(); ++ii)
+        {
+            QJsonValue currValue = array.at(ii);
+            T currObj;
+            FromJson(currObj, currValue);
+            value.insert(currObj);
+        }
+    }
+
+    template< typename T1, typename T2 >
+    void FromJson(std::pair< T1, T2 >& value, const QJsonValue& obj)
+    {
+        value = std::make_pair(T1(), T2());
+        if (!obj.isArray())
+            return;
+        auto array = obj.toArray();
+        if (array.count() != 2)
+            return;
+        auto first = array.at(0);
+        FromJson(value.first, first);
+
+        auto second = array.at(1);
+        FromJson(value.second, second);
+    }
+
+    template< typename T2 >
+    void FromJson(std::unordered_map< QString, T2 >& value, const QJsonValue& obj)
+    {
+        value.clear();
+        if (!obj.isObject())
+            return;
+        auto map = obj.toObject();
+        for (auto && ii = map.constBegin(); ii != map.constEnd(); ++ii)
+        {
+            auto key = ii.key();
+            auto currValue = ii.value();
+            T2 currObj;
+            FromJson(currObj, currValue);
+            value[key] = currObj;
+        }
     }
 }
-
 #endif 

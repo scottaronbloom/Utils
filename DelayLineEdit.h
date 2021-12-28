@@ -25,54 +25,56 @@
 #include <QLineEdit>
 class QTimer;
 
-class CDelayLineEdit : public QLineEdit
+namespace NSABUtils
 {
-    Q_OBJECT;
-public:
-    enum class ELineEditStatus
+    class CDelayLineEdit : public QLineEdit
     {
-        ePending,
-        eOK,
-        eNotOK
+        Q_OBJECT;
+    public:
+        enum class ELineEditStatus
+        {
+            ePending,
+            eOK,
+            eNotOK
+        };
+
+        explicit CDelayLineEdit(QWidget* parent = nullptr);
+        explicit CDelayLineEdit(const QString& text, QWidget* parent = nullptr);
+        explicit CDelayLineEdit(const QString& text, int delayMS, QWidget* parent = nullptr);
+
+        virtual ~CDelayLineEdit();
+        virtual void keyPressEvent(QKeyEvent *event);
+        void setText(const QString &text);
+        void setDelay(int delayMS);
+
+        void setLineEditColor(ELineEditStatus status);
+        void setLineEditColor(bool aOK);
+        void setIsOKFunction(std::function< bool(const QString &text) > func, const QString &errorMsg = {})
+        {
+            fIsOK.first = func;
+            fIsOK.second = errorMsg;
+        }
+    Q_SIGNALS:
+        void sigTextChangedAfterDelay(const QString& text);
+        void sigTextEditedAfterDelay(const QString& text);
+        void sigFinishedEditingAfterDelay();
+
+    public Q_SLOTS:
+        void slotTextChanged();
+        void slotTextEdited();
+        void slotChangedTimerTimeout();
+        void slotEditTimerTimeout();
+
+    private:
+        void connectToEditor(bool connectOrDisconnect);
+
+        int fDelayMS{ 500 };
+        QTimer* fChangedTimer{ nullptr };
+        QTimer* fEditedTimer{ nullptr };
+        bool fEditingFinished{ false };
+        std::pair< std::function< bool(const QString &text) >, QString > fIsOK;
+        ELineEditStatus fStatus{ ELineEditStatus::ePending };
     };
-
-    explicit CDelayLineEdit( QWidget* parent = nullptr );
-    explicit CDelayLineEdit( const QString& text, QWidget* parent = nullptr );
-    explicit CDelayLineEdit( const QString& text, int delayMS, QWidget* parent = nullptr );
-
-    virtual ~CDelayLineEdit();
-    virtual void keyPressEvent( QKeyEvent *event );
-    void setText( const QString &text );
-    void setDelay( int delayMS );
-
-    void setLineEditColor( ELineEditStatus status );
-    void setLineEditColor( bool aOK );
-    void setIsOKFunction( std::function< bool( const QString &text ) > func, const QString &errorMsg = {} )
-    {
-        fIsOK.first = func;
-        fIsOK.second = errorMsg;
-    }
-Q_SIGNALS:
-    void sigTextChangedAfterDelay( const QString& text );
-    void sigTextEditedAfterDelay( const QString& text );
-    void sigFinishedEditingAfterDelay();
-
-public Q_SLOTS:
-    void slotTextChanged();
-    void slotTextEdited();
-    void slotChangedTimerTimeout();
-    void slotEditTimerTimeout();
-
-private:
-    void connectToEditor( bool connectOrDisconnect );
-
-    int fDelayMS{ 500 };
-    QTimer* fChangedTimer{ nullptr };
-    QTimer* fEditedTimer{ nullptr };
-    bool fEditingFinished{ false };
-    std::pair< std::function< bool( const QString &text ) >, QString > fIsOK;
-    ELineEditStatus fStatus{ ELineEditStatus::ePending };
-};
-
+}
 #endif
 

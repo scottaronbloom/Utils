@@ -27,7 +27,7 @@
 #include <qt_windows.h>
 
 #ifdef Q_OS_WINDOWS
-namespace NUtils
+namespace NSABUtils
 {
     void CStayAwake::run()
     {

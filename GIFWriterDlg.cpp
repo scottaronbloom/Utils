@@ -23,7 +23,9 @@
 #include "GIFWriterDlg.h"
 #include "BIFFile.h"
 #include "GIFWriter.h"
+#ifdef _ALLOW_OPENSOURCEGIFWRITER_H
 #include "gif/gif-h/gif.h"
+#endif
 #include "QtUtils.h"
 
 #include <QMessageBox>
@@ -33,9 +35,9 @@
 
 #include "ui_GIFWriterDlg.h"
 
-namespace NUtils
+namespace NSABUtils
 {
-    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, int delayInMSec, QWidget * parent ) :
+    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget * parent ) :
         QDialog( parent ),
         fImpl( new Ui::CGIFWriterDlg )
     {
@@ -57,7 +59,7 @@ namespace NUtils
 #endif
     }
 
-    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CBIFFile > bifFile, QWidget * parent ) :
+    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, QWidget * parent ) :
         CGIFWriterDlg( bifFile, 2, parent )
     {
     }
@@ -71,7 +73,7 @@ namespace NUtils
     {
     }
 
-    void CGIFWriterDlg::setBIF( std::shared_ptr< NBIF::CBIFFile > bifFile )
+    void CGIFWriterDlg::setBIF( std::shared_ptr< NBIF::CFile > bifFile )
     {
         fBIF = bifFile;
         fImpl->startFrame->setValue( 1 );
@@ -246,7 +248,9 @@ namespace NUtils
         }
 
         std::unique_ptr< CGIFWriter > newWriter;
+#ifdef gif_h
         std::unique_ptr< GifWriter > oldWriter;
+#endif
         if ( fImpl->useNew->isChecked() )
         {
             newWriter = std::make_unique< CGIFWriter >( fn );
@@ -256,6 +260,7 @@ namespace NUtils
             newWriter->setLoopCount( loopCount() );
             newWriter->setDelay( delay() );
         }
+#ifdef gif_h
         else
         {
             oldWriter = std::make_unique< GifWriter >();
@@ -264,7 +269,7 @@ namespace NUtils
             oldWriter->oldImage = nullptr;
             GifBegin( oldWriter.get(), qPrintable( fn ), fBIF->imageSize().width(), fBIF->imageSize().height(), delay(), 8, dither(), loopCount() );
         }
-
+#endif
         bool wasCancelled = false;
         QProgressDialog dlg( this );
         dlg.setLabelText( tr( "Generating GIF" ) );
@@ -296,18 +301,22 @@ namespace NUtils
                         return false;
                 }
             }
+#ifdef gif_h
             else
             {
                 auto imageData = NQtUtils::imageToPixels( image );
                 GifWriteFrame( oldWriter.get(), imageData, image.width(), image.height(), delay(), flipImage(), 8, dither() );
                 delete[] imageData;
             }
+#endif
         }
 
         if ( newWriter )
             newWriter->writeEnd();
+#ifdef gif_h
         else
             GifEnd( oldWriter.get() );
+#endif
         if ( wasCancelled )
         {
             QFile::remove( fn );
