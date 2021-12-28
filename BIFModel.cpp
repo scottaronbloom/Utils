@@ -54,12 +54,12 @@ namespace NSABUtils
                 return QVariant();
             if (index.row() > fBIFFile->imageCount() || index.row() < 0)
                 return QVariant();
-            if (role == Qt::DisplayRole)
-                return QString("BIF #%1").arg(index.row());
-            else if (role == Qt::DecorationRole)
-            {
-                return QIcon(QPixmap::fromImage(fBIFFile->image(index.row())));
-            }
+            if ( role == Qt::DisplayRole )
+                return QString( "BIF #%1" ).arg( index.row() );
+            else if ( role == Qt::DecorationRole )
+                return QIcon( QPixmap::fromImage( fBIFFile->image( index.row() ) ) );
+            else if ( role == ECustomRoles::eImage )
+                return fBIFFile->image( index.row() );
             return QVariant();
         }
 

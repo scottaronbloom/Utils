@@ -36,11 +36,16 @@ namespace NSABUtils
         {
             Q_OBJECT;
         public:
+            enum ECustomRoles
+            {
+                eImage = Qt::UserRole + 1
+            };
+
             CModel(QObject *parent = nullptr);
 
             void setBIFFile(std::shared_ptr< CFile > bifFile);
 
-            virtual int rowCount(const QModelIndex &parent) const override;
+            virtual int rowCount(const QModelIndex &parent=QModelIndex()) const override;
             virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
             QImage image(size_t imageNum);
