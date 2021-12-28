@@ -200,6 +200,12 @@ namespace NSABUtils
     }
 
     void dumpImage(const char * title, const uint8_t * arr, int width, int height, const uint8_t * baseArray = nullptr);
+
+    template< template< typename > class T1, typename T2 >
+    std::unordered_set< T2 > hashFromList( const T1< T2 > & values )
+    {
+        return std::unordered_set< T2 >( { values.begin(), values.end() } );
+    }
 }
 
 template< std::size_t I = 0, typename... Tp>
