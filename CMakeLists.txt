@@ -88,6 +88,7 @@ add_library(SABUtils STATIC
 )
 
 add_definitions( -DNON_VIS_BUILD=1 )
+add_definitions( -DBIF_SCROLLBAR_SUPPORT=1 )
 set_target_properties( SABUtils PROPERTIES FOLDER Libs )
 if( SAB_ENABLE_TESTING )
 	add_subdirectory(UnitTests)

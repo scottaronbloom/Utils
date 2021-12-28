@@ -25,7 +25,6 @@ set(qtproject_SRCS
     AutoFetch.cpp
     BIFFile.cpp
     BIFModel.cpp
-    BIFScrollBar.cpp
     BIFWidget.cpp
     ButtonEnabler.cpp
     DelayComboBox.cpp
@@ -34,6 +33,7 @@ set(qtproject_SRCS
     DoubleProgressDlg.cpp
     GIFWriter.cpp
     GIFWriterDlg.cpp
+    ImageScrollBar.cpp
     utils.cpp
     FileCompare.cpp
     FileUtils.cpp
@@ -64,13 +64,13 @@ set(qtproject_H
     AutoWaitCursor.h
     BIFModel.h
     BIFWidget.h
-    BIFScrollBar.h
     ButtonEnabler.h
     DelayComboBox.h
     DelayLineEdit.h
     DelaySpinBox.h
     DoubleProgressDlg.h
     GIFWriterDlg.h
+    ImageScrollBar.h
     MD5.h
     SpinBox64.h
     SpinBox64U.h
