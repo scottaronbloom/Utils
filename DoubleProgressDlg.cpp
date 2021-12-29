@@ -447,10 +447,11 @@ namespace NSABUtils
     void CDoubleProgressDlg::setMinimumDuration(int msec)
     {
         fImpl->fMinimumDuration = msec;
-        if (fImpl->fPrimaryBar->isValueMinimum())
+        if ( ( fImpl->fPrimaryBar->value() == -1 ) || fImpl->fPrimaryBar->isValueMinimum())
         {
             fImpl->fForceTimer->stop();
-            fImpl->fForceTimer->start(msec);
+            if ( msec >= 0 )
+                fImpl->fForceTimer->start(msec);
         }
     }
 
