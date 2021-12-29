@@ -181,8 +181,8 @@ namespace NSABUtils
                 return QString();
 
             auto format = fImpl->fDialog->tr("%1").arg(fBar->format().trimmed());
-            format.replace("%v", QString::number(fBar->value()));
-            format.replace("%m", QString::number(fBar->maximum()));
+            format.replace("%v", QString::number(fBar->value()%fEventsPerIncrement));
+            format.replace("%m", QString::number(fBar->maximum() % fEventsPerIncrement ));
             format.replace("%p", QString::number(fBar->maximum() ? (100 * fBar->value() / fBar->maximum()) : 0));
             return format;
         }
@@ -245,11 +245,14 @@ namespace NSABUtils
             if (*this)
                 fLabel->setText(text);
         }
+        void setEventsPerIncrement( int value ) { fEventsPerIncrement = value; }
+        int  eventsPerIncrement() const { return fEventsPerIncrement; }
     private:
         std::pair< int, int > fRange{ 0,100 };
         QProgressBar * fBar{ nullptr };
         QLabel * fLabel{ nullptr };
         QString fFormat;
+        int fEventsPerIncrement{ 1 };
         CDoubleProgressDlgImpl * fImpl{ nullptr };
     };
     CDoubleProgressDlg::CDoubleProgressDlg(const QString & text, const QString & subTitle, const QString & cancelText, int min, int max, QWidget * parent, Qt::WindowFlags f) :
@@ -478,6 +481,26 @@ namespace NSABUtils
     bool CDoubleProgressDlg::autoReset() const
     {
         return fImpl->fAutoReset;
+    }
+
+    void CDoubleProgressDlg::setPrimaryEventsPerIncrement( int value )
+    {
+        fImpl->fPrimaryBar->setEventsPerIncrement( value );
+    }
+
+    int CDoubleProgressDlg::primaryEventsPerIncrement() const
+    {
+        return fImpl->fPrimaryBar->eventsPerIncrement();
+    }
+
+    void CDoubleProgressDlg::setSecondaryEventsPerIncrement( int value )
+    {
+        fImpl->fSecondaryBar->setEventsPerIncrement( value );
+    }
+
+    int CDoubleProgressDlg::secondaryEventsPerIncrement() const
+    {
+        return fImpl->fSecondaryBar->eventsPerIncrement();
     }
 
     void CDoubleProgressDlg::slotForceShow()

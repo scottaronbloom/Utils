@@ -73,8 +73,16 @@ namespace NSABUtils
         int value() const { return primaryValue(); }
         QString labelText() const { return title(); }
 
-        virtual QSize sizeHint() const override;
+        // for progress bars, one step may have 4 sub events
+        // set this value to for in these cases, default is 1
+        // this value is used in the label and label only
+        void setPrimaryEventsPerIncrement( int value );
+        int  primaryEventsPerIncrement() const;
+
+        void setSecondaryEventsPerIncrement( int value );
+        int  secondaryEventsPerIncrement() const;
     protected:
+        virtual QSize sizeHint() const override;
         virtual void closeEvent(QCloseEvent * e) override;
         virtual void resizeEvent(QResizeEvent *) override;
         virtual void changeEvent(QEvent * ev) override;
