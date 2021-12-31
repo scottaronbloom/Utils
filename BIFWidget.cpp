@@ -214,8 +214,6 @@ namespace NSABUtils
 
         void CWidget::setActive(bool isActive)
         {
-            if (fToolBar)
-                fToolBar->setVisible(isActive);
             validatePlayerActions(isActive);
         }
 
@@ -550,6 +548,9 @@ namespace NSABUtils
 
             fToolBar->clear();
 
+            updateItemForLayout( fToolBar );
+            fToolBar->addSeparator();
+
             auto label = new QLabel(tr("Player Speed Multiplier:"));
             label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             fToolBar->addWidget(label);
@@ -598,7 +599,6 @@ namespace NSABUtils
             fToolBar->addWidget(fPlayCountSB);
             fToolBar->addSeparator();
 
-            updateItemForLayout(fToolBar);
         }
 
         template< typename T>
@@ -606,7 +606,9 @@ namespace NSABUtils
         {
             if (fButtonLayout == EButtonsLayout::eNoButtons)
                 return;
-            item->addSeparator();
+            auto actions = item->actions();
+            if ( !actions.isEmpty() && !actions.back()->isSeparator() )
+                item->addSeparator();
 
             item->addAction(actionSkipBackward());
             item->addAction(actionPrev());
