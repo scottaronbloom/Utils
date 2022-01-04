@@ -173,200 +173,200 @@ namespace NSABUtils
         }
     }
 
-    CFileBasedDelayLineEdit::CFileBasedDelayLineEdit( QWidget * parent /*= nullptr */ ) :
+    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit( QWidget * parent /*= nullptr */ ) :
         CDelayLineEdit( parent )
     {
         init();
     }
 
-    CFileBasedDelayLineEdit::CFileBasedDelayLineEdit( const QString & text, QWidget * parent /*= nullptr */ ) :
+    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit( const QString & text, QWidget * parent /*= nullptr */ ) :
         CDelayLineEdit( text, parent )
     {
         init();
     }
 
-    CFileBasedDelayLineEdit::CFileBasedDelayLineEdit( const QString & text, int delayMS, QWidget * parent /*= nullptr */ ) :
+    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit( const QString & text, int delayMS, QWidget * parent /*= nullptr */ ) :
         CDelayLineEdit( text, delayMS, parent )
     {
         init();
     }
 
-    void CFileBasedDelayLineEdit::init()
+    void CPathBasedDelayLineEdit::init()
     {
         fFileChecker = new CBackgroundFileCheck;
-        connect( fFileChecker, &CBackgroundFileCheck::sigFinished, this, &CFileBasedDelayLineEdit::slotFileCheckFinished );
+        connect( fFileChecker, &CBackgroundFileCheck::sigFinished, this, &CPathBasedDelayLineEdit::slotFileCheckFinished );
     
         disconnect( fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout );
         disconnect( fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout );
 
-        connect( fChangedTimer, &QTimer::timeout, this, &CFileBasedDelayLineEdit::slotChangedTimerTimeout );
-        connect( fEditedTimer, &QTimer::timeout, this, &CFileBasedDelayLineEdit::slotEditTimerTimeout );
+        connect( fChangedTimer, &QTimer::timeout, this, &CPathBasedDelayLineEdit::slotChangedTimerTimeout );
+        connect( fEditedTimer, &QTimer::timeout, this, &CPathBasedDelayLineEdit::slotEditTimerTimeout );
     }
 
-    CFileBasedDelayLineEdit::~CFileBasedDelayLineEdit()
+    CPathBasedDelayLineEdit::~CPathBasedDelayLineEdit()
     {
         delete fFileChecker;
     }
 
-    void CFileBasedDelayLineEdit::setDelay( int delayMS )
+    void CPathBasedDelayLineEdit::setDelay( int delayMS )
     {
         fFileChecker->setTimeOut( delayMS / 2 );
         CDelayLineEdit::setDelay( delayMS );
     }
 
-    bool CFileBasedDelayLineEdit::checkExists() const
+    bool CPathBasedDelayLineEdit::checkExists() const
     {
         return fFileChecker->checkExists();
     }
 
-    void CFileBasedDelayLineEdit::setCheckExists( bool val )
+    void CPathBasedDelayLineEdit::setCheckExists( bool val )
     {
         fFileChecker->setCheckExists( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsBundle() const
+    bool CPathBasedDelayLineEdit::checkIsBundle() const
     {
         return fFileChecker->checkIsBundle();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsBundle( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsBundle( bool val )
     {
         fFileChecker->setCheckIsBundle( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsDir() const
+    bool CPathBasedDelayLineEdit::checkIsDir() const
     {
         return fFileChecker->checkIsDir();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsDir( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsDir( bool val )
     {
         fFileChecker->setCheckIsDir( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsExecutable() const
+    bool CPathBasedDelayLineEdit::checkIsExecutable() const
     {
         return fFileChecker->checkIsExecutable();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsExecutable( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsExecutable( bool val )
     {
         fFileChecker->setCheckIsExecutable( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsFile() const
+    bool CPathBasedDelayLineEdit::checkIsFile() const
     {
         return fFileChecker->checkIsFile();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsFile( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsFile( bool val )
     {
         fFileChecker->setCheckIsFile( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsHidden() const
+    bool CPathBasedDelayLineEdit::checkIsHidden() const
     {
         return fFileChecker->checkIsHidden();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsHidden( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsHidden( bool val )
     {
         fFileChecker->setCheckIsHidden( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsJunction() const
+    bool CPathBasedDelayLineEdit::checkIsJunction() const
     {
         return fFileChecker->checkIsJunction();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsJunction( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsJunction( bool val )
     {
         fFileChecker->setCheckIsJunction( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsReadable() const
+    bool CPathBasedDelayLineEdit::checkIsReadable() const
     {
         return fFileChecker->checkIsReadable();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsReadable( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsReadable( bool val )
     {
         fFileChecker->setCheckIsReadable( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsShortcut() const
+    bool CPathBasedDelayLineEdit::checkIsShortcut() const
     {
         return fFileChecker->checkIsShortcut();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsShortcut( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsShortcut( bool val )
     {
         fFileChecker->setCheckIsShortcut( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsSymLink() const
+    bool CPathBasedDelayLineEdit::checkIsSymLink() const
     {
         return fFileChecker->checkIsSymLink();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsSymLink( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsSymLink( bool val )
     {
         fFileChecker->setCheckIsSymLink( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsSymbolicLink() const
+    bool CPathBasedDelayLineEdit::checkIsSymbolicLink() const
     {
         return fFileChecker->checkIsSymbolicLink();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsSymbolicLink( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsSymbolicLink( bool val )
     {
         fFileChecker->setCheckIsSymbolicLink( val );
     }
 
-    bool CFileBasedDelayLineEdit::checkIsWritable() const
+    bool CPathBasedDelayLineEdit::checkIsWritable() const
     {
         return fFileChecker->checkIsWritable();
     }
 
-    void CFileBasedDelayLineEdit::setCheckIsWritable( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsWritable( bool val )
     {
         fFileChecker->setCheckIsWritable( val );
     }
 
-    QFile::Permissions CFileBasedDelayLineEdit::checkPermissions() const
+    QFile::Permissions CPathBasedDelayLineEdit::checkPermissions() const
     {
         return fFileChecker->checkPermissions();
     }
 
-    void CFileBasedDelayLineEdit::setCheckPermissions( QFile::Permissions val )
+    void CPathBasedDelayLineEdit::setCheckPermissions( QFile::Permissions val )
     {
         fFileChecker->setCheckPermissions( val );
     }
 
-    bool CFileBasedDelayLineEdit::useNTFSPermissions() const
+    bool CPathBasedDelayLineEdit::useNTFSPermissions() const
     {
         return fFileChecker->useNTFSPermissions();
     }
 
-    void CFileBasedDelayLineEdit::setUseNTFSPermissions( bool val )
+    void CPathBasedDelayLineEdit::setUseNTFSPermissions( bool val )
     {
         fFileChecker->setUseNTFSPermissions( val );
     }
 
-    void CFileBasedDelayLineEdit::slotChangedTimerTimeout()
+    void CPathBasedDelayLineEdit::slotChangedTimerTimeout()
     {
         fChanged = true;
         fFileChecker->checkPath( text() );
     }
 
-    void CFileBasedDelayLineEdit::slotEditTimerTimeout()
+    void CPathBasedDelayLineEdit::slotEditTimerTimeout()
     {
         fEdited = true;
         fFileChecker->checkPath( text() );
     }
 
-    void CFileBasedDelayLineEdit::slotFileCheckFinished( bool aOK )
+    void CPathBasedDelayLineEdit::slotFileCheckFinished( bool aOK )
     {
         fMessage = fFileChecker->msg();
 

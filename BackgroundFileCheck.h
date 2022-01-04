@@ -22,10 +22,8 @@
 #ifndef __BACKGROUNDFILECHECK_H
 #define __BACKGROUNDFILECHECK_H
 #include <QObject>
-#include <QFile>
-
 #include <QFutureWatcher>
-#include <QFuture>
+#include <QFile>
 
 namespace NSABUtils
 {
@@ -40,6 +38,7 @@ namespace NSABUtils
 
         void checkPath();
         void checkPath( const QString & pathName );
+
     Q_SIGNALS:
         void sigFinished( bool aOK, const QString & msg );
 
@@ -128,6 +127,7 @@ namespace NSABUtils
 #endif
         };
     private:
+        void dumpDebug( const QString & desc ) const;
         QFutureWatcher< std::pair< bool, QString > > * fResultWatcher{ nullptr };
     };
 }

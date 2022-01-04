@@ -48,9 +48,11 @@ namespace NSABUtils
 
     void CDelayComboBox::setDelayLineEdit( CDelayLineEdit * le )
     {
-        disconnect( lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
+        if ( lineEdit() )
+            disconnect( lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
         setLineEdit( le );
-        connect( lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
+        if ( le )
+            connect( le, &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
     }
 
     QStringList CDelayComboBox::getAllText() const

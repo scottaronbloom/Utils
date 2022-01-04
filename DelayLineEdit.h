@@ -80,17 +80,17 @@ namespace NSABUtils
         ELineEditStatus fStatus{ ELineEditStatus::ePending };
     };
 
-    class CFileBasedDelayLineEdit : public CDelayLineEdit
+    class CPathBasedDelayLineEdit : public CDelayLineEdit
     {
         Q_OBJECT;
     public:
-        explicit CFileBasedDelayLineEdit( QWidget * parent = nullptr );
-        explicit CFileBasedDelayLineEdit( const QString & text, QWidget * parent = nullptr );
-        explicit CFileBasedDelayLineEdit( const QString & text, int delayMS, QWidget * parent = nullptr );
+        explicit CPathBasedDelayLineEdit( QWidget * parent = nullptr );
+        explicit CPathBasedDelayLineEdit( const QString & text, QWidget * parent = nullptr );
+        explicit CPathBasedDelayLineEdit( const QString & text, int delayMS, QWidget * parent = nullptr );
 
         void init();
 
-        virtual ~CFileBasedDelayLineEdit();
+        virtual ~CPathBasedDelayLineEdit();
         void setIsOKFunction( std::function< bool( const QString & text ) > func, const QString & errorMsg = {} ) = delete;
 
         virtual void setDelay( int delayMS ) override;
