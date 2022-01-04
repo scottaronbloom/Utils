@@ -121,7 +121,7 @@ namespace NSABUtils
         void setMaximum(int max) { setPrimaryMaximum(max); }
         void setLabelText(const QString & text) { setTitle(text); }
 
-        void reset();
+        void reset( bool canceled );
     protected Q_SLOTS:
         virtual void slotForceShow();
 

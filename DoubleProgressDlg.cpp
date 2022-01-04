@@ -294,7 +294,7 @@ namespace NSABUtils
     void CDoubleProgressDlg::slotCanceled()
     {
         fImpl->fForceHide = true;
-        reset();
+        reset( true );
         fImpl->fForceHide = false;
         fImpl->fCanceled = true;
     }
@@ -436,13 +436,13 @@ namespace NSABUtils
         return fImpl->fSingleProgressBarMode;
     }
 
-    void CDoubleProgressDlg::reset()
+    void CDoubleProgressDlg::reset( bool canceled )
     {
         if (fImpl->fAutoClose || fImpl->fForceHide)
             hide();
         fImpl->fPrimaryBar->reset();
         fImpl->fSecondaryBar->reset();
-        fImpl->fCanceled = false;
+        fImpl->fCanceled = canceled;
         fImpl->fForceTimer->stop();
         fImpl->fShownOnce = false;
         fImpl->fSetValueCalled = false;
@@ -698,7 +698,7 @@ namespace NSABUtils
         }
 
         if (fAutoReset && primValueChanged && fPrimaryBar->isValueMaximum())
-            fDialog->reset();
+            fDialog->reset( false );
     }
 
     void CDoubleProgressDlgImpl::ensureSizeIsAtLeastSizeHint()
