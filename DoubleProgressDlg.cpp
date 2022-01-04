@@ -181,8 +181,9 @@ namespace NSABUtils
                 return QString();
 
             auto format = fImpl->fDialog->tr("%1").arg(fBar->format().trimmed());
-            format.replace("%v", QString::number(fBar->value()%fEventsPerIncrement));
-            format.replace("%m", QString::number(fBar->maximum() % fEventsPerIncrement ));
+
+            format.replace("%v", QString::number(fBar->value() / fEventsPerIncrement));
+            format.replace("%m", QString::number(fBar->maximum() / fEventsPerIncrement ));
             format.replace("%p", QString::number(fBar->maximum() ? (100 * fBar->value() / fBar->maximum()) : 0));
             return format;
         }
