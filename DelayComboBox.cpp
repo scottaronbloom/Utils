@@ -28,9 +28,7 @@ namespace NSABUtils
     CDelayComboBox::CDelayComboBox(QWidget *parent /*= nullptr */) :
         QComboBox(parent)
     {
-        auto le = new CDelayLineEdit;
-        setLineEdit(le);
-        connect(le, &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay);
+        setDelayLineEdit( new CDelayLineEdit );
     }
 
     CDelayLineEdit *CDelayComboBox::lineEdit() const
@@ -46,6 +44,13 @@ namespace NSABUtils
     void CDelayComboBox::setIsOKFunction(std::function< bool(const QString &text) > func, const QString &errorMsg /*= {} */)
     {
         lineEdit()->setIsOKFunction(func, errorMsg);
+    }
+
+    void CDelayComboBox::setDelayLineEdit( CDelayLineEdit * le )
+    {
+        disconnect( lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
+        setLineEdit( le );
+        connect( lineEdit(), &CDelayLineEdit::sigTextChangedAfterDelay, this, &CDelayComboBox::sigEditTextChangedAfterDelay );
     }
 
     QStringList CDelayComboBox::getAllText() const

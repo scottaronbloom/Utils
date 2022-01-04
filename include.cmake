@@ -23,6 +23,7 @@
 set(qtproject_SRCS
     AutoWaitCursor.cpp
     AutoFetch.cpp
+    BackgroundFileCheck.cpp
     BIFFile.cpp
     BIFModel.cpp
     BIFWidget.cpp
@@ -62,6 +63,7 @@ set(qtproject_CPPMOC_SRCS
 
 set(qtproject_H
     AutoWaitCursor.h
+    BackgroundFileCheck.h
     BIFModel.h
     BIFWidget.h
     ButtonEnabler.h

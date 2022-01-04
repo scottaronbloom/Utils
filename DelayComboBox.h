@@ -38,6 +38,7 @@ namespace NSABUtils
         void setDelay(int delayMS);
         void setIsOKFunction(std::function< bool(const QString &text) > func, const QString &errorMsg = {});
 
+        void setDelayLineEdit( CDelayLineEdit * le );
         QStringList getAllText() const;
         inline void addItems(const QStringList &texts, bool selectFirstItem = false)
         {

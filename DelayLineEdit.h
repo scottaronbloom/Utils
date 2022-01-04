@@ -23,10 +23,12 @@
 // SOFTWARE.
 
 #include <QLineEdit>
+#include <QFile>
 class QTimer;
 
 namespace NSABUtils
 {
+    class CBackgroundFileCheck;
     class CDelayLineEdit : public QLineEdit
     {
         Q_OBJECT;
@@ -45,7 +47,7 @@ namespace NSABUtils
         virtual ~CDelayLineEdit();
         virtual void keyPressEvent(QKeyEvent *event);
         void setText(const QString &text);
-        void setDelay(int delayMS);
+        virtual void setDelay(int delayMS);
 
         void setLineEditColor(ELineEditStatus status);
         void setLineEditColor(bool aOK);
@@ -62,11 +64,13 @@ namespace NSABUtils
     public Q_SLOTS:
         void slotTextChanged();
         void slotTextEdited();
-        void slotChangedTimerTimeout();
-        void slotEditTimerTimeout();
+        virtual void slotChangedTimerTimeout();
+        virtual void slotEditTimerTimeout();
 
-    private:
-        void connectToEditor(bool connectOrDisconnect);
+    protected:
+        void editTimeout( bool aOK );
+        void changeTimeout( bool aOK );
+        void connectToEditor( bool connectOrDisconnect );
 
         int fDelayMS{ 500 };
         QTimer* fChangedTimer{ nullptr };
@@ -74,6 +78,77 @@ namespace NSABUtils
         bool fEditingFinished{ false };
         std::pair< std::function< bool(const QString &text) >, QString > fIsOK;
         ELineEditStatus fStatus{ ELineEditStatus::ePending };
+    };
+
+    class CFileBasedDelayLineEdit : public CDelayLineEdit
+    {
+        Q_OBJECT;
+    public:
+        explicit CFileBasedDelayLineEdit( QWidget * parent = nullptr );
+        explicit CFileBasedDelayLineEdit( const QString & text, QWidget * parent = nullptr );
+        explicit CFileBasedDelayLineEdit( const QString & text, int delayMS, QWidget * parent = nullptr );
+
+        void init();
+
+        virtual ~CFileBasedDelayLineEdit();
+        void setIsOKFunction( std::function< bool( const QString & text ) > func, const QString & errorMsg = {} ) = delete;
+
+        virtual void setDelay( int delayMS ) override;
+
+
+        bool checkExists() const;
+        void setCheckExists( bool val );
+
+        bool checkIsBundle() const;
+        void setCheckIsBundle( bool val );
+
+        bool checkIsDir() const;
+        void setCheckIsDir( bool val );
+
+        bool checkIsExecutable() const;
+        void setCheckIsExecutable( bool val );
+
+        bool checkIsFile() const;
+        void setCheckIsFile( bool val );
+
+        bool checkIsHidden() const;
+        void setCheckIsHidden( bool val );
+
+        bool checkIsJunction() const;
+        void setCheckIsJunction( bool val );
+
+        bool checkIsReadable() const;
+        void setCheckIsReadable( bool val );
+
+        bool checkIsShortcut() const;
+        void setCheckIsShortcut( bool val );
+
+        bool checkIsSymLink() const;
+        void setCheckIsSymLink( bool val );
+
+        bool checkIsSymbolicLink() const;
+        void setCheckIsSymbolicLink( bool val );
+
+        bool checkIsWritable() const;
+        void setCheckIsWritable( bool val );
+
+        QFile::Permissions checkPermissions() const;
+        void setCheckPermissions( QFile::Permissions val );
+
+        bool useNTFSPermissions() const;
+        void setUseNTFSPermissions( bool val );
+    Q_SIGNALS:
+
+    public Q_SLOTS:
+        void slotFileCheckFinished( bool aOK );
+        virtual void slotChangedTimerTimeout() override;
+        virtual void slotEditTimerTimeout() override;
+
+    private:
+        QString fMessage;
+        bool fEdited{ false };
+        bool fChanged{ false };
+        CBackgroundFileCheck * fFileChecker{ nullptr };
     };
 }
 #endif
