@@ -59,7 +59,7 @@ namespace NSABUtils
     Q_SIGNALS:
         void sigTextChangedAfterDelay(const QString& text);
         void sigTextEditedAfterDelay(const QString& text);
-        void sigFinishedEditingAfterDelay();
+        void sigFinishedEditingAfterDelay( const QString & text );
 
     public Q_SLOTS:
         void slotTextChanged();

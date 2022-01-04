@@ -104,7 +104,7 @@ namespace NSABUtils
         {
             fEditingFinished = true;
             if (fStatus == ELineEditStatus::eOK)
-                emit sigFinishedEditingAfterDelay();
+                emit sigFinishedEditingAfterDelay( text() );
         }
         QLineEdit::keyPressEvent(event);
     }
@@ -130,7 +130,7 @@ namespace NSABUtils
         setLineEditColor( aOK );
         emit sigTextEditedAfterDelay( text() );
         if ( fEditingFinished )
-            emit sigFinishedEditingAfterDelay();
+            emit sigFinishedEditingAfterDelay( text() );
     }
 
     void CDelayLineEdit::connectToEditor(bool connectOrDisconnect)
