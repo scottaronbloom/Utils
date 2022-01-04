@@ -301,7 +301,7 @@ namespace NSABUtils
 
         std::shared_ptr< CFile > CWidget::setFileName(const QString & fileName)
         {
-            if (fileName.isEmpty())
+            if (fileName.isEmpty() || !QFileInfo( fileName ).exists() )
                 fBIF.reset();
             else
                 fBIF = std::make_shared< NBIF::CFile >(fileName, false);
