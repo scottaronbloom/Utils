@@ -50,7 +50,10 @@ namespace NSABUtils
         auto array = val.toArray();
         for (int ii = 0; ii < array.count(); ++ii)
         {
-            value << array.at(ii).toString();
+            auto curr = array.at(ii).toString();
+            if (curr.startsWith("{") && curr.endsWith("}"))
+                curr = curr.mid(1, curr.length() - 2);
+            value << curr;
         }
     }
 
