@@ -28,6 +28,7 @@ set(qtproject_SRCS
     BIFModel.cpp
     BIFWidget.cpp
     ButtonEnabler.cpp
+    ConsoleUtils.cpp
     DelayComboBox.cpp
     DelayLineEdit.cpp
     DelaySpinBox.cpp
@@ -87,6 +88,7 @@ set(qtproject_H
 set(project_H
     AutoFetch.h
     BIFFile.h
+    ConsoleUtils.h
     GIFWriter.h
     utils.h
     FileCompare.h
@@ -116,5 +118,6 @@ set(qtproject_QRC
     resources/SABUtils.qrc
     BIFPlayerResources/BIFPlayerResources.qrc
 )
+
 file(GLOB qtproject_QRC_SOURCES "BIFPlayerResources/*")
 file(GLOB qtproject_QRC_SOURCES "resources/*")

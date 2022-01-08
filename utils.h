@@ -386,5 +386,19 @@ namespace NSABUtils
         return lRetVal;
     }
 
+    template< typename T >
+    T MarshalRead(void * mem, size_t offset)
+    {
+        T retVal;
+        auto tmp = sizeof(T);
+        ::memcpy(&retVal, ((char*)mem) + offset, sizeof(retVal));
+
+        return retVal;
+    }
+
+    char GetChar();
+    int waitForPrompt(int returnCode, const char * prompt = nullptr ); // uses GetChar above
+    QString getLastError(); // windows only
+    QString getLastError( int errorCode ); // windows only
 }
 #endif

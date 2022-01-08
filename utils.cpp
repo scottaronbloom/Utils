@@ -28,6 +28,14 @@
 #include <QString>
 #include <QLocale>
 #include <QDateTime>
+#include <QDebug>
+
+#ifdef Q_OS_WINDOWS
+#define UNICODE
+#include <qt_windows.h>
+#else
+#include <termios.h>
+#endif
 
 namespace NSABUtils
 {
@@ -476,4 +484,84 @@ namespace NSABUtils
     //    return retVal;
     //}
 
+#ifdef Q_OS_WINDOWS
+    char GetChar()
+    {
+        auto stdInput = ::GetStdHandle(STD_INPUT_HANDLE);
+
+        DWORD mode{ 0 };
+        GetConsoleMode(stdInput, &mode);
+
+        auto newMode = mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+        ::SetConsoleMode(stdInput, newMode);
+
+        char ch[256]{ 0 };
+        DWORD bytesRead;
+        ReadConsole(stdInput, ch, 1, &bytesRead, nullptr);
+
+        ::SetConsoleMode(stdInput, mode);
+        return ch[0];
+    }
+#else
+    char GetChar()
+    {
+        char ch = 0;
+        struct termios oldt, newt;
+
+        tcgetattr(fileno( stdin ), &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        auto aOK = tcsetattr(fileno(stdin), TCSANOW, &newt);
+        auto ch = getchar();
+        tcsetattr(fileno(stdin), TCSANOW, &oldt);
+        return ch;
+    }
+#endif
+    int waitForPrompt(int returnCode, const char * prompt )
+    {
+        if (!prompt)
+            prompt = "Press any key to close this window . . .";
+        std::cout << prompt;
+        GetChar();
+        char buffer[2];
+        fgets(buffer, 1, stdin);
+        return returnCode;
+    }
+
+#ifdef Q_OS_WINDOWS
+    QString getLastError()
+    {
+        auto errorID = ::GetLastError();
+        return getLastError(errorID);
+    }
+
+    QString getLastError( int errorID)
+    {
+        LPWSTR lpMsgBuf = nullptr;
+
+        ::FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            nullptr,
+            errorID,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&lpMsgBuf,
+            0, nullptr);
+
+        QString result = QString::fromWCharArray(lpMsgBuf);
+        LocalFree(lpMsgBuf);
+        return result;
+    }
+#else
+    QString getLastError(int errorID) 
+    {
+        return QString();
+    }
+    
+    QString getLastError()
+    {
+        return QString(); 
+    }
+#endif
 }
