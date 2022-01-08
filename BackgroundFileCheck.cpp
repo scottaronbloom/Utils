@@ -188,6 +188,8 @@ namespace NSABUtils
         static std::map< const QObject *, int > hitCounts;
         hitCounts[this]++;
         qDebug() << this << hitCounts[this] << msg << fPathName << fStopped << fTimedOut << fResultWatcher->isRunning() << fResultWatcher->isPaused();
+#else
+        (void)msg;
 #endif
     }
 
