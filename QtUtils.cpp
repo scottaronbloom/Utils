@@ -37,6 +37,9 @@
 #include <QTimer>
 #include <QLayout>
 #include <QPlainTextEdit>
+#include <QComboBox>
+#include <QTableView>
+#include <QHeaderView>
 
 #ifdef QT_XMLPATTERNS_LIB
 #include <QXmlQuery>
@@ -886,5 +889,79 @@ namespace NSABUtils
         {
             dumpRow( ii, title, arr, width, height, width / 4, baseArray, 0 );
         }
+    }
+
+    void fetchMore( QAbstractItemModel * model, int maxFetches )
+    {
+        if ( !model )
+            return;
+        int numFetches = 0;
+        while ( numFetches < maxFetches && model->canFetchMore( QModelIndex() ) )
+        {
+            model->fetchMore( QModelIndex() );
+            numFetches++;
+        }
+    }
+
+    int autoSize( QComboBox * comboBox )
+    {
+        if ( !comboBox )
+            return -1;
+
+        comboBox->view()->setTextElideMode( Qt::ElideNone );
+        comboBox->setSizeAdjustPolicy( QComboBox::AdjustToContents );
+        return comboBox->width();
+    }
+
+    int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth/*=150*/ )
+    {
+        if ( !view || !view->model() || !header )
+            return -1;
+
+        auto model = view->model();
+        fetchMore( model, 3 );
+
+        auto numCols = model->columnCount();
+        bool stretchLastColumn = header->stretchLastSection();
+        header->setStretchLastSection( false );
+
+        header->resizeSections( QHeaderView::ResizeToContents );
+        int numVisibleColumns = 0;
+        for ( int ii = 0; ii < numCols; ++ii )
+        {
+            if ( header->isSectionHidden( ii ) )
+                continue;
+            numVisibleColumns++;
+        }
+        bool dontResize = (numVisibleColumns <= 1) && stretchLastColumn;
+
+        int totalWidth = 0;
+        for ( int ii = 0; ii < numCols; ++ii )
+        {
+            if ( header->isSectionHidden( ii ) )
+                continue;
+
+            int contentSz = view->sizeHintForColumn( ii );
+            int headerSz = header->sectionSizeHint( ii );
+
+            auto newWidth = std::max( { minWidth, contentSz, headerSz } );
+            totalWidth += newWidth;
+
+            if ( !dontResize )
+                header->resizeSection( ii, newWidth );
+        }
+        if ( stretchLastColumn )
+            header->setStretchLastSection( true );
+        return totalWidth;
+    }
+
+    int autoSize( QTableView * table )
+    {
+        return autoSize( table, table->horizontalHeader() );
+    }
+
+    int autoSize( QTreeView * tree )
+    {
+        return autoSize( tree, tree->header() );
     }
 }

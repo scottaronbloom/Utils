@@ -36,6 +36,13 @@ class QPlainTextEdit;
 class QTextStream;
 class QTimer;
 class QLayout;
+class QAbstractItemView;
+
+class QTableView;
+class QTreeView;
+class QHeaderView;
+class QComboBox;
+
 #ifdef QT_XMLPATTERNS_LIB
 class QXmlQuery;
 #endif
@@ -116,6 +123,13 @@ namespace NSABUtils
     QDateTime getDateTime(const QStringRef & str, QXmlStreamReader & reader, bool optional);
     QDateTime getDateTime(const QString & str, QXmlStreamReader & reader, bool optional);
     QDateTime getDateTime(const QString & str);
+
+    int autoSize( QTableView * table ); // autoSize( table, table->horizontalHeader )
+    int autoSize( QTreeView * table ); // autoSize( table, table->header )
+    int autoSize( QComboBox * table );
+    int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth = 150 );
+
+    void fetchMore( QAbstractItemModel * model, int maxFetches = 3 );
 
     template< typename T >
     std::set< T > toSet(const QSet< T > & values)
@@ -206,6 +220,8 @@ namespace NSABUtils
     {
         return std::unordered_set< T2 >( { values.begin(), values.end() } );
     }
+
+    void fetchMore( QAbstractItemModel * model, int maxFetch );
 }
 
 template< std::size_t I = 0, typename... Tp>
