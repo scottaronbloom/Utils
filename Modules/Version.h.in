@@ -45,7 +45,7 @@ namespace NVersion
         if ( MODIFIED )
             retVal += "*";
         if ( !BUILD_DATE.empty() )
-            retVal += " " + BUILD_DATE;
+            retVal += " Build Date: " + BUILD_DATE;
         return retVal;
     }
 }
