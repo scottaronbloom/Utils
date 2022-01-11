@@ -27,14 +27,15 @@
 
 namespace NVersion
 {
-    inline const int         MAJOR_VERSION = @VERSION_FILE_MAJOR_VERSION@;
-    inline const int         MINOR_VERSION = @VERSION_FILE_MINOR_VERSION@;
+    inline const int         MAJOR_VERSION =  @VERSION_FILE_MAJOR_VERSION@;
+    inline const int         MINOR_VERSION =  @VERSION_FILE_MINOR_VERSION@;
     inline const std::string PATCH_VERSION = "@VERSION_FILE_PATCH_VERSION@"; // string from git
-    inline const bool        MODIFIED      = @VERSION_FILE_DIFF@;
+    inline const bool        MODIFIED      =  @VERSION_FILE_DIFF@;
     inline const std::string APP_NAME      = "@VERSION_FILE_APP_NAME@";
     inline const std::string VENDOR        = "@VERSION_FILE_VENDOR@";
     inline const std::string HOMEPAGE      = "@VERSION_FILE_HOMEPAGE@";
     inline const std::string EMAIL         = "@VERSION_FILE_EMAIL@";
+    inline const std::string BUILD_DATE    = "@VERSION_FILE_BUILD_DATE@";
 
     inline std::string getVersionString(bool full) 
     { 
@@ -43,6 +44,8 @@ namespace NVersion
             retVal += "." + PATCH_VERSION;
         if ( MODIFIED )
             retVal += "*";
+        if ( !BUILD_DATE.empty() )
+            retVal += " " + BUILD_DATE;
         return retVal;
     }
 }

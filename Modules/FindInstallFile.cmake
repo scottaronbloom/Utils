@@ -22,9 +22,6 @@ FUNCTION (InstallFile inFile outFile)
         
     get_filename_component( baseName ${outFile} NAME)
     configure_file( ${inFile} ${outFile} COPYONLY ) # creates a dependency on TMP_OUTFILE
-    if ( _REMOVE_ORIG )
-        file(REMOVE ${inFile})
-    ENDIF()
 
     #configure file does all the work, but I want to see what happened
     IF ( EXISTS ${outFile} )
@@ -36,13 +33,17 @@ FUNCTION (InstallFile inFile outFile)
         )
 
         IF ( ${filesDifferent} )
-            MESSAGE( "${baseName} has been updated." )
+            MESSAGE( STATUS "${baseName} has been updated." )
         else()
-            MESSAGE( "${baseName} is up to date." )
+            MESSAGE( STATUS "${baseName} is up to date." )
         ENDIF()
     ELSE ()
-        MESSAGE( "${baseName} has been updated." )
+        MESSAGE( STATUS "${baseName} has been updated." )
     ENDIF ()
+
+    if ( _REMOVE_ORIG )
+        file(REMOVE ${inFile})
+    ENDIF()
 ENDFUNCTION()
 
 FUNCTION(InstallFilePostBuild)
