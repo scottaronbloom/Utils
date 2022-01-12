@@ -42,6 +42,7 @@ set(qtproject_SRCS
     JsonUtils.cpp
     MD5.cpp
     MenuBarEx.cpp
+    MKVUtils.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
     QtUtils.cpp
@@ -103,6 +104,7 @@ set(project_H
     QtDumper.h
     VSInstallUtils.h
     StayAwake.h   
+    MKVUtils.h
 )
 
 set(qtproject_UIS
