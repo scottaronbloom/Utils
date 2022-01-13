@@ -130,6 +130,8 @@ namespace NSABUtils
         bool compareTimeStamp(const QDateTime & lhs, const QDateTime & rhs, int toleranceInSecs);
         bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck);
         bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck);
+ 
+        QString getWindowsError( int errorCode ); // returns empty string for non-windows
     }
 }
 #endif
