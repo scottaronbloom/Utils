@@ -104,6 +104,7 @@ set(project_H
     StringUtils.h
     WordExp.h
     QtDumper.h
+    RevertValue.h
     VSInstallUtils.h
     StayAwake.h   
     MKVUtils.h
