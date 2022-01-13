@@ -156,10 +156,16 @@ namespace NSABUtils
     {
         fStatus = status;
         setToolTip(QString());
-        if (status == ELineEditStatus::ePending)
-            setStyleSheet("QLineEdit { background-color: #b7bfaf }");
-        else if (status == ELineEditStatus::eOK)
-            setStyleSheet("QLineEdit { background-color: white }");
+        if ( status == ELineEditStatus::ePending )
+        {
+            setStyleSheet( "QLineEdit { background-color: #b7bfaf }" );
+            setToolTip( tr( "Checking the status" ) );
+        }
+        else if ( status == ELineEditStatus::eOK )
+        {
+            setStyleSheet( "QLineEdit { background-color: white }" );
+            setToolTip( text() );
+        }
         else if (status == ELineEditStatus::eNotOK)
         {
             auto errorMsg = fIsOK.second;
@@ -368,16 +374,16 @@ namespace NSABUtils
 
     void CPathBasedDelayLineEdit::slotFileCheckFinished( bool aOK )
     {
-        fMessage = fFileChecker->msg();
-
         if ( fEdited )
         {
+            fIsOK.second = fFileChecker->msg();
             editTimeout( aOK );
             fEdited = false;
         }
 
         if ( fChanged )
         {
+            fIsOK.second = fFileChecker->msg();
             changeTimeout( aOK );
             fChanged = false;
         }

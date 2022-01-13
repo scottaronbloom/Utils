@@ -145,7 +145,6 @@ namespace NSABUtils
         virtual void slotEditTimerTimeout() override;
 
     private:
-        QString fMessage;
         bool fEdited{ false };
         bool fChanged{ false };
         CBackgroundFileCheck * fFileChecker{ nullptr };
