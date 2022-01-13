@@ -24,7 +24,6 @@
 #include "BackgroundFileCheck.h"
 #include <QThread>
 #include <QFileInfo>
-#include <QFuture>
 #include <QtConcurrent>
 
 extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;

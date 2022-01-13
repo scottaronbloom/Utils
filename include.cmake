@@ -43,6 +43,7 @@ set(qtproject_SRCS
     MD5.cpp
     MenuBarEx.cpp
     MKVUtils.cpp
+    SelectFileUrl.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
     QtUtils.cpp
@@ -83,6 +84,7 @@ set(qtproject_H
     UtilityModels.h
     UtilityViews.h
     MenuBarEx.h
+    SelectFileUrl.h
 )
 
 set(project_H
