@@ -46,10 +46,10 @@ namespace NSABUtils
     }
 
 
-    class QLaunchThread : public QThread
+    class CLaunchThread : public QThread
     {
     public:
-        explicit QLaunchThread( QString path )
+        explicit CLaunchThread( QString path )
         {
 #ifdef Q_OS_WIN
             auto fi = QFileInfo( path );
@@ -61,7 +61,7 @@ namespace NSABUtils
 #endif
         }
 
-        ~QLaunchThread()
+        ~CLaunchThread()
         {
 #ifdef Q_OS_WIN
             ILFree( fDir );
@@ -97,7 +97,7 @@ namespace NSABUtils
             return;
         }
 
-        QLaunchThread thread( url.toLocalFile() );
+        CLaunchThread thread( url.toLocalFile() );
         thread.start();
         thread.wait();
     }
