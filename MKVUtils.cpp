@@ -72,6 +72,24 @@ namespace NSABUtils
         return retVal;
     }
 
+    std::unordered_map< QString, QString > knownMKVTags()
+    {
+        static std::unordered_map< QString, QString > sKnownTags =
+        {
+             { "ALBUM", "" }
+            ,{ "ALBUM_ARTIST", "" }
+            ,{ "ARTIST", "" }
+            ,{ "BPM", "" }
+            ,{ "COMMENT", "" }
+            ,{ "COMPOSER", "" }
+            ,{ "DISC_NUMBER", "" }
+            ,{ "GENRE", "" }
+            ,{ "TITLE", "" }
+            ,{ "TRACK", "" }
+            ,{ "DATE_RECORDED", "" }
+        };
+        return sKnownTags;
+    }
     bool setMediaTags( const QString & fileName, const std::unordered_map< QString, QString > & tags, const QString & mkvPropEdit, QString * msg/*=nullptr */ )
     {
         initResources();
@@ -93,20 +111,7 @@ namespace NSABUtils
             return false;
         }
 
-        std::unordered_map< QString, QString > knownTags =
-        {
-             { "ALBUM", "" }
-            ,{"ALBUM_ARTIST", "" }
-            ,{ "ARTIST", "" }
-            ,{ "BPM", "" }
-            ,{ "COMMENT", "" }
-            ,{ "COMPOSER", "" }
-            ,{ "DISC_NUMBER", "" }
-            ,{ "GENRE", "" }
-            ,{ "TITLE", "" }
-            ,{ "TRACK", "" }
-            ,{ "YEAR", "" }
-        };
+        auto knownTags = knownMKVTags();
 
         for ( auto && ii : tags )
         {
@@ -231,7 +236,7 @@ namespace NSABUtils
                 value = QString::number( variant.toDouble() );
             else if ( variant.isNull() )
                 value = "";
-            retVal[key] = value;
+            retVal[key.toUpper()] = value;
         }
 
         return retVal;
