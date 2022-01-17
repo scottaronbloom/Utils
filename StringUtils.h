@@ -437,12 +437,15 @@ namespace NSABUtils
         bool isSpecialRegExChar(char ch, bool includeDotSlash = true);
         bool isSpecialRegExChar(const QChar & ch, bool includeDotSlash = true);
 
-        QString transformTitle(const QString & title, bool ignoreAllCase = true);
+        int romanToDecimal( QString string, bool & aOK ); // only valid for roman numbers to 3999 as 4000 requires a vinculum
+        bool isRomanNumeral( const QString & string );
+            
+        QString transformTitle( const QString & title, bool ignoreAllCase = true );
         QString titleCase(const QString &string, bool ignoreAllCase = true);
         const std::unordered_set< QString > &unimportantWords();
 
         std::unordered_set< QString > getImportantWords(const QString &string, bool stripPunctuation);
-        bool isSimilar(const QString &lhs, const QString &rhs); // is every important word in the rhs in the left
+        bool isSimilar(const QString &lhs, const QString &rhs, bool inorder); // is every important word in the rhs in the left
     }
 }
 #endif 
