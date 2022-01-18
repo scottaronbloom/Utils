@@ -87,7 +87,7 @@
     </Targets>
     <Simple>
       <Name>DATE_RECORDED</Name>
-      <String>%YEAR%</String>
+      <String>%DATE_RECORDED%</String>
       <TagLanguage>und</TagLanguage>
       <DefaultLanguage>1</DefaultLanguage>
     </Simple>
