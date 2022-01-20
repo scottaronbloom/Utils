@@ -29,6 +29,10 @@
 #include <QLocale>
 #include <QDateTime>
 #include <QDebug>
+#include <QRegularExpression>
+#include <QFontMetrics>
+#include <QDesktopServices>
+#include <QUrl>
 
 #ifdef Q_OS_WINDOWS
 #define UNICODE
@@ -526,6 +530,51 @@ namespace NSABUtils
         char buffer[2];
         fgets(buffer, 1, stdin);
         return returnCode;
+    }
+
+    bool isValidURL(const QString & url, int * start, int * length)
+    {
+        auto regExStr = "((([a-z]+):\\/\\/)|(www\\.))(\\.?[a-z0-9\\-ßàÁâãóôþüúðæåïçèõöÿýòäœêëìíøùîûñé]{2,256})+(\\.[a-z]+)";
+        auto regEx = QRegularExpression(regExStr, QRegularExpression::CaseInsensitiveOption);
+        auto match = regEx.match(url);
+        if (!match.hasMatch())
+            return false;
+        if (start)
+            *start = match.capturedStart();
+        if (length)
+            *length = match.capturedLength();
+        return true;
+    }
+
+
+    void launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font)
+    {
+        int urlStart;
+        int urlLength;
+        auto hasUrl = NSABUtils::isValidURL(title, &urlStart, &urlLength);
+        if (hasUrl)
+        {
+            auto xLoc = pt.x();
+            if (xLoc >= 30)
+            {
+                xLoc -= 30;
+                QFontMetrics fm(font);
+
+                auto preURL = title.left(urlStart);
+                auto url = title.mid(urlStart, urlLength);
+
+                auto preRect = fm.boundingRect(preURL);
+                if (xLoc >= preRect.width())
+                {
+                    xLoc -= preRect.width();
+                    auto urlRect = fm.boundingRect(url);
+                    if (xLoc <= urlRect.width())
+                    {
+                        QDesktopServices::openUrl(url);
+                    }
+                }
+            }
+        }
     }
 
 #ifdef Q_OS_WINDOWS

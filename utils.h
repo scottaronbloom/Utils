@@ -39,6 +39,9 @@
 #include <optional>
 #include <QString>
 class QDateTime;
+class QFont;
+class QPoint;
+
 #if __cplusplus > 201703L
 #include <optional>
 #endif
@@ -400,5 +403,8 @@ namespace NSABUtils
     int waitForPrompt(int returnCode, const char * prompt = nullptr ); // uses GetChar above
     QString getLastError(); // windows only
     QString getLastError( int errorCode ); // windows only
+
+    bool isValidURL(const QString & url, int * start=nullptr, int * length=nullptr);
+    void launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font);
 }
 #endif
