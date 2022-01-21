@@ -547,7 +547,7 @@ namespace NSABUtils
     }
 
 
-    void launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font)
+    bool launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font)
     {
         int urlStart;
         int urlLength;
@@ -571,10 +571,12 @@ namespace NSABUtils
                     if (xLoc <= urlRect.width())
                     {
                         QDesktopServices::openUrl(url);
+                        return true;
                     }
                 }
             }
         }
+        return false;
     }
 
 #ifdef Q_OS_WINDOWS

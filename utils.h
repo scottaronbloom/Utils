@@ -405,6 +405,6 @@ namespace NSABUtils
     QString getLastError( int errorCode ); // windows only
 
     bool isValidURL(const QString & url, int * start=nullptr, int * length=nullptr);
-    void launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font);
+    bool launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font);
 }
 #endif
