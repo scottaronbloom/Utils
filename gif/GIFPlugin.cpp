@@ -24,14 +24,6 @@
 #include "GIFPlugin.h"
 #include "GIFIOHandler.h"
 
-CGIFPlugin::CGIFPlugin()
-{
-}
-
-CGIFPlugin::~CGIFPlugin()
-{
-}
-
 QImageIOPlugin::Capabilities CGIFPlugin::capabilities(QIODevice *device, const QByteArray &format) const
 {
     if (format == "gif" || ( device && device->isWritable() && CGIFIOHandler::canWrite(device) ) )

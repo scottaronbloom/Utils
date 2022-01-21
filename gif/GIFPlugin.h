@@ -41,8 +41,8 @@ class GIF_PLUGIN_DECLSPEC CGIFPlugin : public QImageIOPlugin
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "gif.json")
 public:
-    CGIFPlugin();
-    ~CGIFPlugin();
+    CGIFPlugin()=default;
+    ~CGIFPlugin()=default;
 
     Capabilities capabilities(QIODevice *device, const QByteArray &format) const override;
     QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const override;
