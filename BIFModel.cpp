@@ -52,8 +52,10 @@ namespace NSABUtils
         {
             if (!index.isValid())
                 return QVariant();
+
             if (index.row() > fBIFFile->imageCount() || index.row() < 0)
                 return QVariant();
+
             if ( role == Qt::DisplayRole )
                 return QString( "BIF #%1" ).arg( index.row() );
             else if ( role == Qt::DecorationRole )

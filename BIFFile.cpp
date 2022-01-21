@@ -219,7 +219,7 @@ namespace NSABUtils
                 if (!aOK)
                     return false;
 
-                fBIFs.push_back(SBIFImage(frameNum, absOffset, prev));
+                fBIFs.emplace_back(frameNum, absOffset, prev);
                 prev = &fBIFs.at(ii);
             }
 
