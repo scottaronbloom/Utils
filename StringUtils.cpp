@@ -2735,11 +2735,23 @@ namespace NSABUtils
             if (!ignoreAllCase && allCap)
                 return string;
 
-            auto keepLower = unimportantWords();
+            auto hasDash = retVal.indexOf("-") != -1;
 
-            retVal = retVal.toLower();
-            if (first || (keepLower.find(retVal) == keepLower.end()))
-                retVal[0] = retVal[0].toUpper();
+            auto keepLower = unimportantWords();
+            if (!hasDash && !first && ( keepLower.find(retVal) != keepLower.end()) )
+                retVal = retVal.toLower();
+            else
+            {
+                bool prevIsDashOrFirstChar = true;
+                for (auto &&ii : retVal)
+                {
+                    if (prevIsDashOrFirstChar)
+                        ii = ii.toUpper();
+                    else
+                        ii = ii.toLower();
+                    prevIsDashOrFirstChar = ii == "-";
+                }
+            }
             return retVal;
         }
 
@@ -2753,9 +2765,11 @@ namespace NSABUtils
             auto retVal = title;
             retVal = retVal.replace('.', ' ').trimmed();
             auto tmp = retVal.split(' ');
+            bool prevEndSentence = true;
             for (auto && ii = tmp.begin(); ii != tmp.end(); ++ii)
             {
-                *ii = titleCase(*ii, ii == tmp.begin(), ignoreAllCase);
+                *ii = titleCase(*ii, prevEndSentence, ignoreAllCase);
+                prevEndSentence = (*ii == ".") || (*ii == "-") || (*ii == ":") || (*ii).endsWith(".") || (*ii).endsWith("-") || (*ii).endsWith(":");
             }
 
             return tmp.join(" ");
