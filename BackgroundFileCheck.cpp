@@ -43,6 +43,7 @@ namespace NSABUtils
     {
     public:
         explicit CBackgroundFileCheckImpl( CBackgroundFileCheck * parent );
+
         ~CBackgroundFileCheckImpl()
         {
             fTimer->stop();
@@ -64,15 +65,26 @@ namespace NSABUtils
             fTimer->stop();
             if ( fThread->isRunning() )
             {
-                QObject::disconnect( fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished );
-                fThread->terminate();
-                QObject::connect( fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished );
-                fThread->wait();
+                reinitThread();
             }
             if ( fStopped )
                 fRetVal = std::make_pair( false, QString( "File Checking Stopped" ) );
             if ( fTimedOut )
                 fRetVal = std::make_pair( false, QString( "Path checking timed out, check network connection" ) );
+        }
+
+        void initThread()
+        {
+            fThread = new CBackgroundFileCheckThread(this);
+            QObject::connect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
+        }
+
+        void reinitThread()
+        {
+            QObject::disconnect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
+            fThread->terminate();
+            delete fThread;
+            initThread();
         }
 
         int fTimeOut{ 5000 };
@@ -252,8 +264,7 @@ namespace NSABUtils
     CBackgroundFileCheckImpl::CBackgroundFileCheckImpl( CBackgroundFileCheck * parent )
     {
         fParent = parent;
-        fThread = new CBackgroundFileCheckThread( this );
-        QObject::connect( fThread, &CBackgroundFileCheckThread::finished, parent, &CBackgroundFileCheck::slotFinished );
+        initThread();
 
         fTimer = new QTimer( parent );
         fTimer->setInterval( fTimeOut );
