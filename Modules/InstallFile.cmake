@@ -2,7 +2,6 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
 
 find_package( InstallFile REQUIRED )
 
-
 set(INFILE_FOUND false)
 set(OUTFILE_FOUND false)
 set(DASH_FOUND false)
@@ -25,7 +24,7 @@ foreach(_arg RANGE 1 ${_END})
             SET(INFILE ${currArgV})
         ENDIF()
     elseif ( currArgV STREQUAL "--" )
-            #MESSAGE( STATUS "Dash found" )
+        #MESSAGE( STATUS "Dash found" )
         SET(DASH_FOUND true)
     endif()
 endforeach()
@@ -38,8 +37,12 @@ endforeach()
 #MESSAGE( STATUS "INFILE=${INFILE}" )
 #MESSAGE( STATUS "OUTFILE=${OUTFILE}" )
 
-IF ( NOT INFILE_FOUND OR NOT OUTFILE_FOUND )
-    message( FATAL_ERROR "Usage: -P ${CMAKE_CURRENT_LIST_FILE} -- <infile> <outfile>" )
+IF ( NOT INFILE_FOUND )
+    message( FATAL_ERROR " Usage: -P ${CMAKE_CURRENT_LIST_FILE} -- <infile> <outfile>\n Missing <infile> argument." )
+endif()
+
+IF ( NOT OUTFILE_FOUND )
+    message( FATAL_ERROR " Usage: -P ${CMAKE_CURRENT_LIST_FILE} -- <infile> <outfile>\n Missing <outfile> argument." )
 endif()
 
 InstallFile( ${INFILE} ${OUTFILE} )

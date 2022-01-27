@@ -48,7 +48,7 @@ ENDFUNCTION()
 
 FUNCTION(InstallFilePostBuild)
     set( options )
-    set( oneValueArgs TARGET INFILE OUTFILE)
+    set( oneValueArgs TARGET INFILE TARGET_DIR)
     set( multiValueArgs CONFIGURATIONS )
 
     cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -61,17 +61,33 @@ FUNCTION(InstallFilePostBuild)
         MESSAGE( FATAL_ERROR "INFILE argument not set" )
     ENDIF()
 
-    if( NOT _OUTFILE )
-        MESSAGE( FATAL_ERROR "OUTFILE argument not set" )
+    if( NOT _TARGET_DIR )
+        MESSAGE( FATAL_ERROR "TARGET_DIR argument not set" )
     ENDIF()
     
     SET( _CALL_FUNC_CMD
         ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/SABUtils/Modules/InstallFile.cmake
         --
         ${_INFILE}
-        ${_OUTFILE}
+        ${_TARGET_DIR}
     )
     
+    #MESSAGE( STATUS "===============================" )
+    #MESSAGE( STATUS " InstallFilePostBuild" )
+    #MESSAGE( STATUS " TARGET=${_TARGET}" )
+    #MESSAGE( STATUS " INFILE=${_INFILE}" )
+    #MESSAGE( STATUS " TARGET_DIR=${_TARGET_DIR}" )
+    #MESSAGE( STATUS " CALL_FUNC_CMD=${_CALL_FUNC_CMD}" )
+    
+    if ( NOT _CONFIGURATIONS )
+        if ( _INFILE MATCHES ".*\.pdb" )
+            SET( _CONFIGURATIONS
+                Debug
+                RelWithDebInfo
+            )
+        endif()
+    endif()
+
     if ( _CONFIGURATIONS )
         foreach( currConfig ${_CONFIGURATIONS} )
             add_custom_command( TARGET ${_TARGET} POST_BUILD
@@ -87,3 +103,34 @@ FUNCTION(InstallFilePostBuild)
      endif()
         
 ENDFUNCTION()
+
+FUNCTION(InstallFilesPostBuild)
+    set( options )
+    set( oneValueArgs TARGET TARGET_DIR)
+    set( multiValueArgs INFILES CONFIGURATIONS )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+    if( NOT _TARGET )
+        MESSAGE( FATAL_ERROR "TARGET argument not set" )
+    ENDIF()
+
+    if( NOT _INFILES )
+        MESSAGE( FATAL_ERROR "INFILES argument not set" )
+    ENDIF()
+
+    if( NOT _TARGET_DIR )
+        MESSAGE( FATAL_ERROR "TARGET_DIR argument not set" )
+    ENDIF()
+
+    #MESSAGE( STATUS "===============================" )
+    #MESSAGE( STATUS " InstallFilesPostBuild" )
+    #MESSAGE( STATUS " TARGET=${_TARGET}" )
+    #MESSAGE( STATUS " INFILES=${_INFILES}" )
+    #MESSAGE( STATUS " TARGET_DIR=${_TARGET_DIR}" )
+
+
+    foreach( curr ${_INFILES} )
+        InstallFilePostBuild( TARGET MediaManager INFILE ${curr} TARGET_DIR ${_TARGET_DIR} CONFIGURATIONS ${_CONFIGURATIONS} )
+    endforeach()
+endfunction()
