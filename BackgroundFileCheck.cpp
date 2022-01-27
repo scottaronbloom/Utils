@@ -75,7 +75,7 @@ namespace NSABUtils
 
         void initThread()
         {
-            fThread = new CBackgroundFileCheckThread(this);
+            fThread = new CBackgroundFileCheckThread( this );
             QObject::connect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
         }
 
@@ -83,7 +83,8 @@ namespace NSABUtils
         {
             QObject::disconnect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
             fThread->terminate();
-            delete fThread;
+            fThread->deleteLater();
+            fThread = nullptr;
             initThread();
         }
 
@@ -120,6 +121,7 @@ namespace NSABUtils
     };
 
     CBackgroundFileCheckThread::CBackgroundFileCheckThread( CBackgroundFileCheckImpl * impl ) :
+        QThread( nullptr ),
         fImpl( impl )
     {
     }
