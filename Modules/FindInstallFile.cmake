@@ -131,6 +131,16 @@ FUNCTION(InstallFilesPostBuild)
 
 
     foreach( curr ${_INFILES} )
-        InstallFilePostBuild( TARGET MediaManager INFILE ${curr} TARGET_DIR ${_TARGET_DIR} CONFIGURATIONS ${_CONFIGURATIONS} )
+        IF( NOT _CONFIGURATIONS )
+            if ( curr MATCHES ".*\.pdb" )
+                SET( _CONFIGS
+                    Debug
+                    RelWithDebInfo
+                )
+            endif()        
+        ELSE()
+            SET( _CONFIGS ${_CONFIGURATIONS} )
+        ENDIF()
+        InstallFilePostBuild( TARGET MediaManager INFILE ${curr} TARGET_DIR ${_TARGET_DIR} CONFIGURATIONS ${_CONFIGS} )
     endforeach()
-endfunction()
+    endfunction()

@@ -55,9 +55,9 @@ endif()
 SET(SKIP_INSTALL_ALL ON)
 SET(BUILD_SHARED_LIBS ON)
 add_subdirectory( MediaInfo/MediaInfoLib/Project/cmake )
-set_target_properties( mediainfo PROPERTIES FOLDER MediaInfo )
-set_target_properties( zen PROPERTIES FOLDER MediaInfo )
-set_target_properties( zlibstatic PROPERTIES FOLDER MediaInfo )
+set_target_properties( mediainfo PROPERTIES FOLDER SharedLibs/MediaInfo )
+set_target_properties( zen PROPERTIES FOLDER SharedLibs/MediaInfo )
+set_target_properties( zlibstatic PROPERTIES FOLDER SharedLibs/MediaInfo )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
