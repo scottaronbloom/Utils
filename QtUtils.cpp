@@ -369,26 +369,195 @@ namespace NSABUtils
         return retVal;
     }
 
+    QStringList getHuristicDateFormats( const QStringList & aFormats, const QStringList & bFormats, const QStringList & cFormats )
+    {
+        static auto separators = QStringList() << ":" << "/" << "-";
+        QStringList retVal;
+        for ( auto && ii : aFormats )
+        {
+            for ( auto && jj : bFormats )
+            {
+                for ( auto && kk : cFormats )
+                {
+                    for ( auto && ll : separators )
+                    {
+                        retVal << QString( "%1%4%2%4%3" ).arg( ii ).arg( jj ).arg( kk ).arg( ll );
+                    }
+                }
+            }
+        }
+        return retVal;
+    }
+
+    QStringList getHuristicDateFormats( const QStringList & aFormats, const QStringList & bFormats )
+    {
+        static auto separators = QStringList() << ":" << "/" << "-";
+        QStringList retVal;
+        for ( auto && ii : aFormats )
+        {
+            for ( auto && jj : bFormats )
+            {
+                for ( auto && ll : separators )
+                {
+                    retVal << QString( "%1%3%2%3" ).arg( ii ).arg( jj ).arg( ll );
+                }
+            }
+        }
+        return retVal;
+    }
+
+    QStringList getMonthYearFormats()
+    {
+        static auto yearFormats = QStringList() << "yyyy" << "yy";
+        static auto monthFormats = QStringList() << "M" << "MM";
+        static QStringList sRetVal;
+        if ( sRetVal.isEmpty() )
+        {
+            sRetVal << getHuristicDateFormats( yearFormats, monthFormats );
+            sRetVal << getHuristicDateFormats( monthFormats, yearFormats );
+        }
+        return sRetVal;
+    }
+
+    QStringList getHuristicDateFormats()
+    {
+        static auto yearFormats = QStringList() << "yyyy" << "yy";
+        static auto monthFormats = QStringList() << "M" << "MM";
+        static auto dateFormats = QStringList() << "dd" << "d";
+        static QStringList sRetVal;
+        if ( sRetVal.isEmpty() )
+        {
+            sRetVal << getHuristicDateFormats( yearFormats, monthFormats, dateFormats );
+            sRetVal << getHuristicDateFormats( yearFormats, dateFormats, monthFormats );
+            sRetVal << getHuristicDateFormats( monthFormats, yearFormats, dateFormats );
+            sRetVal << getHuristicDateFormats( monthFormats, dateFormats, yearFormats );
+            sRetVal << getHuristicDateFormats( dateFormats, yearFormats, monthFormats );
+            sRetVal << getHuristicDateFormats( dateFormats, monthFormats, yearFormats );
+        }
+        return sRetVal;
+    }
+
+    QStringList getDateFormats( const SDateSearchOptions & options )
+    {
+        QStringList retVal;
+        QLocale locale;
+        retVal
+            << "ddd MMM d yyyy"
+            << locale.dateFormat( QLocale::ShortFormat )
+            << locale.dateFormat( QLocale::LongFormat )
+            << "yyyy-MM-dd"
+            //<< Qt::ISODateWithMs - NA on dates
+            << "dd MMM yyyy"
+            << "yyyy-M-d"
+            << "yyyy/MM/dd"
+            ;
+        if ( options.fIncludeHuristics )
+            retVal << getHuristicDateFormats();
+        if ( options.fAllowYearOnly )
+            retVal << "yyyy" << "yy";
+        if ( options.fAllowMonthYearOnly )
+            retVal << getHuristicDateFormats();
+        if ( options.fIncludeDateTimeFormats )
+            retVal << getDateTimeFormats();
+
+        return retVal;
+    }
+
+    QStringList getTimeFormats( const SDateSearchOptions & options )
+    {
+        QStringList retVal;
+        QLocale locale;
+        retVal
+            << "HH:mm:ss"
+            << locale.timeFormat( QLocale::ShortFormat )
+            << locale.timeFormat( QLocale::LongFormat )
+            << "h:m:s"
+            << "hh:mm:ss"
+            << "HH:mm:ss.zzz"
+            << "H:m:s"
+            << "h:m:s AP"
+            << "hh:mm:ss AP"
+            << "H:m:s AP"
+            << "h:m:s ap"
+            << "hh:mm:ss ap"
+            << "H:m:s ap"
+            ;
+        if ( options.fIncludeDateTimeFormats )
+            retVal << getDateTimeFormats();
+        return retVal;
+    }
+
+    QStringList getDateTimeFormats()
+    {
+        QStringList retVal;
+        QLocale locale;
+        retVal
+            << "ddd MMM d yyyy HH:mm:ss"
+            << locale.dateTimeFormat( QLocale::ShortFormat )
+            << locale.dateTimeFormat( QLocale::LongFormat )
+            << "yyyy-MM-ddThh:mm:ss"
+            << "yyyy-MM-ddTHH:mm:ss"
+            << "yyyy-MM-ddTh:m:s"
+            << "yyyy-MM-ddTH:m:s"
+
+            << "yyyy-M-dThh:mm:ss"
+            << "yyyy-M-dTHH:mm:ss"
+            << "yyyy-M-dTh:m:s"
+            << "yyyy-M-dTH:m:s"
+
+            << "yyyy-MM-dd"
+            << "yyyy-M-d"
+            << "yyyy/MM/dd"
+            << "yyyy/M/d"
+            ;
+        return retVal;
+    }
+
     QDateTime getDateTime(const QString & dateString)
     {
-        QLocale locale;
-        QDateTime retVal = QDateTime::fromString(dateString);
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, locale.dateTimeFormat(QLocale::ShortFormat));
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, locale.dateTimeFormat(QLocale::LongFormat));
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, Qt::ISODate);
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, "yyyy-M-dTh:m:s");
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, "yyyy-MM-ddTHH:mm:ss");
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, "yyyy-MM-dd");
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, "yyyy-M-d");
-        if (!retVal.isValid())
-            retVal = QDateTime::fromString(dateString, "yyyy/MM/dd");
+        auto formats = getDateTimeFormats();
+        QDateTime retVal;
+        for ( auto && format : formats )
+        {
+            retVal = QDateTime::fromString( dateString, format );
+            if ( retVal.isValid() )
+                return retVal;
+        }
+        return retVal;
+    }
+
+    QDate getDate( const QString & string, const SDateSearchOptions & options )
+    {
+        auto formats = getDateFormats( options );
+        QDate retVal;
+        for ( auto && format : formats )
+        {
+            if ( options.fIncludeDateTimeFormats )
+                retVal = QDateTime::fromString( string, format ).date();
+            else
+                retVal = QDate::fromString( string, format );
+            if ( retVal.isValid() )
+            {
+                qDebug() << string << "=" << retVal;
+                return retVal;
+            }
+        }
+        return retVal;
+    }
+
+    QTime getTime( const QString & string, const SDateSearchOptions & options )
+    {
+        auto formats = getTimeFormats( options );
+        QTime retVal;
+        for ( auto && format : formats )
+        {
+            if ( options.fIncludeDateTimeFormats )
+                retVal = QDateTime::fromString( string, format ).time();
+            else
+                retVal = QTime::fromString( string, format );
+            if ( retVal.isValid() )
+                return retVal;
+        }
         return retVal;
     }
 
@@ -399,14 +568,14 @@ namespace NSABUtils
         {
             if (!optional)
                 reader.raiseError(QString("Invalid value, expecting date '%1'").arg(value.toString()));
-            return QDateTime();
+            return {};
         }
         return retVal;
     }
 
-    QDateTime getDateTime(const QString & value, QXmlStreamReader & reader, bool optional)
+    QDateTime getDateTime( const QString & value, QXmlStreamReader & reader, bool optional )
     {
-        return getDateTime(QStringRef(&value), reader, optional);
+        return getDateTime( QStringRef( &value ), reader, optional );
     }
 
     QStringList splitLineCSV(const QString & line)
@@ -662,49 +831,6 @@ namespace NSABUtils
     size_t CCaseInsensitiveEqual::operator()(const QString & lhs, const QString & rhs) const
     {
         return QDir(lhs).absolutePath().compare(QDir(rhs).absolutePath(), Qt::CaseInsensitive) == 0;
-    }
-
-
-    QDate findDate(const QString & string, const QStringList & aFormats, const QStringList & bFormats, const QStringList & cFormats)
-    {
-        static auto separators = QStringList() << ":" << "/" << "-" << "";
-        for (auto && ii : aFormats)
-        {
-            for (auto && jj : bFormats)
-            {
-                for (auto && kk : cFormats)
-                {
-                    for (auto && ll : separators)
-                    {
-                        auto dt = QDate::fromString(string, QString("%1%4%2%4%3").arg(ii).arg(jj).arg(kk).arg(ll));
-                        if (dt.isValid())
-                        {
-                            return dt;
-                        }
-                    }
-                }
-            }
-        }
-        return QDate();
-    }
-
-    QDate findDate(const QString & dateString)
-    {
-        static auto yearFormats = QStringList() << "yyyy" << "yy";
-        static auto monthFormats = QStringList() << "M" << "MM";
-        static auto dateFormats = QStringList() << "dd" << "d";
-        auto dt = findDate(dateString, yearFormats, monthFormats, dateFormats);
-        if (!dt.isValid())
-            dt = findDate(dateString, yearFormats, dateFormats, monthFormats);
-        if (!dt.isValid())
-            dt = findDate(dateString, monthFormats, yearFormats, dateFormats);
-        if (!dt.isValid())
-            dt = findDate(dateString, monthFormats, dateFormats, yearFormats);
-        if (!dt.isValid())
-            dt = findDate(dateString, dateFormats, yearFormats, monthFormats);
-        if (!dt.isValid())
-            dt = findDate(dateString, dateFormats, monthFormats, yearFormats);
-        return dt;
     }
 
     void updateTimer(int delayMS, QTimer * timer)

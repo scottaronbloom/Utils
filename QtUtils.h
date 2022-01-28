@@ -120,9 +120,30 @@ namespace NSABUtils
     QString getFile(const QDir & relToDir, QXmlStreamReader & reader, QString * origFile = nullptr);
     QString getFile(const QDir & relToDir, const QString & file);
 
+    struct SDateSearchOptions
+    {
+        SDateSearchOptions() {}
+        SDateSearchOptions( bool includeHuristics, bool includeDateTimeFormat ) :
+            fIncludeHuristics( includeHuristics ),
+            fIncludeDateTimeFormats( includeDateTimeFormat )
+        {}
+        bool fIncludeDateTimeFormats{ true };
+        bool fIncludeHuristics{ true };
+        bool fAllowYearOnly{ false };
+        bool fAllowMonthYearOnly{ false };
+    };
+
     QDateTime getDateTime(const QStringRef & str, QXmlStreamReader & reader, bool optional);
     QDateTime getDateTime(const QString & str, QXmlStreamReader & reader, bool optional);
     QDateTime getDateTime(const QString & str);
+
+    QDate getDate( const QString & str, const SDateSearchOptions & options = {} );
+    QTime getTime( const QString & str, const SDateSearchOptions & options = {} );
+
+    QStringList getDateTimeFormats();
+    QStringList getTimeFormats( const SDateSearchOptions & options = {} );
+    QStringList getHuristicDateFormats();
+    QStringList getDateFormats( const SDateSearchOptions & options = {} );
 
     int autoSize( QTableView * table ); // autoSize( table, table->horizontalHeader )
     int autoSize( QTreeView * table ); // autoSize( table, table->header )
@@ -177,8 +198,6 @@ namespace NSABUtils
         std::function<void(QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum) >());
 
     void expandAll(QAbstractItemModel * model, const QModelIndex & index, QTreeView * view);
-
-    QDate findDate(const QString & dateString);
 
     void updateTimer(int delayMS, QTimer * timer);
 
