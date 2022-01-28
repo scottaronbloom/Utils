@@ -27,69 +27,203 @@
 #include <QProcess>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QDir>
 #include <QTemporaryFile>
 
+#define UNICODE
+#include "MediaInfoDLL/MediaInfoDLL_Static.h"
+#include "MediaInfo/MediaInfoList.h"
 
 static void initResources()
 {
     Q_INIT_RESOURCE( SABUtils );
 }
 
+std::unordered_map< QString, QString > knownMKVTags()
+{
+    static std::unordered_map< QString, QString > sKnownTags =
+    {
+         //{ "ALBUM", "" }
+        //,{ "ALBUM_ARTIST", "" }
+         { "ARTIST", "" }
+        ,{ "BPM", "" }
+        ,{ "COMMENT", "" }
+        ,{ "COMPOSER", "" }
+        //,{ "DISC_NUMBER", "" }
+        ,{ "GENRE", "" }
+        ,{ "TITLE", "" }
+        ,{ "TRACK", "" }
+        ,{ "DATE_RECORDED", "" }
+    };
+    return sKnownTags;
+}
+
+std::unordered_map< QString, QString > getMediaInfo( const QString & path )
+{
+        // Create Options for MediaInfo, there is a bunch more but these seem somewhat most relevant
+    QStringList generalParams;
+    generalParams << "FileName"
+        << "BPM" << "Comment" << "ARTIST" << "COMPOSER" << "DATE_RECORDED" << "GENRE"
+        << "Duration" << "Title" << "Track/Position"
+        ;
+
+    auto known = knownMKVTags();
+    for ( auto && ii : known )
+    {
+        generalParams << ii.first;
+    }
+
+        //<< "Album"
+        //<< "Director"
+        //<< "Arranger"
+        //<< "Performer"
+        //<< "Performer"
+        //<< "Conductor"
+        //<< "Comment"
+        //<< "Copyright"
+        //<< "Recorded_Date"
+        //<< "Title_More"
+        //<< "Director"
+        //<< "TermsOfUse"
+        //<< "Tagged_Date"
+        //<< "Encoded_Application"
+        //<< "Origin"
+        //<< "Genre"
+        //<< "Grouping"
+        //<< "HostComputer"
+        //<< "Title_More"
+        //<< "Keywords"
+        //<< "Lyrics"
+        //<< "Make"
+        //<< "Model"
+        //<< "Title"
+        //<< "Original/Performer"
+        //<< "Producer"
+        //<< "Product"
+        //<< "Performer"
+        //<< "Comment"
+        //<< "SoundEngineer"
+        //<< "Conductor"
+        //<< "DistributedBy"
+        //<< "Subtitle"
+        //<< "Encoded_Application"
+        //<< "Encoded_Application"
+        //<< "Track/Url"
+        //<< "Warning"
+        //<< "Composer"
+        //<< "ExecutiveProducer"
+        //<< "Album/Performer"
+        //<< "AppleStoreAccountType"
+        //<< "Album"
+        //<< "AppleStoreAccount"
+        //<< "AlbumTitleID"
+        //<< "Performer"
+        //<< "Category"
+        //<< "AppleStoreCatalogID"
+        //<< "Compilation"
+        //<< "Copyright"
+        //<< "Description"
+        //<< "Part"
+        //<< "Title_More"
+        //<< "EpisodeGlobalUniqueID"
+        //<< "Flavour"
+        //<< "Genre"
+        //<< "GenreID"
+        //<< "Grouping"
+        //<< "HDVideo"
+        //<< "iTunesU"
+        //<< "Keyword"
+        //<< "LongDescription"
+        //<< "Title"
+        //<< "Podcast"
+        //<< "Performer"
+        //<< "PlayListID"
+        //<< "PurchaseDate"
+        //<< "PodcastURL"
+        //<< "Rating"
+        //<< "Rating"
+        //<< "Description"
+        //<< "AppleStoreCountry"
+        //<< "Album/Performer/Sort"
+        //<< "Album/Sort"
+        //<< "Performer/Sort"
+        //<< "Composer/Sort"
+        //<< "Title/Sort"
+        //<< "Title/Sort"
+        //<< "ContentType"
+        //<< "Title"
+        //<< "Encoded_Application"
+        //<< "BPM"
+        //<< "Track"
+        //<< "Part_ID"
+        //<< "Part"
+        //<< "TVNetworkName"
+        //<< "Collection"
+        //<< "Season"
+        //<< "Vendor"
+        //<< "Recorded_Date"
+        //<< "Recorded_Date"
+        //;
+    QString generalInform = QStringLiteral( "General;" ) + "%" + generalParams.join( "%|%" ) + "%";
+    generalInform += "\\n";
+    
+    MediaInfoDLL::MediaInfo MI;
+    MI.Option( __T( "ParseSpeed" ), __T( "0" ) );
+    MI.Option( __T( "Language" ), __T( "raw" ) );
+    MI.Option( __T( "ReadByHuman" ), __T( "0" ) );
+    MI.Option( __T( "Legacy" ), __T( "0" ) );
+
+    // This causes MediaInfo to open all files in the directory
+    auto nFiles = MI.Open( path.toStdWString() /*, MediaInfoLib::FileOption_NoRecursive*/ );
+    if ( nFiles != 1 )
+        return {};
+    // Now we query MediaInfoLib for the data we are interested and receive everything in one string
+    MI.Option( QStringLiteral( "Inform" ).toStdWString(), generalInform.toStdWString() );
+    QString informOptionResult = QString::fromStdWString( MI.Inform() );
+    // Done - be good and close the MediaInfo object
+    MI.Close();
+
+    std::list< std::pair< QString, QString > > retVal;
+    QStringList informResult = informOptionResult.split( '\n', QString::SkipEmptyParts );
+    foreach( QString res, informResult )
+    {
+        QStringList resList = res.split( "|" );
+        Q_ASSERT( resList.count() == generalParams.count() );
+        for ( int i = 0; i < resList.count() - 1; ++i )
+        {
+            retVal.push_back( std::make_pair( generalParams[i], resList[i] ) );
+        }
+    }
+    for ( auto && ii : retVal )
+    {
+        qDebug() << ii.first << "=" << ii.second;
+    }
+    return std::unordered_map< QString, QString >( retVal.begin(), retVal.end() );
+}
+
+
 namespace NSABUtils
 {
-    int64_t getNumberOfSeconds( const QString & fileName, const QString & ffprobe )
+    int64_t getNumberOfSeconds( const QString & fileName )
     {
-        QFileInfo fi = QFileInfo( ffprobe );
-        if ( !fi.exists() || !fi.isReadable() || !fi.isExecutable() || !fi.isFile() )
-            return 0;
+        return getNumberOfMSecs( fileName ) / 1000;
+    }
 
-        fi = QFileInfo( fileName );
-        if ( !fi.exists() || !fi.isReadable() || !fi.isFile() )
+    int64_t getNumberOfMSecs( const QString & fileName )
+    {
+        auto values = getMediaInfo( fileName );
+        auto pos = values.find( "Duration" );
+        if ( pos == values.end() )
             return 0;
-        
-        auto args = QStringList()
-            << "-v" << "error"
-            << "-show_entries" << "format=duration"
-            << "-of" << "default=noprint_wrappers=1:nokey=1"
-            << fileName
-            ;
-
-        QProcess process;
-        process.start( ffprobe, args );
-
-        if ( !process.waitForFinished( -1 ) || (process.exitStatus() != QProcess::NormalExit) || (process.exitCode() != 0) )
-        {
-            return 0;
-        }
-        auto out = process.readAllStandardOutput();
-        auto pos = out.indexOf( '.' );
-        out = out.left( pos );
         bool aOK;
-        int retVal = out.toInt( &aOK );
+        int retVal = (*pos).second.toInt( &aOK );
         if ( !aOK )
             return 0;
+
         return retVal;
     }
 
-    std::unordered_map< QString, QString > knownMKVTags()
-    {
-        static std::unordered_map< QString, QString > sKnownTags =
-        {
-             { "ALBUM", "" }
-            ,{ "ALBUM_ARTIST", "" }
-            ,{ "ARTIST", "" }
-            ,{ "BPM", "" }
-            ,{ "COMMENT", "" }
-            ,{ "COMPOSER", "" }
-            ,{ "DISC_NUMBER", "" }
-            ,{ "GENRE", "" }
-            ,{ "TITLE", "" }
-            ,{ "TRACK", "" }
-            ,{ "DATE_RECORDED", "" }
-        };
-        return sKnownTags;
-    }
     bool setMediaTags( const QString & fileName, const std::unordered_map< QString, QString > & tags, const QString & mkvPropEdit, QString * msg/*=nullptr */ )
     {
         initResources();

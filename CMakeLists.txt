@@ -52,6 +52,13 @@ if( SAB_ENABLE_TESTING )
     set_target_properties( gtest_main PROPERTIES FOLDER 3rdParty/google )
 endif()
 
+SET(SKIP_INSTALL_ALL ON)
+SET(BUILD_SHARED_LIBS ON)
+add_subdirectory( MediaInfo/MediaInfoLib/Project/cmake )
+set_target_properties( mediainfo PROPERTIES FOLDER MediaInfo )
+set_target_properties( zen PROPERTIES FOLDER MediaInfo )
+set_target_properties( zlibstatic PROPERTIES FOLDER MediaInfo )
+
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
@@ -69,6 +76,9 @@ set(SAB_MOC_OPTIONS "-DNON_VIS_BUILD=1")
 
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
+
+include_directories(MediaInfo/MediaInfoLib/Source)
+include_directories(MediaInfo/ZenLib/Source)
 
 add_library(SABUtils STATIC
     ${project_SRCS} 

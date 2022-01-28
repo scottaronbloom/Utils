@@ -27,7 +27,22 @@
 #include <QString>
 namespace NSABUtils
 {
-    int64_t getNumberOfSeconds( const QString & fileName, const QString & ffprobe );
+    int64_t getNumberOfSeconds( const QString & fileName );
+    int64_t getNumberOfMSecs( const QString & fileName );
+
+    enum class EMediaTags
+    {
+        eArtist,
+        eBPM,
+        eComment,
+        eComposer,
+        eGenre,
+        eTitle,
+        eTrack,
+        eDateRecorded,
+        eLength
+    };
+
     std::unordered_map< QString, QString > getMediaTags( const QString & fileName, const QString & ffprobe );
 
     bool setMediaTags( const QString & fileName, const std::unordered_map< QString, QString > & tags, const QString & mkvPropEdit, QString * msg=nullptr );
