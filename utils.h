@@ -210,7 +210,7 @@ namespace NSABUtils
                 oss << "    ";
             first = false;
 
-            oss << NUtils::toString(currVal, base);
+            oss << NSABUtils::toString(currVal, base);
             if (base != 10)
                 oss << "(=" << currVal << ")";
             ii++;
@@ -297,7 +297,7 @@ namespace NSABUtils
     std::vector< std::vector< T > > allCombinations(const std::vector< T >& arr, size_t r, const std::pair< bool, size_t > & report = std::make_pair(false, 1))
     {
         std::vector< std::vector< T > > combinations;
-        NUtils::allCombinations< T >(arr, r,
+        NSABUtils::allCombinations< T >(arr, r,
             [&combinations, &report = std::as_const(report)](const std::vector< T >& sub)
         {
             combinations.push_back(sub);
@@ -381,9 +381,9 @@ namespace NSABUtils
     template< typename T >
     std::list< T > replaceInList(const std::list< T > & inList, int xFirst, int xCount, const std::list< T > & values, int xNum = -1)
     {
-        auto prefix = NUtils::mid(inList, 0, xFirst);
-        auto mid = NUtils::mid(values, 0, xNum);
-        auto suffix = NUtils::mid(inList, xFirst + xCount);
+        auto prefix = NSABUtils::mid(inList, 0, xFirst);
+        auto mid = NSABUtils::mid(values, 0, xNum);
+        auto suffix = NSABUtils::mid(inList, xFirst + xCount);
 
         auto lRetVal = std::list< T >({ prefix.first, prefix.second }) + mid + suffix; //( { prefix.first, prefix.second } );
         return lRetVal;
