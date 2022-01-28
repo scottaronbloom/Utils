@@ -57,6 +57,7 @@ if( SAB_ENABLE_TESTING )
 endif()
 
 SET(NO_USE_MEDIAINFO_INSTALL ON)
+set(BUILD_SHARED_LIBS ON)
 add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
