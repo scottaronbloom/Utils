@@ -28,6 +28,7 @@ set(qtproject_SRCS
     BIFModel.cpp
     BIFWidget.cpp
     ButtonEnabler.cpp
+    WidgetEnabler.cpp
     ConsoleUtils.cpp
     DelayComboBox.cpp
     DelayLineEdit.cpp
@@ -71,6 +72,7 @@ set(qtproject_H
     BIFModel.h
     BIFWidget.h
     ButtonEnabler.h
+    WidgetEnabler.h
     DelayComboBox.h
     DelayLineEdit.h
     DelaySpinBox.h
