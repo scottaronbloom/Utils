@@ -33,7 +33,7 @@
 extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
 
 #ifdef _DEBUG
-#define DEBUG_BACKGROUND_FILE_CHECK
+//#define DEBUG_BACKGROUND_FILE_CHECK
 #endif
 
 namespace NSABUtils
