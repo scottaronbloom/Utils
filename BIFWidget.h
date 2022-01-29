@@ -54,7 +54,7 @@ namespace NSABUtils
         {
             Q_OBJECT
         public:
-            CWidget(QWidget *parent = 0);
+            CWidget(QWidget *parent = nullptr);
             ~CWidget();
 
             void clear();

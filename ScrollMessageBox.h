@@ -38,8 +38,8 @@ namespace NSABUtils
         Q_OBJECT
 
     public:
-        CScrollMessageBox(QWidget *parent = 0);
-        CScrollMessageBox(const QString & title, const QString & label, QWidget *parent = 0);
+        CScrollMessageBox(QWidget *parent = nullptr );
+        CScrollMessageBox(const QString & title, const QString & label, QWidget *parent = nullptr );
         ~CScrollMessageBox();
 
         void setTitle(const QString & title);

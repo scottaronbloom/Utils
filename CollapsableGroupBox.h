@@ -33,8 +33,8 @@ namespace NSABUtils
         Q_PROPERTY(bool collapsive READ isCollapsible WRITE setCollapsible)
 
     public:
-        explicit CCollapsableGroupBox(QWidget* parent = 0);
-        explicit CCollapsableGroupBox(const QString& title, QWidget* parent = 0);
+        explicit CCollapsableGroupBox(QWidget* parent = nullptr );
+        explicit CCollapsableGroupBox(const QString& title, QWidget* parent = nullptr );
         virtual ~CCollapsableGroupBox();
 
         bool isCollapsible() const;

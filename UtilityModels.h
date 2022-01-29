@@ -142,12 +142,15 @@ namespace NSABUtils
 
         QStringList getCheckedStrings(bool & allChecked) const;
         QStringList getCheckedStrings() const;
+        std::list< std::pair< QString, bool > > getAllStrings() const;
+
         void uncheckAll(bool update);
         void checkAll(bool update);
 
         bool operator==(const CCheckableStringListModel & rhs) const;
         void copy(const CCheckableStringListModel & rhs);
         bool isChecked(int rowNum) const;
+        bool isChecked( const QString & value ) const;
 
         void setStringList(const std::list< std::pair< QString, bool > > & values);
         void setStringList(const QStringList & strings, bool checked) { QStringListModel::setStringList(strings); setChecked(strings, checked, true); }
