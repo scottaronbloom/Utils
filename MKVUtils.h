@@ -43,7 +43,7 @@ namespace NSABUtils
         eLength
     };
 
-    std::unordered_map< QString, QString > getMediaTags( const QString & fileName, const QString & ffprobe );
+    std::unordered_map< QString, QString > getMediaTags( const QString & fileName );
 
     bool setMediaTags( const QString & fileName, const std::unordered_map< QString, QString > & tags, const QString & mkvPropEdit, QString * msg=nullptr );
 }

@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "MKVUtils.h"
+#include "utils.h"
 
 #include <QFileInfo>
 #include <QString>
@@ -63,16 +64,29 @@ std::unordered_map< QString, QString > getMediaInfo( const QString & path )
 {
         // Create Options for MediaInfo, there is a bunch more but these seem somewhat most relevant
     QStringList generalParams;
-    generalParams << "FileName"
-        << "BPM" << "Comment" << "ARTIST" << "COMPOSER" << "DATE_RECORDED" << "GENRE"
-        << "Duration" << "Title" << "Track/Position"
+    generalParams 
+        << "FileName"
+        << "Duration"
+        << "Title"
+        << "DATE_RECORDED"
+        << "Comment"
+        << "BPM" 
+        << "ARTIST" 
+        << "COMPOSER" 
+        << "GENRE"
+        << "Track/Position"
         ;
 
-    auto known = knownMKVTags();
-    for ( auto && ii : known )
-    {
-        generalParams << ii.first;
-    }
+    //generalParams << "FileName"
+    //    << "BPM" << "Comment" << "ARTIST" << "COMPOSER" << "DATE_RECORDED" << "GENRE"
+    //    << "Duration" << "Title" << "Track/Position"
+    //    ;
+
+    //auto known = knownMKVTags();
+    //for ( auto && ii : known )
+    //{
+    //    generalParams << ii.first;
+    //}
 
         //<< "Album"
         //<< "Director"
@@ -184,22 +198,30 @@ std::unordered_map< QString, QString > getMediaInfo( const QString & path )
     // Done - be good and close the MediaInfo object
     MI.Close();
 
-    std::list< std::pair< QString, QString > > retVal;
+    std::unordered_map< QString, QString > retVal;
     QStringList informResult = informOptionResult.split( '\n', QString::SkipEmptyParts );
     foreach( QString res, informResult )
     {
         QStringList resList = res.split( "|" );
         Q_ASSERT( resList.count() == generalParams.count() );
-        for ( int i = 0; i < resList.count() - 1; ++i )
+        for ( int i = 0; i < resList.count(); ++i )
         {
-            retVal.push_back( std::make_pair( generalParams[i], resList[i] ) );
+            retVal[ generalParams[i].toUpper() ] = resList[i];
         }
     }
-    for ( auto && ii : retVal )
+
+    auto pos = retVal.find( "DURATION" );
+    if ( pos != retVal.end() )
     {
-        qDebug() << ii.first << "=" << ii.second;
+        bool aOK;
+        uint64_t numMSecs = (*pos).second.toInt( &aOK );
+        if ( !aOK )
+            numMSecs = 0;
+
+        NSABUtils::CTimeString ts( numMSecs );
+        retVal["LENGTH"] = ts.toString( "hh:mm:ss" );
     }
-    return std::unordered_map< QString, QString >( retVal.begin(), retVal.end() );
+    return retVal;
 }
 
 
@@ -222,6 +244,11 @@ namespace NSABUtils
             return 0;
 
         return retVal;
+    }
+
+    std::unordered_map< QString, QString > getMediaTags( const QString & fileName )
+    {
+        return getMediaInfo( fileName );
     }
 
     bool setMediaTags( const QString & fileName, const std::unordered_map< QString, QString > & tags, const QString & mkvPropEdit, QString * msg/*=nullptr */ )
@@ -311,68 +338,5 @@ namespace NSABUtils
         }
 
         return retVal == 0;
-    }
-
-    std::unordered_map< QString, QString > getMediaTags( const QString & fileName, const QString & ffprobe )
-    {
-        QFileInfo fi = QFileInfo( ffprobe );
-        if ( !fi.exists() || !fi.isReadable() || !fi.isExecutable() || !fi.isFile() )
-            return {};
-
-        fi = QFileInfo( fileName );
-        if ( !fi.exists() || !fi.isReadable() || !fi.isFile() )
-            return {};
-
-        auto args = QStringList()
-            << "-v" << "error"
-            << "-print_format" << "json"
-            << "-show_format" 
-            << fileName
-            ;
-
-        QProcess process;
-        process.start( ffprobe, args );
-
-        if ( !process.waitForFinished( -1 ) || (process.exitStatus() != QProcess::NormalExit) || (process.exitCode() != 0) )
-        {
-            return {};
-        }
-        auto out = process.readAllStandardOutput();
-
-        auto doc = QJsonDocument::fromJson( out );
-        if ( doc.isNull() )
-            return {};
-        if ( !doc.object().contains( "format" ) )
-            return {};
-        auto format = doc.object()["format"];
-        if ( format.isNull() || !format.isObject() )
-            return {};
-
-        if ( !format.toObject().contains( "tags" ) )
-            return {};
-
-        auto tags = format.toObject()["tags"];
-        if ( !tags.isObject() )
-            return {};
-
-        std::unordered_map< QString, QString > retVal;
-        auto tagsObj = tags.toObject();
-        for ( auto && ii = tagsObj.begin(); ii != tagsObj.end(); ++ii )
-        {
-            auto key = ii.key().toLower();
-            auto variant = ii.value();
-            QString value;
-            if ( variant.isString() )
-                value = variant.toString();
-            else if ( variant.isBool() )
-                value = variant.toBool() ? "true" : "false";
-            else if ( variant.isDouble() )
-                value = QString::number( variant.toDouble() );
-            else if ( variant.isNull() )
-                value = "";
-            retVal[key.toUpper()] = value;
-        }
-
-        return retVal;
     }
 }
