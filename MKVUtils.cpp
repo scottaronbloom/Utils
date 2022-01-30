@@ -33,114 +33,61 @@
 #include <QTemporaryFile>
 #include "MediaInfoDLL/MediaInfoDLL_Static.h"
 #include "MediaInfo/MediaInfoList.h"
+#include "SABUtilsResources.h"
 #include <iosfwd>
 #include <iomanip>
 
-static void initResources()
-{
-    Q_INIT_RESOURCE( SABUtils );
-}
-
-//QString toString( MediaInfoDLL::stream_t whichStream )
-//{
-//    switch( whichStream )
-//    {
-//        case MediaInfoDLL::Stream_General: return "General";
-//        case MediaInfoDLL::Stream_Video: return "Video";
-//        case MediaInfoDLL::Stream_Audio: return "Audio";
-//        case MediaInfoDLL::Stream_Text: return "Text";
-//        case MediaInfoDLL::Stream_Other: return "Other";
-//        case MediaInfoDLL::Stream_Image: return "Image";
-//        case MediaInfoDLL::Stream_Menu: return "Menu";
-//        default:
-//            return QString();
-//    }
-//}
-
-//QString test( const QString & fileName )
-//{
-//        //Information about MediaInfo
-//    MediaInfoDLL::MediaInfo MI;
-//    QString retVal = QString::fromStdWString( MI.Option( __T( "Info_Version" ), __T( "0.7.13;MediaInfoDLL_Example_MSVC;0.7.13" ) ) );
-//
-//    //retVal += __T( "\n\nInfo_Parameters\n" );
-//    //retVal += MI.Option( __T( "Info_Parameters" ) );
-//
-//    //retVal += __T( "\n\nInfo_Codecs\n" );
-//    //retVal += MI.Option( __T( "Info_Codecs" ) );
-//
-//    ////An example of how to use the library
-//    //retVal += __T( "\n\nOpen\n" );
-//    MI.Open( fileName.toStdWString() );
-//
-//    //retVal += __T( "\n\nInform with Complete=false\n" );
-//    //MI.Option( __T( "Complete" ) );
-//    //retVal += MI.Inform();
-//
-//    //retVal += __T( "\n\nInform with Complete=true\n" );
-//    //MI.Option( __T( "Complete" ), __T( "1" ) );
-//    //retVal += MI.Inform();
-//
-//    //retVal += __T( "\n\nCustom Inform\n" );
-//    //MI.Option( __T( "Inform" ), __T( "General;Example : FileSize=%FileSize%" ) );
-//    //retVal += MI.Inform();
-//
-//    //retVal += __T( "\n\nGet with Stream=General and Parameter=\"FileSize\"\n" );
-//    //retVal += MI.Get( MediaInfoDLL::Stream_General, 0, __T( "FileSize" ), MediaInfoDLL::Info_Text, MediaInfoDLL::Info_Name );
-//
-//    for ( MediaInfoDLL::stream_t ii = MediaInfoDLL::Stream_General; ii < MediaInfoDLL::Stream_Max; ii = static_cast<MediaInfoDLL::stream_t>( static_cast< int >( ii ) + 1 ) )
-//    {
-//        retVal += "===========================================\n";
-//        retVal += "Stream: " + toString( ii ) + "\n";
-//        retVal += "===========================================\n";
-//        bool aOK;
-//        auto streamCount = QString::fromStdWString( MI.Get( ii, 0, __T( "StreamCount" ) ) ).toInt( &aOK );
-//        if ( !aOK )
-//            streamCount = 1;
-//        for ( int jj = 0; jj < streamCount; ++jj )
-//        {
-//            retVal += "===========================================\n";
-//            retVal += QString( "Stream #%1 of %2\n" ).arg( jj ).arg( streamCount );
-//            retVal += "===========================================\n";
-//            auto paramCount = QString::fromStdWString( MI.Get( ii, jj, __T( "Count" ) ) ).toInt( &aOK );
-//            if ( !aOK )
-//                paramCount = 0;
-//            for ( int kk = 0; kk < paramCount; ++kk )
-//            {
-//                auto curr = QString( "Param #%1 of %2 = %3" ).arg( kk ).arg( paramCount ).arg( MI.Get( ii, jj, kk ) );
-//                qDebug() << curr;
-//                retVal += curr + "\n";
-//            }
-//        }
-//    }
-//
-//
-////    retVal += __T( "\n\nCount_Get with StreamKind=Stream_Audio\n" );
-////#ifdef __MINGW32__
-////    Char * C1 = new Char[33];
-////    _itot( MI.Count_Get( Stream_Audio ), C1, 10 );
-////    retVal += C1;
-////    delete[] C1;
-////#else
-////    std::wstringstream SS;
-////    SS << std::setbase( 10 ) << MI.Count_Get( MediaInfoDLL::Stream_Audio );
-////    retVal += SS.str();
-////#endif
-//
-//    //retVal += __T( "\n\nGet with Stream=General and Parameter=\"AudioCount\"\n" );
-//    //retVal += MI.Get( MediaInfoDLL::Stream_General, 0, __T( "AudioCount" ), MediaInfoDLL::Info_Text, MediaInfoDLL::Info_Name );
-//
-//    //retVal += __T( "\n\nGet with Stream=Audio and Parameter=\"StreamCount\"\n" );
-//    //retVal += MI.Get( MediaInfoDLL::Stream_Audio, 0, __T( "StreamCount" ), MediaInfoDLL::Info_Text, MediaInfoDLL::Info_Name );
-//
-//    //retVal += __T( "\n\nClose\n" );
-//    //MI.Close();
-//
-//    return retVal;
-//}
-
 namespace NSABUtils
 {
+
+    QString toString( MediaInfoDLL::stream_t whichStream )
+    {
+        switch ( whichStream )
+        {
+            case MediaInfoDLL::Stream_General: return "General";
+            case MediaInfoDLL::Stream_Video: return "Video";
+            case MediaInfoDLL::Stream_Audio: return "Audio";
+            case MediaInfoDLL::Stream_Text: return "Text";
+            case MediaInfoDLL::Stream_Other: return "Other";
+            case MediaInfoDLL::Stream_Image: return "Image";
+            case MediaInfoDLL::Stream_Menu: return "Menu";
+            default:
+                return {};
+        }
+    }
+
+
+    SAllMediaInfo getAllMediaInfo( const QString & fileName )
+    {
+        SAllMediaInfo retVal;
+
+        MediaInfoDLL::MediaInfo MI;
+        retVal.fVersion = QString::fromStdWString( MI.Option( __T( "Info_Version" ), __T( "0.7.13;MediaInfoDLL_Example_MSVC;0.7.13" ) ) );
+
+        MI.Open( fileName.toStdWString() );
+
+        for ( MediaInfoDLL::stream_t ii = MediaInfoDLL::Stream_General; ii < MediaInfoDLL::Stream_Max; ii = static_cast<MediaInfoDLL::stream_t>(static_cast<int>(ii) + 1) )
+        {
+            auto streamCount = MI.Count_Get( ii );
+            for ( int jj = 0; jj < streamCount; ++jj )
+            {
+                auto streamName = QString::fromStdWString( MI.Get( ii, jj, __T( "StreamKind" ) ) );
+                SStreamData data( ii, streamName, jj );
+                auto paramCount = MI.Count_Get( ii, jj );
+                for ( int kk = 0; kk < paramCount; ++kk )
+                {
+                    auto name = QString::fromStdWString( MI.Get( ii, jj, kk, MediaInfoDLL::Info_Name ) );
+                    auto value = QString::fromStdWString( MI.Get( ii, jj, kk ) );
+                    data.fStreamData.emplace_back( std::make_pair( name, value ) );
+                    data.fStreamDataMap[name] = value;
+                }
+                retVal.fData.emplace_back( data );
+            }
+        }
+        MI.Close();
+        return retVal;
+    }
+
     int64_t getNumberOfSeconds( const QString & fileName )
     {
         auto value = getMediaTag( fileName, EMediaTags::eLengthS );
@@ -361,9 +308,27 @@ namespace NSABUtils
         return (*pos).second;
     }
 
+    std::unordered_map< NSABUtils::EMediaTags, QString > getSetableMediaTags( const QString & path )
+    {
+        return getMediaTags( path,
+                             {
+                                 EMediaTags::eTitle,
+                                 EMediaTags::eDate,
+                                 EMediaTags::eComment,
+                                 EMediaTags::eBPM,
+                                 EMediaTags::eArtist,
+                                 EMediaTags::eComposer,
+                                 EMediaTags::eGenre,
+                                 EMediaTags::eTrack,
+                                 EMediaTags::eAlbum,
+                                 EMediaTags::eAlbumArtist,
+                                 EMediaTags::eDiscnumber
+                             }
+        );
+    }
     std::unordered_map< NSABUtils::EMediaTags, QString > getMediaTags( const QString & path, const std::list< NSABUtils::EMediaTags > & tags )
     {
-        getMediaInfo( path );
+        auto tmp = getAllMediaInfo( path );
 
         MediaInfoDLL::MediaInfo MI;
         MI.Option( __T( "ParseSpeed" ), __T( "0" ) );
@@ -398,27 +363,17 @@ namespace NSABUtils
                 EMediaTags::eDiscnumber
             };
         }
-        QStringList generalParams;
-        for ( auto && ii : realTags )
-        {
-            generalParams << mediaInfoName( ii );
-        }
-
-        auto generalInform = QString( "General;" ) + "%" + generalParams.join( "%|%" ) + "%\\n";
-        MI.Option( QStringLiteral( "Inform" ).toStdWString(), generalInform.toStdWString() );
-        auto informOptionResult = QString::fromStdWString( MI.Inform() );
 
         std::unordered_map< NSABUtils::EMediaTags, QString > retVal;
-        QStringList informResult = informOptionResult.split( '\n', QString::SkipEmptyParts );
-        for( auto && ii : informResult )
+        for ( auto && ii : realTags )
         {
-            auto resList = ii.split( "|" );
-            Q_ASSERT( resList.count() == static_cast< int >(realTags.size() ) );
-            auto jj = realTags.begin();
-            auto kk = resList.begin();
-            for( ; jj != realTags.end() && kk != resList.end(); ++jj, ++kk )
+            auto streamCount = MI.Count_Get( MediaInfoDLL::Stream_General );
+            for ( int jj = 0; jj < streamCount; ++jj )
             {
-                retVal[*jj] = *kk;
+                auto value = QString::fromStdWString( MI.Get( MediaInfoDLL::Stream_General, jj, mediaInfoName( ii ).toStdWString() ) );
+                retVal[ii] = value;
+                if ( !value.isEmpty() )
+                    break;
             }
         }
 
@@ -532,7 +487,7 @@ namespace NSABUtils
     }
 
 
-    bool setMediaTags( const QString & fileName, const std::unordered_map< EMediaTags, QString > & tags, const QString & mkvPropEdit, QString * msg/*=nullptr */ )
+    bool setMediaTags( const QString & fileName, const std::unordered_map< EMediaTags, QString > & newTagValues, const QString & mkvPropEdit, QString * msg/*=nullptr */ )
     {
         initResources();
         if ( !QFileInfo( fileName ).isFile() )
@@ -553,8 +508,12 @@ namespace NSABUtils
             return false;
         }
 
-        std::unordered_map< QString, QString > realTags;
-        for ( auto && ii : tags )
+        auto currentValues = getSetableMediaTags( fileName );
+        for ( auto && ii : newTagValues )
+            currentValues[ii.first] = ii.second;
+
+        std::unordered_map< QString, QString > stringBasedTags;
+        for ( auto && ii : currentValues )
         {
             auto name = setMKVName( ii.first );
             if ( name.isEmpty() )
@@ -563,15 +522,21 @@ namespace NSABUtils
                     *msg = QObject::tr( "Tag %1 is invalid" ).arg( displayName( ii.first ) );
                 return false;
             }
-            realTags[ name ] = ii.second;
+            stringBasedTags[name] = ii.second;
         }
-        if ( tags.find( EMediaTags::eTitle ) == tags.end() )
-            realTags[ setMKVName( EMediaTags::eTitle ) ] = QFileInfo( fileName ).baseName();
+
+        auto newTitle = QString();
+        auto pos = newTagValues.find( EMediaTags::eTitle );
+        if ( pos != newTagValues.end() )
+            newTitle = (*pos).second;
+
+        if ( newTitle.isEmpty() )
+            newTitle = QFileInfo( fileName ).baseName();
 
         auto xml = file.readAll();
-        for ( auto && ii : realTags )
+        for ( auto && ii : stringBasedTags )
         {
-            xml.replace( ( "%" + ii.first + "%" ).toUtf8(), ii.second.toUtf8() );
+            xml.replace( ("%" + ii.first + "%").toUtf8(), ii.second.toUtf8() );
         }
 
         auto templateName = QDir( QDir::tempPath() ).absoluteFilePath( "XXXXXX.xml" );
@@ -594,8 +559,8 @@ namespace NSABUtils
             << QString( "global:%1" ).arg( tmpFileName )
             << "--edit"
             << "info"
-            << "--set"
-            << QString( "title=%2" ).arg( realTags[ setMKVName( EMediaTags::eTitle ) ] )
+            //<< "--set"
+            //<< QString( "title=%2" ).arg( newTitle )
             ;
         auto retVal = QProcess::execute( mkvPropEdit, args );
 
@@ -617,4 +582,12 @@ namespace NSABUtils
 
         return retVal == 0;
     }
+
+    SStreamData::SStreamData( MediaInfoDLL::stream_t type, const QString & streamName, int num ) :
+        fStreamType( type ),
+        fStreamName( streamName ),
+        fStreamNum( num )
+    {
+    }
+
 }
