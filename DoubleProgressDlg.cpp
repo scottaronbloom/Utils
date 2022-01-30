@@ -744,7 +744,7 @@ namespace NSABUtils
     {
         if (button == fCancelButton.second)
         {
-            qDebug() << "CDoubleProgressDlg::setCancelButton: Attemp to set the same button again";
+            qDebug() << "CDoubleProgressDlg::setCancelButton: Attempt to set the same button again";
             return;
         }
         delete fCancelButton.second;

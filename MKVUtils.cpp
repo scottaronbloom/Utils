@@ -328,7 +328,7 @@ namespace NSABUtils
     }
     std::unordered_map< NSABUtils::EMediaTags, QString > getMediaTags( const QString & path, const std::list< NSABUtils::EMediaTags > & tags )
     {
-        auto tmp = getAllMediaInfo( path );
+        //auto tmp = getAllMediaInfo( path );
 
         MediaInfoDLL::MediaInfo MI;
         MI.Option( __T( "ParseSpeed" ), __T( "0" ) );

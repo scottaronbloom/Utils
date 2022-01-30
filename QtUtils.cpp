@@ -538,7 +538,7 @@ namespace NSABUtils
                 retVal = QDate::fromString( string, format );
             if ( retVal.isValid() )
             {
-                qDebug() << string << "=" << retVal;
+                //qDebug() << string << "=" << retVal;
                 return retVal;
             }
         }
