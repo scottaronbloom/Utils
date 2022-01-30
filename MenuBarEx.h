@@ -23,11 +23,13 @@
 #ifndef __MENUBAREX_H
 #define __MENUBAREX_H
 
+#include "SABUtilsExport.h"
+
 #include <QMenuBar>
 class QTimer;
 namespace NSABUtils
 {
-    class CMenuBarEx : public QMenuBar
+    class SABUTILS_EXPORT CMenuBarEx : public QMenuBar
     {
         Q_OBJECT
     public:

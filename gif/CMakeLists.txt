@@ -63,5 +63,5 @@ target_link_libraries( gif
 
 set_target_properties( gif PROPERTIES FOLDER SharedLibs )
 
-INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.dll DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
+INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.dll DESTINATION imageformats )
 INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )

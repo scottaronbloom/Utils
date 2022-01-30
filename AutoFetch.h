@@ -23,12 +23,14 @@
 #ifndef __AUTOFETCH_H
 #define __AUTOFETCH_H
 
+#include "SABUtilsExport.h"
+
 #include <QObject>
 class QTreeView;
 
 namespace NSABUtils
 {
-    class CAutoFetchMore : public QObject
+    class SABUTILS_EXPORT CAutoFetchMore : public QObject
     {
     public:
         CAutoFetchMore(QTreeView * view);

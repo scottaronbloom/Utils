@@ -484,6 +484,11 @@ namespace NSABUtils
         return fImpl->fAutoReset;
     }
 
+    int CDoubleProgressDlg::value() const
+    {
+        return primaryValue();
+    }
+
     void CDoubleProgressDlg::setPrimaryEventsPerIncrement( int value )
     {
         fImpl->fPrimaryBar->setEventsPerIncrement( value );

@@ -61,6 +61,7 @@ set(qtproject_SRCS
     VSInstallUtils.cpp
     StayAwake.cpp   
     ValidateOpenSSL.cpp
+    SABUtilsResources.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -114,6 +115,8 @@ set(project_H
     StayAwake.h   
     MKVUtils.h
     ValidateOpenSSL.h
+    SABUtilsExport.h
+    SABUtilsResources.h
 )
 
 set(qtproject_UIS

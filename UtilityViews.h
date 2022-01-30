@@ -23,6 +23,8 @@
 #ifndef __UTILITYVIEWS_H
 #define __UTILITYVIEWS_H
 
+#include "SABUtilsExport.h"
+
 #include <QTableWidget>
 #include <QTableView>
 
@@ -30,7 +32,7 @@ class QAbstractButton;
 
 namespace NSABUtils
 {
-    class CTableWidgetWithSelectCommand : public QTableWidget
+    class SABUTILS_EXPORT CTableWidgetWithSelectCommand : public QTableWidget
     {
         Q_OBJECT;
     public:
@@ -39,7 +41,7 @@ namespace NSABUtils
             const QEvent *event = 0) const override;
     };
 
-    class CTableViewWithSelectCommand : public QTableView
+    class SABUTILS_EXPORT CTableViewWithSelectCommand : public QTableView
     {
         Q_OBJECT;
     public:

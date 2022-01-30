@@ -20,11 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <QSslSocket>
-#include <QLibrary>
-#include <QDir>
+#include <QString>
+#include "SABUtilsExport.h"
+
 namespace NSABUtils
 {
     // if require local is true, will return false if the OpenSSL libraries are not local
-    std::pair< bool, QString > validateOpenSSL(bool requireLocal = true);
+    SABUTILS_EXPORT std::pair< bool, QString > validateOpenSSL(bool requireLocal = true);
 }

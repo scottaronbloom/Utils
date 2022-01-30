@@ -28,7 +28,6 @@
 #include <iostream>
 
 #ifdef Q_OS_WINDOWS
-#define UNICODE
 #include <qt_windows.h>
 #endif
 

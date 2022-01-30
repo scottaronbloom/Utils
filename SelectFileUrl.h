@@ -22,14 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "SABUtilsExport.h"
+
 #include <QObject>
 #include <QDesktopServices>
 class QUrl;
 
+
 namespace NSABUtils
 {
     class CDelayLineEdit;
-    class CSelectFileUrl : public QObject
+    class SABUTILS_EXPORT CSelectFileUrl : public QObject
     {
         Q_OBJECT;
     public:

@@ -23,6 +23,8 @@
 #ifndef __UTILITYMODELS_H
 #define __UTILITYMODELS_H
 
+#include "SABUtilsExport.h"
+
 #include <QObject>
 #include <QAbstractListModel>
 #include <QList>
@@ -41,7 +43,7 @@ class QXmlQuery;
 class QDir;
 namespace NSABUtils
 {
-    class CMoveStringListModel : public QStringListModel
+    class SABUTILS_EXPORT CMoveStringListModel : public QStringListModel
     {
         Q_OBJECT;
     public:
@@ -53,7 +55,7 @@ namespace NSABUtils
         void addRow(const QString & value);
     };
 
-    class CStringListModel : public QStringListModel
+    class SABUTILS_EXPORT CStringListModel : public QStringListModel
     {
         Q_OBJECT;
     public:
@@ -67,7 +69,7 @@ namespace NSABUtils
         QString at(int ii) const;
     };
 
-    class CStringTupleModel : public QAbstractTableModel
+    class SABUTILS_EXPORT CStringTupleModel : public QAbstractTableModel
     {
         Q_OBJECT;
     public:
@@ -105,7 +107,7 @@ namespace NSABUtils
         QList< QStringList > fData;
     };
 
-    class CKeyValuePairModel : public CStringTupleModel
+    class SABUTILS_EXPORT CKeyValuePairModel : public CStringTupleModel
     {
         Q_OBJECT;
     public:
@@ -125,7 +127,7 @@ namespace NSABUtils
         QList< QPair< QString, QString > > data() const;
     };
 
-    class CCheckableStringListModel : public QStringListModel
+    class SABUTILS_EXPORT CCheckableStringListModel : public QStringListModel
     {
         Q_OBJECT
     public:
@@ -186,7 +188,7 @@ namespace NSABUtils
         std::map< QString, QString > fReverseAliasMap;
     };
 
-    class CStringFilterModel : public QSortFilterProxyModel
+    class SABUTILS_EXPORT CStringFilterModel : public QSortFilterProxyModel
     {
         Q_OBJECT
     public:
@@ -199,7 +201,7 @@ namespace NSABUtils
         QTimer * fTimer;
     };
 
-    class CCheckableListView : public QListView
+    class SABUTILS_EXPORT CCheckableListView : public QListView
     {
         Q_OBJECT
     public:
@@ -210,7 +212,7 @@ namespace NSABUtils
     };
 
 
-    class CCheckableTableView : public QTableView
+    class SABUTILS_EXPORT CCheckableTableView : public QTableView
     {
         Q_OBJECT
     public:
@@ -220,7 +222,7 @@ namespace NSABUtils
         void sigBlockFilterUpdates(bool block);
     };
 
-    class CCheckableTreeView : public QTreeView
+    class SABUTILS_EXPORT CCheckableTreeView : public QTreeView
     {
         Q_OBJECT
     public:

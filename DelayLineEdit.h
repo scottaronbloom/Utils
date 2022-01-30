@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "SABUtilsExport.h"
+
 #include <QLineEdit>
 #include <QFile>
 class QTimer;
@@ -29,7 +31,7 @@ class QTimer;
 namespace NSABUtils
 {
     class CBackgroundFileCheck;
-    class CDelayLineEdit : public QLineEdit
+    class SABUTILS_EXPORT CDelayLineEdit : public QLineEdit
     {
         Q_OBJECT;
     public:
@@ -80,7 +82,7 @@ namespace NSABUtils
         ELineEditStatus fStatus{ ELineEditStatus::ePending };
     };
 
-    class CPathBasedDelayLineEdit : public CDelayLineEdit
+    class SABUTILS_EXPORT CPathBasedDelayLineEdit : public CDelayLineEdit
     {
         Q_OBJECT;
     public:

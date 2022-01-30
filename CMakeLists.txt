@@ -26,9 +26,14 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 project(SABUtils)
+
+SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
+   
 if ( NOT SAB_UTILS_DIR )
     SET( SAB_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR} )
 endif()
+
+add_definitions( -DSABUTILS_INTERNAL )
 
 MESSAGE( STATUS "SAB_ENABLE_TESTING=${SAB_ENABLE_TESTING}" )
 
@@ -81,7 +86,12 @@ include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
 include_directories(MediaInfo/MediaInfoLib/Source)
 include_directories(MediaInfo/ZenLib/Source)
 
-add_library(SABUtils STATIC
+if ( SABUTILS_DLL )
+    SET( LIBTYPE SHARED )
+else()
+    SET( LIBTYPE STATIC )
+endif()
+add_library(SABUtils ${LIBTYPE}
     ${project_SRCS} 
     ${project_H}  
     ${qtproject_SRCS} 
@@ -98,9 +108,25 @@ add_library(SABUtils STATIC
     ${_CMAKE_MODULE_FILES}
 )
 
+if ( SABUTILS_DLL )
+target_link_libraries( SABUtils
+                 Qt5::Widgets
+                 Qt5::Core
+                 Qt5::Network
+                 mediainfo
+          )
+endif()
+
 add_definitions( -DNON_VIS_BUILD=1 )
 add_definitions( -DBIF_SCROLLBAR_SUPPORT=1 )
+if ( SABUTILS_DLL )
+set_target_properties( SABUtils PROPERTIES FOLDER SharedLibs )
+INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.dll DESTINATION . )
+INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
+else()
 set_target_properties( SABUtils PROPERTIES FOLDER Libs )
+endif()
+
 if( SAB_ENABLE_TESTING )
 	add_subdirectory(UnitTests)
 endif()

@@ -23,6 +23,8 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
+#include "SABUtilsExport.h"
+
 #include <cinttypes>
 #include <cstdarg>
 #include <string>
@@ -97,7 +99,7 @@ std::ostream& operator<<( std::ostream& oss, const std::list< std::vector< T > >
     return oss;
 }
 
-inline std::ostream & sabsabDebugStreamInternal(){ return std::cout; }
+SABUTILS_EXPORT inline std::ostream & sabsabDebugStreamInternal(){ return std::cout; }
 #  undef sabDebugStream
 #if defined(SAB_DEBUG_TRACE)
 #  define sabDebugStream sabsabDebugStreamInternal
@@ -154,14 +156,14 @@ namespace NSABUtils
         return retVal;
     }
 
-    int fromChar(char ch, int base, bool& aOK);
-    char toChar(int value);
+    SABUTILS_EXPORT  int fromChar(char ch, int base, bool& aOK);
+    SABUTILS_EXPORT char toChar(int value);
 
-    void toDigits(int64_t val, int base, std::pair< int8_t*, uint32_t > & retVal, size_t& numDigits, bool * aOK = nullptr);
-    std::string toString(int64_t val, int base);
-    int64_t fromString(const std::string &str, int base);
+    SABUTILS_EXPORT void toDigits(int64_t val, int base, std::pair< int8_t*, uint32_t > & retVal, size_t& numDigits, bool * aOK = nullptr);
+    SABUTILS_EXPORT std::string toString(int64_t val, int base);
+    SABUTILS_EXPORT int64_t fromString(const std::string &str, int base);
 
-    class CTimeString
+    class SABUTILS_EXPORT CTimeString
     {
     public:
         CTimeString(const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > &startEndTime); // highprecsion is microseconds
@@ -178,17 +180,17 @@ namespace NSABUtils
         bool fMicroSecondsAvailable{ false };
     };
 
-    std::list< int64_t > computeFactors(int64_t num, bool properFactors = false);
-    std::list< int64_t > computePrimeFactors(int64_t num);
+    SABUTILS_EXPORT std::list< int64_t > computeFactors(int64_t num, bool properFactors = false);
+    SABUTILS_EXPORT std::list< int64_t > computePrimeFactors(int64_t num);
 
-    bool isNarcissistic(int64_t val, int base, bool& aOK);
+    SABUTILS_EXPORT bool isNarcissistic(int64_t val, int base, bool& aOK);
     // return Value, the list of factors since the factors are often needed
-    std::pair< int64_t, std::list< int64_t > > getSumOfFactors(int64_t curr, bool properFactors);
-    std::pair< bool, std::list< int64_t > > isSemiPerfect(int64_t num);
-    std::pair< bool, std::list< int64_t > > isPerfect(int64_t num);
-    std::pair< bool, std::list< int64_t > > isAbundant(int64_t num);
+    SABUTILS_EXPORT std::pair< int64_t, std::list< int64_t > > getSumOfFactors(int64_t curr, bool properFactors);
+    SABUTILS_EXPORT std::pair< bool, std::list< int64_t > > isSemiPerfect(int64_t num);
+    SABUTILS_EXPORT std::pair< bool, std::list< int64_t > > isPerfect(int64_t num);
+    SABUTILS_EXPORT std::pair< bool, std::list< int64_t > > isAbundant(int64_t num);
 
-    bool isSemiPerfect(const std::vector< int64_t >& numbers, size_t n, int64_t num);
+    SABUTILS_EXPORT bool isSemiPerfect(const std::vector< int64_t >& numbers, size_t n, int64_t num);
 
     template< typename T >
     std::string getNumberListString(const T & numbers, int base)
@@ -308,8 +310,8 @@ namespace NSABUtils
     }
 #endif
 
-    long double factorial(int64_t num);
-    uint64_t numCombinations(int64_t numPossible, int64_t numSelections);
+    SABUTILS_EXPORT long double factorial(int64_t num);
+    SABUTILS_EXPORT uint64_t numCombinations(int64_t numPossible, int64_t numSelections);
 
     template< typename T >
     std::vector< std::vector< T > > addVectorElementToSets(const std::vector< std::vector< T > >& currentSets, const std::list< T >& rhs, const std::function< bool(const std::vector< T >& curr, const T & obj) > & addToResult = std::function< bool(const std::vector< T >& curr, const T& obj) >())
@@ -399,12 +401,12 @@ namespace NSABUtils
         return retVal;
     }
 
-    char GetChar();
-    int waitForPrompt(int returnCode, const char * prompt = nullptr ); // uses GetChar above
-    QString getLastError(); // windows only
-    QString getLastError( int errorCode ); // windows only
+    SABUTILS_EXPORT char GetChar();
+    SABUTILS_EXPORT int waitForPrompt(int returnCode, const char * prompt = nullptr ); // uses GetChar above
+    SABUTILS_EXPORT QString getLastError(); // windows only
+    SABUTILS_EXPORT QString getLastError( int errorCode ); // windows only
 
-    bool isValidURL(const QString & url, int * start=nullptr, int * length=nullptr);
-    bool launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font);
+    SABUTILS_EXPORT bool isValidURL(const QString & url, int * start=nullptr, int * length=nullptr);
+    SABUTILS_EXPORT bool launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font);
 }
 #endif

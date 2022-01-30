@@ -23,6 +23,8 @@
 #ifndef _GIFWRITERDLG_H
 #define _GIFWRITERDLG_H
 
+#include "SABUtilsExport.h"
+
 #include <QDialog>
 #include <memory>
 
@@ -34,7 +36,7 @@ namespace NSABUtils
     }
 
     namespace Ui { class CGIFWriterDlg; }
-    class CGIFWriterDlg : public QDialog
+    class SABUTILS_EXPORT CGIFWriterDlg : public QDialog
     {
         Q_OBJECT
     public:

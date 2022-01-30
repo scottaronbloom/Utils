@@ -23,6 +23,8 @@
 #ifndef __JSONUTILS_H
 #define __JSONUTILS_H
 
+#include "SABUtilsExport.h"
+
 #include <set>
 #include <list>
 #include <unordered_map>
@@ -37,7 +39,7 @@ namespace NSABUtils
         obj = QJsonValue(value);
     }
 
-    void ToJson(const QStringList& value, QJsonValue& obj);
+    SABUTILS_EXPORT void ToJson(const QStringList& value, QJsonValue& obj);
 
     template< typename T >
     void ToJson(const std::list< T > & value, QJsonValue& obj)
@@ -93,11 +95,11 @@ namespace NSABUtils
         obj = retVal;
     }
 
-    void FromJson(QStringList& value, const QJsonValue& obj);
-    void FromJson(bool& value, const QJsonValue& obj);
-    void FromJson(double& value, const QJsonValue& obj);
-    void FromJson(QString& value, const QJsonValue& obj);
-    void FromJson(int& value, const QJsonValue& obj);
+    SABUTILS_EXPORT void FromJson(QStringList& value, const QJsonValue& obj);
+    SABUTILS_EXPORT void FromJson(bool& value, const QJsonValue& obj);
+    SABUTILS_EXPORT void FromJson(double& value, const QJsonValue& obj);
+    SABUTILS_EXPORT void FromJson(QString& value, const QJsonValue& obj);
+    SABUTILS_EXPORT void FromJson(int& value, const QJsonValue& obj);
 
     template< typename T >
     void FromJson(std::list< T >& value, const QJsonValue& obj)

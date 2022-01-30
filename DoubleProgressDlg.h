@@ -23,6 +23,8 @@
 #ifndef __DOUBLEPROGRESSDLG_H
 #define __DOUBLEPROGRESSDLG_H
 
+#include "SABUtilsExport.h"
+
 class QProgressBar;
 #include <QDialog>
 #include <QElapsedTimer>
@@ -31,7 +33,7 @@ class QTimer;
 namespace NSABUtils
 {
     class CDoubleProgressDlgImpl;
-    class CDoubleProgressDlg : public QDialog
+    class SABUTILS_EXPORT CDoubleProgressDlg : public QDialog
     {
         friend class CDoubleProgressDlgImpl;
         Q_OBJECT
@@ -70,7 +72,7 @@ namespace NSABUtils
         void setAutoReset(bool autoReset); // primary value
         bool autoReset() const;
 
-        int value() const { return primaryValue(); }
+        int value() const;
         QString labelText() const { return title(); }
 
         // for progress bars, one step may have 4 sub events

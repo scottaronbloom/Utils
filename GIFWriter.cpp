@@ -570,8 +570,6 @@ namespace NSABUtils
                     currCode = nextValue;
                 }
             }
-            if ( currRow % 10 == 0 )
-                int xyz = 0;
         }
         bitStatus.writeFooter( currCode, codeSize, clearCode, minCodeSize );
         writeChar( 0 );

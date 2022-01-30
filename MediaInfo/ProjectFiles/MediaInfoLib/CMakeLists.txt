@@ -496,7 +496,7 @@ install(FILES
 endif()
 
 if( NO_USE_MEDIAINFO_INSTALL )
-    INSTALL( FILES $<TARGET_FILE_DIR:mediainfo>/$<TARGET_FILE_BASE_NAME:mediainfo>.dll DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
+    INSTALL( FILES $<TARGET_FILE_DIR:mediainfo>/$<TARGET_FILE_BASE_NAME:mediainfo>.dll DESTINATION . )
     INSTALL( FILES $<TARGET_FILE_DIR:mediainfo>/$<TARGET_FILE_BASE_NAME:mediainfo>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
 
     set_target_properties( mediainfo PROPERTIES FOLDER SharedLibs/MediaInfo )

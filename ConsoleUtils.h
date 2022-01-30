@@ -22,6 +22,9 @@
 #ifndef __CONSOLEUTILS_H
 #define __CONSOLEUTILS_H
 
+#include "SABUtilsExport.h"
+
+
 #include <string>
 #include <QString>
 namespace NSABUtils
@@ -45,16 +48,16 @@ namespace NSABUtils
     };
 
     // windows only, not defined for linux
-    const char * toString(ESubSystem subsystem);
-    ESubSystem getSubSystemForCurrentHandle();
-    ESubSystem getSubSystemForHandle(void * handle); // return from GetModuleHandle
+    SABUTILS_EXPORT const char * toString(ESubSystem subsystem);
+    SABUTILS_EXPORT ESubSystem getSubSystemForCurrentHandle();
+    SABUTILS_EXPORT ESubSystem getSubSystemForHandle(void * handle); // return from GetModuleHandle
 
     // returns true for linux
-    bool runningAsConsole();  // getSubSystemForCurrentHandle() == eIMAGE_SUBSYSTEM_WINDOWS_CUI
+    SABUTILS_EXPORT bool runningAsConsole();  // getSubSystemForCurrentHandle() == eIMAGE_SUBSYSTEM_WINDOWS_CUI
     
     // does nothing for linux
-    bool attachConsole( std::string  * msg = nullptr ); // returns true if successful
-    bool attachConsole(QString * msg); // returns true if successful
+    SABUTILS_EXPORT bool attachConsole( std::string  * msg = nullptr ); // returns true if successful
+    SABUTILS_EXPORT bool attachConsole(QString * msg); // returns true if successful
 }
 
 #endif

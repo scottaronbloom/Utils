@@ -23,6 +23,8 @@
 #ifndef __BIFFILE_H
 #define __BIFFILE_H
 
+#include "SABUtilsExport.h"
+
 #include <QObject>
 #include <QString>
 #include <QImage>
@@ -30,13 +32,15 @@
 #include <optional>
 #include <QAbstractListModel>
 
+#include "SABUtilsExport.h"
+
 class QFile;
 namespace NSABUtils
 {
     namespace NBIF
     {
         using T32BitValue = std::tuple< QByteArray, QString, uint32_t >;
-        struct SBIFImage
+        struct SABUTILS_EXPORT SBIFImage
         {
             SBIFImage(T32BitValue ts, T32BitValue offset, SBIFImage *prev);
 
@@ -49,7 +53,7 @@ namespace NSABUtils
         };
 
         using TBIFIndex = std::vector< SBIFImage >; // data read in of ts, pos then a pair of pos, size
-        class CFile
+        class SABUTILS_EXPORT CFile
         {
         public:
             enum class EState

@@ -25,7 +25,6 @@
 #include <iostream>
 #ifdef WIN32 
 #include <QProcessEnvironment>
-#define UNICODE
 #include <userenv.h>
 #include <lmcons.h>
 #pragma comment(lib, "userenv.lib")

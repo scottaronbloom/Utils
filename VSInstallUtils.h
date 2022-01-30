@@ -23,6 +23,8 @@
 #ifndef __VSINSTALLUTILS_H
 #define __VSINSTALLUTILS_H
 
+#include "SABUtilsExport.h"
+
 #include <QString>
 #include <tuple>
 #include <map>
@@ -34,7 +36,7 @@ namespace NSABUtils
     namespace NVSInstallUtils
     {
         using TInstalledVisualStudios = std::pair < std::map< QString, QString >, QStringList >;
-        std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios(QProcess * process, bool * retry);
+        SABUTILS_EXPORT std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios(QProcess * process, bool * retry);
     }
 }
 #endif

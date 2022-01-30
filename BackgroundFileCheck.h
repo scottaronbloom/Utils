@@ -25,10 +25,12 @@
 #include <QFile>
 #include <QThread>
 
+#include "SABUtilsExport.h"
+
 namespace NSABUtils
 {
     class CBackgroundFileCheckImpl;
-    class CBackgroundFileCheck  : public QObject
+    class SABUTILS_EXPORT CBackgroundFileCheck  : public QObject
     {
         Q_OBJECT;
     public:
@@ -100,7 +102,7 @@ namespace NSABUtils
         CBackgroundFileCheckImpl * fImpl{ nullptr };
     };
 
-    class CBackgroundFileCheckThread : public QThread
+    class SABUTILS_EXPORT CBackgroundFileCheckThread : public QThread
     {
     public:
         CBackgroundFileCheckThread( CBackgroundFileCheckImpl * impl );

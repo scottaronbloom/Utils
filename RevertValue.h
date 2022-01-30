@@ -22,12 +22,14 @@
 #ifndef __REVERTVALUE_H
 #define __REVERTVALUE_H
 
+#include "SABUtilsExport.h"
+
 #include <initializer_list>
 #include <list>
 namespace NSABUtils
 {
     template< typename T >
-    class CRevertValue
+    class SABUTILS_EXPORT CRevertValue
     {
     public:
         CRevertValue( T & value ) :

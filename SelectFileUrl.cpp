@@ -27,7 +27,6 @@
 #include <QThread>
 
 #ifdef Q_OS_WIN
-#define UNICODE
 #include <qt_windows.h>
 #include <shellapi.h>
 #include <combaseapi.h>

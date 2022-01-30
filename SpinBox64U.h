@@ -22,6 +22,9 @@
 
 #ifndef __SPINBOX64U_H
 #define __SPINBOX64U_H
+
+#include "SABUtilsExport.h"
+
 #include "SpinBox64_StepType.h"
 #include <QAbstractSpinBox>
 #include <QString>
@@ -30,7 +33,7 @@
 namespace NSABUtils
 {
     class CSpinBox64UImpl;
-    class CSpinBox64U : public QAbstractSpinBox
+    class SABUTILS_EXPORT CSpinBox64U : public QAbstractSpinBox
     {
         friend class CSpinBox64UImpl;
 #if (QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 ))

@@ -23,13 +23,15 @@
 #ifndef __WIDGETENABLER_H
 #define __WIDGETENABLER_H
 
+#include "SABUtilsExport.h"
+
 #include <QObject>
 #include <initializer_list>
 class QCheckBox;
 class QGroupBox;
 namespace NSABUtils
 {
-    class CWidgetEnabler : public QObject
+    class SABUTILS_EXPORT CWidgetEnabler : public QObject
     {
         Q_OBJECT;
         CWidgetEnabler( const std::pair< QCheckBox *, QGroupBox * > & checker,  const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );

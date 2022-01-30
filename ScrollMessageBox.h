@@ -23,6 +23,8 @@
 #ifndef _SCROLLMESSAGEBOX_H
 #define _SCROLLMESSAGEBOX_H
 
+#include "SABUtilsExport.h"
+
 #include <QDialog>
 #include <QMessageBox>
 #include <QDialogButtonBox>
@@ -33,7 +35,7 @@ namespace NSABUtils
 {
     namespace Ui { class CScrollMessageBox; };
 
-    class CScrollMessageBox : public QDialog
+    class SABUTILS_EXPORT CScrollMessageBox : public QDialog
     {
         Q_OBJECT
 

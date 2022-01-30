@@ -38,6 +38,8 @@ AddQtIncludes()
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/../Project.cmake )
 add_definitions( -DBUILD_BIF_PLUGIN=1 )
+add_definitions( -DSABUTILS_INTERNAL )
+
 add_library(bif SHARED
     ${project_SRCS} 
     ${project_H}  
@@ -62,5 +64,5 @@ target_link_libraries( bif
 
 set_target_properties( bif PROPERTIES FOLDER SharedLibs )
 
-INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.dll DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
+INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.dll DESTINATION imageformats )
 INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )

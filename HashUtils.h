@@ -23,6 +23,8 @@
 #ifndef __QTHASH_H
 #define __QTHASH_H
 
+#include "SABUtilsExport.h"
+
 #include <QHash>
 #include <initializer_list>
 #include <functional>
