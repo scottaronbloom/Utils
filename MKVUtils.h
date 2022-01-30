@@ -22,30 +22,57 @@
 #ifndef __MKVUTILS_H
 #define __MKVUTILS_H
 
+#include "SABUtilsExport.h"
+
 #include <cstdint>
 #include <unordered_map>
 #include <QString>
+
 namespace NSABUtils
 {
-    int64_t getNumberOfSeconds( const QString & fileName );
-    int64_t getNumberOfMSecs( const QString & fileName );
+    SABUTILS_EXPORT int64_t getNumberOfSeconds( const QString & fileName );
+    SABUTILS_EXPORT int64_t getNumberOfMSecs( const QString & fileName );
 
     enum class EMediaTags
     {
-        eArtist,
-        eBPM,
+        eFileName,
+        eTitle,
+        eLengthMS,
+        eLengthS,
+        eLength,
+        eDate,
         eComment,
+        eBPM,
+        eArtist,
         eComposer,
         eGenre,
-        eTitle,
         eTrack,
-        eDateRecorded,
-        eLength
+        eAlbum,
+        eAlbumArtist,
+        eDiscnumber
     };
 
-    std::unordered_map< QString, QString > getMediaTags( const QString & fileName );
+    SABUTILS_EXPORT QString displayName( EMediaTags tag );
+    SABUTILS_EXPORT EMediaTags fromDisplayName( const QString & tag );
+    SABUTILS_EXPORT QString mediaInfoName( EMediaTags tag );
+    SABUTILS_EXPORT QString setMKVName( EMediaTags tag );
+    
+    SABUTILS_EXPORT QString getMediaTag( const QString & fileName, NSABUtils::EMediaTags tag );
+    SABUTILS_EXPORT std::unordered_map< EMediaTags, QString > getMediaTags( const QString & fileName, const std::list< NSABUtils::EMediaTags > & tags = {} );
+    SABUTILS_EXPORT bool setMediaTags( const QString & fileName, const std::unordered_map< EMediaTags, QString > & tags, const QString & mkvPropEdit, QString * msg=nullptr );
+}
 
-    bool setMediaTags( const QString & fileName, const std::unordered_map< QString, QString > & tags, const QString & mkvPropEdit, QString * msg=nullptr );
+namespace std
+{
+    template <>
+    struct hash<NSABUtils::EMediaTags>
+    {
+        std::size_t operator()( const NSABUtils::EMediaTags & ii ) const
+        {
+            auto tmp = static_cast<int>(ii);
+            return std::hash< int >()( tmp );
+        }
+    };
 }
 
 #endif
