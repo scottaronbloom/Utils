@@ -308,7 +308,7 @@ namespace NSABUtils
         return (*pos).second;
     }
 
-    std::unordered_map< NSABUtils::EMediaTags, QString > getSetableMediaTags( const QString & path )
+    std::unordered_map< NSABUtils::EMediaTags, QString > getSettableMediaTags( const QString & path )
     {
         return getMediaTags( path,
                              {
@@ -508,7 +508,7 @@ namespace NSABUtils
             return false;
         }
 
-        auto currentValues = getSetableMediaTags( fileName );
+        auto currentValues = getSettableMediaTags( fileName );
         for ( auto && ii : newTagValues )
             currentValues[ii.first] = ii.second;
 
