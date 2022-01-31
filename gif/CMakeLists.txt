@@ -65,3 +65,10 @@ set_target_properties( gif PROPERTIES FOLDER SharedLibs )
 
 INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.dll DESTINATION imageformats )
 INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
+
+SET( _SL_FILES
+    "$<TARGET_FILE:gif>"
+    "$<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.pdb"
+    )
+
+InstallFilesPostBuild( TARGET gif INFILES ${_SL_FILES} TARGET_DIR "$<TARGET_FILE_DIR:MediaManager>" )
