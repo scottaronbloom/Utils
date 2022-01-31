@@ -308,6 +308,27 @@ namespace NSABUtils
         return (*pos).second;
     }
 
+    bool isSettableTag( EMediaTags tag )
+    {
+        switch ( tag )
+        {
+            case EMediaTags::eTitle:
+            case EMediaTags::eDate:
+            case EMediaTags::eComment:
+            case EMediaTags::eBPM:
+            case EMediaTags::eArtist:
+            case EMediaTags::eComposer:
+            case EMediaTags::eGenre:
+            case EMediaTags::eTrack:
+            case EMediaTags::eAlbum:
+            case EMediaTags::eAlbumArtist:
+            case EMediaTags::eDiscnumber:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     std::unordered_map< NSABUtils::EMediaTags, QString > getSettableMediaTags( const QString & path )
     {
         return getMediaTags( path,
