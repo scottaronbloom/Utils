@@ -27,6 +27,7 @@ endif()
 
 project(SABUtils)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
    
 if ( NOT SAB_UTILS_DIR )
@@ -64,8 +65,6 @@ endif()
 SET(NO_USE_MEDIAINFO_INSTALL ON)
 set(BUILD_SHARED_LIBS ON)
 add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
-
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
@@ -130,3 +129,10 @@ endif()
 if( SAB_ENABLE_TESTING )
 	add_subdirectory(UnitTests)
 endif()
+
+SET( _SL_FILES
+    "$<TARGET_FILE:SABUtils>"
+    "$<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb"
+    )
+
+InstallFilesPostBuild( TARGET SABUtils INFILES ${_SL_FILES} TARGET_DIR "$<TARGET_FILE_DIR:MediaManager>" )
