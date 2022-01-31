@@ -1058,6 +1058,8 @@ namespace NSABUtils
             if ( header->isSectionHidden( ii ) )
                 continue;
             numVisibleColumns++;
+            if ( numVisibleColumns > 1 )
+                break;
         }
         bool dontResize = (numVisibleColumns <= 1) && stretchLastColumn;
 
