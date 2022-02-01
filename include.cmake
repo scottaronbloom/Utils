@@ -45,6 +45,7 @@ set(qtproject_SRCS
     MD5.cpp
     MenuBarEx.cpp
     MKVUtils.cpp
+    SetMKVTags.cpp
     SelectFileUrl.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
@@ -90,6 +91,7 @@ set(qtproject_H
     UtilityViews.h
     MenuBarEx.h
     SelectFileUrl.h
+    SetMKVTags.h
 )
 
 set(project_H
@@ -123,6 +125,7 @@ set(qtproject_UIS
     BIFWidget.ui
     GIFWriterDlg.ui
     ScrollMessageBox.ui
+    SetMKVTags.ui
 )
 
 
