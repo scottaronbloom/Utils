@@ -50,4 +50,23 @@ namespace NSABUtils
     {
         return QTableView::selectionCommand(index, event);
     }
+
+    CNoEditDelegate::CNoEditDelegate( QObject * parent ) :
+        QItemDelegate( parent )
+    {
+    }
+
+    CNoEditDelegate::CNoEditDelegate( std::unordered_set< int > & noEditColumns, QObject * parent ) :
+        QItemDelegate( parent )
+    {
+        fNoEditColumns = noEditColumns;
+    }
+
+    QWidget * CNoEditDelegate::createEditor( QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+    {
+        if ( fNoEditColumns.empty() || ( fNoEditColumns.find( index.column() ) != fNoEditColumns.end() ) )
+            return nullptr;
+        return QItemDelegate::createEditor( parent, option, index );
+    }
+
 }
