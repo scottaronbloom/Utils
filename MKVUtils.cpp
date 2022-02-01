@@ -402,7 +402,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    QString setMKVName( EMediaTags tag )
+    QString getMKVEditName( EMediaTags tag )
     {
         switch ( tag )
         {
@@ -536,7 +536,7 @@ namespace NSABUtils
         std::unordered_map< QString, QString > stringBasedTags;
         for ( auto && ii : currentValues )
         {
-            auto name = setMKVName( ii.first );
+            auto name = getMKVEditName( ii.first );
             if ( name.isEmpty() )
             {
                 if ( msg )
@@ -580,8 +580,8 @@ namespace NSABUtils
             << QString( "global:%1" ).arg( tmpFileName )
             << "--edit"
             << "info"
-            //<< "--set"
-            //<< QString( "title=%2" ).arg( newTitle )
+            << "--set"
+            << QString( "title=%2" ).arg( newTitle )
             ;
         auto retVal = QProcess::execute( mkvPropEdit, args );
 

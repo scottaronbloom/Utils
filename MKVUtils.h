@@ -80,7 +80,7 @@ namespace NSABUtils
     SABUTILS_EXPORT QString displayName( EMediaTags tag );
     SABUTILS_EXPORT EMediaTags fromDisplayName( const QString & tag );
     SABUTILS_EXPORT QString mediaInfoName( EMediaTags tag );
-    SABUTILS_EXPORT QString setMKVName( EMediaTags tag );
+    SABUTILS_EXPORT QString getMKVEditName( EMediaTags tag );
     
     SABUTILS_EXPORT QString getMediaTag( const QString & fileName, NSABUtils::EMediaTags tag );
     SABUTILS_EXPORT std::unordered_map< EMediaTags, QString > getMediaTags( const QString & fileName, const std::list< NSABUtils::EMediaTags > & tags = {} );
