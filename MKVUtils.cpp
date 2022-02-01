@@ -101,7 +101,7 @@ namespace NSABUtils
 
     int64_t getNumberOfMSecs( const QString & fileName )
     {
-        auto value = getMediaTag( fileName, EMediaTags::eLengthS );
+        auto value = getMediaTag( fileName, EMediaTags::eLengthMS );
         bool aOK;
         int retVal = value.toInt( &aOK );
         if ( !aOK )
@@ -284,7 +284,7 @@ namespace NSABUtils
             if ( !aOK )
                 numMSecs = 0;
             auto numSecs = numMSecs / 1000;
-            (*pos).second = QString::number( numMSecs );
+            (*pos).second = QString::number( numSecs );
         }
         pos = retVal.find( EMediaTags::eLength );
         if ( pos != retVal.end() )
@@ -547,8 +547,8 @@ namespace NSABUtils
         }
 
         auto newTitle = QString();
-        auto pos = newTagValues.find( EMediaTags::eTitle );
-        if ( pos != newTagValues.end() )
+        auto pos = currentValues.find( EMediaTags::eTitle );
+        if ( pos != currentValues.end() )
             newTitle = (*pos).second;
 
         if ( newTitle.isEmpty() )
