@@ -69,12 +69,6 @@
       <DefaultLanguage>1</DefaultLanguage>
     </Simple>
     <Simple>
-      <Name>TITLE</Name>
-      <String>%TITLE%</String>
-      <TagLanguage>und</TagLanguage>
-      <DefaultLanguage>1</DefaultLanguage>
-    </Simple>
-    <Simple>
       <Name>PART_NUMBER</Name>
       <String>%TRACK%</String>
       <TagLanguage>und</TagLanguage>
