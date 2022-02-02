@@ -130,9 +130,3 @@ if( SAB_ENABLE_TESTING )
 	add_subdirectory(UnitTests)
 endif()
 
-SET( _SL_FILES
-    "$<TARGET_FILE:SABUtils>"
-    "$<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb"
-    )
-
-InstallFilesPostBuild( TARGET SABUtils INFILES ${_SL_FILES} TARGET_DIR "$<TARGET_FILE_DIR:MediaManager>" )

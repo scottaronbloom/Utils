@@ -499,13 +499,6 @@ if( NO_USE_MEDIAINFO_INSTALL )
     INSTALL( FILES $<TARGET_FILE_DIR:mediainfo>/$<TARGET_FILE_BASE_NAME:mediainfo>.dll DESTINATION . )
     INSTALL( FILES $<TARGET_FILE_DIR:mediainfo>/$<TARGET_FILE_BASE_NAME:mediainfo>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
 
-    SET( _SL_FILES
-        "$<TARGET_FILE:mediainfo>"
-        "$<TARGET_FILE_DIR:mediainfo>/$<TARGET_FILE_BASE_NAME:mediainfo>.pdb"
-        )
-
-    InstallFilesPostBuild( TARGET mediainfo INFILES ${_SL_FILES} TARGET_DIR "$<TARGET_FILE_DIR:MediaManager>" )
-
     set_target_properties( mediainfo PROPERTIES FOLDER SharedLibs/MediaInfo )
     set_target_properties( zen PROPERTIES FOLDER SharedLibs/MediaInfo )
     set_target_properties( zlibstatic PROPERTIES FOLDER SharedLibs/MediaInfo )

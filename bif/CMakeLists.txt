@@ -67,9 +67,3 @@ set_target_properties( bif PROPERTIES FOLDER SharedLibs )
 INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.dll DESTINATION imageformats )
 INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
 
-SET( _SL_FILES
-    "$<TARGET_FILE:bif>"
-    "$<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.pdb"
-    )
-
-InstallFilesPostBuild( TARGET bif INFILES ${_SL_FILES} TARGET_DIR "$<TARGET_FILE_DIR:MediaManager>" )
