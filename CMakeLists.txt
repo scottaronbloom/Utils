@@ -108,11 +108,11 @@ add_library(SABUtils ${LIBTYPE}
 )
 
 if ( SABUTILS_DLL )
-target_link_libraries( SABUtils
-                 Qt5::Widgets
-                 Qt5::Core
-                 Qt5::Network
-                 mediainfo
+    target_link_libraries( SABUtils
+                           Qt5::Widgets
+                           Qt5::Core
+                           Qt5::Network
+                           mediainfo
           )
 endif()
 
