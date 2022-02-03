@@ -466,6 +466,7 @@ foreach(HEADER ${MediaInfoLib_PUBLIC_HDRS})
 endforeach(HEADER ${MediaInfoLib_PUBLIC_HDRS})
 endif()
 
+if( NOT NO_USE_MEDIAINFO_INSTALL )
 # pkg-config
 find_package(PkgConfig)
 if(PKG_CONFIG_FOUND)
@@ -477,7 +478,6 @@ if(PKG_CONFIG_FOUND)
 endif()
 
 # cmake-modules
-if( NOT NO_USE_MEDIAINFO_INSTALL )
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   MediaInfoLibConfig.cmake.in
