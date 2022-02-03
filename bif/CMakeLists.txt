@@ -62,7 +62,12 @@ target_link_libraries( bif
     Qt5::Core
 )
 
-set_target_properties( bif PROPERTIES FOLDER SharedLibs )
+set_target_properties( bif PROPERTIES 
+                                RUNTIME_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
+                                ARCHIVE_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
+                                LIBRARY_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
+                                FOLDER SharedLibs 
+)
 
 INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.dll DESTINATION imageformats )
 INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
