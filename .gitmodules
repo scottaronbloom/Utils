@@ -10,3 +10,4 @@
 [submodule "MediaInfo/zlib"]
 	path = MediaInfo/zlib
 	url = https://github.com/MediaArea/zlib
+    ignore = all
