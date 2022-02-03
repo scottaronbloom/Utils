@@ -58,6 +58,12 @@ if( NOT DEFINED DEPLOYQT_EXECUTABLE )
 endif()
 
 function( DeploySystem target directory)
+    set( options )
+    set( oneValueArgs INSTALL_ONLY )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    
     #message( STATUS "Deploy System ${target}" )
     if ( WIN32 )
         set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
@@ -69,14 +75,16 @@ function( DeploySystem target directory)
     SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
     include(InstallRequiredSystemLibraries)
 
-    #message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
-    foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-        get_filename_component(filename "${lib}" NAME)
-        add_custom_command(TARGET ${target} POST_BUILD
-			COMMAND "${CMAKE_COMMAND}" -E echo "Deploying System Library '${filename}' for '${target}'"
-            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
-        )
-    endforeach()
+    if ( NOT _INSTALL_ONLY )
+        #message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
+        foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+            get_filename_component(filename "${lib}" NAME)
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND "${CMAKE_COMMAND}" -E echo "Deploying System Library '${filename}' for '${target}'"
+                COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
+            )
+        endforeach()
+    endif()
 endfunction()
 
 # Add commands that copy the required Qt files to the same directory as the
@@ -90,6 +98,12 @@ function(DeployQt target directory)
         message(FATAL_ERROR "deployqt not found")
     endif()
 
+    set( options )
+    set( oneValueArgs INSTALL_ONLY )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
     SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
     IF( WIN32 )
         SET(_QTDEPLOY_OPTIONS "--verbose=1;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
@@ -101,15 +115,17 @@ function(DeployQt target directory)
         return()
     ENDIF()
 
-    # Run deployqt immediately after build to make the build area "complete"
-    add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E echo "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
-        COMMAND "${CMAKE_COMMAND}" -E
-            env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
-                ${_QTDEPLOY_OPTIONS}
-                ${_QTDEPLOY_TARGET_DIR}
-    )
-
+    if ( NOT _INSTALL_ONLY )
+        # Run deployqt immediately after build to make the build area "complete"
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E echo "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
+            COMMAND "${CMAKE_COMMAND}" -E
+                env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
+                    ${_QTDEPLOY_OPTIONS}
+                    ${_QTDEPLOY_TARGET_DIR}
+        )
+    endif()
+    
     # install(CODE ...) doesn't support generator expressions, but
     # file(GENERATE ...) does - store the path in a file
     file(GENERATE 

@@ -92,7 +92,8 @@ function( CheckOpenSSL )
 			else()
 				SET( SUFFIX ".so" )
 			endif()
-			SET( OPENSSL_DEPLOY_LIBS ${OPENSSL_ROOT_DIR}/bin/libcrypto-1_1-x64${SUFFIX} ${OPENSSL_ROOT_DIR}/bin/libssl-1_1-x64${SUFFIX} CACHE INTERNAL "Locations of OpenSSL shared libraries" )
+			SET( OPENSSL_DEPLOY_BINDIR ${OPENSSL_ROOT_DIR}/bin CACHE INTERNAL "Locations of OpenSSL shared library directory" )
+			SET( OPENSSL_DEPLOY_LIBS ${OPENSSL_DEPLOY_BINDIR}/libcrypto-1_1-x64${SUFFIX} ${OPENSSL_DEPLOY_BINDIR}/libssl-1_1-x64${SUFFIX} CACHE INTERNAL "Locations of OpenSSL shared libraries" )
 			mark_as_advanced(OPENSSL_DEPLOY_LIBS)
 		else()
 			MESSAGE( FATAL_ERROR "${OPENSSL_ROOT_DIR}/bin does not exist, so deployment libraries can not be found" )
@@ -108,20 +109,28 @@ function( CheckOpenSSL )
 endfunction()
 
 function(DeployOpenSSL target directory)
+    set( options )
+    set( oneValueArgs INSTALL_ONLY )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
 	if( NOT DEFINED OPENSSL_DEPLOY_LIBS )
 		MESSAGE( FATAL_ERROR "Required OpenSSL shared libraries were not found, please call CheckOpenSSL()" )
 	endif()
 	
 	#MESSAGE( STATUS "OpenSSL Found, Deploying OpenSSL Libraries for target '${target}'" )
 	#message( STATUS "OPENSSL_LIBRARIES = ${OPENSSL_LIBRARIES}" )
-	foreach(lib ${OPENSSL_DEPLOY_LIBS})
-		get_filename_component(filename "${lib}" NAME)
-		add_custom_command(TARGET ${target} POST_BUILD
-			COMMAND "${CMAKE_COMMAND}" -E echo "Deploying OpenSSL Library '${filename}' for '${target}'"
-			COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
-		)
-	endforeach()
-
+    if( NOT _INSTALL_ONLY )
+        foreach(lib ${OPENSSL_DEPLOY_LIBS})
+            get_filename_component(filename "${lib}" NAME)
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND "${CMAKE_COMMAND}" -E echo "Deploying OpenSSL Library '${filename}' for '${target}'"
+                COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
+            )
+        endforeach()
+    endif()
+    
 	INSTALL( FILES ${OPENSSL_DEPLOY_LIBS} DESTINATION . )
 endfunction()
 
