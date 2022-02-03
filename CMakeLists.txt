@@ -119,11 +119,14 @@ endif()
 add_definitions( -DNON_VIS_BUILD=1 )
 add_definitions( -DBIF_SCROLLBAR_SUPPORT=1 )
 if ( SABUTILS_DLL )
-set_target_properties( SABUtils PROPERTIES FOLDER SharedLibs )
-INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.dll DESTINATION . )
-INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
+    set_target_properties( SABUtils PROPERTIES 
+                                FOLDER SharedLibs 
+                                DEBUG_POSTFIX d
+                          )
+    INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.dll DESTINATION . )
+    INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
 else()
-set_target_properties( SABUtils PROPERTIES FOLDER Libs )
+    set_target_properties( SABUtils PROPERTIES FOLDER Libs )
 endif()
 
 if( SAB_ENABLE_TESTING )

@@ -65,6 +65,7 @@ set_target_properties( gif PROPERTIES
                                 RUNTIME_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
                                 ARCHIVE_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
                                 LIBRARY_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
+                                DEBUG_POSTFIX d
                                 FOLDER SharedLibs 
 )
 
