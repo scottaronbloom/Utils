@@ -107,7 +107,7 @@ ENDFUNCTION()
 FUNCTION(InstallFilesPostBuild)
     set( options )
     set( oneValueArgs TARGET TARGET_DIR)
-    set( multiValueArgs INTARGETS CONFIGURATIONS )
+    set( multiValueArgs INFILES CONFIGURATIONS )
 
     cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
@@ -115,8 +115,8 @@ FUNCTION(InstallFilesPostBuild)
         MESSAGE( FATAL_ERROR "TARGET argument not set" )
     ENDIF()
 
-    if( NOT _INTARGETS )
-        MESSAGE( FATAL_ERROR "INTARGETS argument not set" )
+    if( NOT _INFILES )
+        MESSAGE( FATAL_ERROR "INFILES argument not set" )
     ENDIF()
 
     if( NOT _TARGET_DIR )
@@ -126,28 +126,21 @@ FUNCTION(InstallFilesPostBuild)
     #MESSAGE( STATUS "===============================" )
     #MESSAGE( STATUS " InstallFilesPostBuild" )
     #MESSAGE( STATUS " TARGET=${_TARGET}" )
-    #MESSAGE( STATUS " INTARGETS=${_INTARGETS}" )
+    #MESSAGE( STATUS " INFILES=${_INFILES}" )
     #MESSAGE( STATUS " TARGET_DIR=${_TARGET_DIR}" )
 
 
-    foreach( currTarget ${_INTARGETS} )
-        SET( _SL_FILES
-            "$<TARGET_FILE:${currTarget}>"
-            "$<TARGET_FILE_DIR:${currTarget}>/$<TARGET_FILE_BASE_NAME:${currTarget}>.pdb"
-            )
-
-        foreach( curr ${_SL_FILES} )
-            IF( NOT _CONFIGURATIONS )
-                if ( curr MATCHES ".*\.pdb" )
-                    SET( _CONFIGS
-                        Debug
-                        RelWithDebInfo
-                    )
-                endif()        
-            ELSE()
-                SET( _CONFIGS ${_CONFIGURATIONS} )
-            ENDIF()
-            InstallFilePostBuild( TARGET ${_TARGET} INFILE ${curr} TARGET_DIR ${_TARGET_DIR} CONFIGURATIONS ${_CONFIGS} )
-        endforeach()
+    foreach( curr ${_INFILES} )
+        IF( NOT _CONFIGURATIONS )
+            if ( curr MATCHES ".*\.pdb" )
+                SET( _CONFIGS
+                    Debug
+                    RelWithDebInfo
+                )
+            endif()        
+        ELSE()
+            SET( _CONFIGS ${_CONFIGURATIONS} )
+        ENDIF()
+        InstallFilePostBuild( TARGET ${_TARGET} INFILE ${curr} TARGET_DIR ${_TARGET_DIR} CONFIGURATIONS ${_CONFIGS} )
     endforeach()
     endfunction()
