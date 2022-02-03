@@ -528,6 +528,8 @@ namespace NSABUtils
 
     QDate getDate( const QString & string, const SDateSearchOptions & options )
     {
+        if ( string.isEmpty() )
+            return {};
         auto formats = getDateFormats( options );
         QDate retVal;
         for ( auto && format : formats )
