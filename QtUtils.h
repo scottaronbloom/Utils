@@ -243,6 +243,7 @@ namespace NSABUtils
     }
 
     SABUTILS_EXPORT void fetchMore( QAbstractItemModel * model, int maxFetch );
+    SABUTILS_EXPORT void setDPIAwarenessToMode( int & argc, char **& argv, const char * mode );
 }
 
 template< std::size_t I = 0, typename... Tp>

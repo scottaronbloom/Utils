@@ -1031,6 +1031,40 @@ namespace NSABUtils
         }
     }
 
+    void setDPIAwarenessToMode( int & argc, char **& argv, const char * mode )
+    {
+        bool dpiAwarenessFound = false;
+        for ( int ii = 1; ii < argc; ++ii )
+        {
+            if ( strncmp( argv[ ii ], "-platform", 9 ) == 0 )
+            {
+                if ( ( ii + 1 ) < argc )
+                {
+                    std::string arg = argv[ ii + 1 ];
+                    if ( arg.find( "dpiawareness=" ) != std::string::npos )
+                        dpiAwarenessFound = true;
+                }
+            }
+        }
+
+        if ( !dpiAwarenessFound )
+        {
+            char ** newArgv = new char * [ argc + 2 ];
+            for ( int ii = 0; ii < argc; ++ii )
+            {
+                newArgv[ ii ] = new char[ strlen( argv[ ii ] ) + 1 ];
+                strcpy( newArgv[ ii ], argv[ ii ] );
+            }
+            newArgv[ argc ] = new char[ strlen( "-platform" ) + 1 ];
+            strcpy( newArgv[ argc ], "-platform" );
+            newArgv[ argc + 1 ] = new char[ strlen( "windows:dpiawareness=" ) + strlen( mode ) + 1 ];
+            strcpy( newArgv[ argc + 1 ], "windows:dpiawareness=" );
+            strcat( newArgv[ argc + 1 ], mode );
+            argc += 2;
+            argv = newArgv;
+        }
+    }
+
     int autoSize( QComboBox * comboBox )
     {
         if ( !comboBox )
