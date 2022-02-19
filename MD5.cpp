@@ -67,6 +67,16 @@ namespace NSABUtils
         return formatMd5( digest, false );
     }
 
+    QByteArray getMd5( const QStringList & data )
+    {
+        QCryptographicHash hash( QCryptographicHash::Md5 );
+        for ( auto && ii : data )
+        {
+            hash.addData( ii.toLatin1() );
+        }
+        return hash.result();
+    }
+
     QString getMd5( const QString & data, bool isFileName )
     {
         if ( isFileName )
