@@ -24,9 +24,6 @@ set(qtproject_SRCS
     AutoWaitCursor.cpp
     AutoFetch.cpp
     BackgroundFileCheck.cpp
-    BIFFile.cpp
-    BIFModel.cpp
-    BIFWidget.cpp
     ButtonEnabler.cpp
     WidgetEnabler.cpp
     ConsoleUtils.cpp
@@ -34,8 +31,6 @@ set(qtproject_SRCS
     DelayLineEdit.cpp
     DelaySpinBox.cpp
     DoubleProgressDlg.cpp
-    GIFWriter.cpp
-    GIFWriterDlg.cpp
     ImageScrollBar.cpp
     utils.cpp
     FileCompare.cpp
@@ -44,8 +39,6 @@ set(qtproject_SRCS
     JsonUtils.cpp
     MD5.cpp
     MenuBarEx.cpp
-    MKVUtils.cpp
-    SetMKVTags.cpp
     SelectFileUrl.cpp
     StringUtils.cpp
     StringComparisonClasses.cpp
@@ -71,15 +64,12 @@ set(qtproject_CPPMOC_SRCS
 set(qtproject_H
     AutoWaitCursor.h
     BackgroundFileCheck.h
-    BIFModel.h
-    BIFWidget.h
     ButtonEnabler.h
     WidgetEnabler.h
     DelayComboBox.h
     DelayLineEdit.h
     DelaySpinBox.h
     DoubleProgressDlg.h
-    GIFWriterDlg.h
     ImageScrollBar.h
     MD5.h
     SpinBox64.h
@@ -91,14 +81,11 @@ set(qtproject_H
     UtilityViews.h
     MenuBarEx.h
     SelectFileUrl.h
-    SetMKVTags.h
 )
 
 set(project_H
     AutoFetch.h
-    BIFFile.h
     ConsoleUtils.h
-    GIFWriter.h
     utils.h
     FileCompare.h
     FileUtils.h
@@ -115,24 +102,92 @@ set(project_H
     RevertValue.h
     VSInstallUtils.h
     StayAwake.h   
-    MKVUtils.h
     ValidateOpenSSL.h
     SABUtilsExport.h
     SABUtilsResources.h
 )
 
 set(qtproject_UIS
-    BIFWidget.ui
-    GIFWriterDlg.ui
     ScrollMessageBox.ui
-    SetMKVTags.ui
 )
 
 
 set(qtproject_QRC
     resources/SABUtils.qrc
-    BIFPlayerResources/BIFPlayerResources.qrc
 )
 
-file(GLOB qtproject_QRC_SOURCES "BIFPlayerResources/*")
 file(GLOB qtproject_QRC_SOURCES "resources/*")
+
+if ( BIFSUPPORT )
+    set(qtproject_SRCS
+        ${qtproject_SRCS}
+        BIFFile.cpp
+        BIFModel.cpp
+        BIFWidget.cpp
+    )
+    set(qtproject_H
+        ${qtproject_H}
+        BIFModel.h
+        BIFWidget.h
+    )
+    set(project_H
+        ${project_H}
+        BIFFile.h
+    )
+    set(qtproject_UIS
+        ${qtproject_UIS}
+        BIFWidget.ui
+    )
+
+    set(qtproject_QRC
+        ${qtproject_QRC}
+        BIFPlayerResources/BIFPlayerResources.qrc
+    )
+
+    file(GLOB tmp "BIFPlayerResources/*")
+    SET( qtproject_QRC_SOURCES
+        ${qtproject_QRC_SOURCES}
+        ${tmp}
+    )
+endif()
+
+
+if ( GIFSUPPORT )
+    set(qtproject_SRCS
+        ${qtproject_SRCS}
+        GIFWriter.cpp
+        GIFWriterDlg.cpp
+    )
+    set(qtproject_H
+        ${qtproject_H}
+        GIFWriterDlg.h
+    )
+    set(project_H
+        ${project_H}
+        GIFWriter.h
+    )
+    set(qtproject_UIS
+        ${qtproject_UIS}
+        GIFWriterDlg.ui
+    )
+endif()
+
+if ( MKVUTILS )
+    set(qtproject_SRCS
+        ${qtproject_SRCS}
+        MKVUtils.cpp
+        SetMKVTags.cpp
+    )
+    set(qtproject_H
+        ${qtproject_H}
+        SetMKVTags.h
+    )
+    set(project_H
+        ${project_H}
+        MKVUtils.h
+    )
+    set(qtproject_UIS
+        ${qtproject_UIS}
+        SetMKVTags.ui
+    )
+endif()
