@@ -36,7 +36,6 @@ SET(CMAKE_AUTOMOC OFF)
 SET(CMAKE_AUTORCC OFF)
 SET(CMAKE_AUTOUIC OFF)
 
-include( include.cmake )
 UNSET( qtproject_UIS_H )
 UNSET( qtproject_MOC_SRCS )
 UNSET( qtproject_CPPMOC_H )
@@ -83,6 +82,7 @@ SET( _PROJECT_DEPENDENCIES
     ${qtproject_UIS}
     ${qtproject_QRC_SOURCES}
     ${_CMAKE_FILES}
+    ${_CMAKE_MODULE_FILES}
 )
 
 SET( project_pub_DEPS

@@ -45,9 +45,7 @@ namespace NSABUtils
         void sigValueChangedAfterDelay(int);
         void sigEditingFinishedAfterDelay();
 
-#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
         void sigTextChangedAfterDelay(const QString &);
-#endif
 
     public Q_SLOTS:
         void slotValueChanged();
