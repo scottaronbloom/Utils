@@ -191,3 +191,11 @@ if ( MKVUTILS )
         SetMKVTags.ui
     )
 endif()
+
+SET( project_pub_DEPS
+     Qt5::Concurrent
+     Qt5::Network
+     MKVReader
+     ${MEDIAINFOLIB}
+)
+
