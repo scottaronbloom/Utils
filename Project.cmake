@@ -29,7 +29,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 find_package(Threads REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
-AddQtIncludes()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -72,4 +71,27 @@ else()
     include( ${CMAKE_SOURCE_DIR}/SABUtils/CompilerSettings.cmake )
 endif()
 
+SET( _PROJECT_DEPENDENCIES
+    ${project_SRCS} 
+    ${project_H}  
+    ${qtproject_SRCS} 
+    ${qtproject_QRC} 
+    ${qtproject_QRC_SRCS} 
+    ${qtproject_UIS_H} 
+    ${qtproject_MOC_SRCS} 
+    ${qtproject_H} 
+    ${qtproject_UIS}
+    ${qtproject_QRC_SOURCES}
+    ${_CMAKE_FILES}
+)
 
+SET( project_pub_DEPS
+     Qt5::Core
+     Qt5::Widgets
+     ${project_pub_DEPS}
+     )
+
+SET( project_pri_DEPS
+    # insert and "global default" private depends here
+    ${project_pri_DEPS}
+)
