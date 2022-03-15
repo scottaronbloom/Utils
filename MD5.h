@@ -37,6 +37,7 @@ namespace NSABUtils
 {
     SABUTILS_EXPORT QByteArray getMd5(const QByteArray & data);
     SABUTILS_EXPORT QString getMd5(const QFileInfo & fi);
+    SABUTILS_EXPORT QByteArray getMd5( const QStringList & data );
     SABUTILS_EXPORT QString getMd5(const QString & data, bool isFileName = false);
     SABUTILS_EXPORT std::string getMd5(const std::string & data, bool isFileName = false);
     SABUTILS_EXPORT QByteArray formatMd5(const QByteArray & digest, bool isHex);

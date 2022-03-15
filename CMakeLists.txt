@@ -29,6 +29,10 @@ project(SABUtils)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
+SET( MKVUTILS OFF CACHE BOOL "Support for MKV Utilities" )
+SET( BIFSUPPORT OFF CACHE BOOL "Support for BIF Utilities" )
+SET( GIFSUPPORT OFF CACHE BOOL "Support for GIF Utilities" )
+SET( SAB_ENABLE_TESTING ON CACHE BOOL "Enable Unit Testing of SAB Utils" )
    
 if ( NOT SAB_UTILS_DIR )
     SET( SAB_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR} )
@@ -62,9 +66,11 @@ if( SAB_ENABLE_TESTING )
     set_target_properties( gtest_main PROPERTIES FOLDER GoogleTest )
 endif()
 
-SET(NO_USE_MEDIAINFO_INSTALL ON)
-set(BUILD_SHARED_LIBS ON)
-add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
+if ( MKVUTILS )
+    SET(NO_USE_MEDIAINFO_INSTALL ON)
+    set(BUILD_SHARED_LIBS ON)
+    add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
+endif()
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
@@ -82,8 +88,10 @@ set(SAB_MOC_OPTIONS "-DNON_VIS_BUILD=1")
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
 
-include_directories(MediaInfo/MediaInfoLib/Source)
-include_directories(MediaInfo/ZenLib/Source)
+if ( MKVUTILS )
+    include_directories(MediaInfo/MediaInfoLib/Source)
+    include_directories(MediaInfo/ZenLib/Source)
+endif()
 
 if ( SABUTILS_DLL )
     SET( LIBTYPE SHARED )
@@ -107,6 +115,9 @@ add_library(SABUtils ${LIBTYPE}
     ${_CMAKE_MODULE_FILES}
 )
 
+if ( MKVUTILS )
+    set( MEDIAINFOLIB mediainfo )
+endif()
 if ( SABUTILS_DLL )
     target_link_libraries( SABUtils
                            Qt5::Widgets
@@ -114,11 +125,15 @@ if ( SABUTILS_DLL )
                            Qt5::Network
                            mediainfo
                            MKVReader
+                           ${MEDIAINFOLIB}
           )
 endif()
 
 add_definitions( -DNON_VIS_BUILD=1 )
-add_definitions( -DBIF_SCROLLBAR_SUPPORT=1 )
+if ( BIFSUPPORT )
+    add_definitions( -DBIF_SCROLLBAR_SUPPORT=1 )
+endif()
+
 if ( SABUTILS_DLL )
     set_target_properties( SABUtils PROPERTIES 
                                 FOLDER SharedLibs 
