@@ -42,3 +42,8 @@ set(qtproject_UIS
 
 set(qtproject_QRC
 )
+
+SET( project_pub_DEPS
+     SABUtils
+)
+

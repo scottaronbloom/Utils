@@ -31,37 +31,21 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../Modules ${CMAKE_MODULE_PATH
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 find_package(Deploy REQUIRED)
 
-project( gif )
-
-AddQtIncludes()
-
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/../Project.cmake )
 add_definitions( -DBUILD_GIF_PLUGIN=1 )
-add_library(gif SHARED
-    ${project_SRCS} 
-    ${project_H}  
-    ${qtproject_SRCS} 
-    ${qtproject_QRC} 
-    ${qtproject_QRC_SRCS} 
-    ${qtproject_UIS_H} 
-    ${qtproject_MOC_SRCS} 
-    ${qtproject_CPPMOC_SRCS}
-    ${qtproject_CPPMOC_H} 
-    ${qtproject_H} 
-    ${qtproject_UIS}
-    ${qtproject_QRC_SOURCES}
-    ${_CMAKE_FILES}
-    ${_CMAKE_MODULE_FILES}
+add_library(${PROJECT_NAME} SHARED
+    ${_PROJECT_DEPENDENCIES} 
 )
 
-target_link_libraries( gif
-    Qt5::Widgets
-    Qt5::Core
-    SABUtils
+target_link_libraries( ${PROJECT_NAME}
+    PUBLIC
+        ${project_pub_DEPS}
+    PRIVATE 
+        ${project_pri_DEPS}
 )
 
-set_target_properties( gif PROPERTIES 
+set_target_properties( ${PROJECT_NAME} PROPERTIES 
                                 RUNTIME_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
                                 ARCHIVE_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
                                 LIBRARY_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
