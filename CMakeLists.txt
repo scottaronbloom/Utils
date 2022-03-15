@@ -40,7 +40,7 @@ endif()
 
 add_definitions( -DSABUTILS_INTERNAL )
 
-MESSAGE( STATUS "SAB_ENABLE_TESTING=${SAB_ENABLE_TESTING}" )
+#MESSAGE( STATUS "SAB_ENABLE_TESTING=${SAB_ENABLE_TESTING}" )
 
 if( SAB_ENABLE_TESTING )
     SET(GOOGLETEST_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
@@ -72,6 +72,8 @@ if ( MKVUTILS )
     add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
 endif()
 
+add_subdirectory( MKVReader )
+
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
 find_package(Qt5 COMPONENTS Core Widgets Xml Concurrent REQUIRED)
@@ -82,8 +84,11 @@ find_package(Qt5SrcMoc REQUIRED)
 
 project( SABUtils )
 
-AddQtIncludes()
 set(SAB_MOC_OPTIONS "-DNON_VIS_BUILD=1")
+
+if ( MKVUTILS )
+    set( MEDIAINFOLIB mediainfo )
+endif()
 
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
@@ -98,36 +103,17 @@ if ( SABUTILS_DLL )
 else()
     SET( LIBTYPE STATIC )
 endif()
+
 add_library(SABUtils ${LIBTYPE}
-    ${project_SRCS} 
-    ${project_H}  
-    ${qtproject_SRCS} 
-    ${qtproject_QRC} 
-    ${qtproject_QRC_SRCS} 
-    ${qtproject_UIS_H} 
-    ${qtproject_MOC_SRCS} 
-    ${qtproject_CPPMOC_SRCS}
-    ${qtproject_CPPMOC_H} 
-    ${qtproject_H} 
-    ${qtproject_UIS}
-    ${qtproject_QRC_SOURCES}
-    ${_CMAKE_FILES}
-    ${_CMAKE_MODULE_FILES}
+    ${_PROJECT_DEPENDENCIES}
 )
 
-if ( MKVUTILS )
-    set( MEDIAINFOLIB mediainfo )
-endif()
-if ( SABUTILS_DLL )
-    target_link_libraries( SABUtils
-                           Qt5::Widgets
-                           Qt5::Core
-                           Qt5::Network
-                           mediainfo
-                           MKVReader
-                           ${MEDIAINFOLIB}
-          )
-endif()
+target_link_libraries( ${PROJECT_NAME}
+    PUBLIC
+        ${project_pub_DEPS}
+    PRIVATE 
+        ${project_pri_DEPS}
+)
 
 add_definitions( -DNON_VIS_BUILD=1 )
 if ( BIFSUPPORT )
@@ -148,5 +134,3 @@ endif()
 if( SAB_ENABLE_TESTING )
 	add_subdirectory(UnitTests)
 endif()
-
-add_subdirectory( MKVReader )
