@@ -22,19 +22,22 @@
 #ifndef __BACKGROUNDFILECHECK_H
 #define __BACKGROUNDFILECHECK_H
 #include <QObject>
-#include <QFutureWatcher>
 #include <QFile>
+#include <QThread>
+
+#include "SABUtilsExport.h"
 
 namespace NSABUtils
 {
-    class CBackgroundFileCheck  : public QObject
+    class CBackgroundFileCheckImpl;
+    class SABUTILS_EXPORT CBackgroundFileCheck  : public QObject
     {
         Q_OBJECT;
     public:
         CBackgroundFileCheck( QObject * parent = nullptr );
         ~CBackgroundFileCheck();
         
-        void stop();
+        void stop( bool markAsStopped=true );
 
         void checkPath();
         void checkPath( const QString & pathName );
@@ -43,92 +46,69 @@ namespace NSABUtils
         void sigFinished( bool aOK, const QString & msg );
 
     public:
-        int timeOut() const { return fTimeOut; }
-        void setTimeOut( int val ) { fTimeOut = val; }
+        int timeOut() const;
+        void setTimeOut( int val );
 
-        QString pathName() const { return fPathName; }
+        QString pathName() const;
         void setPathName( const QString & pathName );
 
-        bool checkExists() const { return fCheckExists; }
-        void setCheckExists( bool val ) { fCheckExists = val; }
+        bool checkExists() const;
+        void setCheckExists( bool val );
 
-        bool checkIsBundle() const { return fCheckIsBundle; }
-        void setCheckIsBundle( bool val ) { fCheckIsBundle = val; }
+        bool checkIsBundle() const;
+        void setCheckIsBundle( bool val );
 
-        bool checkIsDir() const { return fCheckIsDir; }
-        void setCheckIsDir( bool val ) { fCheckIsDir = val; }
+        bool checkIsDir() const;
+        void setCheckIsDir( bool val );
 
-        bool checkIsExecutable() const { return fCheckIsExecutable; }
-        void setCheckIsExecutable( bool val ) { fCheckIsExecutable = val; }
+        bool checkIsExecutable() const;
+        void setCheckIsExecutable( bool val );
 
-        bool checkIsFile() const { return fCheckIsFile; }
-        void setCheckIsFile( bool val ) { fCheckIsFile = val; }
+        bool checkIsFile() const;
+        void setCheckIsFile( bool val );
 
-        bool checkIsHidden() const { return fCheckIsHidden; }
-        void setCheckIsHidden( bool val ) { fCheckIsHidden = val; }
+        bool checkIsHidden() const;
+        void setCheckIsHidden( bool val );
 
-        bool checkIsJunction() const { return fCheckIsJunction; }
-        void setCheckIsJunction( bool val ) { fCheckIsJunction = val; }
+        bool checkIsJunction() const;
+        void setCheckIsJunction( bool val );
 
-        bool checkIsReadable() const { return fCheckIsReadable; }
-        void setCheckIsReadable( bool val ) { fCheckIsReadable = val; }
+        bool checkIsReadable() const;
+        void setCheckIsReadable( bool val );
 
-        bool checkIsShortcut() const { return fCheckIsShortcut; }
-        void setCheckIsShortcut( bool val ) { fCheckIsShortcut = val; }
+        bool checkIsShortcut() const;
+        void setCheckIsShortcut( bool val );
 
-        bool checkIsSymLink() const { return fCheckIsSymLink; }
-        void setCheckIsSymLink( bool val ) { fCheckIsSymLink = val; }
+        bool checkIsSymLink() const;
+        void setCheckIsSymLink( bool val );
 
-        bool checkIsSymbolicLink() const { return fCheckIsSymbolicLink; }
-        void setCheckIsSymbolicLink( bool val ) { fCheckIsSymbolicLink = val; }
+        bool checkIsSymbolicLink() const;
+        void setCheckIsSymbolicLink( bool val );
 
-        bool checkIsWritable() const { return fCheckIsWritable; }
-        void setCheckIsWritable( bool val ) { fCheckIsWritable = val; }
+        bool checkIsWritable() const;
+        void setCheckIsWritable( bool val );
 
-        QFile::Permissions checkPermissions() const { return fCheckPermissions; }
-        void setCheckPermissions( QFile::Permissions val ) { fCheckPermissions = val; }
+        QFile::Permissions checkPermissions() const;
+        void setCheckPermissions( QFile::Permissions val );
 
-        bool useNTFSPermissions() const { return fUseNTFSPermissions; }
-        void setUseNTFSPermissions( bool val ) { fUseNTFSPermissions = val; }
+        bool useNTFSPermissions() const;
+        void setUseNTFSPermissions( bool val );
 
-        QString msg() const { return fMessage; }
-    private Q_SLOTS:
+        QString msg() const;
+    public Q_SLOTS:
+        void slotFinished();
         void slotTimeout();
-        void slotCanceled();
-        void slotResultsReady( int index );
     private:
-        bool canContinue() const;
-        std::pair< bool, QString > checkPathInternal();
+        CBackgroundFileCheckImpl * fImpl{ nullptr };
+    };
 
-        int fTimeOut{ 5000 };
-        bool fStopped{ false };
-        bool fTimedOut{ false };
-        QString fPathName;
-        QString fMessage;
-
-        bool fCheckExists{ true };
-        bool fCheckIsBundle{ false };
-        bool fCheckIsDir{ false };
-        bool fCheckIsExecutable{ false };
-        bool fCheckIsFile{ false };
-        bool fCheckIsHidden{ false };
-        bool fCheckIsJunction{ false };
-        bool fCheckIsReadable{ false };
-        bool fCheckIsShortcut{ false };
-        bool fCheckIsSymLink{ false };
-        bool fCheckIsSymbolicLink{ false };
-        bool fCheckIsWritable{ false };
-        QFile::Permissions fCheckPermissions;
-        bool fUseNTFSPermissions{
-#ifdef Q_OS_WINDOWS
-        true
-#else
-        false
-#endif
-        };
+    class SABUTILS_EXPORT CBackgroundFileCheckThread : public QThread
+    {
+    public:
+        CBackgroundFileCheckThread( CBackgroundFileCheckImpl * impl );
+        virtual void run() override;
     private:
-        void dumpDebug( const QString & desc ) const;
-        QFutureWatcher< std::pair< bool, QString > > * fResultWatcher{ nullptr };
+        CBackgroundFileCheckImpl * fImpl{ nullptr };
     };
 }
 #endif

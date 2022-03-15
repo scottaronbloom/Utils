@@ -23,6 +23,8 @@
 #ifndef __GIFWRITER_H
 #define __GIFWRITER_H
 
+#include "SABUtilsExport.h"
+
 #include <QImage>
 #include <QDataStream>
 #include <initializer_list>
@@ -35,7 +37,7 @@ namespace NSABUtils
 {
     struct SGIFPalette;
 
-    class CGIFWriter
+    class SABUTILS_EXPORT CGIFWriter
     {
     public:
         static int kTransparentIndex;

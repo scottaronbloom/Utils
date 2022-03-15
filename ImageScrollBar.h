@@ -22,6 +22,8 @@
 #ifndef __IMAGESCROLLBAR_H
 #define __IMAGESCROLLBAR_H
 
+#include "SABUtilsExport.h"
+
 #include <QScrollBar>
 #include <QImage>
 namespace NSABUtils
@@ -33,7 +35,7 @@ namespace NSABUtils
         class CModel;
     }
 #endif
-    class CImageScrollBar : public QScrollBar
+    class SABUTILS_EXPORT CImageScrollBar : public QScrollBar
     {
         Q_OBJECT;
     public:

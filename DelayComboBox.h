@@ -22,11 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "SABUtilsExport.h"
+
 #include <QComboBox>
 namespace NSABUtils
 {
     class CDelayLineEdit;
-    class CDelayComboBox : public QComboBox
+    class SABUTILS_EXPORT CDelayComboBox : public QComboBox
     {
         Q_OBJECT;
     Q_SIGNALS:

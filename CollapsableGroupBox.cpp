@@ -109,7 +109,7 @@ namespace NSABUtils
         QObject* child = event->child();
         if (event->added() && child->isWidgetType())
         {
-            QWidget* widget = static_cast<QWidget*>(child);
+            auto* widget = static_cast<QWidget*>(child);
             if (fImpl->fCollapsible && !isChecked())
                 widget->hide();
         }

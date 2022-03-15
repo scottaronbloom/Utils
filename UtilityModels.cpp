@@ -128,12 +128,18 @@ namespace NSABUtils
         QObject::connect(this, &CCheckableStringListModel::columnsMoved, this, &CCheckableStringListModel::sigChanged);
     }
 
-    bool CCheckableStringListModel::isChecked(int rowNum) const
+    bool CCheckableStringListModel::isChecked( int rowNum ) const
     {
-        if (rowNum > rowCount())
+        if ( rowNum > rowCount() )
             return false;
 
-        auto key = stringList()[rowNum].toUpper();
+        auto key = stringList()[rowNum];
+        return isChecked( key );
+    }
+
+    bool CCheckableStringListModel::isChecked( const QString & value ) const
+    {
+        auto key = value.toUpper();
         auto pos = fEnabled.find(key);
         if (pos == fEnabled.end())
             return false;
@@ -207,13 +213,24 @@ namespace NSABUtils
         return retVal;
     }
 
+    std::list< std::pair< QString, bool > > CCheckableStringListModel::getAllStrings() const
+    {
+        std::list< std::pair< QString, bool > > retVal;
+        auto strings = this->stringList();
+        for ( auto && ii : strings )
+        {
+            retVal.emplace_back( std::make_pair( ii, isChecked( ii ) ) );
+        }
+        return retVal;
+    }
+
     QStringList CCheckableStringListModel::getCheckedStrings(bool & allChecked) const
     {
         QStringList retVal;
-        for (auto ii = fEnabled.begin(); ii != fEnabled.end(); ++ii)
+        for (auto && ii : fEnabled )
         {
-            if ((*ii).second.second)
-                retVal << getAlias((*ii).second.first);
+            if ( ii.second.second)
+                retVal << getAlias( ii.second.first );
         }
         allChecked = retVal.size() == rowCount();
         return retVal;
@@ -513,10 +530,10 @@ namespace NSABUtils
     QVariant CStringTupleModel::data(const QModelIndex &index, int role) const
     {
         if (index.row() <= -1 || index.row() >= rowCount(index.parent()) || index.column() <= -1 || index.column() >= columnCount(index.parent()))
-            return QVariant();
+            return {};
 
         if (role != Qt::DisplayRole && role != Qt::EditRole)
-            return QVariant();
+            return {};
 
         return fData[index.row()][index.column()];
     }

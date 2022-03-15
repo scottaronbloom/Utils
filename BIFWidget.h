@@ -23,6 +23,8 @@
 #ifndef _BIFWIDGET_H
 #define _BIFWIDGET_H
 
+#include "SABUtilsExport.h"
+
 #include <QFrame>
 #include <optional>
 #include <memory>
@@ -50,11 +52,11 @@ namespace NSABUtils
             eNoButtons,
         };
 
-        class CWidget : public QFrame
+        class SABUTILS_EXPORT CWidget : public QFrame
         {
             Q_OBJECT
         public:
-            CWidget(QWidget *parent = 0);
+            CWidget(QWidget *parent = nullptr);
             ~CWidget();
 
             void clear();

@@ -2589,41 +2589,139 @@ namespace NSABUtils
             return retVal;
         }
 
-        std::unordered_set< QString > getImportantWords(const QString & string, bool stripPunctuation)
+        std::vector< QString > getImportantWordsInOrder( const QString & string, bool stripPunctuation )
         {
+            std::vector< QString > retVal;
             auto wordsToRemove = unimportantWords();
 
-            std::unordered_set< QString > retVal;
-            auto words = string.toLower().split(" ");
-            for (auto && ii : words)
+            auto words = string.toLower().split( QRegularExpression( "\\s" ), Qt::SkipEmptyParts );
+            for ( auto && ii : words )
             {
-                if (stripPunctuation)
-                    ii = ii.remove(QRegularExpression("\\W"));
-                if (wordsToRemove.find(ii) != wordsToRemove.end())
+                if ( stripPunctuation )
+                    ii = ii.remove( QRegularExpression( "\\W" ) );
+                if ( wordsToRemove.find( ii ) != wordsToRemove.end() )
                     continue;
-                retVal.insert(ii);
+                retVal.push_back( ii );
             }
             return retVal;
         }
 
-        // is every word in the RHS in the LHS
-        bool isSimilar(const QString &lhs, const QString &rhs)
+        std::unordered_set< QString > getImportantWords(const QString & string, bool stripPunctuation)
         {
-            auto lhsWords = getImportantWords(lhs, true);
-            auto rhsWords = getImportantWords(rhs, true);
+            auto ordered = getImportantWordsInOrder( string, stripPunctuation );
 
-            for (auto && ii : rhsWords)
+            std::unordered_set< QString > retVal = { ordered.begin(), ordered.end() };
+            return retVal;
+        }
+
+        // is every word in the RHS in the LHS
+        bool isSimilar(const QString &lhs, const QString &rhs, bool inOrder)
+        {
+            if ( !inOrder )
             {
-                if (lhsWords.find(ii) == lhsWords.end())
-                    return false;
+                auto lhsWords = getImportantWords( lhs, true );
+                auto rhsWords = getImportantWords( rhs, true );
+
+                for ( auto && ii : rhsWords )
+                {
+                    if ( lhsWords.find( ii ) == lhsWords.end() )
+                        return false;
+                }
+                return true;
             }
-            return true;
+            else
+            {
+                auto lhsWords = getImportantWordsInOrder( lhs, true );
+                auto rhsWords = getImportantWordsInOrder( rhs, true );
+                return (lhsWords == rhsWords);
+            }
+        }
+
+        int romanCharValue( QChar ch, bool & aOK )
+        {
+            static std::unordered_map< char, int > sValueMap =
+            {
+                { 'i', 1 },
+                { 'v', 5 },
+                { 'x', 10 },
+                { 'l', 50 },
+                { 'c', 100 },
+                { 'd', 500 },
+                { 'm', 1000 }
+            };
+
+            auto pos = sValueMap.find( ch.toLower().toLatin1() );
+            if ( pos == sValueMap.end() )
+            {
+                aOK = false;
+                return -1;
+            }
+            return (*pos).second;
+        }
+
+        int romanToDecimal( QString string, bool & aOK )
+        {
+            auto regExStr = "[^MDCLXVI\\s]";
+            auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
+            if ( regEx.match( string ).hasMatch() )
+            {
+                aOK = false;
+                return -1;
+            }
+            string = string.replace( QRegularExpression( "\\s" ), "" );
+
+            int retVal = 0;
+            for ( int ii = 0; ii < string.length(); ++ii )
+            {
+                if ( string[ii].isSpace() )
+                    continue;
+                auto currValue = romanCharValue( string[ii], aOK );
+                if ( !aOK )
+                    return -1;
+
+                if ( (ii + 1) < string.length() ) // not last char
+                {
+                    auto nextValue = romanCharValue( string[ii + 1], aOK );
+                    if ( !aOK )
+                        return -1;
+
+                    if ( currValue >= nextValue )
+                    {
+                        retVal += currValue;
+                    }
+                    else
+                    {
+                        retVal += nextValue - currValue;
+                        ++ii;
+                    }
+                }
+                else
+                    retVal += currValue;
+            }
+            aOK = true;
+            return retVal;
+        }
+
+        bool isRomanNumeral( const QString & string )
+        {
+            auto regExStr = "^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$";
+            auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
+            if ( !regEx.match( string ).hasMatch() )
+                return false;
+
+            bool aOK;
+            int value = romanToDecimal( string, aOK );
+            return aOK;
         }
 
         QString titleCase(const QString &string, bool first, bool ignoreAllCase)
         {
             if (string.isEmpty())
                 return string;
+
+            if ( isRomanNumeral( string ) )
+                return string.toUpper();
+
             auto retVal = string;
             bool allCap = true;
             for (auto &&ii : string)
@@ -2637,11 +2735,23 @@ namespace NSABUtils
             if (!ignoreAllCase && allCap)
                 return string;
 
-            auto keepLower = unimportantWords();
+            auto hasDash = retVal.indexOf("-") != -1;
 
-            retVal = retVal.toLower();
-            if (first || (keepLower.find(retVal) == keepLower.end()))
-                retVal[0] = retVal[0].toUpper();
+            auto keepLower = unimportantWords();
+            if (!hasDash && !first && ( keepLower.find(retVal) != keepLower.end()) )
+                retVal = retVal.toLower();
+            else
+            {
+                bool prevIsDashOrFirstChar = true;
+                for (auto &&ii : retVal)
+                {
+                    if (prevIsDashOrFirstChar)
+                        ii = ii.toUpper();
+                    else
+                        ii = ii.toLower();
+                    prevIsDashOrFirstChar = ii == "-";
+                }
+            }
             return retVal;
         }
 
@@ -2655,9 +2765,11 @@ namespace NSABUtils
             auto retVal = title;
             retVal = retVal.replace('.', ' ').trimmed();
             auto tmp = retVal.split(' ');
+            bool prevEndSentence = true;
             for (auto && ii = tmp.begin(); ii != tmp.end(); ++ii)
             {
-                *ii = titleCase(*ii, ii == tmp.begin(), ignoreAllCase);
+                *ii = titleCase(*ii, prevEndSentence, ignoreAllCase);
+                prevEndSentence = (*ii == ".") || (*ii == "-") || (*ii == ":") || (*ii).endsWith(".") || (*ii).endsWith("-") || (*ii).endsWith(":");
             }
 
             return tmp.join(" ");

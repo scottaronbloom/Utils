@@ -22,6 +22,8 @@
 #ifndef __WORDEXP_H
 #define __WORDEXP_H
 
+#include "SABUtilsExport.h"
+
 #include <tuple>
 #include <QString>
 #include <QStringList>
@@ -31,7 +33,7 @@
 
 namespace NSABUtils
 {
-    class CWordExp
+    class SABUTILS_EXPORT CWordExp
     {
         friend class CWordExpImpl;
     public:

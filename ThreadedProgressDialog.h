@@ -23,6 +23,8 @@
 #ifndef __THREADEDPROGRESSDIALOG_H
 #define __THREADEDPROGRESSDIALOG_H
 
+#include "SABUtilsExport.h"
+
 #include <QProgressDialog>
 #include <QEventLoop>
 #include <functional>
@@ -32,7 +34,7 @@ namespace NSABUtils
 {
 using TVoidFunction = std::function< void() >;
 class CThreadedProgressDialogImpl;
-class CThreadedProgressDialog : public QProgressDialog
+class SABUTILS_EXPORT CThreadedProgressDialog : public QProgressDialog
 {
     Q_OBJECT;
 public:
@@ -51,7 +53,7 @@ private:
 };
 
 class CThreadedEventLoopImpl;
-class CThreadedEventLoop : public QEventLoop
+class SABUTILS_EXPORT CThreadedEventLoop : public QEventLoop
 {
     Q_OBJECT;
 public:

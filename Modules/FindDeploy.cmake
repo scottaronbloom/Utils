@@ -23,62 +23,47 @@
 
 find_package(Qt5Core REQUIRED)
 
-# Retrieve the absolute path to qmake and then use that path to find
-# the <os>deployqt binaries
-get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
-get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+if( NOT DEFINED DEPLOYQT_EXECUTABLE )
+	# Retrieve the absolute path to qmake and then use that path to find
+	# the <os>deployqt binaries
+	get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+	get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
-if( WIN32 )
-    find_program(DEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
-    if(NOT DEPLOYQT_EXECUTABLE)
-        message(FATAL_ERROR "windeployqt not found")
-    endif()
-    message(STATUS "Found windeployqt: ${DEPLOYQT_EXECUTABLE}")
-
-    # Doing this with MSVC 2015 requires CMake 3.6+
-    if( (MSVC_VERSION VERSION_EQUAL 1900 OR MSVC_VERSION VERSION_GREATER 1900)
-                   AND CMAKE_VERSION VERSION_LESS "3.6")
-        message(WARNING "Deploying with MSVC 2015+ requires CMake 3.6+")
-    endif()
-ELSEIF( APPLE )
-    find_program(DEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-    if(NOT DEPLOYQT_EXECUTABLE)
-        message(FATAL_ERROR "macdeployqt not found")
-    endif()
-    message(STATUS "Found macdeployqt: ${DEPLOYQT_EXECUTABLE}")
-ELSEIF( UNIX )
-    #find_program(DEPLOYQT_EXECUTABLE linuxdeployqt HINTS "${_qt_bin_dir}")
-    if(NOT DEPLOYQT_EXECUTABLE)
-        message(STATUS "linuxdeployqt not found")
-    endif()
-    message(STATUS "Found linuxdeployqt: ${DEPLOYQT_EXECUTABLE}")
-ENDIF()
-mark_as_advanced(DEPLOYQT_EXECUTABLE)
-
-function( CheckOpenSSL )
-	MESSAGE( STATUS "Checking for OpenSSL" )
-	if( DEFINED OPENSSL_FOUND )
-		MESSAGE( STATUS "OpenSSL Found" )
-		SET(_SSL_LIBS ${OPENSSL_LIBRARIES})
-	elseif ( DEFINED OPENSSL_ROOT_DIR )
-		FILE(TO_CMAKE_PATH ${OPENSSL_ROOT_DIR} OPENSSL_ROOT_DIR)
-		MESSAGE( STATUS "OPENSSL_ROOT_DIR set to ${OPENSSL_ROOT_DIR}" )
-		SET( _SSL_LIBS "${OPENSSL_ROOT_DIR}/libcrypto-1_1-x64.dll" "${OPENSSL_ROOT_DIR}/libssl-1_1-x64.dll" )
-	else()
-		MESSAGE( STATUS "OPENSSL_FOUND and OPENSSL_ROOT_DIR are not set, please run use find_package( OpenSSL REQUIRED )" )
-		find_package( OpenSSL REQUIRED )
-    endif()
-	
-	MESSAGE( STATUS "Checking OpenSSL required libraries exist" )
-	foreach(lib ${_SSL_LIBS})
-		if( NOT EXISTS ${lib} )
-			message( FATAL_ERROR "Could not find OpenSSL  library '${lib}'" )
+	if( WIN32 )
+		find_program(DEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+		if(NOT DEPLOYQT_EXECUTABLE)
+			message(FATAL_ERROR "windeployqt not found")
 		endif()
-	endforeach()
-	MESSAGE( STATUS "OpenSSL install validated" )
-endfunction()
+		message(STATUS "Found windeployqt: ${DEPLOYQT_EXECUTABLE}")
+
+		# Doing this with MSVC 2015 requires CMake 3.6+
+		if( (MSVC_VERSION VERSION_EQUAL 1900 OR MSVC_VERSION VERSION_GREATER 1900)
+					   AND CMAKE_VERSION VERSION_LESS "3.6")
+			message(WARNING "Deploying with MSVC 2015+ requires CMake 3.6+")
+		endif()
+	ELSEIF( APPLE )
+		find_program(DEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+		if(NOT DEPLOYQT_EXECUTABLE)
+			message(FATAL_ERROR "macdeployqt not found")
+		endif()
+		message(STATUS "Found macdeployqt: ${DEPLOYQT_EXECUTABLE}")
+	ELSEIF( UNIX )
+		#find_program(DEPLOYQT_EXECUTABLE linuxdeployqt HINTS "${_qt_bin_dir}")
+		if(NOT DEPLOYQT_EXECUTABLE)
+			message(STATUS "linuxdeployqt not found")
+		endif()
+		message(STATUS "Found linuxdeployqt: ${DEPLOYQT_EXECUTABLE}")
+	ENDIF()
+	mark_as_advanced(DEPLOYQT_EXECUTABLE)
+endif()
 
 function( DeploySystem target directory)
+    set( options )
+    set( oneValueArgs INSTALL_ONLY )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    
     #message( STATUS "Deploy System ${target}" )
     if ( WIN32 )
         set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
@@ -90,31 +75,16 @@ function( DeploySystem target directory)
     SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
     include(InstallRequiredSystemLibraries)
 
-    #message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
-    foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-        get_filename_component(filename "${lib}" NAME)
-        add_custom_command(TARGET ${target} POST_BUILD
-			COMMAND "${CMAKE_COMMAND}" -E echo "Deploying System Library '${filename}' for '${target}'"
-            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
-        )
-    endforeach()
-
-	if( DEFINED OPENSSL_FOUND )
-		MESSAGE( STATUS "OpenSSL Found, Deploying OpenSSL Libraries for target '${target}'" )
-	elseif ( DEFINED OPENSSL_ROOT_DIR )
-		FILE(TO_CMAKE_PATH ${OPENSSL_ROOT_DIR} OPENSSL_ROOT_DIR)
-		MESSAGE( STATUS "OPENSSL_ROOT_DIR set to ${OPENSSL_ROOT_DIR}, Deploying OpenSSL Libraries for target '${target}'" )
-		SET( OPENSSL_LIBRARIES "${OPENSSL_ROOT_DIR}/libcrypto-1_1-x64.dll" "${OPENSSL_ROOT_DIR}/libssl-1_1-x64.dll" )
-	endif()
-	#message( STATUS "OPENSSL_LIBRARIES = ${OPENSSL_LIBRARIES}" )
-	foreach(lib ${OPENSSL_LIBRARIES})
-		get_filename_component(filename "${lib}" NAME)
-		add_custom_command(TARGET ${target} POST_BUILD
-			COMMAND "${CMAKE_COMMAND}" -E echo "Deploying OpenSSL Library '${filename}' for '${target}'"
-			COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
-		)
-	endforeach()
-	
+    if ( NOT _INSTALL_ONLY )
+        #message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
+        foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+            get_filename_component(filename "${lib}" NAME)
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND "${CMAKE_COMMAND}" -E echo "Deploying System Library '${filename}' for '${target}'"
+                COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
+            )
+        endforeach()
+    endif()
 endfunction()
 
 # Add commands that copy the required Qt files to the same directory as the
@@ -128,6 +98,12 @@ function(DeployQt target directory)
         message(FATAL_ERROR "deployqt not found")
     endif()
 
+    set( options )
+    set( oneValueArgs INSTALL_ONLY )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
     SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
     IF( WIN32 )
         SET(_QTDEPLOY_OPTIONS "--verbose=1;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
@@ -139,31 +115,23 @@ function(DeployQt target directory)
         return()
     ENDIF()
 
-    # Run deployqt immediately after build to make the build area "complete"
-    add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E echo "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
-        COMMAND "${CMAKE_COMMAND}" -E
-            env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
-                ${_QTDEPLOY_OPTIONS}
-                ${_QTDEPLOY_TARGET_DIR}
-    )
-
+    if ( NOT _INSTALL_ONLY )
+        # Run deployqt immediately after build to make the build area "complete"
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E echo "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
+            COMMAND "${CMAKE_COMMAND}" -E
+                env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
+                    ${_QTDEPLOY_OPTIONS}
+                    ${_QTDEPLOY_TARGET_DIR}
+        )
+    endif()
+    
     # install(CODE ...) doesn't support generator expressions, but
     # file(GENERATE ...) does - store the path in a file
     file(GENERATE 
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${target}_$<CONFIG>_path"
         CONTENT "$<TARGET_FILE:${target}>"
     )
-
-	if( DEFINED OPENSSL_FOUND )
-		MESSAGE( STATUS "OpenSSL Found, Installing OpenSSL Libraries" )
-	elseif ( DEFINED OPENSSL_ROOT_DIR )
-		FILE(TO_CMAKE_PATH ${OPENSSL_ROOT_DIR} OPENSSL_ROOT_DIR)
-		MESSAGE( STATUS "OPENSSL_ROOT_DIR set to ${OPENSSL_ROOT_DIR}, Installing OpenSSL Libraries" )
-		SET( OPENSSL_LIBRARIES "${OPENSSL_ROOT_DIR}/libcrypto-1_1-x64.dll" "${OPENSSL_ROOT_DIR}/libssl-1_1-x64.dll" )
-	endif()
-	#message( STATUS \"OPENSSL_LIBRARIES = ${OPENSSL_LIBRARIES}\" )
-	INSTALL( FILES ${OPENSSL_LIBRARIES} DESTINATION . )
 
     # Before installation, run a series of commands that copy each of the Qt
     # runtime files to the appropriate directory for installation

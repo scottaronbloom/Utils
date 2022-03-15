@@ -23,6 +23,8 @@
 #ifndef __COMMON_MD5_H
 #define __COMMON_MD5_H
 
+#include "SABUtilsExport.h"
+
 class QByteArray;
 class QFileInfo;
 class QString;
@@ -33,14 +35,15 @@ class QString;
 
 namespace NSABUtils
 {
-    QByteArray getMd5(const QByteArray & data);
-    QString getMd5(const QFileInfo & fi);
-    QString getMd5(const QString & data, bool isFileName = false);
-    std::string getMd5(const std::string & data, bool isFileName = false);
-    QByteArray formatMd5(const QByteArray & digest, bool isHex);
+    SABUTILS_EXPORT QByteArray getMd5(const QByteArray & data);
+    SABUTILS_EXPORT QString getMd5(const QFileInfo & fi);
+    SABUTILS_EXPORT QByteArray getMd5( const QStringList & data );
+    SABUTILS_EXPORT QString getMd5(const QString & data, bool isFileName = false);
+    SABUTILS_EXPORT std::string getMd5(const std::string & data, bool isFileName = false);
+    SABUTILS_EXPORT QByteArray formatMd5(const QByteArray & digest, bool isHex);
 
 
-    class CComputeMD5 : public QObject, public QRunnable
+    class SABUTILS_EXPORT CComputeMD5 : public QObject, public QRunnable
     {
         Q_OBJECT;
     public:

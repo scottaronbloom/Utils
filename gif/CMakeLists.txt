@@ -61,7 +61,14 @@ target_link_libraries( gif
     SABUtils
 )
 
-set_target_properties( gif PROPERTIES FOLDER SharedLibs )
+set_target_properties( gif PROPERTIES 
+                                RUNTIME_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
+                                ARCHIVE_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
+                                LIBRARY_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
+                                DEBUG_POSTFIX d
+                                FOLDER SharedLibs 
+)
 
-INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.dll DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
+INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.dll DESTINATION imageformats )
 INSTALL( FILES $<TARGET_FILE_DIR:gif>/$<TARGET_FILE_BASE_NAME:gif>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
+

@@ -23,6 +23,8 @@
 #ifndef __STRINGCOMPARISONCLASSES_H
 #define __STRINGCOMPARISONCLASSES_H
 
+#include "SABUtilsExport.h"
+
 #include <string>
 #include <QString>
 namespace NSABUtils
@@ -31,36 +33,36 @@ namespace NSABUtils
     {
         // Functors
         // Functor noCaseStringCmp: case-less string comparisons
-        class noCaseStringCmp
+        class SABUTILS_EXPORT noCaseStringCmp
         {
         public:
             bool operator() (const std::string& s1, const std::string& s2) const;
         };
 
-        class noCaseStringEq
+        class SABUTILS_EXPORT noCaseStringEq
         {
         public:
             bool operator() (const std::string& s1, const std::string& s2) const;
         };
 
-        struct noCaseStringHash
+        struct SABUTILS_EXPORT noCaseStringHash
         {
             size_t operator()(const std::string& s) const;
         };
 
-        class noCaseQStringCmp
+        class SABUTILS_EXPORT noCaseQStringCmp
         {
         public:
             bool operator() (const QString & s1, const QString & s2) const;
         };
 
-        class noCaseQStringEq
+        class SABUTILS_EXPORT noCaseQStringEq
         {
         public:
             bool operator() (const QString & s1, const QString & s2) const;
         };
 
-        struct noCaseQStringHash
+        struct SABUTILS_EXPORT noCaseQStringHash
         {
             size_t operator()(const QString & s) const;
         };

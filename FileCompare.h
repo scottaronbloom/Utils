@@ -22,6 +22,9 @@
 
 #ifndef __FILECOMPARE_H
 #define __FILECOMPARE_H
+
+#include "SABUtilsExport.h"
+
 #include <string>
 #include <QFileDevice>
 class QFileInfo;
@@ -41,7 +44,7 @@ namespace NSABUtils
         //   readonly
         // md5
         class CFileCompareImpl;
-        class CFileCompare
+        class SABUTILS_EXPORT CFileCompare
         {
         public:
             CFileCompare(const std::string & lhs, const std::string & rhs);

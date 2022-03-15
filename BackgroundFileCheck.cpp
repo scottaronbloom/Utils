@@ -22,26 +22,268 @@
 
 
 #include "BackgroundFileCheck.h"
+#include "RevertValue.h"
+
 #include <QThread>
 #include <QFileInfo>
-#include <QFuture>
-#include <QtConcurrent>
+#include <QDebug>
+#include <QTimer>
+#include <optional>
 
 extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
 
+#ifdef _DEBUG
+//#define DEBUG_BACKGROUND_FILE_CHECK
+#endif
+
 namespace NSABUtils
 {
+
+    class CBackgroundFileCheckImpl
+    {
+    public:
+        explicit CBackgroundFileCheckImpl( CBackgroundFileCheck * parent );
+
+        ~CBackgroundFileCheckImpl()
+        {
+            fTimer->stop();
+            fThread->terminate();
+            delete fThread;
+        }
+
+        void dumpDebug( const QString & msg ) const;
+
+        bool canContinue() const
+        {
+            return !fStopped && !fTimedOut;
+        }
+
+        void stop( std::optional< bool > stopped, std::optional< bool > timedOut )
+        {
+            fStopped = stopped.has_value() ? stopped.value() : fStopped;
+            fTimedOut = timedOut.has_value() ? timedOut.value() : fTimedOut;
+            fTimer->stop();
+            if ( fThread->isRunning() )
+            {
+                reinitThread();
+            }
+            if ( fStopped )
+                fRetVal = std::make_pair( false, QString( "File Checking Stopped" ) );
+            if ( fTimedOut )
+                fRetVal = std::make_pair( false, QString( "Path checking timed out, check network connection" ) );
+        }
+
+        void initThread()
+        {
+            fThread = new CBackgroundFileCheckThread( this );
+            QObject::connect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
+        }
+
+        void reinitThread()
+        {
+            QObject::disconnect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
+            fThread->terminate();
+            fThread->deleteLater();
+            fThread = nullptr;
+            initThread();
+        }
+
+        int fTimeOut{ 5000 };
+        bool fStopped{ false };
+        bool fTimedOut{ false };
+        QString fPathName;
+
+        bool fCheckExists{ true };
+        bool fCheckIsBundle{ false };
+        bool fCheckIsDir{ false };
+        bool fCheckIsExecutable{ false };
+        bool fCheckIsFile{ false };
+        bool fCheckIsHidden{ false };
+        bool fCheckIsJunction{ false };
+        bool fCheckIsReadable{ false };
+        bool fCheckIsShortcut{ false };
+        bool fCheckIsSymLink{ false };
+        bool fCheckIsSymbolicLink{ false };
+        bool fCheckIsWritable{ false };
+        QFile::Permissions fCheckPermissions;
+        bool fUseNTFSPermissions{
+#ifdef Q_OS_WINDOWS
+        true
+#else
+        false
+#endif
+        };
+
+        std::pair< bool, QString > fRetVal;
+        CBackgroundFileCheck * fParent{ nullptr };
+        CBackgroundFileCheckThread * fThread{ nullptr };
+        QTimer * fTimer{ nullptr };
+    };
+
+    CBackgroundFileCheckThread::CBackgroundFileCheckThread( CBackgroundFileCheckImpl * impl ) :
+        QThread( nullptr ),
+        fImpl( impl )
+    {
+    }
+
+    void CBackgroundFileCheckThread::run()
+    {
+        fImpl->fRetVal = std::make_pair( false, QString() );
+        fImpl->dumpDebug( "checkPathInternal Started: " );
+        fImpl->fStopped = false;
+        fImpl->fTimedOut = false;
+        if ( fImpl->fPathName.isEmpty() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is empty" ) );
+            return;
+        }
+
+        CRevertValue revertValue( qt_ntfs_permission_lookup );
+        if ( fImpl->fUseNTFSPermissions )
+        {
+            qt_ntfs_permission_lookup++;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal exists: " );
+        auto fi = QFileInfo( fImpl->fPathName );
+        if ( fImpl->canContinue() && fImpl->fCheckExists && !fi.exists() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Path does not exist" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isDir: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsDir && !fi.isDir() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a directory" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isFile: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsFile && !fi.isFile() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a file" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal bundle: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsBundle && !fi.isBundle() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a bundle" ) );
+            return;
+        }
+
+
+        fImpl->dumpDebug( "checkPathInternal isExe: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsExecutable && !fi.isExecutable() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not executable (or have execute permissions)" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isHidden: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsHidden && !fi.isHidden() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not hidden" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isJunction: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsJunction && !fi.isJunction() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a junction" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isReadable: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsReadable && !fi.isReadable() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not readable" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isShortcut: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsShortcut && !fi.isShortcut() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a shortcut" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isSymlink: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsSymLink && !fi.isSymLink() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a symbolic link or shortcut" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isSymboliclink: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsSymbolicLink && !fi.isSymbolicLink() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a symbolic link" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal isWritable: " );
+        if ( fImpl->canContinue() && fImpl->fCheckIsWritable && !fi.isWritable() )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not writeable" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal checkPerms: " );
+        if ( fImpl->canContinue() && (fImpl->fCheckPermissions != 0) && !fi.permission( fImpl->fCheckPermissions ) )
+        {
+            fImpl->fRetVal = std::make_pair( false, tr( "Pathname does not have the proper permissions" ) );
+            return;
+        }
+
+        fImpl->dumpDebug( "checkPathInternal finished: " );
+        if ( fImpl->fStopped )
+        {
+            fImpl->fRetVal = std::make_pair( false, QString( "Background Checking Stopped" ) );
+            return;
+        }
+        if ( fImpl->fTimedOut )
+        {
+            fImpl->fRetVal = std::make_pair( false, QString( "Background Checking timed out" ) );
+            return;
+        }
+
+        fImpl->fRetVal = std::make_pair( true, QString() );
+    }
+
+    void CBackgroundFileCheckImpl::dumpDebug( const QString & msg ) const
+    {
+#ifdef DEBUG_BACKGROUND_FILE_CHECK
+        static std::unordered_map< const CBackgroundFileCheckImpl *, int > hitCounts;
+        hitCounts[this]++;
+        qDebug() << this << hitCounts[this] << msg << fPathName << fStopped << fTimedOut << fThread->isRunning();
+#else
+        (void)msg;
+#endif
+    }
+
+    CBackgroundFileCheckImpl::CBackgroundFileCheckImpl( CBackgroundFileCheck * parent )
+    {
+        fParent = parent;
+        initThread();
+
+        fTimer = new QTimer( parent );
+        fTimer->setInterval( fTimeOut );
+        fTimer->setSingleShot( true );
+        QObject::connect( fTimer, &QTimer::timeout, parent, &CBackgroundFileCheck::slotTimeout );
+    }
+
     CBackgroundFileCheck::CBackgroundFileCheck( QObject * parent ) :
         QObject( parent )
     {
-        fResultWatcher = new QFutureWatcher< std::pair< bool, QString > >( this );
-        connect( fResultWatcher, &QFutureWatcher< std::pair< bool, QString > >::resultReadyAt, this, &CBackgroundFileCheck::slotResultsReady );
-        connect( fResultWatcher, &QFutureWatcher< std::pair< bool, QString > >::canceled, this, &CBackgroundFileCheck::slotCanceled );
+        fImpl = new CBackgroundFileCheckImpl( this );
     }
 
     CBackgroundFileCheck::~CBackgroundFileCheck()
     {
-        stop();
+        stop( false );
+        delete fImpl;
     }
 
     void CBackgroundFileCheck::checkPath( const QString & pathName )
@@ -50,148 +292,205 @@ namespace NSABUtils
         return checkPath();
     }
 
+    int CBackgroundFileCheck::timeOut() const
+    {
+        return fImpl ->fTimeOut;
+    }
+
+    void CBackgroundFileCheck::setTimeOut( int val )
+    {
+        fImpl->fTimeOut = val;
+        bool isRunning = fImpl->fTimer->isActive();
+        fImpl->fTimer->stop();
+        fImpl->fTimer->setInterval( val );
+        if ( isRunning )
+            fImpl->fTimer->start();
+    }
+
+    QString CBackgroundFileCheck::pathName() const
+    {
+        return fImpl->fPathName;
+    }
+
     void CBackgroundFileCheck::setPathName( const QString & pathName )
     {
-        fPathName = pathName;
-        stop();
+        fImpl->fPathName = pathName;
+        stop( false );
+    }
+
+    bool CBackgroundFileCheck::checkExists() const
+    {
+        return fImpl->fCheckExists;
+    }
+
+    void CBackgroundFileCheck::setCheckExists( bool val )
+    {
+        fImpl->fCheckExists = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsBundle() const
+    {
+        return fImpl->fCheckIsBundle;
+    }
+
+    void CBackgroundFileCheck::setCheckIsBundle( bool val )
+    {
+        fImpl->fCheckIsBundle = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsDir() const
+    {
+        return fImpl->fCheckIsDir;
+    }
+
+    void CBackgroundFileCheck::setCheckIsDir( bool val )
+    {
+        fImpl->fCheckIsDir = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsExecutable() const
+    {
+        return fImpl->fCheckIsExecutable;
+    }
+
+    void CBackgroundFileCheck::setCheckIsExecutable( bool val )
+    {
+        fImpl->fCheckIsExecutable = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsFile() const
+    {
+        return fImpl->fCheckIsFile;
+    }
+
+    void CBackgroundFileCheck::setCheckIsFile( bool val )
+    {
+        fImpl->fCheckIsFile = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsHidden() const
+    {
+        return fImpl->fCheckIsHidden;
+    }
+
+    void CBackgroundFileCheck::setCheckIsHidden( bool val )
+    {
+        fImpl->fCheckIsHidden = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsJunction() const
+    {
+        return fImpl->fCheckIsJunction;
+    }
+
+    void CBackgroundFileCheck::setCheckIsJunction( bool val )
+    {
+        fImpl->fCheckIsJunction = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsReadable() const
+    {
+        return fImpl->fCheckIsReadable;
+    }
+
+    void CBackgroundFileCheck::setCheckIsReadable( bool val )
+    {
+        fImpl->fCheckIsReadable = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsShortcut() const
+    {
+        return fImpl->fCheckIsShortcut;
+    }
+
+    void CBackgroundFileCheck::setCheckIsShortcut( bool val )
+    {
+        fImpl->fCheckIsShortcut = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsSymLink() const
+    {
+        return fImpl->fCheckIsSymLink;
+    }
+
+    void CBackgroundFileCheck::setCheckIsSymLink( bool val )
+    {
+        fImpl->fCheckIsSymLink = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsSymbolicLink() const
+    {
+        return fImpl->fCheckIsSymbolicLink;
+    }
+
+    void CBackgroundFileCheck::setCheckIsSymbolicLink( bool val )
+    {
+        fImpl->fCheckIsSymbolicLink = val;
+    }
+
+    bool CBackgroundFileCheck::checkIsWritable() const
+    {
+        return fImpl->fCheckIsWritable;
+    }
+
+    void CBackgroundFileCheck::setCheckIsWritable( bool val )
+    {
+        fImpl->fCheckIsWritable = val;
+    }
+
+    QFile::Permissions CBackgroundFileCheck::checkPermissions() const
+    {
+        return fImpl->fCheckPermissions;
+    }
+
+    void CBackgroundFileCheck::setCheckPermissions( QFile::Permissions val )
+    {
+        fImpl->fCheckPermissions = val;
+    }
+
+    bool CBackgroundFileCheck::useNTFSPermissions() const
+    {
+        return fImpl->fUseNTFSPermissions;
+    }
+
+    void CBackgroundFileCheck::setUseNTFSPermissions( bool val )
+    {
+        fImpl->fUseNTFSPermissions = val;
+    }
+
+    QString CBackgroundFileCheck::msg() const
+    {
+        return fImpl->fRetVal.second;
     }
 
     void CBackgroundFileCheck::checkPath()
     {
-        dumpDebug( "Check Path Started: " );;
-        auto future = QtConcurrent::run( this, &CBackgroundFileCheck::checkPathInternal );
-        fResultWatcher->setFuture( future );
-        QTimer::singleShot( timeOut(), this, &CBackgroundFileCheck::slotTimeout );
-    }
-
-    void CBackgroundFileCheck::slotCanceled()
-    {
-        if ( fStopped )
-            emit sigFinished( false, QString( "Background Checking Stopped" ) );
-        if ( fTimedOut )
-            emit sigFinished( false, QString( "Background Checking timed out" ) );
-    }
-
-    void CBackgroundFileCheck::slotResultsReady( int /*index*/ )
-    {
-        auto result = fResultWatcher->result();
-        emit sigFinished( result.first, result.second );
-    }
-
-    std::pair< bool, QString > CBackgroundFileCheck::checkPathInternal()
-    {
-        dumpDebug( "checkPathInternal Started: " );
-        fStopped = false;
-        fTimedOut = false;
-        if ( fPathName.isEmpty() )
-        {
-            return std::make_pair( false, tr( "Pathname is empty" ) );
-        }
-
-        if ( useNTFSPermissions() )
-        {
-            qt_ntfs_permission_lookup++;
-        }
-
-        dumpDebug( "checkPathInternal exists: " );
-        auto fi = QFileInfo( fPathName );
-        if ( canContinue() && checkExists() && !fi.exists() )
-            return std::make_pair( false, tr( "Path does not exist" ) );
-
-        dumpDebug( "checkPathInternal isDir: " );
-        if ( canContinue() && checkIsDir() && !fi.isDir() )
-            return std::make_pair( false, tr( "Pathname is not a directory" ) );
-
-        dumpDebug( "checkPathInternal isFile: " );
-        if ( canContinue() && checkIsFile() && !fi.isFile() )
-            return std::make_pair( false, tr( "Pathname is not a file" ) );
-
-        dumpDebug( "checkPathInternal bundle: " );
-        if ( canContinue() && checkIsBundle() && !fi.isBundle() )
-            return std::make_pair( false, tr( "Pathname is not a bundle" ) );
-
-
-        dumpDebug( "checkPathInternal isExe: " );
-        if ( canContinue() && checkIsExecutable() && !fi.isExecutable() )
-            return std::make_pair( false, tr( "Pathname is not executable (or have execute permissions)" ) );
-
-        dumpDebug( "checkPathInternal isHidden: " );
-        if ( canContinue() && checkIsHidden() && !fi.isHidden() )
-            return std::make_pair( false, tr( "Pathname is not hidden" ) );
-
-        dumpDebug( "checkPathInternal isJunction: " );
-        if ( canContinue() && checkIsJunction() && !fi.isJunction() )
-            return std::make_pair( false, tr( "Pathname is not a junction" ) );
-
-        dumpDebug( "checkPathInternal isReadable: " );
-        if ( canContinue() && checkIsReadable() && !fi.isReadable() )
-            return std::make_pair( false, tr( "Pathname is not readable" ) );
-
-        dumpDebug( "checkPathInternal isShortcut: " );
-        if ( canContinue() && checkIsShortcut() && !fi.isShortcut() )
-            return std::make_pair( false, tr( "Pathname is not a shortcut" ) );
-
-        dumpDebug( "checkPathInternal isSymlink: " );
-        if ( canContinue() && checkIsSymLink() && !fi.isSymLink() )
-            return std::make_pair( false, tr( "Pathname is not a symbolic link or shortcut" ) );
-
-        dumpDebug( "checkPathInternal isSymboliclink: " );
-        if ( canContinue() && checkIsSymbolicLink() && !fi.isSymbolicLink() )
-            return std::make_pair( false, tr( "Pathname is not a symbolic link" ) );
-
-        dumpDebug( "checkPathInternal isWritable: " );
-        if ( canContinue() && checkIsWritable() && !fi.isWritable() )
-            return std::make_pair( false, tr( "Pathname is not writeable" ) );
-
-        dumpDebug( "checkPathInternal checkPerms: " );
-        if ( canContinue() && (checkPermissions() != 0) && !fi.permission( fCheckPermissions ) )
-            return std::make_pair( false, tr( "Pathname does not have the proper permissions" ) );
-
-        if ( useNTFSPermissions() )
-        {
-            qt_ntfs_permission_lookup--;
-        }
-        dumpDebug( "checkPathInternal finished: " );
-        if ( fStopped )
-            return std::make_pair( false, QString( "Background Checking Stopped" ) );
-        if ( fTimedOut )
-            return std::make_pair( false, QString( "Background Checking timed out" ) );
-
-        return std::make_pair( true, QString() );
-    }
-
-    bool CBackgroundFileCheck::canContinue() const
-    {
-        return !fStopped && !fTimedOut;
+        fImpl->fTimer->start();
+        fImpl->fThread->start();
     }
 
     void CBackgroundFileCheck::slotTimeout()
     {
-        dumpDebug( "slotTimeout: " );
-        fTimedOut = true;
-        if ( fResultWatcher->isRunning() || fResultWatcher->isPaused() )
-            fResultWatcher->cancel();
+        fImpl->dumpDebug( "start timeout: " );
+        fImpl->stop( {}, true );
+        fImpl->dumpDebug( "end timeout: " );
+        slotFinished();
     }
 
-    void CBackgroundFileCheck::stop()
+    void CBackgroundFileCheck::slotFinished()
     {
-        dumpDebug( "stop: " );
-        fStopped = true;
-        if ( fResultWatcher->isRunning() || fResultWatcher->isPaused() )
-            fResultWatcher->cancel();
-        dumpDebug( "end stop: " );
+        fImpl->stop( {}, {} ); // stops the timer only,to prevent a timeout later
+        emit sigFinished( fImpl->fRetVal.first, fImpl->fRetVal.second );
     }
 
-    void CBackgroundFileCheck::dumpDebug( const QString & msg ) const
+    void CBackgroundFileCheck::stop( bool markAsStopped )
     {
-#ifdef _DEBUG
-        static std::map< const QObject *, int > hitCounts;
-        hitCounts[this]++;
-        qDebug() << this << hitCounts[this] << msg << fPathName << fStopped << fTimedOut << fResultWatcher->isRunning() << fResultWatcher->isPaused();
-#else
-        (void)msg;
-#endif
+        fImpl->dumpDebug( "stop: " );
+        if ( markAsStopped )
+            fImpl->stop( true, {} );
+        else
+            fImpl->stop( {}, {} );
+        fImpl->dumpDebug( "end stop: " );
     }
-
 }
 

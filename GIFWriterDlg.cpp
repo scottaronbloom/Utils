@@ -41,6 +41,7 @@ namespace NSABUtils
         QDialog( parent ),
         fImpl( new Ui::CGIFWriterDlg )
     {
+        Q_INIT_RESOURCE( SABUtils );
         Q_INIT_RESOURCE( BIFPlayerResources );
         fImpl->setupUi( this );
 

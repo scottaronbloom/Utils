@@ -26,14 +26,26 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 project(SABUtils)
+
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
+SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
+SET( MKVUTILS OFF CACHE BOOL "Support for MKV Utilities" )
+SET( BIFSUPPORT OFF CACHE BOOL "Support for BIF Utilities" )
+SET( GIFSUPPORT OFF CACHE BOOL "Support for GIF Utilities" )
+   
 if ( NOT SAB_UTILS_DIR )
     SET( SAB_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR} )
 endif()
+
+add_definitions( -DSABUTILS_INTERNAL )
+
+MESSAGE( STATUS "SAB_ENABLE_TESTING=${SAB_ENABLE_TESTING}" )
 
 if( SAB_ENABLE_TESTING )
     SET(GOOGLETEST_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
     MESSAGE( STATUS "Adding support for testing - ${GOOGLETEST_ROOT_DIR}" )
     SET( gtest_force_shared_crt ON CACHE BOOL "Always use shared crt" )
+    UNSET( INSTALL_GTEST CACHE )
     SET( INSTALL_GTEST OFF CACHE BOOL "Never install gtest" )
     if ( NOT gtest_force_shared_crt )
         message( FATAL_ERROR "Please run with -Dgtest_force_shared_crt=ON" )
@@ -43,16 +55,21 @@ if( SAB_ENABLE_TESTING )
     endif()
     
     enable_testing()
+    
     add_subdirectory( ${GOOGLETEST_ROOT_DIR} )
     SET(GOOGLETEST_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googletest)
     SET(GMOCK_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googlemock)
-    set_target_properties( gmock PROPERTIES FOLDER 3rdParty/google )
-    set_target_properties( gmock_main PROPERTIES FOLDER 3rdParty/google )
-    set_target_properties( gtest PROPERTIES FOLDER 3rdParty/google )
-    set_target_properties( gtest_main PROPERTIES FOLDER 3rdParty/google )
+    set_target_properties( gmock PROPERTIES FOLDER GoogleTest )
+    set_target_properties( gmock_main PROPERTIES FOLDER GoogleTest )
+    set_target_properties( gtest PROPERTIES FOLDER GoogleTest )
+    set_target_properties( gtest_main PROPERTIES FOLDER GoogleTest )
 endif()
 
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
+if ( MKVUTILS )
+    SET(NO_USE_MEDIAINFO_INSTALL ON)
+    set(BUILD_SHARED_LIBS ON)
+    add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
+endif()
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
@@ -70,7 +87,17 @@ set(SAB_MOC_OPTIONS "-DNON_VIS_BUILD=1")
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
 
-add_library(SABUtils STATIC
+if ( MKVUTILS )
+    include_directories(MediaInfo/MediaInfoLib/Source)
+    include_directories(MediaInfo/ZenLib/Source)
+endif()
+
+if ( SABUTILS_DLL )
+    SET( LIBTYPE SHARED )
+else()
+    SET( LIBTYPE STATIC )
+endif()
+add_library(SABUtils ${LIBTYPE}
     ${project_SRCS} 
     ${project_H}  
     ${qtproject_SRCS} 
@@ -87,9 +114,35 @@ add_library(SABUtils STATIC
     ${_CMAKE_MODULE_FILES}
 )
 
+if ( MKVUTILS )
+    set( MEDIAINFOLIB mediainfo )
+endif()
+if ( SABUTILS_DLL )
+    target_link_libraries( SABUtils
+                           Qt5::Widgets
+                           Qt5::Core
+                           Qt5::Network
+                           ${MEDIAINFOLIB}
+          )
+endif()
+
 add_definitions( -DNON_VIS_BUILD=1 )
-add_definitions( -DBIF_SCROLLBAR_SUPPORT=1 )
-set_target_properties( SABUtils PROPERTIES FOLDER Libs )
+if ( BIFSUPPORT )
+    add_definitions( -DBIF_SCROLLBAR_SUPPORT=1 )
+endif()
+
+if ( SABUTILS_DLL )
+    set_target_properties( SABUtils PROPERTIES 
+                                FOLDER SharedLibs 
+                                DEBUG_POSTFIX d
+                          )
+    INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.dll DESTINATION . )
+    INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
+else()
+    set_target_properties( SABUtils PROPERTIES FOLDER Libs )
+endif()
+
 if( SAB_ENABLE_TESTING )
 	add_subdirectory(UnitTests)
 endif()
+

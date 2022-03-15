@@ -23,6 +23,8 @@
 #ifndef _SCROLLMESSAGEBOX_H
 #define _SCROLLMESSAGEBOX_H
 
+#include "SABUtilsExport.h"
+
 #include <QDialog>
 #include <QMessageBox>
 #include <QDialogButtonBox>
@@ -33,13 +35,13 @@ namespace NSABUtils
 {
     namespace Ui { class CScrollMessageBox; };
 
-    class CScrollMessageBox : public QDialog
+    class SABUTILS_EXPORT CScrollMessageBox : public QDialog
     {
         Q_OBJECT
 
     public:
-        CScrollMessageBox(QWidget *parent = 0);
-        CScrollMessageBox(const QString & title, const QString & label, QWidget *parent = 0);
+        CScrollMessageBox(QWidget *parent = nullptr );
+        CScrollMessageBox(const QString & title, const QString & label, QWidget *parent = nullptr );
         ~CScrollMessageBox();
 
         void setTitle(const QString & title);

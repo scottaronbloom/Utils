@@ -23,6 +23,8 @@
 #ifndef __BIFMODEL_H
 #define __BIFMODEL_H
 
+#include "SABUtilsExport.h"
+
 #include <QAbstractListModel>
 #include <memory>
 
@@ -32,7 +34,7 @@ namespace NSABUtils
     namespace NBIF
     {
         class CFile;
-        class CModel : public QAbstractListModel
+        class SABUTILS_EXPORT CModel : public QAbstractListModel
         {
             Q_OBJECT;
         public:

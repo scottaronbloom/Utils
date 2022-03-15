@@ -23,7 +23,11 @@
 #ifndef __QTHASH_H
 #define __QTHASH_H
 
+#include "SABUtilsExport.h"
+
 #include <QHash>
+#include <initializer_list>
+#include <functional>
 
 #if QT_VERSION < QT_VERSION_CHECK(5,14,0)
 namespace std
@@ -41,9 +45,29 @@ namespace std
 #endif
 namespace NSABUtils
 {
-    inline std::size_t HashCombine(size_t h1, size_t h2)
+    template< typename T>
+    inline std::size_t HashCombine( size_t seed, const std::initializer_list< T > & values, bool needsHash = true )
     {
-        return h1 ^ (h2 << 1);
+        std::hash< T > hasher;
+        std::size_t retVal = seed;
+        for ( auto ii = values.begin(); ii != values.end(); ++ii )
+        {
+            auto currValue = needsHash ? hasher( *ii ) : *ii;
+            retVal ^= currValue + 0x9e489236 + (retVal << 6) + (retVal >> 2);
+        }
+        return retVal;
+    }
+
+    template< typename T >
+    inline std::size_t HashCombine( const std::initializer_list< T > & values, bool needsHash = true )
+    {
+        return HashCombine( 0, values, needsHash );
+    }
+
+    template< typename T >
+    inline std::size_t HashCombine( T h1, T h2, bool needsHash = true )
+    {
+        return HashCombine( 0, { h1, h2 }, needsHash );
     }
 }
 #endif

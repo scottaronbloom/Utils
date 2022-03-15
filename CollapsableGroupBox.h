@@ -22,19 +22,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "SABUtilsExport.h"
+
 #include <QGroupBox>
 namespace NSABUtils
 {
     class CCollapsableGroupBoxImpl;
 
-    class CCollapsableGroupBox : public QGroupBox
+    class SABUTILS_EXPORT CCollapsableGroupBox : public QGroupBox
     {
         Q_OBJECT;
         Q_PROPERTY(bool collapsive READ isCollapsible WRITE setCollapsible)
 
     public:
-        explicit CCollapsableGroupBox(QWidget* parent = 0);
-        explicit CCollapsableGroupBox(const QString& title, QWidget* parent = 0);
+        explicit CCollapsableGroupBox(QWidget* parent = nullptr );
+        explicit CCollapsableGroupBox(const QString& title, QWidget* parent = nullptr );
         virtual ~CCollapsableGroupBox();
 
         bool isCollapsible() const;

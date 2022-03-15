@@ -23,10 +23,12 @@
 #define __STAYAWAKE_H
 #include <QRunnable>
 
+#include "SABUtilsExport.h"
+
 #ifdef Q_OS_WINDOWS
 namespace NSABUtils
 {
-    class CStayAwake : public QRunnable
+    class SABUTILS_EXPORT CStayAwake : public QRunnable
     {
     public:
         CStayAwake( bool keepScreenOn ) :

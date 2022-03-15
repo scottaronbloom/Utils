@@ -189,7 +189,12 @@ IF(WIN32)
 ENDIF()
 
 add_definitions( -D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING -D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS  )
-    
+
+add_definitions( -DUNICODE )
+if ( SABUTILS_DLL )
+    add_definitions( -DSABUTILS_DLL )
+endif()
+
 IF( SAB_DEBUG_TRACE )
     add_definitions( -DSAB_DEBUG_TRACE )
 ENDIF()
