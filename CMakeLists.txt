@@ -32,6 +32,7 @@ SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
 SET( MKVUTILS OFF CACHE BOOL "Support for MKV Utilities" )
 SET( BIFSUPPORT OFF CACHE BOOL "Support for BIF Utilities" )
 SET( GIFSUPPORT OFF CACHE BOOL "Support for GIF Utilities" )
+SET( SAB_ENABLE_TESTING ON CACHE BOOL "Enable Unit Testing of SAB Utils" )
    
 if ( NOT SAB_UTILS_DIR )
     SET( SAB_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR} )
