@@ -22,6 +22,7 @@
 
 #include "MKVUtils.h"
 #include "utils.h"
+#include "MKVReader/MKVReader.h"
 
 #include <QFileInfo>
 #include <QString>
@@ -350,6 +351,8 @@ namespace NSABUtils
     std::unordered_map< NSABUtils::EMediaTags, QString > getMediaTags( const QString & path, const std::list< NSABUtils::EMediaTags > & tags )
     {
         //auto tmp = getAllMediaInfo( path );
+
+        //auto mkvFile = NSABUtils::NMKVReader::CMKVFile( path );
 
         MediaInfoDLL::MediaInfo MI;
         MI.Option( __T( "ParseSpeed" ), __T( "0" ) );

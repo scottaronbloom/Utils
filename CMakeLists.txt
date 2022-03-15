@@ -113,6 +113,7 @@ if ( SABUTILS_DLL )
                            Qt5::Core
                            Qt5::Network
                            mediainfo
+                           MKVReader
           )
 endif()
 
@@ -133,3 +134,4 @@ if( SAB_ENABLE_TESTING )
 	add_subdirectory(UnitTests)
 endif()
 
+add_subdirectory( MKVReader )
