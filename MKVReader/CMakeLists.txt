@@ -32,28 +32,19 @@ find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)
 find_package(Qt5SrcMoc REQUIRED)
 
-project( MKVReader )
-
-AddQtIncludes()
-
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 include( ${CMAKE_CURRENT_LIST_DIR}/../Project.cmake )
 
-add_library(MKVReader STATIC
-    ${project_SRCS} 
-    ${project_H}  
-    ${qtproject_SRCS} 
-    ${qtproject_QRC} 
-    ${qtproject_QRC_SRCS} 
-    ${qtproject_UIS_H} 
-    ${qtproject_MOC_SRCS} 
-    ${qtproject_CPPMOC_SRCS}
-    ${qtproject_CPPMOC_H} 
-    ${qtproject_H} 
-    ${qtproject_UIS}
-    ${qtproject_QRC_SOURCES}
-    ${_CMAKE_FILES}
-    ${_CMAKE_MODULE_FILES}
+add_library(${PROJECT_NAME} STATIC
+    ${_PROJECT_DEPENDENCIES} 
 )
 
-set_target_properties( MKVReader PROPERTIES FOLDER Libs )
+set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER Libs )
+
+
+target_link_libraries( ${PROJECT_NAME}
+    PUBLIC
+        ${project_pub_DEPS}
+    PRIVATE 
+        ${project_pri_DEPS}
+)
