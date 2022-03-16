@@ -30,6 +30,9 @@ namespace NSABUtils
         QObject(nullptr),
         fRestoreOnOpenWidget(revertOnShowWidget)
     {
+        if ( !dynamic_cast<QApplication *>( QCoreApplication::instance() ) )
+            return;
+
         QCursor * cursor = QApplication::overrideCursor();
         QApplication::setOverrideCursor(Qt::BusyCursor);
         if (!cursor)
@@ -60,12 +63,18 @@ namespace NSABUtils
 
     void CAutoWaitCursor::restore()
     {
+        if ( !dynamic_cast<QApplication *>( QCoreApplication::instance() ) )
+            return;
+
         QApplication::restoreOverrideCursor();
         qApp->processEvents();
     }
 
     bool CAutoWaitCursor::active()
     {
+        if ( !dynamic_cast<QApplication *>( QCoreApplication::instance() ) )
+            return false;
+
         return QApplication::overrideCursor() != nullptr;
     }
 
