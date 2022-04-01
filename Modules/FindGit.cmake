@@ -28,19 +28,20 @@ IF(GIT_EXE_EXECUTABLE)
 		SET(_GIT_SAVED_LC_ALL "$ENV{LC_ALL}")
 		SET(ENV{LC_ALL} C)
 
+        Message( STATUS "Using GIT: '${GIT_EXE_EXECUTABLE}'" )
 		Message( STATUS "Getting GIT info on '${dir}'" )
-		Message( STATUS "Using GIT: '${GIT_EXE_EXECUTABLE}'" )
 		EXECUTE_PROCESS(
 			COMMAND 
 				${GIT_EXE_EXECUTABLE} -C "${dir}" 
 					log --pretty=format:%h -n 1 
 					OUTPUT_VARIABLE ${prefix}_REV 
-					ERROR_QUIET
+                    ERROR_VARIABLE ${prefix}_ERROR
 					OUTPUT_STRIP_TRAILING_WHITESPACE
+					ERROR_STRIP_TRAILING_WHITESPACE
 		)
 
 		if ("${${prefix}_REV}" STREQUAL "" )
-			MESSAGE( WARNING "Could not get GIT info on directory '${dir}'" )
+			MESSAGE( WARNING "Could not get GIT info on directory '${dir}'\r     '${${prefix}_ERROR}'" )
 			SET(${prefix}_REV "N/A")
 			SET(${prefix}_DIFF "")
 			SET(${prefix}_TAG "N/A")
