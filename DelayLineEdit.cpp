@@ -280,6 +280,7 @@ namespace NSABUtils
         fFileChecker->setCheckIsHidden( val );
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CPathBasedDelayLineEdit::checkIsJunction() const
     {
         return fFileChecker->checkIsJunction();
@@ -289,6 +290,7 @@ namespace NSABUtils
     {
         fFileChecker->setCheckIsJunction( val );
     }
+#endif
 
     bool CPathBasedDelayLineEdit::checkIsReadable() const
     {
@@ -300,6 +302,7 @@ namespace NSABUtils
         fFileChecker->setCheckIsReadable( val );
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CPathBasedDelayLineEdit::checkIsShortcut() const
     {
         return fFileChecker->checkIsShortcut();
@@ -309,6 +312,7 @@ namespace NSABUtils
     {
         fFileChecker->setCheckIsShortcut( val );
     }
+#endif
 
     bool CPathBasedDelayLineEdit::checkIsSymLink() const
     {
@@ -320,6 +324,7 @@ namespace NSABUtils
         fFileChecker->setCheckIsSymLink( val );
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CPathBasedDelayLineEdit::checkIsSymbolicLink() const
     {
         return fFileChecker->checkIsSymbolicLink();
@@ -329,6 +334,7 @@ namespace NSABUtils
     {
         fFileChecker->setCheckIsSymbolicLink( val );
     }
+#endif
 
     bool CPathBasedDelayLineEdit::checkIsWritable() const
     {
