@@ -348,13 +348,12 @@ namespace NSABUtils
     //}
 
 
-    //QString secsToString( quint64 seconds, bool alwaysShowDaysAndHours )
-    //{
-    //    const quint64 DAY = 86400;
-    //    qint64 days = seconds / DAY;
-    //    QTime t = QTime( 0, 0 ).addSecs( seconds % DAY );
-    //    return QString( "%1 days, %2 hours, %3 minutes, %4 seconds" ).arg( days ).arg( t.hour() ).arg( t.minute() ).arg( t.second() );
-    //}
+    QString secsToString( quint64 seconds)
+    {
+        uint64_t msecs = seconds * 1000;
+        CTimeString ts( msecs );
+        return ts.toString( "dd days, hh hours, mm minutes, ss seconds" );
+    }
 
     CTimeString::CTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > &startEndTime ) :
         CTimeString( startEndTime.second - startEndTime.first )

@@ -69,6 +69,7 @@ namespace NSABUtils
         if (!isVisible())
         {
             connectToEditor(true);
+            slotTextChanged();
         }
     }
 

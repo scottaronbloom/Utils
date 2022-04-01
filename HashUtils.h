@@ -41,7 +41,6 @@ namespace std
         }
     };
 }
-
 #endif
 namespace NSABUtils
 {

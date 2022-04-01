@@ -162,6 +162,8 @@ namespace NSABUtils
     SABUTILS_EXPORT void toDigits(int64_t val, int base, std::pair< int8_t*, uint32_t > & retVal, size_t& numDigits, bool * aOK = nullptr);
     SABUTILS_EXPORT std::string toString(int64_t val, int base);
     SABUTILS_EXPORT int64_t fromString(const std::string &str, int base);
+    
+    SABUTILS_EXPORT QString secsToString( quint64 seconds );
 
     class SABUTILS_EXPORT CTimeString
     {
