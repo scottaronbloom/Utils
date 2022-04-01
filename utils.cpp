@@ -412,6 +412,8 @@ namespace NSABUtils
             ? ( totalSeconds % 1000000ULL )
             : ( totalSeconds % 1000ULL );
 
+        totalSeconds /= fMicroSecondsAvailable ? 1000000ULL : 1000ULL;
+
         secs -= ( ( mins * 60 ) + ( hrs * 3600 ) );
 
         QLocale locale;
