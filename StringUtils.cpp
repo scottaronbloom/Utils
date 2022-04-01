@@ -2594,7 +2594,7 @@ namespace NSABUtils
             std::vector< QString > retVal;
             auto wordsToRemove = unimportantWords();
 
-            auto words = string.toLower().split( QRegularExpression( "\\s" ), Qt::SkipEmptyParts );
+            auto words = string.toLower().split( QRegularExpression( "\\s" ), TSkipEmptyParts );
             for ( auto && ii : words )
             {
                 if ( stripPunctuation )
