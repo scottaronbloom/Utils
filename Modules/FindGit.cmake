@@ -79,7 +79,7 @@ IF(GIT_EXE_EXECUTABLE)
 		SET(ENV{LC_ALL} ${_GIT_SAVED_LC_ALL})
 	ENDMACRO()
 
-	MACRO(CreateVersion prefix dir inFile major minor appName vendor homepage email date)
+	MACRO(CreateVersion prefix dir inFile major minor appName vendor homepage product_homepage email date)
 
 		set(OUTFILE "${CMAKE_BINARY_DIR}/Version.h")
 		set(TMP_OUTFILE ${OUTFILE}.tmp)
@@ -92,7 +92,8 @@ IF(GIT_EXE_EXECUTABLE)
 		set(VERSION_FILE_DIFF          ${${prefix}_DIFF})
 		set(VERSION_FILE_APP_NAME      ${appName})
 		set(VERSION_FILE_VENDOR        ${vendor})
-		set(VERSION_FILE_HOMEPAGE      ${homepage})
+        set(VERSION_FILE_HOMEPAGE      ${homepage})
+		set(VERSION_FILE_PRODUCT_HOMEPAGE      ${product_homepage})
 		set(VERSION_FILE_EMAIL         ${email})
 		set(VERSION_FILE_BUILD_DATE    ${date})
 
