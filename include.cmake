@@ -190,12 +190,15 @@ if ( MKVUTILS )
         ${qtproject_UIS}
         SetMKVTags.ui
     )
+    set(MKVREADERLIB  
+        MKVReader
+    )
 endif()
 
 SET( project_pub_DEPS
      Qt5::Concurrent
      Qt5::Network
-     MKVReader
+     ${MKVREADERLIB}
      ${MEDIAINFOLIB}
 )
 
