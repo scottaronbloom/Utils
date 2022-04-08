@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -23,35 +23,39 @@
 #ifndef _SCROLLMESSAGEBOX_H
 #define _SCROLLMESSAGEBOX_H
 
+#include "SABUtilsExport.h"
+
 #include <QDialog>
 #include <QMessageBox>
 #include <QDialogButtonBox>
 #include <memory>
 class QAbstractButton;
 
-namespace Ui {class CScrollMessageBox;};
-
-class CScrollMessageBox : public QDialog
+namespace NSABUtils
 {
-    Q_OBJECT
+    namespace Ui { class CScrollMessageBox; };
 
-public:
-    CScrollMessageBox( QWidget *parent = 0 );
-    CScrollMessageBox( const QString & title, const QString & label, QWidget *parent = 0 );
-    ~CScrollMessageBox();
+    class SABUTILS_EXPORT CScrollMessageBox : public QDialog
+    {
+        Q_OBJECT
 
-    void setTitle( const QString & title );
-    void setLabel( const QString & label );
+    public:
+        CScrollMessageBox(QWidget *parent = nullptr );
+        CScrollMessageBox(const QString & title, const QString & label, QWidget *parent = nullptr );
+        ~CScrollMessageBox();
 
-    void setPlainText( const QString & text );
-    void setHtmlText( const QString & text );
-    void setIconLabel( const QMessageBox::Icon & icon );
-    void setButtons( QDialogButtonBox::StandardButtons buttons );
-private Q_SLOTS:
-    void slotButtonClicked( QAbstractButton * btn );
+        void setTitle(const QString & title);
+        void setLabel(const QString & label);
 
-private:
-    std::unique_ptr< Ui::CScrollMessageBox > fImpl;
-};
+        void setPlainText(const QString & text);
+        void setHtmlText(const QString & text);
+        void setIconLabel(const QMessageBox::Icon & icon);
+        void setButtons(QDialogButtonBox::StandardButtons buttons);
+    private Q_SLOTS:
+        void slotButtonClicked(QAbstractButton * btn);
 
+    private:
+        std::unique_ptr< Ui::CScrollMessageBox > fImpl;
+    };
+}
 #endif 

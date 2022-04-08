@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -23,19 +23,58 @@
 #ifndef __COMMON_MD5_H
 #define __COMMON_MD5_H
 
+#include "SABUtilsExport.h"
+
 class QByteArray;
 class QFileInfo;
 class QString;
+#include <QRunnable>
 #include <string>
+#include <QObject>
+#include <QFileInfo>
 
-namespace Verific{ class verific_stream; }
-namespace NUtils
+namespace NSABUtils
 {
-    QByteArray getMd5( const QByteArray & data );
-    QString getMd5( const QFileInfo & fi );
-    QString getMd5( const QString & data, bool isFileName=false );
-    std::string getMd5( const std::string & data, bool isFileName=false );
-    QByteArray formatMd5( const QByteArray & digest, bool isHex );
+    SABUTILS_EXPORT QByteArray getMd5(const QByteArray & data);
+    SABUTILS_EXPORT QString getMd5(const QFileInfo & fi);
+    SABUTILS_EXPORT QByteArray getMd5( const QStringList & data );
+    SABUTILS_EXPORT QString getMd5(const QString & data, bool isFileName = false);
+    SABUTILS_EXPORT std::string getMd5(const std::string & data, bool isFileName = false);
+    SABUTILS_EXPORT QByteArray formatMd5(const QByteArray & digest, bool isHex);
+
+
+    class SABUTILS_EXPORT CComputeMD5 : public QObject, public QRunnable
+    {
+        Q_OBJECT;
+    public:
+        CComputeMD5(const QString& fileName) :
+            fFileInfo(fileName)
+        {
+        };
+
+        void run() override;
+
+        unsigned long long getThreadID() const;
+
+        QString md5() const { return fMD5; }
+
+        void stop() { slotStop(); }
+    Q_SIGNALS:
+        void sigStarted(unsigned long long threadID, const QDateTime& dt, const QString& filename);
+        void sigFinishedReading(unsigned long long threadID, const QDateTime& dt, const QString& filename);
+        void sigReadPositionStatus(unsigned long long threadID, const QDateTime &dt, const QString &filename, qint64 pos);
+        void sigFinishedComputing(unsigned long long threadID, const QDateTime &dt, const QString &filename);
+        void sigFinished(unsigned long long threadID, const QDateTime& dt, const QString& filename, const QString & md5);
+    public Q_SLOTS:
+        void slotStop();
+    private:
+        void emitFinished();
+
+        QFileInfo fFileInfo;
+        QString fMD5;
+        bool fStopped{ false };
+    };
+
 }
 
 #endif

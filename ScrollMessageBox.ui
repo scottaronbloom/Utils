@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CScrollMessageBox</class>
- <widget class="QDialog" name="CScrollMessageBox">
+ <class>NSABUtils::CScrollMessageBox</class>
+ <widget class="QDialog" name="NSABUtils::CScrollMessageBox">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>298</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,32 +63,32 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CScrollMessageBox</receiver>
+   <receiver>NSABUtils::CScrollMessageBox</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>187</x>
-     <y>261</y>
+     <x>248</x>
+     <y>254</y>
     </hint>
     <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
+     <x>157</x>
+     <y>274</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CScrollMessageBox</receiver>
+   <receiver>NSABUtils::CScrollMessageBox</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>187</x>
-     <y>261</y>
+     <x>316</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
+     <x>286</x>
+     <y>274</y>
     </hint>
    </hints>
   </connection>

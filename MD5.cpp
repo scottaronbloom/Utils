@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -25,7 +25,12 @@
 #include <QString>
 #include <QCryptographicHash>
 #include <QFileInfo>
-namespace NUtils
+#include <QThread>
+#include <QDateTime>
+#include <QDebug>
+#include <QAbstractEventDispatcher>
+
+namespace NSABUtils
 {
     QByteArray formatMd5( const QByteArray & digest, bool isHex )
     {
@@ -62,6 +67,16 @@ namespace NUtils
         return formatMd5( digest, false );
     }
 
+    QByteArray getMd5( const QStringList & data )
+    {
+        QCryptographicHash hash( QCryptographicHash::Md5 );
+        for ( auto && ii : data )
+        {
+            hash.addData( ii.toLatin1() );
+        }
+        return hash.result();
+    }
+
     QString getMd5( const QString & data, bool isFileName )
     {
         if ( isFileName )
@@ -88,5 +103,74 @@ namespace NUtils
 
         return QString();
     }
+
+    void CComputeMD5::run()
+    {
+        emit sigStarted( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+
+
+        QFile file( fFileInfo.absoluteFilePath() );
+        if ( !file.open( QIODevice::ReadOnly ) )
+            emitFinished();
+
+
+        QCryptographicHash hash( QCryptographicHash::Md5 );
+        if ( !file.isReadable() )
+            emitFinished();
+
+        char buffer[4096];
+        int length;
+
+        qint64 pos = 0;
+        while ( !fStopped && ( length = file.read( buffer, sizeof( buffer ) ) ) > 0 )
+        {
+            pos += length;
+            hash.addData( buffer, length );
+            emit sigReadPositionStatus( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), pos );
+            if ( QThread::currentThread() && QThread::currentThread()->eventDispatcher() )
+            {
+                QThread::currentThread()->eventDispatcher()->processEvents( QEventLoop::AllEvents );
+            }
+        }
+
+        if ( file.atEnd() )
+        {
+            emit sigFinishedReading( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+            if ( fStopped )
+            {
+                emitFinished();
+                return;
+            }
+
+            auto tmp = hash.result();
+            emit sigFinishedComputing( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+            if ( fStopped )
+            {
+                emitFinished();
+                return;
+            }
+            
+            fMD5 = QString::fromLatin1( formatMd5( tmp, false ) );
+        }
+        emitFinished();
+    }
+
+
+    unsigned long long CComputeMD5::getThreadID() const
+    {
+        return reinterpret_cast<unsigned long long>( QThread::currentThreadId() );
+    }
+
+    void CComputeMD5::slotStop()
+    {
+        fStopped = true;
+        //qDebug() << "ComputeMD5 stopped";
+    }
+
+    void CComputeMD5::emitFinished()
+    {
+        emit sigFinished( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), fMD5 );
+    }
+
 }
 

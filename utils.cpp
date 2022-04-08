@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -24,8 +24,23 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cctype>
+#include <QString>
+#include <QLocale>
+#include <QDateTime>
+#include <QDebug>
+#include <QRegularExpression>
+#include <QFontMetrics>
+#include <QDesktopServices>
+#include <QUrl>
 
-namespace NUtils
+#ifdef Q_OS_WINDOWS
+#include <qt_windows.h>
+#else
+#include <termios.h>
+#endif
+
+namespace NSABUtils
 {
     int fromChar( char ch, int base, bool& aOK )
     {
@@ -68,7 +83,7 @@ namespace NUtils
         return 'a' + value - 10;
     }
 
-    void toDigits( int64_t val, int base, std::pair< int8_t *, int > & retVal, size_t & numDigits, bool * aOK )
+    void toDigits( int64_t val, int base, std::pair< int8_t *, uint32_t > & retVal, size_t & numDigits, bool * aOK )
     {
         numDigits = 0;
         if ( aOK )
@@ -123,80 +138,19 @@ namespace NUtils
         return retVal;
     }
 
-    std::string getTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point >& startEndTime, bool reportTotalSeconds, bool highPrecision )
-    {
-        auto duration = startEndTime.second - startEndTime.first;
-        return getTimeString( duration, reportTotalSeconds, highPrecision );
-    }
-
-    double getSeconds( const std::chrono::system_clock::duration& duration, bool highPrecision )
-    {
-        double totalSeconds = 1.0 * std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
-        if ( highPrecision )
-            totalSeconds = std::chrono::duration_cast<std::chrono::duration< double, std::micro >>( duration ).count() / 1000000.0;
-        return totalSeconds;
-    }
-
-    std::string getTimeString( const std::chrono::system_clock::duration& duration, bool reportTotalSeconds, bool highPrecision )
-    {
-        auto totalSeconds = getSeconds( duration, highPrecision );
-        auto hrs = static_cast< int64_t >( std::chrono::duration_cast<std::chrono::hours>( duration ).count() );
-        auto mins = static_cast<int64_t>( std::chrono::duration_cast<std::chrono::minutes>( duration ).count() - ( hrs * 60 ) );
-        double secs = 1.0 * std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
-        if ( highPrecision )
-            secs = ( std::chrono::duration_cast<std::chrono::duration< double, std::micro >>( duration ).count() ) / 1000000.0;
-        secs -= ( ( mins * 60 ) + ( hrs * 3600 ) );
-
-        std::ostringstream oss;
-        if ( hrs > 0 )
-        {
-            oss << hrs << " hour";
-            if ( hrs != 1 )
-                oss << "s";
-            oss << ", ";
-        }
-
-        if ( mins > 0 )
-        {
-            oss << mins << " minute";
-            if ( mins != 1 )
-                oss << "s";
-            oss << ", ";
-        }
-
-        if ( highPrecision )
-        {
-            oss.setf( std::ios::fixed, std::ios::floatfield );
-            oss.precision( 6 );
-        }
-
-        oss << secs << " second";
-
-        if ( secs != 1 )
-            oss << "s";
-        if ( reportTotalSeconds && ( totalSeconds > 60 ) )
-        {
-            oss << ", (" << totalSeconds << " second";
-            if ( totalSeconds != 1 )
-                oss << "s";
-            oss << ")";
-        }
-        return oss.str();
-    }
-
     bool isNarcissisticDigits( int64_t val, int base, bool& aOK )
     {
         aOK = true;
         int8_t rawDigits[ 4096 ] = {0};
         size_t numDigits;
-        auto digits = std::make_pair( rawDigits, 4096 );
+        auto digits = std::make_pair( rawDigits, static_cast< uint32_t >( 4096 ) );
         toDigits( val, base, digits, numDigits );
 
         int64_t sumOfPowers = 0;
         int64_t value = 0;
         for ( int64_t ii = numDigits - 1; ii >= 0; --ii )
         {
-            sumOfPowers += NUtils::power( rawDigits[ ii ], numDigits );
+            sumOfPowers += NSABUtils::power( rawDigits[ ii ], numDigits );
 
             value = ( value * base ) + rawDigits[ ii ];
         }
@@ -303,7 +257,7 @@ namespace NUtils
     {
         auto sum = getSumOfFactors( num, true );
         auto factors = std::vector< int64_t >( { sum.second.begin(), sum.second.end() } );
-        auto isSemiPerfect = NUtils::isSemiPerfect( factors, factors.size(), num );
+        auto isSemiPerfect = NSABUtils::isSemiPerfect( factors, factors.size(), num );
         return std::make_pair( isSemiPerfect, sum.second );
     }
 
@@ -332,4 +286,333 @@ namespace NUtils
         auto retVal = static_cast< uint64_t >( t4 );
         return retVal;
     }
+
+    //std::string getTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > &startEndTime, bool reportTotalSeconds, bool highPrecision, bool alwaysShowDaysAndHours )
+    //{
+    //    auto duration = startEndTime.second - startEndTime.first;
+    //    return getTimeString( duration );
+    //}
+
+    //QString getTimeString( const QDateTime &startTime, const QDateTime &endTime, bool reportTotalSeconds, bool highPrecision, bool alwaysShowDaysAndHours )
+    //{
+    //    auto msecs = startTime.msecsTo( endTime );
+    //    return getTimeString( msecs );
+    //}
+
+
+    //std::string getTimeString( const std::chrono::system_clock::duration &duration, bool reportTotalSeconds, bool highPrecision, bool alwaysShowHours )
+    //{
+    //    auto totalSeconds = getSeconds( duration, highPrecision );
+    //    auto hrs = static_cast<int64_t>( std::chrono::duration_cast<std::chrono::hours>( duration ).count() );
+    //    auto mins = static_cast<int64_t>( std::chrono::duration_cast<std::chrono::minutes>( duration ).count() - ( hrs * 60 ) );
+    //    double secs = 1.0 * std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
+    //    if ( highPrecision )
+    //        secs = ( std::chrono::duration_cast<std::chrono::duration< double, std::micro >>( duration ).count() ) / 1000000.0;
+    //    secs -= ( ( mins * 60 ) + ( hrs * 3600 ) );
+
+    //    std::ostringstream oss;
+    //    if ( alwaysShowHours || ( hrs > 0 ) )
+    //    {
+    //        oss << hrs << " hour";
+    //        if ( hrs != 1 )
+    //            oss << "s";
+    //        oss << ", ";
+    //    }
+
+    //    if ( mins > 0 )
+    //    {
+    //        oss << mins << " minute";
+    //        if ( mins != 1 )
+    //            oss << "s";
+    //        oss << ", ";
+    //    }
+
+    //    if ( highPrecision )
+    //    {
+    //        oss.setf( std::ios::fixed, std::ios::floatfield );
+    //        oss.precision( 6 );
+    //    }
+
+    //    oss << secs << " second";
+
+    //    if ( secs != 1 )
+    //        oss << "s";
+    //    if ( reportTotalSeconds && ( totalSeconds > 60 ) )
+    //    {
+    //        oss << ", (" << totalSeconds << " second";
+    //        if ( totalSeconds != 1 )
+    //            oss << "s";
+    //        oss << ")";
+    //    }
+    //    return oss.str();
+    //}
+
+
+    QString secsToString( quint64 seconds)
+    {
+        uint64_t msecs = seconds * 1000;
+        CTimeString ts( msecs );
+        return ts.toString( "dd days, hh hours, mm minutes, ss seconds" );
+    }
+
+    CTimeString::CTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > &startEndTime ) :
+        CTimeString( startEndTime.second - startEndTime.first )
+    {
+
+    }
+
+    CTimeString::CTimeString( const std::chrono::system_clock::time_point &startTime, const std::chrono::system_clock::time_point &endTime ) :
+        CTimeString( endTime - startTime )
+    {
+
+    }
+
+    //    auto msecs = startTime.msecsTo( endTime );
+    CTimeString::CTimeString( const QDateTime &startTime, const QDateTime &endTime ) :
+        fDuration( startTime.msecsTo( endTime ) )
+    {
+
+    }
+
+    CTimeString::CTimeString( uint64_t msecs ) :
+        CTimeString( std::chrono::milliseconds( msecs ) )
+    {
+        fMicroSecondsAvailable = false;
+    }
+
+    CTimeString::CTimeString( const std::chrono::system_clock::duration &duration ) :
+        fDuration( duration ),
+        fMicroSecondsAvailable( true )
+    {
+    }
+
+    std::string CTimeString::toStdString( const QString &format /*= "dd:hh:mm:ss.zzz (SS seconds)" */) const
+    {
+        return toString( format ).toStdString();
+    }
+
+    //// dd -> days, hh -> hours, mm minutes, ss seconds, zzz milliseconds for Qt and microseconds for chrono based SS total seconds
+    QString CTimeString::toString( const QString &format /*= "dd:hh:mm:ss.zzz (SS seconds)" */ ) const
+    {
+        auto hrs = static_cast<int64_t>( std::chrono::duration_cast<std::chrono::hours>( fDuration ).count() );
+        int days = 0;
+        if ( hrs > 24 )
+        {
+            days = hrs % 24;
+            hrs = hrs / 24;
+        }
+        auto mins = static_cast<int64_t>( std::chrono::duration_cast<std::chrono::minutes>( fDuration ).count() - ( hrs * 60 ) );
+        auto secs = std::chrono::duration_cast<std::chrono::seconds>( fDuration ).count();
+
+        auto totalSeconds = fMicroSecondsAvailable
+            ? ( std::chrono::duration_cast<std::chrono::duration< uint64_t, std::micro >>( fDuration ).count() )
+            : ( std::chrono::duration_cast<std::chrono::duration< uint64_t, std::milli >>( fDuration ).count() );
+
+        auto fractionalSecs = fMicroSecondsAvailable
+            ? ( totalSeconds % 1000000ULL )
+            : ( totalSeconds % 1000ULL );
+
+        totalSeconds /= fMicroSecondsAvailable ? 1000000ULL : 1000ULL;
+
+        secs -= ( ( mins * 60 ) + ( hrs * 3600 ) );
+
+        QLocale locale;
+        QString retVal = format;
+        retVal.replace( "dd", QString("%1").arg( days, 2, 10, QChar( '0' ) ) );
+        retVal.replace( "hh", QString( "%1" ).arg( hrs, 2, 10, QChar( '0' ) ) );
+        retVal.replace( "mm", QString( "%1" ).arg( mins, 2, 10, QChar( '0' ) ) );
+        retVal.replace( "ss", QString( "%1" ).arg( secs, 2, 10, QChar( '0' ) ) );
+        retVal.replace( "zzz", QString( "%1" ).arg( fractionalSecs, 3, 10, QChar( '0' ) ) );
+        retVal.replace( "SS", locale.toString( totalSeconds ) );
+
+        return retVal;
+    }
+
+    //double CTimeString::getMicroSeconds() const
+    //{
+    //    auto lowPrec = std::chrono::duration_cast<std::chrono::seconds>( fDuration ).count();
+    //    (void)lowPrec;
+    //    auto highPrec = std::chrono::duration_cast< std::chrono::duration< double, std::micro > >( fDuration ).count();
+
+    //    return highPrec;
+    //    //if ( highPrecision )
+    //    //double totalSeconds = 1.0 * std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
+    //    //if ( highPrecision )
+    //    //return totalSeconds;
+    //}
+
+    //QString getTimeString( quint64 msecs, bool reportTotalSeconds, bool highPrecision, bool alwaysShowDaysAndHours )
+    //{
+    //    auto totalMsecs = ( 1.0 * msecs );
+    //    auto days = msecs / ( 24 * 60 * 60 * 1000 );
+    //    msecs = msecs - ( days * ( 24 * 60 * 60 * 1000 ) );
+
+    //    auto hours = msecs / ( 60 * 60 * 1000 );
+    //    msecs = msecs - ( hours * ( 60 * 60 * 1000 ) );
+
+    //    auto mins = msecs / ( 60 * 1000 );
+    //    msecs = msecs - ( mins * ( 60 * 1000 ) );
+
+    //    auto secs = msecs / 1000;
+    //    msecs = msecs - ( secs * 1000 );
+
+    //    auto tmp = QStringList()
+    //        << ( ( alwaysShowDaysAndHours || days ) ? QString( "%1" ).arg( days, 1, 10, QChar( '0' ) ) : QString() )
+    //        << ( ( alwaysShowDaysAndHours || hours ) ? QString( "%1" ).arg( hours, 2, 10, QChar( '0' ) ) : QString() )
+    //        << QString( "%1" ).arg( mins, 2, 10, QChar( '0' ) )
+    //        << QString( "%1" ).arg( secs, 2, 10, QChar( '0' ) )
+    //        ;
+    //    tmp.removeAll( QString() );
+    //    auto retVal = tmp.join( ":" );
+
+    //    if ( highPrecision )
+    //        retVal + QString( ".%1" ).arg( msecs, 3, 10, QChar( '0' ) );
+    //    if ( reportTotalSeconds )
+    //    {
+    //        auto secs = totalMsecs / 1000;
+    //        totalMsecs = totalMsecs - ( secs * 1000 );
+
+    //        retVal += QString( ", (%1" ).arg( secs );
+    //        if ( highPrecision )
+    //        {
+    //            retVal += QString( ".%2" ).arg( totalMsecs );
+    //        }
+
+    //        if ( ( secs != 1 ) || ( totalMsecs != 0 ) )
+    //        {
+    //            retVal += "s";
+    //        }
+
+    //        retVal += ")";
+    //    }
+    //    return retVal;
+    //}
+
+#ifdef Q_OS_WINDOWS
+    char GetChar()
+    {
+        auto stdInput = ::GetStdHandle(STD_INPUT_HANDLE);
+
+        DWORD mode{ 0 };
+        GetConsoleMode(stdInput, &mode);
+
+        auto newMode = mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+        ::SetConsoleMode(stdInput, newMode);
+
+        char ch[256]{ 0 };
+        DWORD bytesRead;
+        ReadConsole(stdInput, ch, 1, &bytesRead, nullptr);
+
+        ::SetConsoleMode(stdInput, mode);
+        return ch[0];
+    }
+#else
+    char GetChar()
+    {
+        char ch = 0;
+        struct termios oldt, newt;
+
+        tcgetattr(fileno( stdin ), &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        auto aOK = tcsetattr(fileno(stdin), TCSANOW, &newt);
+        auto ch = getchar();
+        tcsetattr(fileno(stdin), TCSANOW, &oldt);
+        return ch;
+    }
+#endif
+    int waitForPrompt(int returnCode, const char * prompt )
+    {
+        if (!prompt)
+            prompt = "Press any key to close this window . . .";
+        std::cout << prompt;
+        GetChar();
+        char buffer[2];
+        fgets(buffer, 1, stdin);
+        return returnCode;
+    }
+
+    bool isValidURL(const QString & url, int * start, int * length)
+    {
+        auto regExStr = "((([a-z]+):\\/\\/)|(www\\.))(\\.?[a-z0-9\\-ßàÁâãóôþüúðæåïçèõöÿýòäœêëìíøùîûñé]{2,256})+(\\.[a-z]+)";
+        auto regEx = QRegularExpression(regExStr, QRegularExpression::CaseInsensitiveOption);
+        auto match = regEx.match(url);
+        if (!match.hasMatch())
+            return false;
+        if (start)
+            *start = match.capturedStart();
+        if (length)
+            *length = match.capturedLength();
+        return true;
+    }
+
+
+    bool launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font)
+    {
+        int urlStart;
+        int urlLength;
+        auto hasUrl = NSABUtils::isValidURL(title, &urlStart, &urlLength);
+        if (hasUrl)
+        {
+            auto xLoc = pt.x();
+            if (xLoc >= 30)
+            {
+                xLoc -= 30;
+                QFontMetrics fm(font);
+
+                auto preURL = title.left(urlStart);
+                auto url = title.mid(urlStart, urlLength);
+
+                auto preRect = fm.boundingRect(preURL);
+                if (xLoc >= preRect.width())
+                {
+                    xLoc -= preRect.width();
+                    auto urlRect = fm.boundingRect(url);
+                    if (xLoc <= urlRect.width())
+                    {
+                        QDesktopServices::openUrl(url);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+#ifdef Q_OS_WINDOWS
+    QString getLastError()
+    {
+        auto errorID = ::GetLastError();
+        return getLastError(errorID);
+    }
+
+    QString getLastError( int errorID)
+    {
+        LPWSTR lpMsgBuf = nullptr;
+
+        ::FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            nullptr,
+            errorID,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&lpMsgBuf,
+            0, nullptr);
+
+        QString result = QString::fromWCharArray(lpMsgBuf);
+        LocalFree(lpMsgBuf);
+        return result;
+    }
+#else
+    QString getLastError(int errorID) 
+    {
+        return QString();
+    }
+    
+    QString getLastError()
+    {
+        return QString(); 
+    }
+#endif
 }

@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -23,43 +23,47 @@
 #ifndef __FROMSTRING_H
 #define __FROMSTRING_H 
 
+#include "SABUtilsExport.h"
+
 #include <string>
 #include <sstream>
-
-template <class T>
-bool fromString( T & retVal, const char * arg )
+namespace NSABUtils
 {
-    if ( !arg || !*arg )
-        return false;
-    std::stringstream ss( arg );
-    ss >> retVal;
-    char c;
-    if ( ss.fail() || ss.get(c) )
-        return false;
-    return true;
+
+    template <class T>
+    bool fromString(T & retVal, const char * arg)
+    {
+        if (!arg || !*arg)
+            return false;
+        std::stringstream ss(arg);
+        ss >> retVal;
+        char c;
+        if (ss.fail() || ss.get(c))
+            return false;
+        return true;
+    }
+
+    template <class T>
+    bool fromString(T & retVal, const std::string & arg)
+    {
+        return fromString(retVal, arg.c_str());
+    }
+
+    SABUTILS_EXPORT bool fromString(long & retVal, const char * arg, int base);
+    SABUTILS_EXPORT bool fromString(long & retVal, const std::string & arg, int base);
+    SABUTILS_EXPORT bool fromString(long & retVal, const std::string & arg);
+
+    SABUTILS_EXPORT bool fromString(int & retVal, const char * arg, int base);
+    SABUTILS_EXPORT bool fromString(int & retVal, const char * arg);
+    SABUTILS_EXPORT bool fromString(int & retVal, const std::string & arg, int base);
+    SABUTILS_EXPORT bool fromString(int & retVal, const std::string & arg);
+
+    SABUTILS_EXPORT bool fromString(double & retVal, const std::string & arg);
+    SABUTILS_EXPORT bool fromString(double & retVal, const char * arg);
+    SABUTILS_EXPORT bool fromString(float & retVal, const std::string & arg);
+    SABUTILS_EXPORT bool fromString(float & retVal, const char * arg);
+    SABUTILS_EXPORT bool fromString(bool & retVal, const char * arg);
+    SABUTILS_EXPORT bool fromString(bool & retVal, const std::string & arg);
 }
-
-template <class T>
-bool fromString( T & retVal, const std::string & arg )
-{
-    return fromString( retVal, arg.c_str() );
-}
-
-bool fromString( long & retVal, const char * arg, int base );
-bool fromString( long & retVal, const std::string & arg, int base );
-bool fromString( long & retVal, const std::string & arg );
-
-bool fromString( int & retVal, const char * arg, int base );
-bool fromString( int & retVal, const char * arg );
-bool fromString( int & retVal, const std::string & arg, int base );
-bool fromString( int & retVal, const std::string & arg );
-
-bool fromString( double & retVal, const std::string & arg );
-bool fromString( double & retVal, const char * arg );
-bool fromString( float & retVal, const std::string & arg );
-bool fromString( float & retVal, const char * arg );
-bool fromString( bool & retVal, const char * arg );
-bool fromString( bool & retVal, const std::string & arg );
-
 #endif 
 

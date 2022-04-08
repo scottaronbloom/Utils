@@ -1,7 +1,7 @@
 # The MIT License (MIT)
 #
 # Copyright (c) 2017 Nathan Osman
-# Copyright (c) 2020 Scott Aron Bloom - Work on linux and mac
+# Copyright (c) 2020-2021 Scott Aron Bloom - Work on linux and mac
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,39 +23,48 @@
 
 find_package(Qt5Core REQUIRED)
 
-# Retrieve the absolute path to qmake and then use that path to find
-# the <os>deployqt binaries
-get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
-get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+if( NOT DEFINED DEPLOYQT_EXECUTABLE )
+	# Retrieve the absolute path to qmake and then use that path to find
+	# the <os>deployqt binaries
+	get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+	get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
-if( WIN32 )
-    find_program(DEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
-    if(NOT DEPLOYQT_EXECUTABLE)
-        message(FATAL_ERROR "windeployqt not found")
-    endif()
-    message(STATUS "Found windeployqt: ${DEPLOYQT_EXECUTABLE}")
+	if( WIN32 )
+		find_program(DEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+		if(NOT DEPLOYQT_EXECUTABLE)
+			message(FATAL_ERROR "windeployqt not found")
+		endif()
+		message(STATUS "Found windeployqt: ${DEPLOYQT_EXECUTABLE}")
 
-    # Doing this with MSVC 2015 requires CMake 3.6+
-    if( (MSVC_VERSION VERSION_EQUAL 1900 OR MSVC_VERSION VERSION_GREATER 1900)
-                   AND CMAKE_VERSION VERSION_LESS "3.6")
-        message(WARNING "Deploying with MSVC 2015+ requires CMake 3.6+")
-    endif()
-ELSEIF( APPLE )
-    find_program(DEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-    if(NOT DEPLOYQT_EXECUTABLE)
-        message(FATAL_ERROR "macdeployqt not found")
-    endif()
-    message(STATUS "Found macdeployqt: ${DEPLOYQT_EXECUTABLE}")
-ELSEIF( UNIX )
-    find_program(DEPLOYQT_EXECUTABLE linuxdeployqt HINTS "${_qt_bin_dir}")
-    if(NOT DEPLOYQT_EXECUTABLE)
-        message(FATAL_ERROR "linuxdeployqt not found")
-    endif()
-    message(STATUS "Found linuxdeployqt: ${DEPLOYQT_EXECUTABLE}")
-ENDIF()
-mark_as_advanced(DEPLOYQT_EXECUTABLE)
+		# Doing this with MSVC 2015 requires CMake 3.6+
+		if( (MSVC_VERSION VERSION_EQUAL 1900 OR MSVC_VERSION VERSION_GREATER 1900)
+					   AND CMAKE_VERSION VERSION_LESS "3.6")
+			message(WARNING "Deploying with MSVC 2015+ requires CMake 3.6+")
+		endif()
+	ELSEIF( APPLE )
+		find_program(DEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+		if(NOT DEPLOYQT_EXECUTABLE)
+			message(FATAL_ERROR "macdeployqt not found")
+		endif()
+		message(STATUS "Found macdeployqt: ${DEPLOYQT_EXECUTABLE}")
+	ELSEIF( UNIX )
+		#find_program(DEPLOYQT_EXECUTABLE linuxdeployqt HINTS "${_qt_bin_dir}")
+		if(NOT DEPLOYQT_EXECUTABLE)
+			message(STATUS "linuxdeployqt not found")
+		endif()
+		message(STATUS "Found linuxdeployqt: ${DEPLOYQT_EXECUTABLE}")
+	ENDIF()
+	mark_as_advanced(DEPLOYQT_EXECUTABLE)
+endif()
 
-function( DeploySystem target)
+function( DeploySystem target directory)
+    set( options )
+    set( oneValueArgs INSTALL_ONLY )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    
+    #message( STATUS "Deploy System ${target}" )
     if ( WIN32 )
         set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
         #set(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE ) 
@@ -63,26 +72,41 @@ function( DeploySystem target)
 
     # deployqt doesn't work correctly with the system runtime libraries,
     # so we fall back to one of CMake's own modules for copying them over
+    SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
     include(InstallRequiredSystemLibraries)
-        
-    foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-        get_filename_component(filename "${lib}" NAME)
-        add_custom_command(TARGET ${target} POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
-        )
-    endforeach()
+
+    if ( NOT _INSTALL_ONLY )
+        #message( STATUS "${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}" )
+        foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+            get_filename_component(filename "${lib}" NAME)
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND "${CMAKE_COMMAND}" -E echo "Deploying System Library '${filename}' for '${target}'"
+                COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
+            )
+        endforeach()
+    endif()
 endfunction()
 
 # Add commands that copy the required Qt files to the same directory as the
 # target after being built as well as including them in final installation
 function(DeployQt target directory)
     if(NOT DEPLOYQT_EXECUTABLE)
+        IF( UNIX )
+            return()
+        ENDIF()
+
         message(FATAL_ERROR "deployqt not found")
     endif()
 
+    set( options )
+    set( oneValueArgs INSTALL_ONLY )
+    set( multiValueArgs )
+
+    cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
     SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
     IF( WIN32 )
-        SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
+        SET(_QTDEPLOY_OPTIONS "--verbose=1;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
     ELSEIF( APPLE )
         SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
         SET(_QTDEPLOY_OPTIONS "--verbose=0;--no-compiler-runtime;--always-overwrite" )
@@ -91,15 +115,17 @@ function(DeployQt target directory)
         return()
     ENDIF()
 
-    # Run deployqt immediately after build to make the build area "complete"
-    add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E
-            env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
-                ${_QTDEPLOY_OPTIONS}
-                ${_QTDEPLOY_TARGET_DIR}
-        COMMENT "Deploying Qt to Build Area for Project '${target}' ..."
-    )
-
+    if ( NOT _INSTALL_ONLY )
+        # Run deployqt immediately after build to make the build area "complete"
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E echo "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
+            COMMAND "${CMAKE_COMMAND}" -E
+                env PATH="${_qt_bin_dir}" "${DEPLOYQT_EXECUTABLE}"
+                    ${_QTDEPLOY_OPTIONS}
+                    ${_QTDEPLOY_TARGET_DIR}
+        )
+    endif()
+    
     # install(CODE ...) doesn't support generator expressions, but
     # file(GENERATE ...) does - store the path in a file
     file(GENERATE 
@@ -120,7 +146,7 @@ function(DeployQt target directory)
             SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;\" )
         ENDIF()
 
-        MESSAGE( STATUS \"Deploying Qt to the Install Area '\${CMAKE_INSTALL_PREFIX}/${directory}'\" )
+        MESSAGE( STATUS \"Deploying Qt to the Install Area '\${CMAKE_INSTALL_PREFIX}/${directory}' using '${DEPLOYQT_EXECUTABLE}' ...\" )
         execute_process(
             COMMAND \"${CMAKE_COMMAND}\" -E
                 env PATH=\"${_qt_bin_dir}\" \"${DEPLOYQT_EXECUTABLE}\"
@@ -163,30 +189,3 @@ function (PrintList listVar)
     endforeach()
 endfunction()
 
-FUNCTION( AddQtIncludes )
-    cmake_policy(SET CMP0057 NEW)
-    get_cmake_property(_variableNames VARIABLES)
-    foreach(_variableName ${_variableNames})
-        if ( "${_variableName}" MATCHES "Qt5[^_]*_INCLUDE_DIRS" )
-            #MESSAGE( STATUS "BEFORE Adding include ${_variableName}" )
-            #PrintList( _QtDirs )
-            #MESSAGE( STATUS "Adding include ${_variableName}" )
-            foreach( dir ${${_variableName}} )
-                #MESSAGE( STATUS "Checking include dir ${dir}" )
-                IF( NOT ${dir} IN_LIST _QtDirs )
-                    #MESSAGE( STATUS "Adding include dir ${dir}" )
-                    LIST( APPEND _QtDirs "${dir}" )
-                ELSE()
-                    #MESSAGE( STATUS "Already in dir" )
-                ENDIF()
-            endforeach()
-            #MESSAGE( STATUS "AFTER Adding include ${_variableName}" )
-            #PrintList( _QtDirs )
-        endif()  
-    endforeach()
-    #MESSAGE( STATUS "${_QtDirs}" )
-    #MESSAGE( FATAL_ERROR "Exit on first call" )
-    foreach( dir ${_QtDirs} )
-        include_directories( ${dir} )
-    endforeach()
-ENDFUNCTION()  

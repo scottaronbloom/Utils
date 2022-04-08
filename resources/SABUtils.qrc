@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/SABUtilsResources">
+        <file>add.png</file>
+        <file>delete.png</file>
+        <file>error.png</file>
+        <file>load.png</file>
+        <file>ok.png</file>
+        <file>open.png</file>
+        <file>run.png</file>
+        <file>BlankMKVTags.xml</file>
+    </qresource>
+</RCC>

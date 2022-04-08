@@ -2,7 +2,7 @@
 #define COLLAPSABLEGROUPBOX_H
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -22,31 +22,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "SABUtilsExport.h"
+
 #include <QGroupBox>
-
-class CCollapsableGroupBoxImpl;
-
-class CCollapsableGroupBox : public QGroupBox
+namespace NSABUtils
 {
-    Q_OBJECT;
-    Q_PROPERTY(bool collapsive READ isCollapsible WRITE setCollapsible )
+    class CCollapsableGroupBoxImpl;
 
-public:
-    explicit CCollapsableGroupBox(QWidget* parent = 0);
-    explicit CCollapsableGroupBox(const QString& title, QWidget* parent = 0);
-    virtual ~CCollapsableGroupBox();
+    class SABUTILS_EXPORT CCollapsableGroupBox : public QGroupBox
+    {
+        Q_OBJECT;
+        Q_PROPERTY(bool collapsive READ isCollapsible WRITE setCollapsible)
 
-    bool isCollapsible() const;
-    void setCollapsible(bool enabled);
+    public:
+        explicit CCollapsableGroupBox(QWidget* parent = nullptr );
+        explicit CCollapsableGroupBox(const QString& title, QWidget* parent = nullptr );
+        virtual ~CCollapsableGroupBox();
 
-public Q_SLOTS:
-    void setCollapsed(bool collapsed = true);
-    void setExpanded(bool expanded = true);
+        bool isCollapsible() const;
+        void setCollapsible(bool enabled);
 
-protected:
-    virtual void childEvent(QChildEvent* event);
-private:
-    CCollapsableGroupBoxImpl * fImpl;
-};
+    public Q_SLOTS:
+        void setCollapsed(bool collapsed = true);
+        void setExpanded(bool expanded = true);
 
+    protected:
+        virtual void childEvent(QChildEvent* event);
+    private:
+        CCollapsableGroupBoxImpl * fImpl;
+    };
+}
 #endif // CCollapsableGroupBox_H

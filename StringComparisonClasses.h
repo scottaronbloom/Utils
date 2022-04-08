@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -23,29 +23,50 @@
 #ifndef __STRINGCOMPARISONCLASSES_H
 #define __STRINGCOMPARISONCLASSES_H
 
+#include "SABUtilsExport.h"
+
 #include <string>
-
-namespace NStringUtils
+#include <QString>
+namespace NSABUtils
 {
-    // Functors
-    // Functor noCaseStringCmp: case-less string comparisons
-    class noCaseStringCmp
+    namespace NStringUtils
     {
-    public:
-        bool operator() ( const std::string& s1, const std::string& s2 ) const;
-    };
+        // Functors
+        // Functor noCaseStringCmp: case-less string comparisons
+        class SABUTILS_EXPORT noCaseStringCmp
+        {
+        public:
+            bool operator() (const std::string& s1, const std::string& s2) const;
+        };
 
-    class noCaseStringEq
-    {
-    public:
-        bool operator() ( const std::string& s1, const std::string& s2 ) const;
-    };
+        class SABUTILS_EXPORT noCaseStringEq
+        {
+        public:
+            bool operator() (const std::string& s1, const std::string& s2) const;
+        };
 
-    struct noCaseStringHash
-    {
-        size_t operator()( const std::string& s ) const;
-    };
+        struct SABUTILS_EXPORT noCaseStringHash
+        {
+            size_t operator()(const std::string& s) const;
+        };
+
+        class SABUTILS_EXPORT noCaseQStringCmp
+        {
+        public:
+            bool operator() (const QString & s1, const QString & s2) const;
+        };
+
+        class SABUTILS_EXPORT noCaseQStringEq
+        {
+        public:
+            bool operator() (const QString & s1, const QString & s2) const;
+        };
+
+        struct SABUTILS_EXPORT noCaseQStringHash
+        {
+            size_t operator()(const QString & s) const;
+        };
+    }
 }
-
 #endif 
 

@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 #
-# Copyright (c) 2020 Scott Aron Bloom
+# Copyright (c) 2020-2021 Scott Aron Bloom
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 find_package(Threads REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
-AddQtIncludes()
+find_package(Qt5SrcMoc)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -37,22 +37,62 @@ SET(CMAKE_AUTOMOC OFF)
 SET(CMAKE_AUTORCC OFF)
 SET(CMAKE_AUTOUIC OFF)
 
-include( include.cmake )
+UNSET( qtproject_UIS_H )
+UNSET( qtproject_MOC_SRCS )
+UNSET( qtproject_CPPMOC_H )
+UNSET( qtproject_QRC_SRCS )
 QT5_WRAP_UI(qtproject_UIS_H ${qtproject_UIS})
-QT5_WRAP_CPP(qtproject_MOC_SRCS ${qtproject_H})
+if( DEFINED SAB_MOC_OPTIONS )
+	QT5_WRAP_CPP(qtproject_MOC_SRCS ${qtproject_H} OPTIONS ${SAB_MOC_OPTIONS})
+	SAB_WRAP_SRCMOC(qtproject_CPPMOC_H ${qtproject_CPPMOC_SRCS} OPTIONS ${SAB_MOC_OPTIONS})
+else()
+	QT5_WRAP_CPP(qtproject_MOC_SRCS ${qtproject_H})
+	SAB_WRAP_SRCMOC(qtproject_CPPMOC_H ${qtproject_CPPMOC_SRCS})
+endif()
 QT5_ADD_RESOURCES( qtproject_QRC_SRCS ${qtproject_QRC} )
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-source_group("Generated Files" FILES ${qtproject_UIS_H} ${qtproject_MOC_SRCS} ${qtproject_QRC_SRCS} )
+source_group("Generated Files" FILES ${qtproject_UIS_H} ${qtproject_MOC_SRCS} ${qtproject_QRC_SRCS} ${qtproject_CPPMOC_H})
 source_group("Resource Files" FILES ${qtproject_QRC} ${qtproject_QRC_SOURCES} )
 source_group("Designer Files" FILES ${qtproject_UIS} )
 source_group("Header Files" FILES ${qtproject_H} ${project_H} )
+source_group("Source Files" FILES ${qtproject_CPPMOC_SRCS} )
+
 SET( _CMAKE_FILES "CMakeLists.txt;include.cmake" )
 source_group("CMake Files" FILES ${_CMAKE_FILES} )
 FILE(GLOB _CMAKE_MODULE_FILES "${CMAKE_SOURCE_DIR}/Modules/*")
-source_group("CMake Files\\Modues" FILES ${_CMAKE_MODULE_FILES} )
+source_group("CMake Files\\Modules" FILES ${_CMAKE_MODULE_FILES} )
 
-include( ${CMAKE_SOURCE_DIR}/SABUtils/CompilerSettings.cmake )
+if( SAB_UTILS_DIR )
+    include( ${SAB_UTILS_DIR}/CompilerSettings.cmake )
+else()
+    include( ${CMAKE_SOURCE_DIR}/SABUtils/CompilerSettings.cmake )
+endif()
 
+SET( _PROJECT_DEPENDENCIES
+    ${project_SRCS} 
+    ${project_H}  
+    ${qtproject_SRCS} 
+    ${qtproject_QRC} 
+    ${qtproject_QRC_SRCS} 
+    ${qtproject_UIS_H} 
+    ${qtproject_MOC_SRCS} 
+    ${qtproject_H} 
+    ${qtproject_UIS}
+    ${qtproject_QRC_SOURCES}
+    ${_CMAKE_FILES}
+    ${_CMAKE_MODULE_FILES}
+)
+
+SET( project_pub_DEPS
+     Qt5::Core
+     Qt5::Widgets
+     ${project_pub_DEPS}
+     )
+
+SET( project_pri_DEPS
+    # insert and "global default" private depends here
+    ${project_pri_DEPS}
+)
