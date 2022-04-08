@@ -45,9 +45,9 @@ if ( MKVUTILS )
     SET(NO_USE_MEDIAINFO_INSTALL ON)
     set(BUILD_SHARED_LIBS ON)
     add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
+    add_subdirectory( MKVReader )
 endif()
 
-add_subdirectory( MKVReader )
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
