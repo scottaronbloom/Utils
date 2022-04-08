@@ -44,10 +44,10 @@ namespace NSABUtils
 
         void setEnableOnPartial( bool value ) { fEnableOnPartial = value; };
         bool enableOnPartial() const { return fEnableOnPartial; }
-    public slots:
+    public Q_SLOTS:
         void slotReset();
 
-    private slots:
+    private Q_SLOTS:
         void slotCheckStateChanged( int newState );
         void slotSetWidgetsEnabled( bool clicked );
     private:

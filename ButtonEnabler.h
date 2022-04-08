@@ -40,10 +40,10 @@ namespace NSABUtils
         CButtonEnabler(QLineEdit * le, QAbstractButton * btn, QObject * parent = nullptr);
 
         void setLineEditIsFile() { fLineEditIsFile = true; };
-    public slots:
+    public Q_SLOTS:
         void slotReset();
 
-    private slots:
+    private Q_SLOTS:
         void slotSelectionChanged(const QItemSelection  & selected, const QItemSelection  &);
         void slotTextChanged(const QString & changed);
     private:
