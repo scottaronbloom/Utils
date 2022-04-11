@@ -12,15 +12,15 @@ MACRO(CreateVersion dir)
         "${multiValueArgs}"
         ${ARGN}
         )
-        
-    message( STATUS "MAJOR = ${_CREATE_VERSION_MAJOR}" )
+
     set( IN_FILE ${CMAKE_SOURCE_DIR}/SABUtils/Modules/Version.h.in )
 
     set(OUTFILE "${CMAKE_BINARY_DIR}/Version.h")
     set(TMP_OUTFILE ${OUTFILE}.tmp)
     
+    message( STATUS "_CREATE_VERSION_MAJOR=${_CREATE_VERSION_MAJOR}" )
     message( STATUS "Generating version file '${OUTFILE}'" )
-
+    
     set(VERSION_FILE_MAJOR_VERSION ${_CREATE_VERSION_MAJOR})
     set(VERSION_FILE_MINOR_VERSION ${_CREATE_VERSION_MINOR})
     set(VERSION_FILE_PATCH_VERSION ${_CREATE_VERSION_PATCH})
