@@ -78,38 +78,6 @@ IF(GIT_EXE_EXECUTABLE)
 		endif()
 		SET(ENV{LC_ALL} ${_GIT_SAVED_LC_ALL})
 	ENDMACRO()
-
-	MACRO(CreateVersion prefix dir inFile major minor appName vendor homepage email date)
-
-		set(OUTFILE "${CMAKE_BINARY_DIR}/Version.h")
-		set(TMP_OUTFILE ${OUTFILE}.tmp)
-		
-		message( STATUS "Generating version file ${OUTFILE}" )
-
-		set(VERSION_FILE_MAJOR_VERSION ${major})
-		set(VERSION_FILE_MINOR_VERSION ${minor})
-		set(VERSION_FILE_PATCH_VERSION ${${prefix}_REV})
-		set(VERSION_FILE_DIFF          ${${prefix}_DIFF})
-		set(VERSION_FILE_APP_NAME      ${appName})
-		set(VERSION_FILE_VENDOR        ${vendor})
-		set(VERSION_FILE_HOMEPAGE      ${homepage})
-		set(VERSION_FILE_EMAIL         ${email})
-		set(VERSION_FILE_BUILD_DATE    ${date})
-
-		configure_file(
-			"${inFile}"
-			"${TMP_OUTFILE}"
-		)
-
-        InstallFile( ${TMP_OUTFILE} ${OUTFILE} REMOVE_ORIG ) # creates a dependency on TMP_OUTFILE
-        set_property( 
-            DIRECTORY ${dir} 
-            APPEND
-            PROPERTY CMAKE_CONFIGURE_DEPENDS
-            ${OUTFILE}
-            )
-
-	ENDMACRO()
 ENDIF(GIT_EXE_EXECUTABLE)
 
 IF(NOT GIT_FOUND)

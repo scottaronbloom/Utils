@@ -396,6 +396,13 @@ namespace
         EXPECT_EQ( 15, NSABUtils::findSmallestIndexInBitSet( std::bitset< 16 >( 32768 ) ).value_or( -99 ) );
     }
 
+    TEST(TestUtils, TestCombinationalString)
+    {
+        std::vector< std::string > arr = { "1", "2", "3" };
+        auto numCombinations = NUtils::numCombinations(3, 3);
+        auto combinations = NUtils::allCombinations(arr, 3);
+    }
+
     TEST( TestUtils, TestCombinational )
     {
         std::vector< int > arr = { 1, 2, 3, 4, 5, 6, 7 };

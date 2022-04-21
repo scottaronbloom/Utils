@@ -27,15 +27,55 @@
 
 namespace NVersion
 {
-    inline const int         MAJOR_VERSION =  @VERSION_FILE_MAJOR_VERSION@;
-    inline const int         MINOR_VERSION =  @VERSION_FILE_MINOR_VERSION@;
-    inline const std::string PATCH_VERSION = "@VERSION_FILE_PATCH_VERSION@"; // string from git
-    inline const bool        MODIFIED      =  @VERSION_FILE_DIFF@;
-    inline const std::string APP_NAME      = "@VERSION_FILE_APP_NAME@";
-    inline const std::string VENDOR        = "@VERSION_FILE_VENDOR@";
-    inline const std::string HOMEPAGE      = "@VERSION_FILE_HOMEPAGE@";
-    inline const std::string EMAIL         = "@VERSION_FILE_EMAIL@";
-    inline const std::string BUILD_DATE    = "@VERSION_FILE_BUILD_DATE@";
+#cmakedefine VERSION_FILE_MAJOR_VERSION
+#ifdef VERSION_FILE_MAJOR_VERSION
+    inline const int         MAJOR_VERSION    =  @VERSION_FILE_MAJOR_VERSION@;
+#endif
+
+#cmakedefine VERSION_FILE_MINOR_VERSION
+#ifdef VERSION_FILE_MINOR_VERSION
+    inline const int         MINOR_VERSION    =  @VERSION_FILE_MINOR_VERSION@;
+#endif
+
+#cmakedefine VERSION_FILE_PATCH_VERSION
+#ifdef VERSION_FILE_PATCH_VERSION
+    inline const std::string PATCH_VERSION    = "@VERSION_FILE_PATCH_VERSION@"; // string from git
+#endif
+
+#cmakedefine VERSION_FILE_DIFF
+#ifdef VERSION_FILE_DIFF
+    inline const bool        MODIFIED         =  @VERSION_FILE_DIFF@;
+#endif
+
+#cmakedefine VERSION_FILE_APP_NAME
+#ifdef VERSION_FILE_APP_NAME
+    inline const std::string APP_NAME         = "@VERSION_FILE_APP_NAME@";
+#endif
+
+#cmakedefine VERSION_FILE_VENDOR
+#ifdef VERSION_FILE_VENDOR
+    inline const std::string VENDOR           = "@VERSION_FILE_VENDOR@";
+#endif
+
+#cmakedefine VERSION_FILE_HOMEPAGE
+#ifdef VERSION_FILE_HOMEPAGE
+    inline const std::string HOMEPAGE         = "@VERSION_FILE_HOMEPAGE@";
+#endif
+
+#cmakedefine VERSION_FILE_PRODUCT_HOMEPAGE
+#ifdef VERSION_FILE_PRODUCT_HOMEPAGE
+    inline const std::string PRODUCT_HOMEPAGE = "@VERSION_FILE_PRODUCT_HOMEPAGE@";
+#endif
+
+#cmakedefine VERSION_FILE_EMAIL
+#ifdef VERSION_FILE_EMAIL
+    inline const std::string EMAIL            = "@VERSION_FILE_EMAIL@";
+#endif
+
+#cmakedefine VERSION_FILE_BUILD_DATE
+#ifdef VERSION_FILE_BUILD_DATE
+    inline const std::string BUILD_DATE       = "@VERSION_FILE_BUILD_DATE@";
+#endif
 
     inline std::string getVersionString(bool full) 
     { 
