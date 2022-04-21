@@ -423,110 +423,121 @@ namespace NSABUtils
         return speed;
     }
 
-
-    std::unordered_map< size_t, double > getCPUCoreUtilizations( HQUERY & query, uint64_t sampleTime )
+    namespace NCPUUtilization
     {
-        HCOUNTER cpuTotal;
-        auto status = PdhAddCounter( query, L"\\Processor(*)\\% Processor Time", 0, &cpuTotal );
-        if ( status != ERROR_SUCCESS )
+        std::optional< std::pair< void *, void * > > initQuery()
         {
-            qDebug() << "Error (PdhAddCounter): " << status;
-            return {};
-        }
+            void * query;
+            auto status = PdhOpenQuery( nullptr, NULL, &query );
+            if ( status != ERROR_SUCCESS )
+                return {};
 
-        status = PdhCollectQueryData( query );
-        if ( status != ERROR_SUCCESS )
-        {
-            qDebug() << "Error (PdhCollectQueryData): " << status;
-            return {};
-        }
-
-        Sleep( sampleTime );
-
-        status = PdhCollectQueryData( query );
-        if ( status != ERROR_SUCCESS )
-        {
-            qDebug() << "Error (PdhCollectQueryData): " << status;
-            return {};
-        }
-
-        std::unordered_map< size_t, double > retVal;
-        DWORD dwBufferSize = 0;
-        DWORD dwItemCount = 0;
-        PDH_FMT_COUNTERVALUE_ITEM * pItems = nullptr;
-        status = PdhGetFormattedCounterArray( cpuTotal, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
-        if ( PDH_MORE_DATA != status )
-        {
-            qDebug() << "Error (PdhGetFormattedCounterArray): " << status;
-            return retVal;
-        }
-
-        pItems = (PDH_FMT_COUNTERVALUE_ITEM *)new uint8_t[ dwBufferSize ];
-        if ( !pItems )
-        {
-            qDebug() << "Error (new):";
-            return retVal;
-        }
-
-        if ( pItems )
-        {
-            status = PdhGetFormattedCounterArray( cpuTotal, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
-            if ( ERROR_SUCCESS != status )
+            void * cpuTotal;
+            status = PdhAddCounter( query, L"\\Processor(*)\\% Processor Time", 0, &cpuTotal );
+            if ( status != ERROR_SUCCESS )
             {
-                qDebug() << "Error (PdhGetFormattedCounterArray): " << status;
+                qDebug() << "Error (PdhAddCounter): " << status;
                 return {};
             }
-            
-            // Loop through the array and print the instance name and counter value.
-            for ( DWORD i = 0; i < dwItemCount; i++ )
-            {
-                try
-                {
-                    auto cpuID = std::stoll( pItems[ i ].szName );
-                    retVal[ cpuID ] = pItems[ i ].FmtValue.doubleValue;
-                    //wprintf( L"counter: %s, value %.20g\n", pItems[ i ].szName, );
-                }
-                catch ( ... )
-                {
-                }
-            }
-            
 
-            delete pItems;
-            pItems = nullptr;
-            dwBufferSize = dwItemCount = 0;
+            status = PdhCollectQueryData( query );
+            if ( status != ERROR_SUCCESS )
+            {
+                qDebug() << "Error (PdhCollectQueryData): " << status;
+                return {};
+            }
+
+            auto retVal = std::make_pair( query, cpuTotal );
+
+            return retVal;
         }
 
-        return retVal;
-    }
+        void freeQuery( std::pair< void *, void * > & query )
+        {
+            if ( query.first )
+                PdhCloseQuery( query.first );
+        }
+        
+        std::unordered_map< size_t, double > getCPUCoreUtilizations( const std::pair< void *, void * >& query )
+        {
+            auto status = PdhCollectQueryData( query.first );
+            if ( status != ERROR_SUCCESS )
+            {
+                qDebug() << "Error (PdhCollectQueryData): " << status;
+                return {};
+            }
 
-    std::unordered_map< size_t, double > CSystemInfo::getCPUCoreUtilizations()
-    {
-        HQUERY query{ 0 };
-        auto status = PdhOpenQuery( nullptr, NULL, &query );
-        if ( status != ERROR_SUCCESS )
-            return {};
+            std::unordered_map< size_t, double > retVal;
+            DWORD dwBufferSize = 0;
+            DWORD dwItemCount = 0;
+            PDH_FMT_COUNTERVALUE_ITEM * pItems = nullptr;
+            status = PdhGetFormattedCounterArray( query.second, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
+            if ( PDH_MORE_DATA != status )
+            {
+                qDebug() << "Error (PdhGetFormattedCounterArray): " << status;
+                return retVal;
+            }
 
-        auto cpuUtilization = NSABUtils::getCPUCoreUtilizations( query, 1000 );
-        if ( query )
-            PdhCloseQuery( query );
-        return cpuUtilization;
-    }
+            pItems = ( PDH_FMT_COUNTERVALUE_ITEM * )new uint8_t[ dwBufferSize ];
+            if ( !pItems )
+            {
+                qDebug() << "Error (new):";
+                return retVal;
+            }
 
-    double cleanPercentage( double in )
-    {
-        auto integral = static_cast<int>( std::floor( in ) );
-        auto decimal = static_cast<int>( std::floor( 100 * ( in - integral ) ) );
-        return integral + 1.0 * decimal / 100.0;
-    }
+            if ( pItems )
+            {
+                status = PdhGetFormattedCounterArray( query.second, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
+                if ( ERROR_SUCCESS != status )
+                {
+                    qDebug() << "Error (PdhGetFormattedCounterArray): " << status;
+                    return {};
+                }
 
-    std::string getPercentageAsString( double value )
-    {
-        value = cleanPercentage( value );
-        std::ostringstream oss;
-        oss << std::setw( 5 ) << std::fixed << std::setfill( '0' ) << std::setprecision( 2 ) << value;
-        auto retVal = oss.str();
-        return retVal;
+                // Loop through the array and print the instance name and counter value.
+                for ( DWORD ii = 0; ii < dwItemCount; ii++ )
+                {
+                    std::wstring nm = pItems[ ii ].szName;
+                    if ( nm == L"_Total" )
+                    {
+                        retVal[ -1 ] = pItems[ ii ].FmtValue.doubleValue;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            auto cpuID = std::stoll( nm );
+                            retVal[ cpuID ] = pItems[ ii ].FmtValue.doubleValue;
+                            //wprintf( L"counter: %s, value %.20g\n", pItems[ i ].szName, );
+                        }
+                        catch ( ... )
+                        {
+                        }
+                    }
+                }
+
+
+                delete pItems;
+                pItems = nullptr;
+                dwBufferSize = dwItemCount = 0;
+            }
+
+            return retVal;
+        }
+
+        std::unordered_map< size_t, double > getCPUCoreUtilizations( uint64_t sampleTime )
+        {
+            auto query = initQuery();
+
+            if ( !query.has_value() || !query.value().first )
+                return {};
+
+            Sleep( sampleTime );
+
+            auto cpuUtilization = getCPUCoreUtilizations( query.value() );
+            freeQuery( query.value() );
+            return cpuUtilization;
+        }
     }
 
     struct SCPUInfo
@@ -561,7 +572,7 @@ namespace NSABUtils
             for ( size_t ii = fProcNum; ii < fProcNum + fNumLogicalCores; ++ii )
             {
                 std::cout << "Logical Core Number: " << ii << "\n";
-                std::cout << "% Utilization: " << getPercentageAsString( fUtilization[ ii - fProcNum ] ) << "%\n";
+                std::cout << "% Utilization: " << NStringUtils::getPercentageAsString( fUtilization[ ii - fProcNum ] ) << "%\n";
             }
         }
         uint64_t fProcID{ 0 };
@@ -624,6 +635,11 @@ namespace NSABUtils
             {
                 ii->updateCPUInfo( cpuUtilizations );
             }
+            auto pos = cpuUtilizations.find( -1 );
+            if ( pos == cpuUtilizations.end() )
+                fAvgUtilization = 0.0;
+            else
+                fAvgUtilization = ( *pos ).second;
         }
 
         void dump()
@@ -648,6 +664,7 @@ namespace NSABUtils
         bool fHasL3Cache{ false };
 
         int fSpeed{ 0 };
+        double fAvgUtilization{ 0.0 };
 
         std::list< std::shared_ptr< SCPUInfo > > fProcessors; // only valid when it is a package
     };
@@ -772,7 +789,7 @@ namespace NSABUtils
     {
         std::unordered_map< std::string, std::list< std::unordered_map< std::string, std::string > > > retVal;
 
-        auto cpuUtilizations = CSystemInfo::getCPUCoreUtilizations();
+        auto cpuUtilizations = NCPUUtilization::getCPUCoreUtilizations();
         auto cpus = getCPUs();
         for ( auto && ii : cpus )
             ii->updateCPUInfo( cpuUtilizations );
@@ -790,8 +807,8 @@ namespace NSABUtils
             currMap[ "HasL2Cache" ] = std::to_string( ii->fHasL2Cache );
             currMap[ "HasL3Cache" ] = std::to_string( ii->fHasL3Cache );
             currMap[ "Frequency" ] = std::to_string( ii->fSpeed );
+            currMap[ "%Utilization" ] = NStringUtils::getPercentageAsString( ii->fAvgUtilization );
             size_t totalCores = 0;
-            double totalUtilization = 0.0;
             for ( auto && jj : ii->fProcessors )
             {
                 auto keyBase = "Proc" + std::to_string( jj->fProcNum );
@@ -803,12 +820,10 @@ namespace NSABUtils
                 currMap[ keyBase + "HasL3Cache" ] = std::to_string( jj->fHasL3Cache );
                 for ( size_t kk = jj->fProcNum; kk < jj->fProcNum + jj->fNumLogicalCores; ++kk )
                 {
-                    currMap[ keyBase + "Core" + std::to_string( kk ) + "%Util" ] = getPercentageAsString( jj->fUtilization[ kk - jj->fProcNum ] );
-                    totalUtilization += jj->fUtilization[ kk - jj->fProcNum ];
+                    currMap[ keyBase + "Core" + std::to_string( kk ) + "%Util" ] = NStringUtils::getPercentageAsString( jj->fUtilization[ kk - jj->fProcNum ] );
                 }
             }
             currMap[ "NumberOfCores" ] = std::to_string( totalCores );
-            currMap[ "%Utilization" ] = getPercentageAsString( totalUtilization / totalCores );
             cpuNum++;
             maps.push_back( currMap );
         }
