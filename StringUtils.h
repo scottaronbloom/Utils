@@ -478,6 +478,12 @@ namespace NSABUtils
             retVal = ltrim( retVal );
             return retVal;
         }
+
+
+        double SABUTILS_EXPORT cleanPercentage( double in );
+
+        std::string SABUTILS_EXPORT getPercentageAsString( double value );
+
     }
 }
 #endif 

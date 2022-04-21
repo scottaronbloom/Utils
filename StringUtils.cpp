@@ -36,6 +36,7 @@
 #include <cctype>
 #include <cmath>
 #include <unordered_set>
+#include <iomanip>
 
 #ifdef _WIN32
 #define vscprintf _vscprintf
@@ -2635,6 +2636,22 @@ namespace NSABUtils
                 auto rhsWords = getImportantWordsInOrder( rhs, true );
                 return (lhsWords == rhsWords);
             }
+        }
+
+        double SABUTILS_EXPORT cleanPercentage( double in )
+        {
+            auto integral = static_cast<int>( std::floor( in ) );
+            auto decimal = static_cast<int>( std::floor( 100 * ( in - integral ) ) );
+            return integral + 1.0 * decimal / 100.0;
+        }
+
+        std::string SABUTILS_EXPORT getPercentageAsString( double value )
+        {
+            value = cleanPercentage( value );
+            std::ostringstream oss;
+            oss << std::setw( 5 ) << std::fixed << std::setfill( '0' ) << std::setprecision( 2 ) << value;
+            auto retVal = oss.str();
+            return retVal;
         }
 
         int romanCharValue( QChar ch, bool & aOK )
