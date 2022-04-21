@@ -41,6 +41,8 @@
 #include "EnumUtils.h"
 #include "StringComparisonClasses.h"
 
+#include <locale>
+
 namespace NSABUtils
 {
     namespace NStringUtils
@@ -448,6 +450,34 @@ namespace NSABUtils
 
         SABUTILS_EXPORT std::unordered_set< QString > getImportantWords(const QString &string, bool stripPunctuation);
         SABUTILS_EXPORT bool isSimilar(const QString &lhs, const QString &rhs, bool inorder); // is every important word in the rhs in the left
+
+        template< typename T >
+        SABUTILS_EXPORT T [[nodiscard]] rtrim( T string )
+        {
+            string.erase( std::find_if( string.rbegin(), string.rend(), []( unsigned char ch )
+                     {
+                         return !std::isspace( ch );
+                     } ).base(), string.end() );
+            return string;
+        }
+
+        template< typename T >
+        SABUTILS_EXPORT T [[nodiscard]] ltrim( T string )
+        {
+            string.erase( string.begin(), std::find_if( string.begin(), string.end(), []( unsigned char ch )
+                     {
+                         return !std::isspace( ch );
+                     } ) );
+            return string;
+        }
+
+        template< typename T >
+        SABUTILS_EXPORT T [[nodiscard]] trim( T string )
+        {
+            auto retVal = rtrim( string );
+            retVal = ltrim( retVal );
+            return retVal;
+        }
     }
 }
 #endif 
