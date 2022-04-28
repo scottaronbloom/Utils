@@ -48,6 +48,7 @@ namespace NSABUtils
             if (selectFirstItem)
                 setCurrentIndex(0);
         }
+
         void addCurrentItem();
     };
 }
