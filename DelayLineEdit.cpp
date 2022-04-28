@@ -87,16 +87,22 @@ namespace NSABUtils
     void CDelayLineEdit::slotTextChanged()
     {
         fChangedTimer->stop();
-        fChangedTimer->start();
-        setLineEditColor(ELineEditStatus::ePending);
+        if ( fDelayMS > 0 )
+        {
+            fChangedTimer->start();
+            setLineEditColor( ELineEditStatus::ePending );
+        }
     }
 
     void CDelayLineEdit::slotTextEdited()
     {
         fEditingFinished = false;
         fEditedTimer->stop();
-        fEditedTimer->start();
-        setLineEditColor(ELineEditStatus::ePending);
+        if ( fDelayMS > 0 )
+        {
+            fEditedTimer->start();
+            setLineEditColor( ELineEditStatus::ePending );
+        }
     }
 
     void CDelayLineEdit::keyPressEvent(QKeyEvent * event)
