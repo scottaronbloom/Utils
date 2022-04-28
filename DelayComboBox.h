@@ -39,6 +39,7 @@ namespace NSABUtils
         CDelayLineEdit * lineEdit() const;
         void setDelay(int delayMS);
         void setIsOKFunction(std::function< bool(const QString &text) > func, const QString &errorMsg = {});
+        bool isOK() const;
 
         void setDelayLineEdit( CDelayLineEdit * le );
         QStringList getAllText() const;

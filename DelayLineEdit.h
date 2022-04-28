@@ -58,6 +58,10 @@ namespace NSABUtils
             fIsOK.first = func;
             fIsOK.second = errorMsg;
         }
+        bool isOK() const
+        {
+            return fStatus != ELineEditStatus::eNotOK;
+        }
     Q_SIGNALS:
         void sigTextChangedAfterDelay(const QString& text);
         void sigTextEditedAfterDelay(const QString& text);
