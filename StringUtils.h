@@ -452,7 +452,7 @@ namespace NSABUtils
         SABUTILS_EXPORT bool isSimilar(const QString &lhs, const QString &rhs, bool inorder); // is every important word in the rhs in the left
 
         template< typename T >
-        SABUTILS_EXPORT T [[nodiscard]] rtrim( T string )
+        T [[nodiscard]] rtrim( T string )
         {
             string.erase( std::find_if( string.rbegin(), string.rend(), []( unsigned char ch )
                      {
@@ -462,7 +462,7 @@ namespace NSABUtils
         }
 
         template< typename T >
-        SABUTILS_EXPORT T [[nodiscard]] ltrim( T string )
+        T [[nodiscard]] ltrim( T string )
         {
             string.erase( string.begin(), std::find_if( string.begin(), string.end(), []( unsigned char ch )
                      {
@@ -472,7 +472,7 @@ namespace NSABUtils
         }
 
         template< typename T >
-        SABUTILS_EXPORT T [[nodiscard]] trim( T string )
+        T [[nodiscard]] trim( T string )
         {
             auto retVal = rtrim( string );
             retVal = ltrim( retVal );
