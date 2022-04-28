@@ -26,15 +26,20 @@
 namespace NSABUtils
 {
 
-    CAutoWaitCursor::CAutoWaitCursor(QObject * revertOnShowWidget) :
-        QObject(nullptr),
+    CAutoWaitCursor::CAutoWaitCursor( QObject * revertOnShowWidget ) :
+        CAutoWaitCursor( revertOnShowWidget, Qt::WaitCursor )
+    {
+    }
+
+    CAutoWaitCursor::CAutoWaitCursor( QObject * revertOnShowWidget, Qt::CursorShape cursorShape ) :
+        QObject( nullptr ),
         fRestoreOnOpenWidget(revertOnShowWidget)
     {
         if ( !dynamic_cast<QApplication *>( QCoreApplication::instance() ) )
             return;
 
         QCursor * cursor = QApplication::overrideCursor();
-        QApplication::setOverrideCursor(Qt::BusyCursor);
+        QApplication::setOverrideCursor( cursorShape );
         if (!cursor)
             qApp->processEvents();
         if (revertOnShowWidget)
