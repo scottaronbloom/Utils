@@ -842,9 +842,12 @@ namespace NSABUtils
 
         bool isActive = timer->isActive();
         timer->stop();
-        timer->setInterval(delayMS);
-        if (isActive)
-            timer->start();
+        if ( delayMS >= 0 )
+        {
+            timer->setInterval( delayMS );
+            if ( isActive )
+                timer->start();
+        }
     }
 
     void deleteLayoutAndItems(QLayout * layout)
