@@ -106,6 +106,7 @@ namespace NSABUtils
         void setPrimaryMinimum(int min) { setPrimaryRange(min, primaryMax()); }
         void setPrimaryMaximum(int max) { setPrimaryRange(primaryMin(), max); }
         void setPrimaryFormat(const QString & format);
+        void setPrimaryVisible( bool visible );
 
         void setSecondaryProgressLabel(const QString & text);
         void setSecondaryValue(int value);
@@ -113,6 +114,7 @@ namespace NSABUtils
         void setSecondaryMaximum(int max) { setSecondaryRange(primaryMin(), max); }
         void setSecondaryRange(int min, int max);
         void setSecondaryFormat(const QString & format);
+        void setSecondaryVisible( bool visible );
 
         void setSingleProgressBarMode(bool value);
 

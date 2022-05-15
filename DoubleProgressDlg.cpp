@@ -318,6 +318,7 @@ namespace NSABUtils
     void CDoubleProgressDlg::setPrimaryRange(int min, int max)
     {
         fImpl->fPrimaryBar->setRange(min, max);
+        setPrimaryVisible( std::abs( max - min ) > 1 );
     }
 
     int CDoubleProgressDlg::primaryMin() const
@@ -499,6 +500,11 @@ namespace NSABUtils
         return fImpl->fPrimaryBar->eventsPerIncrement();
     }
 
+    void CDoubleProgressDlg::setPrimaryVisible( bool visible )
+    {
+        return fImpl->fPrimaryBar->setVisible( visible );
+    }
+
     void CDoubleProgressDlg::setSecondaryEventsPerIncrement( int value )
     {
         fImpl->fSecondaryBar->setEventsPerIncrement( value );
@@ -507,6 +513,11 @@ namespace NSABUtils
     int CDoubleProgressDlg::secondaryEventsPerIncrement() const
     {
         return fImpl->fSecondaryBar->eventsPerIncrement();
+    }
+
+    void CDoubleProgressDlg::setSecondaryVisible( bool visible )
+    {
+        return fImpl->fSecondaryBar->setVisible( visible );
     }
 
     void CDoubleProgressDlg::slotForceShow()
