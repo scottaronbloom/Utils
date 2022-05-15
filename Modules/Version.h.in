@@ -45,6 +45,8 @@ namespace NVersion
 #cmakedefine VERSION_FILE_DIFF
 #ifdef VERSION_FILE_DIFF
     inline const bool        MODIFIED         =  @VERSION_FILE_DIFF@;
+#else
+    inline const bool        MODIFIED         =  false;
 #endif
 
 #cmakedefine VERSION_FILE_APP_NAME
