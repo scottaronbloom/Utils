@@ -29,6 +29,8 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QAbstractEventDispatcher>
+#include <QIcon>
+#include <QBuffer>
 
 namespace NSABUtils
 {
@@ -95,13 +97,41 @@ namespace NSABUtils
     {
         QFile file( fi.absoluteFilePath() );
         if ( !file.open( QIODevice::ReadOnly ) )
-            return QString();
+            return {};
 
         QCryptographicHash hash( QCryptographicHash::Md5 );
         if ( hash.addData( &file ) )
             return QString::fromLatin1( formatMd5( hash.result(), false ) );
 
-        return QString();
+        return {};
+    }
+
+    QByteArray getPixmapData( const QPixmap & pixMap )
+    {
+        QByteArray data;
+        QBuffer buffer( &data );
+        buffer.open( QIODevice::WriteOnly );
+        pixMap.save( &buffer, "png" );
+        return data;
+    }
+
+    SABUTILS_EXPORT QByteArray getMd5( const QPixmap & pixMap )
+    {
+        auto data = getPixmapData( pixMap );
+
+        return getMd5( data );
+    }
+
+    SABUTILS_EXPORT QByteArray getMd5( const QIcon & icon )
+    {
+        auto sizes = icon.availableSizes();
+        QCryptographicHash hash( QCryptographicHash::Md5 );
+        for ( auto && ii : sizes )
+        {
+            auto data = getPixmapData( icon.pixmap( ii ) );
+            hash.addData( data );
+        }
+        return formatMd5( hash.result(), false );
     }
 
     void CComputeMD5::run()
