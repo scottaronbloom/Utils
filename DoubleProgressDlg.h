@@ -42,7 +42,7 @@ namespace NSABUtils
         CDoubleProgressDlg(const QString & labelText, const QString & cancelText, int min, int max, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()); // subtitle = QString()
         CDoubleProgressDlg(const QString & text, const QString & cancelText, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()); // subtitle = QString(), min max = 0, 100; 
         CDoubleProgressDlg(QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()); // all defaults
-        ~CDoubleProgressDlg();
+        virtual ~CDoubleProgressDlg() override;
 
         int primaryValue() const;
         int primaryMin() const;
@@ -83,6 +83,9 @@ namespace NSABUtils
 
         void setSecondaryEventsPerIncrement( int value );
         int  secondaryEventsPerIncrement() const;
+
+        void stopAutoShowTimer() const; // when you set a value, sometiems it can trigger a show you dont want
+
     protected:
         virtual QSize sizeHint() const override;
         virtual void closeEvent(QCloseEvent * e) override;
