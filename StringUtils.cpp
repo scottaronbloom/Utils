@@ -2736,10 +2736,26 @@ namespace NSABUtils
             if (string.isEmpty())
                 return string;
 
-            if ( isRomanNumeral( string ) )
-                return string.toUpper();
-
             auto retVal = string;
+            QString prefix;
+            if ( retVal.startsWith( "." ) || retVal.startsWith( ":" ) || retVal.startsWith( "-" ) )
+            {
+                prefix = retVal[ 0 ];
+                retVal.remove( 0, 1 );
+            }
+
+            QString suffix;
+            if ( retVal.endsWith( "." ) || retVal.endsWith( ":" ) || retVal.endsWith( "-" ) )
+            {
+                suffix = retVal.back();
+                retVal.remove( retVal.length()-1, 1 );
+            }
+            bool isRomanNumber = isRomanNumeral( retVal );
+            retVal = prefix + retVal + suffix;
+            if ( isRomanNumber )
+                return retVal.toUpper();
+
+
             bool allCap = true;
             for (auto &&ii : string)
             {
