@@ -615,26 +615,27 @@ namespace
 #endif
 
 #ifdef WIN32
-#define HOME_DIR R"(C:\Users\scott.TOWEL42)"
+#define USER QString( R"(sbloom)" )
+#define HOME_DIR QString( R"(C:\Users\)" ) + USER
 
     TEST( TestUtils, TestWordExp )
     {
         using namespace NSABUtils;
         bool aOK = false;
-        EXPECT_EQ( HOME_DIR, CWordExp::getHomeDir( "scott", &aOK ) );
+        EXPECT_EQ( HOME_DIR, CWordExp::getHomeDir( USER, &aOK ) );
         EXPECT_TRUE( aOK );
         EXPECT_EQ( "", CWordExp::getHomeDir( "unknown", &aOK ) );
         EXPECT_FALSE( aOK );
 
-        EXPECT_EQ( HOME_DIR, CWordExp::expandTildePath( "~scott", &aOK ) );
+        EXPECT_EQ( HOME_DIR, CWordExp::expandTildePath( "~" + USER, &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( HOME_DIR "\\", CWordExp::expandTildePath( "~scott/", &aOK ) );
+        EXPECT_EQ( HOME_DIR + "\\", CWordExp::expandTildePath( "~" + USER + "/", &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( HOME_DIR "\\", CWordExp::expandTildePath( "~scott\\", &aOK ) );
+        EXPECT_EQ( HOME_DIR + "\\", CWordExp::expandTildePath( "~" + USER + "\\", &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( HOME_DIR "\\", CWordExp::expandTildePath( "~\\", &aOK ) );
+        EXPECT_EQ( HOME_DIR + "\\", CWordExp::expandTildePath( "~\\", &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( HOME_DIR "\\", CWordExp::expandTildePath( "~/", &aOK ) );
+        EXPECT_EQ( HOME_DIR + "\\", CWordExp::expandTildePath( "~/", &aOK ) );
         EXPECT_TRUE( aOK );
 
         EXPECT_EQ( "~unknown/", CWordExp::expandTildePath( "~unknown/", &aOK ) );
@@ -642,13 +643,13 @@ namespace
         EXPECT_EQ( "~unknown\\", CWordExp::expandTildePath( "~unknown\\", &aOK ) );
         EXPECT_FALSE( aOK );
 
-        EXPECT_EQ( "scott", CWordExp::getUserName() );
+        EXPECT_EQ( USER, CWordExp::getUserName() );
         //EXPECT_EQ( "thor", CWordExp::getHostName() );
 
         //CWordExp wordExp( "%HOMEDRIVE%%HOMEPATH%/*/sb" );
         ////ASSERT_EQ( 1, wordExp.getAbsoluteFilePaths( &aOK ).size() );
         //EXPECT_TRUE( aOK );
-        //EXPECT_EQ( "C:\\Users\\scott\\source\\sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
+        //EXPECT_EQ( "C:\\Users\\" USER "\\source\\sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
 
         //CWordExp wordExp1( "e:/*/*/sb/*" );
         //EXPECT_GE( 64, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
@@ -658,20 +659,20 @@ namespace
     TEST( TestUtils, TestWordExp )
     {
         bool aOK = false;
-        EXPECT_EQ( QString( "/home/scott" ), CWordExp::getHomeDir( "scott", &aOK ) );
+        EXPECT_EQ( QString( "/home/" USER ), CWordExp::getHomeDir( USER, &aOK ) );
         EXPECT_TRUE( aOK );
         EXPECT_EQ( "", CWordExp::getHomeDir( "unknown", &aOK ) );
         EXPECT_FALSE( aOK );
 
-        EXPECT_EQ( "/home/scott", CWordExp::expandTildePath( "~scott", &aOK ) );
+        EXPECT_EQ( "/home/" USER, CWordExp::expandTildePath( "~" HOME, &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~scott/", &aOK ) );
+        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~" HOME/", &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~scott\\", &aOK ) );
+        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~" HOME\\", &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~\\", &aOK ) );
+        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~\\", &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "/home/scott/", CWordExp::expandTildePath( "~/", &aOK ) );
+        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~/", &aOK ) );
         EXPECT_TRUE( aOK );
 
         EXPECT_EQ( "~unknown/", CWordExp::expandTildePath( "~unknown/", &aOK ) );
@@ -679,13 +680,13 @@ namespace
         EXPECT_EQ( "~unknown\\", CWordExp::expandTildePath( "~unknown\\", &aOK ) );
         EXPECT_FALSE( aOK );
 
-        EXPECT_EQ( "scott", CWordExp::getUserName() );
+        EXPECT_EQ( USER, CWordExp::getUserName() );
         EXPECT_EQ( "localhost.localdomain", CWordExp::getHostName() );
 
         CWordExp wordExp( "$HOME/*/sb" );
         ASSERT_EQ( 1, wordExp.getAbsoluteFilePaths( &aOK ).size() );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "/home/scott/fuckit/sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
+        EXPECT_EQ( "/home/" USER "/it/sb", wordExp.getAbsoluteFilePaths()[ 0 ] );
 
         CWordExp wordExp1( "/*/*/sb/*" );
         EXPECT_EQ( 17, wordExp1.getAbsoluteFilePaths( &aOK ).size() );
