@@ -27,6 +27,8 @@
 #include <cstdio>
 #include <iostream>
 
+#include <QThread>
+
 #ifdef Q_OS_WINDOWS
 #include <qt_windows.h>
 #endif
@@ -64,18 +66,34 @@ namespace NSABUtils
         };
     }
 
+    FILE * file = nullptr;
     ESubSystem getSubSystemForCurrentHandle()
     {
-        return getSubSystemForHandle(::GetModuleHandle(nullptr));
+        QThread::usleep( 20000 );
+        auto currModuleHandle = ::GetModuleHandle( nullptr );
+        auto retVal = getSubSystemForHandle( currModuleHandle );
+        fprintf( file, "currModuleHandle: 0x%Ix\n", reinterpret_cast<intptr_t>( currModuleHandle ) );
+        fprintf( file, "\t%s\n", toString( retVal ) );
+        return retVal;
     }
 
     bool runningAsConsole()
     {
-        auto subsystem = getSubSystemForCurrentHandle();
-        if (subsystem != ESubSystem::eIMAGE_SUBSYSTEM_WINDOWS_CUI)
-            return false;
-        return ::GetConsoleWindow() != nullptr;
+        file = fopen( "handle.txt", "w+" );
 
+        auto subsystem = getSubSystemForCurrentHandle();
+        if ( subsystem != ESubSystem::eIMAGE_SUBSYSTEM_WINDOWS_CUI && subsystem != ESubSystem::eIMAGE_SUBSYSTEM_WINDOWS_GUI )
+        {
+            fclose( file );
+            return false;
+        }
+        auto consoleWindow = ::GetConsoleWindow();
+        fprintf( file, "consoleWindow: 0x%Ix\n", reinterpret_cast<intptr_t>( consoleWindow ) );
+
+        auto consoleCP = GetConsoleCP();
+        fprintf( file, "consoleCP: %x\n", consoleCP );
+        fclose( file );
+        return ( consoleWindow != nullptr ) || ( !!consoleCP );
     }
 
     bool attachConsoleInt(QString * msg, bool tryToAlloc)
@@ -119,8 +137,8 @@ namespace NSABUtils
         }
         else
         {
-            fprintf(stdout, "STDOUT 1\n");
-            fprintf(stderr, "STDERR 1\n");
+            //fprintf(stdout, "STDOUT 1\n");
+            //fprintf(stderr, "STDERR 1\n");
 
             HANDLE hConIn = GetStdHandle(STD_INPUT_HANDLE);
             if (hConIn != INVALID_HANDLE_VALUE)
@@ -143,8 +161,8 @@ namespace NSABUtils
                 freopen("CONOUT$", "w", stdout);
             }
 
-            fprintf(stdout, "STDOUT 2\n");
-            fprintf(stderr, "STDERR 2\n");
+            //fprintf(stdout, "STDOUT 2\n");
+            //fprintf(stderr, "STDERR 2\n");
 
             HANDLE hConErr = GetStdHandle(STD_ERROR_HANDLE);
             if (hConErr != INVALID_HANDLE_VALUE)
@@ -158,8 +176,8 @@ namespace NSABUtils
             }
         }
 
-        fprintf(stdout, "STDOUT 3\n");
-        fprintf(stderr,"STDERR 3\n");
+        //fprintf(stdout, "STDOUT 3\n");
+        //fprintf(stderr,"STDERR 3\n");
 
         return true;
     }
