@@ -480,10 +480,12 @@ namespace NSABUtils
         }
 
 
-        double SABUTILS_EXPORT cleanPercentage( double in );
+        SABUTILS_EXPORT double cleanPercentage( double in );
 
-        std::string SABUTILS_EXPORT getPercentageAsString( double value );
+        SABUTILS_EXPORT std::string getPercentageAsString( double value );
 
+        SABUTILS_EXPORT QString removeDiacriticalCharacters( const QString & str );
+        SABUTILS_EXPORT bool isDiacriticalCharacter( const QChar & ch, QString * ascii = nullptr );
     }
 }
 #endif 
