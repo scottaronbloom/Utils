@@ -2565,7 +2565,7 @@ namespace NSABUtils
         {
             static auto map = std::map< QChar, QString >(
                 {
-                        { u'Á', u8"A" }
+                     { u'Á', u8"A" }
                     ,{ u'À', u8"A" }
                     ,{ u'Â', u8"A" }
                     ,{ u'Ä', u8"A" }
@@ -2818,9 +2818,11 @@ namespace NSABUtils
             auto words = string.toLower().split( QRegularExpression( "\\s" ), TSkipEmptyParts );
             for ( auto && ii : words )
             {
-                ii = removeDiacriticalCharacters( ii );
                 if ( stripPunctuation )
+                {
+                    ii = removeDiacriticalCharacters( ii );
                     ii = ii.remove( QRegularExpression( "\\W" ) );
+                }
                 if ( wordsToRemove.find( ii ) != wordsToRemove.end() )
                     continue;
                 retVal.push_back( ii );
