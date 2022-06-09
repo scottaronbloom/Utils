@@ -53,6 +53,11 @@ namespace NSABUtils
         void setCancelButtonText(QString label, bool init);
         void setCancelButton(QPushButton * button);
 
+        void stopAutoShowTimer()
+        {
+            fForceTimer->stop();
+        }
+
         void layout();
         void ensureSizeIsAtLeastSizeHint();
         void adoptChildWidget(QWidget * child);
@@ -256,6 +261,7 @@ namespace NSABUtils
         int fEventsPerIncrement{ 1 };
         CDoubleProgressDlgImpl * fImpl{ nullptr };
     };
+
     CDoubleProgressDlg::CDoubleProgressDlg(const QString & text, const QString & subTitle, const QString & cancelText, int min, int max, QWidget * parent, Qt::WindowFlags f) :
         QDialog(parent, f),
         fImpl(new CDoubleProgressDlgImpl(text, subTitle, min, max, this))
@@ -266,13 +272,10 @@ namespace NSABUtils
         fImpl->setCancelButtonText(cancelText, true);
     }
 
-
-
     CDoubleProgressDlg::CDoubleProgressDlg(const QString & text, const QString & cancelText, int min, int max, QWidget * parent, Qt::WindowFlags f) :
         CDoubleProgressDlg(text, QString(), cancelText, min, max, parent, f)
     {
     }
-
 
     CDoubleProgressDlg::CDoubleProgressDlg(const QString & text, const QString & cancelText, QWidget * parent, Qt::WindowFlags f) :
         CDoubleProgressDlg(text, cancelText, 0, 100, parent, f)
@@ -318,6 +321,7 @@ namespace NSABUtils
     void CDoubleProgressDlg::setPrimaryRange(int min, int max)
     {
         fImpl->fPrimaryBar->setRange(min, max);
+        setPrimaryVisible( std::abs( max - min ) > 1 );
     }
 
     int CDoubleProgressDlg::primaryMin() const
@@ -499,6 +503,11 @@ namespace NSABUtils
         return fImpl->fPrimaryBar->eventsPerIncrement();
     }
 
+    void CDoubleProgressDlg::setPrimaryVisible( bool visible )
+    {
+        return fImpl->fPrimaryBar->setVisible( visible );
+    }
+
     void CDoubleProgressDlg::setSecondaryEventsPerIncrement( int value )
     {
         fImpl->fSecondaryBar->setEventsPerIncrement( value );
@@ -507,6 +516,16 @@ namespace NSABUtils
     int CDoubleProgressDlg::secondaryEventsPerIncrement() const
     {
         return fImpl->fSecondaryBar->eventsPerIncrement();
+    }
+
+    void CDoubleProgressDlg::stopAutoShowTimer() const // when you set a value, sometiems it can trigger a show you dont want
+    {
+        return fImpl->stopAutoShowTimer();
+    }
+
+    void CDoubleProgressDlg::setSecondaryVisible( bool visible )
+    {
+        return fImpl->fSecondaryBar->setVisible( visible );
     }
 
     void CDoubleProgressDlg::slotForceShow()

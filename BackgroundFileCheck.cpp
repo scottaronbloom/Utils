@@ -99,11 +99,17 @@ namespace NSABUtils
         bool fCheckIsExecutable{ false };
         bool fCheckIsFile{ false };
         bool fCheckIsHidden{ false };
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool fCheckIsJunction{ false };
+#endif
         bool fCheckIsReadable{ false };
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool fCheckIsShortcut{ false };
+#endif
         bool fCheckIsSymLink{ false };
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool fCheckIsSymbolicLink{ false };
+#endif
         bool fCheckIsWritable{ false };
         QFile::Permissions fCheckPermissions;
         bool fUseNTFSPermissions{
@@ -188,12 +194,14 @@ namespace NSABUtils
             return;
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         fImpl->dumpDebug( "checkPathInternal isJunction: " );
         if ( fImpl->canContinue() && fImpl->fCheckIsJunction && !fi.isJunction() )
         {
             fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a junction" ) );
             return;
         }
+#endif
 
         fImpl->dumpDebug( "checkPathInternal isReadable: " );
         if ( fImpl->canContinue() && fImpl->fCheckIsReadable && !fi.isReadable() )
@@ -202,13 +210,14 @@ namespace NSABUtils
             return;
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         fImpl->dumpDebug( "checkPathInternal isShortcut: " );
         if ( fImpl->canContinue() && fImpl->fCheckIsShortcut && !fi.isShortcut() )
         {
             fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a shortcut" ) );
             return;
         }
-
+#endif
         fImpl->dumpDebug( "checkPathInternal isSymlink: " );
         if ( fImpl->canContinue() && fImpl->fCheckIsSymLink && !fi.isSymLink() )
         {
@@ -216,13 +225,14 @@ namespace NSABUtils
             return;
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         fImpl->dumpDebug( "checkPathInternal isSymboliclink: " );
         if ( fImpl->canContinue() && fImpl->fCheckIsSymbolicLink && !fi.isSymbolicLink() )
         {
             fImpl->fRetVal = std::make_pair( false, tr( "Pathname is not a symbolic link" ) );
             return;
         }
-
+#endif
         fImpl->dumpDebug( "checkPathInternal isWritable: " );
         if ( fImpl->canContinue() && fImpl->fCheckIsWritable && !fi.isWritable() )
         {
@@ -378,6 +388,7 @@ namespace NSABUtils
         fImpl->fCheckIsHidden = val;
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CBackgroundFileCheck::checkIsJunction() const
     {
         return fImpl->fCheckIsJunction;
@@ -387,6 +398,7 @@ namespace NSABUtils
     {
         fImpl->fCheckIsJunction = val;
     }
+#endif
 
     bool CBackgroundFileCheck::checkIsReadable() const
     {
@@ -398,6 +410,7 @@ namespace NSABUtils
         fImpl->fCheckIsReadable = val;
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CBackgroundFileCheck::checkIsShortcut() const
     {
         return fImpl->fCheckIsShortcut;
@@ -407,6 +420,7 @@ namespace NSABUtils
     {
         fImpl->fCheckIsShortcut = val;
     }
+#endif
 
     bool CBackgroundFileCheck::checkIsSymLink() const
     {
@@ -418,6 +432,7 @@ namespace NSABUtils
         fImpl->fCheckIsSymLink = val;
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CBackgroundFileCheck::checkIsSymbolicLink() const
     {
         return fImpl->fCheckIsSymbolicLink;
@@ -427,6 +442,7 @@ namespace NSABUtils
     {
         fImpl->fCheckIsSymbolicLink = val;
     }
+#endif
 
     bool CBackgroundFileCheck::checkIsWritable() const
     {

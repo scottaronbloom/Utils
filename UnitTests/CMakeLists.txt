@@ -21,6 +21,6 @@
 # SOFTWARE.
 SAB_UNIT_TEST(Utils
     Test.cpp
-    "SABUtils;gmock;Qt5::Core;Qt::Gui"
+    "SABUtils;gmock;Qt5::Core"
     )
 

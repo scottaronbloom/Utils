@@ -148,8 +148,9 @@ namespace NSABUtils
     SABUTILS_EXPORT QStringList getDateFormats( const SDateSearchOptions & options = {} );
 
     SABUTILS_EXPORT int autoSize( QTableView * table ); // autoSize( table, table->horizontalHeader )
-    SABUTILS_EXPORT int autoSize( QTreeView * table ); // autoSize( table, table->header )
-    SABUTILS_EXPORT int autoSize( QComboBox * table );
+    SABUTILS_EXPORT int autoSize( QTreeView * treeView ); // autoSize( table, table->header )
+    SABUTILS_EXPORT int autoSize( QComboBox * comboBox );
+    SABUTILS_EXPORT int autoSize( QAbstractItemView * view ); // autoSize( table, table->horizontalHeader )
     SABUTILS_EXPORT int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth = 150 );
 
     SABUTILS_EXPORT void fetchMore( QAbstractItemModel * model, int maxFetches = 3 );
@@ -199,7 +200,7 @@ namespace NSABUtils
         const std::function<void(QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum) > & writeRow =
         std::function<void(QAbstractItemModel * model, QXmlStreamWriter & writer, const QString & keyName, int rowNum) >());
 
-    SABUTILS_EXPORT void expandAll(QAbstractItemModel * model, const QModelIndex & index, QTreeView * view);
+    SABUTILS_EXPORT void expandAll( QTreeView * view );
 
     SABUTILS_EXPORT void updateTimer(int delayMS, QTimer * timer);
 

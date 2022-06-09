@@ -178,7 +178,7 @@ namespace NSABUtils
         }
 
         void setAliasMap(const std::map< QString, QString > & map);
-    signals:
+    Q_SIGNALS:
         void sigBlockFilterUpdates(bool block);
         void sigChanged();
     private:
@@ -194,7 +194,7 @@ namespace NSABUtils
     public:
         CStringFilterModel(QAbstractItemModel * sourceModel, QLineEdit * filter, QObject * parent = nullptr);
         CStringFilterModel(QAbstractItemModel * sourceModel, QLineEdit * filter, QAbstractButton * pb, QObject * parent = nullptr);
-    public slots:
+    public Q_SLOTS:
         void slotFilterChanged();
     private:
         QLineEdit * fFilter;
@@ -207,7 +207,7 @@ namespace NSABUtils
     public:
         CCheckableListView(QWidget * parent = nullptr);
         void keyPressEvent(QKeyEvent *event);
-    signals:
+    Q_SIGNALS:
         void sigBlockFilterUpdates(bool block);
     };
 
@@ -218,7 +218,7 @@ namespace NSABUtils
     public:
         CCheckableTableView(QWidget * parent = nullptr);
         void keyPressEvent(QKeyEvent *event);
-    signals:
+    Q_SIGNALS:
         void sigBlockFilterUpdates(bool block);
     };
 
@@ -228,7 +228,7 @@ namespace NSABUtils
     public:
         CCheckableTreeView(QWidget * parent = nullptr);
         void keyPressEvent(QKeyEvent *event);
-    signals:
+    Q_SIGNALS:
         void sigBlockFilterUpdates(bool block);
     };
 }

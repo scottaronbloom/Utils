@@ -46,6 +46,11 @@ namespace NSABUtils
         lineEdit()->setIsOKFunction(func, errorMsg);
     }
 
+    bool CDelayComboBox::isOK() const
+    {
+        return lineEdit()->isOK();
+    }
+
     void CDelayComboBox::setDelayLineEdit( CDelayLineEdit * le )
     {
         if ( lineEdit() )

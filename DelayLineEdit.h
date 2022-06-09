@@ -58,6 +58,10 @@ namespace NSABUtils
             fIsOK.first = func;
             fIsOK.second = errorMsg;
         }
+        bool isOK() const
+        {
+            return fStatus != ELineEditStatus::eNotOK;
+        }
     Q_SIGNALS:
         void sigTextChangedAfterDelay(const QString& text);
         void sigTextEditedAfterDelay(const QString& text);
@@ -116,20 +120,26 @@ namespace NSABUtils
         bool checkIsHidden() const;
         void setCheckIsHidden( bool val );
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool checkIsJunction() const;
         void setCheckIsJunction( bool val );
+#endif
 
         bool checkIsReadable() const;
         void setCheckIsReadable( bool val );
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool checkIsShortcut() const;
         void setCheckIsShortcut( bool val );
+#endif
 
         bool checkIsSymLink() const;
         void setCheckIsSymLink( bool val );
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool checkIsSymbolicLink() const;
         void setCheckIsSymbolicLink( bool val );
+#endif
 
         bool checkIsWritable() const;
         void setCheckIsWritable( bool val );

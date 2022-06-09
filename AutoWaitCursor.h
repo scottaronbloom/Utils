@@ -33,6 +33,7 @@ namespace NSABUtils
         Q_OBJECT;
     public:
         CAutoWaitCursor(QObject * revertOnOpen = nullptr);
+        CAutoWaitCursor( QObject * revertOnOpen, Qt::CursorShape cursorShape );
         ~CAutoWaitCursor();
 
         void restore();

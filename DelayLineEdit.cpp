@@ -69,6 +69,7 @@ namespace NSABUtils
         if (!isVisible())
         {
             connectToEditor(true);
+            slotTextChanged();
         }
     }
 
@@ -86,16 +87,22 @@ namespace NSABUtils
     void CDelayLineEdit::slotTextChanged()
     {
         fChangedTimer->stop();
-        fChangedTimer->start();
-        setLineEditColor(ELineEditStatus::ePending);
+        if ( fDelayMS > 0 )
+        {
+            fChangedTimer->start();
+            setLineEditColor( ELineEditStatus::ePending );
+        }
     }
 
     void CDelayLineEdit::slotTextEdited()
     {
         fEditingFinished = false;
         fEditedTimer->stop();
-        fEditedTimer->start();
-        setLineEditColor(ELineEditStatus::ePending);
+        if ( fDelayMS > 0 )
+        {
+            fEditedTimer->start();
+            setLineEditColor( ELineEditStatus::ePending );
+        }
     }
 
     void CDelayLineEdit::keyPressEvent(QKeyEvent * event)
@@ -280,6 +287,7 @@ namespace NSABUtils
         fFileChecker->setCheckIsHidden( val );
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CPathBasedDelayLineEdit::checkIsJunction() const
     {
         return fFileChecker->checkIsJunction();
@@ -289,6 +297,7 @@ namespace NSABUtils
     {
         fFileChecker->setCheckIsJunction( val );
     }
+#endif
 
     bool CPathBasedDelayLineEdit::checkIsReadable() const
     {
@@ -300,6 +309,7 @@ namespace NSABUtils
         fFileChecker->setCheckIsReadable( val );
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CPathBasedDelayLineEdit::checkIsShortcut() const
     {
         return fFileChecker->checkIsShortcut();
@@ -309,6 +319,7 @@ namespace NSABUtils
     {
         fFileChecker->setCheckIsShortcut( val );
     }
+#endif
 
     bool CPathBasedDelayLineEdit::checkIsSymLink() const
     {
@@ -320,6 +331,7 @@ namespace NSABUtils
         fFileChecker->setCheckIsSymLink( val );
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
     bool CPathBasedDelayLineEdit::checkIsSymbolicLink() const
     {
         return fFileChecker->checkIsSymbolicLink();
@@ -329,6 +341,7 @@ namespace NSABUtils
     {
         fFileChecker->setCheckIsSymbolicLink( val );
     }
+#endif
 
     bool CPathBasedDelayLineEdit::checkIsWritable() const
     {

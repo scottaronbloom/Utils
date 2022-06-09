@@ -1,4 +1,4 @@
-// The MIT License( MIT )
+﻿// The MIT License( MIT )
 //
 // Copyright( c ) 2020-2021 Scott Aron Bloom
 //
@@ -36,6 +36,9 @@
 #include <cctype>
 #include <cmath>
 #include <unordered_set>
+#include <iomanip>
+
+#include <QDebug>
 
 #ifdef _WIN32
 #define vscprintf _vscprintf
@@ -2558,6 +2561,224 @@ namespace NSABUtils
             return isSpecialRegExChar(ch.toLatin1(), includeDotSlash);
         }
 
+        bool isDiacriticalCharacter( const QChar & ch, QString * ascii )
+        {
+            static auto map = std::map< QChar, QString >(
+                {
+                     { u'Á', u8"A" }
+                    ,{ u'À', u8"A" }
+                    ,{ u'Â', u8"A" }
+                    ,{ u'Ä', u8"A" }
+                    ,{ u'Ă', u8"A" }
+                    ,{ u'Ā', u8"A" }
+                    ,{ u'Ã', u8"A" }
+                    ,{ u'Å', u8"A" }
+                    ,{ u'Ą', u8"A" }
+                    ,{ u'Æ', u8"AE" }
+                    ,{ u'Ć', u8"C" }
+                    ,{ u'Ċ', u8"C" }
+                    ,{ u'Ĉ', u8"C" }
+                    ,{ u'Č', u8"C" }
+                    ,{ u'Ç', u8"C" }
+                    ,{ u'Ď', u8"D" }
+                    ,{ u'Đ', u8"D" }
+                    ,{ u'Ð', u8"ETH" }
+                    ,{ u'É', u8"E" }
+                    ,{ u'È', u8"E" }
+                    ,{ u'Ė', u8"E" }
+                    ,{ u'Ê', u8"E" }
+                    ,{ u'Ë', u8"E" }
+                    ,{ u'Ě', u8"E" }
+                    ,{ u'Ĕ', u8"E" }
+                    ,{ u'Ē', u8"E" }
+                    ,{ u'Ę', u8"E" }
+                    ,{ u'Ġ', u8"G" }
+                    ,{ u'Ĝ', u8"G" }
+                    ,{ u'Ğ', u8"G" }
+                    ,{ u'Ģ', u8"G" }
+                    ,{ u'Ĥ', u8"H" }
+                    ,{ u'Ħ', u8"H" }
+                    ,{ u'Í', u8"I" }
+                    ,{ u'Ì', u8"I" }
+                    ,{ u'İ', u8"I" }
+                    ,{ u'Î', u8"I" }
+                    ,{ u'Ï', u8"I" }
+                    ,{ u'Ĭ', u8"I" }
+                    ,{ u'Ī', u8"I" }
+                    ,{ u'Ĩ', u8"I" }
+                    ,{ u'Į', u8"I" }
+                    ,{ u'Ĳ', u8"IJ" }
+                    ,{ u'Ĵ', u8"J" }
+                    ,{ u'Ķ', u8"K" }
+                    ,{ u'Ĺ', u8"L" }
+                    ,{ u'Ŀ', u8"L" }
+                    ,{ u'Ľ', u8"L" }
+                    ,{ u'Ļ', u8"L" }
+                    ,{ u'Ł', u8"L" }
+                    ,{ u'Ń', u8"N" }
+                    ,{ u'Ň', u8"N" }
+                    ,{ u'Ñ', u8"N" }
+                    ,{ u'Ņ', u8"N" }
+                    ,{ u'Ŋ', u8"N" }
+                    ,{ u'Ó', u8"O" }
+                    ,{ u'Ò', u8"O" }
+                    ,{ u'Ô', u8"O" }
+                    ,{ u'Ö', u8"O" }
+                    ,{ u'Ŏ', u8"O" }
+                    ,{ u'Ō', u8"O" }
+                    ,{ u'Õ', u8"O" }
+                    ,{ u'Ő', u8"O" }
+                    ,{ u'Ø', u8"O" }
+                    ,{ u'Œ', u8"OE" }
+                    ,{ u'Ŕ', u8"R" }
+                    ,{ u'Ř', u8"R" }
+                    ,{ u'Ŗ', u8"R" }
+                    ,{ u'Ś', u8"S" }
+                    ,{ u'Ŝ', u8"S" }
+                    ,{ u'Š', u8"S" }
+                    ,{ u'Ş', u8"S" }
+                    ,{ u'Ť', u8"T" }
+                    ,{ u'Ţ', u8"T" }
+                    ,{ u'Þ', u8"P" }
+                    ,{ u'Ŧ', u8"T" }
+                    ,{ u'Ú', u8"U" }
+                    ,{ u'Ù', u8"U" }
+                    ,{ u'Û', u8"U" }
+                    ,{ u'Ü', u8"U" }
+                    ,{ u'Ŭ', u8"U" }
+                    ,{ u'Ū', u8"U" }
+                    ,{ u'Ũ', u8"U" }
+                    ,{ u'Ů', u8"U" }
+                    ,{ u'Ų', u8"U" }
+                    ,{ u'Ű', u8"U" }
+                    ,{ u'Ŵ', u8"W" }
+                    ,{ u'Ý', u8"Y" }
+                    ,{ u'Ŷ', u8"Y" }
+                    ,{ u'Ÿ', u8"Y" }
+                    ,{ u'Ź', u8"Z" }
+                    ,{ u'Ż', u8"Z" }
+                    ,{ u'Ž', u8"Z" }
+                    ,{ u'á', u8"a" }
+                    ,{ u'à', u8"a" }
+                    ,{ u'â', u8"a" }
+                    ,{ u'ä', u8"a" }
+                    ,{ u'ă', u8"a" }
+                    ,{ u'ā', u8"a" }
+                    ,{ u'ã', u8"a" }
+                    ,{ u'å', u8"a" }
+                    ,{ u'ą', u8"a" }
+                    ,{ u'æ', u8"ae" }
+                    ,{ u'ć', u8"c" }
+                    ,{ u'ċ', u8"c" }
+                    ,{ u'ĉ', u8"c" }
+                    ,{ u'č', u8"c" }
+                    ,{ u'ç', u8"c" }
+                    ,{ u'ď', u8"d" }
+                    ,{ u'đ', u8"d" }
+                    ,{ u'ð', u8"eth" }
+                    ,{ u'é', u8"e" }
+                    ,{ u'è', u8"e" }
+                    ,{ u'ė', u8"e" }
+                    ,{ u'ê', u8"e" }
+                    ,{ u'ë', u8"e" }
+                    ,{ u'ě', u8"e" }
+                    ,{ u'ĕ', u8"e" }
+                    ,{ u'ē', u8"e" }
+                    ,{ u'ę', u8"e" }
+                    ,{ u'ġ', u8"g" }
+                    ,{ u'ĝ', u8"g" }
+                    ,{ u'ğ', u8"g" }
+                    ,{ u'ģ', u8"g" }
+                    ,{ u'ĥ', u8"h" }
+                    ,{ u'ħ', u8"h" }
+                    ,{ u'ı', u8"i" }
+                    ,{ u'í', u8"i" }
+                    ,{ u'ì', u8"i" }
+                    ,{ u'î', u8"i" }
+                    ,{ u'ï', u8"i" }
+                    ,{ u'ĭ', u8"i" }
+                    ,{ u'ī', u8"i" }
+                    ,{ u'ĩ', u8"i" }
+                    ,{ u'į', u8"i" }
+                    ,{ u'ĳ', u8"ij" }
+                    ,{ u'ĵ', u8"j" }
+                    ,{ u'ĸ', u8"k" }
+                    ,{ u'ķ', u8"k" }
+                    ,{ u'ĺ', u8"l" }
+                    ,{ u'ŀ', u8"l" }
+                    ,{ u'ľ', u8"l" }
+                    ,{ u'ļ', u8"l" }
+                    ,{ u'ł', u8"l" }
+                    ,{ u'ń', u8"n" }
+                    ,{ u'ň', u8"n" }
+                    ,{ u'ñ', u8"n" }
+                    ,{ u'ņ', u8"n" }
+                    ,{ u'ŉ', u8"n" }
+                    ,{ u'ŋ', u8"n" }
+                    ,{ u'ó', u8"o" }
+                    ,{ u'ò', u8"o" }
+                    ,{ u'ô', u8"o" }
+                    ,{ u'ö', u8"o" }
+                    ,{ u'ŏ', u8"o" }
+                    ,{ u'ō', u8"o" }
+                    ,{ u'õ', u8"o" }
+                    ,{ u'ő', u8"o" }
+                    ,{ u'ø', u8"o" }
+                    ,{ u'œ', u8"oe" }
+                    ,{ u'ŕ', u8"r" }
+                    ,{ u'ř', u8"r" }
+                    ,{ u'ŗ', u8"r" }
+                    ,{ u'ś', u8"s" }
+                    ,{ u'ŝ', u8"s" }
+                    ,{ u'š', u8"s" }
+                    ,{ u'ş', u8"s" }
+                    ,{ u'ß', u8"ss" }
+                    ,{ u'ſ', u8"s" }
+                    ,{ u'ť', u8"t" }
+                    ,{ u'ţ', u8"t" }
+                    ,{ u'þ', u8"p" }
+                    ,{ u'ŧ', u8"t" }
+                    ,{ u'ú', u8"u" }
+                    ,{ u'ù', u8"u" }
+                    ,{ u'û', u8"u" }
+                    ,{ u'ü', u8"u" }
+                    ,{ u'ŭ', u8"u" }
+                    ,{ u'ū', u8"u" }
+                    ,{ u'ũ', u8"u" }
+                    ,{ u'ů', u8"u" }
+                    ,{ u'ų', u8"u" }
+                    ,{ u'ű', u8"u" }
+                    ,{ u'ŵ', u8"w" }
+                    ,{ u'ý', u8"y" }
+                    ,{ u'ŷ', u8"y" }
+                    ,{ u'ÿ', u8"y" }
+                    ,{ u'ź', u8"z" }
+                    ,{ u'ż', u8"z" }
+                    ,{ u'ž', u8"z" }
+                } );
+            auto pos = map.find( ch );
+            if ( pos == map.end() )
+                return false;
+            if ( ascii )
+                *ascii = ( *pos ).second;
+            return true;
+        }
+
+        QString removeDiacriticalCharacters( const QString & str )
+        {
+            QString retVal;
+            for ( auto && ii : str )
+            {
+                QString ascii;
+                if ( isDiacriticalCharacter( ii, &ascii ) )
+                    retVal += ascii;
+                else
+                    retVal += ii;
+            }
+
+            return retVal;
+        }
+
         const std::unordered_set< QString > & unimportantWords()
         {
             static std::unordered_set< QString > retVal =
@@ -2594,11 +2815,14 @@ namespace NSABUtils
             std::vector< QString > retVal;
             auto wordsToRemove = unimportantWords();
 
-            auto words = string.toLower().split( QRegularExpression( "\\s" ), Qt::SkipEmptyParts );
+            auto words = string.toLower().split( QRegularExpression( "\\s" ), TSkipEmptyParts );
             for ( auto && ii : words )
             {
                 if ( stripPunctuation )
+                {
+                    ii = removeDiacriticalCharacters( ii );
                     ii = ii.remove( QRegularExpression( "\\W" ) );
+                }
                 if ( wordsToRemove.find( ii ) != wordsToRemove.end() )
                     continue;
                 retVal.push_back( ii );
@@ -2635,6 +2859,22 @@ namespace NSABUtils
                 auto rhsWords = getImportantWordsInOrder( rhs, true );
                 return (lhsWords == rhsWords);
             }
+        }
+
+        double SABUTILS_EXPORT cleanPercentage( double in )
+        {
+            auto integral = static_cast<int>( std::floor( in ) );
+            auto decimal = static_cast<int>( std::floor( 100 * ( in - integral ) ) );
+            return integral + 1.0 * decimal / 100.0;
+        }
+
+        std::string SABUTILS_EXPORT getPercentageAsString( double value )
+        {
+            value = cleanPercentage( value );
+            std::ostringstream oss;
+            oss << std::setw( 5 ) << std::fixed << std::setfill( '0' ) << std::setprecision( 2 ) << value;
+            auto retVal = oss.str();
+            return retVal;
         }
 
         int romanCharValue( QChar ch, bool & aOK )
@@ -2719,10 +2959,26 @@ namespace NSABUtils
             if (string.isEmpty())
                 return string;
 
-            if ( isRomanNumeral( string ) )
-                return string.toUpper();
-
             auto retVal = string;
+            QString prefix;
+            if ( retVal.startsWith( "." ) || retVal.startsWith( ":" ) || retVal.startsWith( "-" ) )
+            {
+                prefix = retVal[ 0 ];
+                retVal.remove( 0, 1 );
+            }
+
+            QString suffix;
+            if ( retVal.endsWith( "." ) || retVal.endsWith( ":" ) || retVal.endsWith( "-" ) )
+            {
+                suffix = retVal.back();
+                retVal.remove( retVal.length()-1, 1 );
+            }
+            bool isRomanNumber = isRomanNumeral( retVal );
+            retVal = prefix + retVal + suffix;
+            if ( isRomanNumber )
+                return retVal.toUpper();
+
+
             bool allCap = true;
             for (auto &&ii : string)
             {

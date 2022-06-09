@@ -135,6 +135,8 @@ namespace NSABUtils
         SABUTILS_EXPORT bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck);
  
         SABUTILS_EXPORT QString getWindowsError( int errorCode ); // returns empty string for non-windows
+
+        SABUTILS_EXPORT QString getCorrectPathCase( QString path ); // note, on linux returns path, windows does the actual analysis, and returns the absolute path
     }
 }
 #endif

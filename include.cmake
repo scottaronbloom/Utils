@@ -20,6 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+IF(WIN32)
+        set( SYSTEMINFO_SRCS SystemInfo.cpp SystemInfo_win.cpp )
+ELSE()
+        set( SYSTEMINFO_SRCS SystemInfo.cpp SystemInfo_linux.cpp )
+ENDIF()
+
 set(qtproject_SRCS
     AutoWaitCursor.cpp
     AutoFetch.cpp
@@ -56,6 +62,7 @@ set(qtproject_SRCS
     StayAwake.cpp   
     ValidateOpenSSL.cpp
     SABUtilsResources.cpp
+    ${SYSTEMINFO_SRCS} SystemInfo.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -105,6 +112,7 @@ set(project_H
     ValidateOpenSSL.h
     SABUtilsExport.h
     SABUtilsResources.h
+    SystemInfo.h
 )
 
 set(qtproject_UIS
@@ -190,12 +198,15 @@ if ( MKVUTILS )
         ${qtproject_UIS}
         SetMKVTags.ui
     )
+    set(MKVREADERLIB  
+        MKVReader
+    )
 endif()
 
 SET( project_pub_DEPS
      Qt5::Concurrent
      Qt5::Network
-     MKVReader
+     ${MKVREADERLIB}
      ${MEDIAINFOLIB}
 )
 

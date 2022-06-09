@@ -805,24 +805,32 @@ namespace NSABUtils
         writer.writeEndElement();
     }
 
-
-    void expandAll(QAbstractItemModel * model, const QModelIndex & index, QTreeView * view)
+    void expandAll( const QModelIndex & index, QTreeView * view )
     {
-        if (!model || !view)
+        if ( !view || !view->model() )
             return;
 
-        view->setExpanded(index, true);
+        view->setExpanded( index, true );
 
-        auto rowCount = model->rowCount(index);
-        auto columnCount = model->columnCount(index);
-        for (auto ii = 0; ii < rowCount; ++ii)
+        auto model = view->model();
+        auto rowCount = model->rowCount( index );
+        auto columnCount = model->columnCount( index );
+        for ( auto ii = 0; ii < rowCount; ++ii )
         {
-            for (auto jj = 0; jj < columnCount; ++jj)
+            for ( auto jj = 0; jj < columnCount; ++jj )
             {
-                auto childIndex = model->index(ii, jj, index);
-                expandAll(model, childIndex, view);
+                auto childIndex = model->index( ii, jj, index );
+                expandAll( childIndex, view );
             }
         }
+    }
+
+    void expandAll( QTreeView * view )
+    {
+        if ( !view || !view->model() )
+            return;
+
+        return expandAll( QModelIndex(), view );
     }
 
     size_t CCaseInsensitiveHash::operator()(const QString & str) const
@@ -842,9 +850,12 @@ namespace NSABUtils
 
         bool isActive = timer->isActive();
         timer->stop();
-        timer->setInterval(delayMS);
-        if (isActive)
-            timer->start();
+        if ( delayMS >= 0 )
+        {
+            timer->setInterval( delayMS );
+            if ( isActive )
+                timer->start();
+        }
     }
 
     void deleteLayoutAndItems(QLayout * layout)
@@ -1065,16 +1076,6 @@ namespace NSABUtils
         }
     }
 
-    int autoSize( QComboBox * comboBox )
-    {
-        if ( !comboBox )
-            return -1;
-
-        comboBox->view()->setTextElideMode( Qt::ElideNone );
-        comboBox->setSizeAdjustPolicy( QComboBox::AdjustToContents );
-        return comboBox->width();
-    }
-
     int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth/*=150*/ )
     {
         if ( !view || !view->model() || !header )
@@ -1128,4 +1129,28 @@ namespace NSABUtils
     {
         return autoSize( tree, tree->header() );
     }
+
+    int autoSize( QAbstractItemView * view )
+    {
+        auto treeView = dynamic_cast<QTreeView *>( view );
+        if ( treeView )
+            return autoSize( treeView );
+
+        auto tableView = dynamic_cast<QTableView *>( view );
+        if ( tableView )
+            return autoSize( tableView );
+        return -1;
+    }
+
+    int autoSize( QComboBox * comboBox )
+    {
+        if ( !comboBox )
+            return -1;
+
+        comboBox->view()->setTextElideMode( Qt::ElideNone );
+        comboBox->setSizeAdjustPolicy( QComboBox::AdjustToContents );
+        return comboBox->width();
+    }
+
+
 }

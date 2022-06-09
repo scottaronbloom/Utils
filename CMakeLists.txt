@@ -32,7 +32,6 @@ SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
 SET( MKVUTILS OFF CACHE BOOL "Support for MKV Utilities" )
 SET( BIFSUPPORT OFF CACHE BOOL "Support for BIF Utilities" )
 SET( GIFSUPPORT OFF CACHE BOOL "Support for GIF Utilities" )
-SET( SAB_ENABLE_TESTING ON CACHE BOOL "Enable Unit Testing of SAB Utils" )
    
 if ( NOT SAB_UTILS_DIR )
     SET( SAB_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR} )
@@ -40,39 +39,15 @@ endif()
 
 add_definitions( -DSABUTILS_INTERNAL )
 
-#MESSAGE( STATUS "SAB_ENABLE_TESTING=${SAB_ENABLE_TESTING}" )
-
-if( SAB_ENABLE_TESTING )
-    SET(GOOGLETEST_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
-    MESSAGE( STATUS "Adding support for testing - ${GOOGLETEST_ROOT_DIR}" )
-    SET( gtest_force_shared_crt ON CACHE BOOL "Always use shared crt" )
-    UNSET( INSTALL_GTEST CACHE )
-    SET( INSTALL_GTEST OFF CACHE BOOL "Never install gtest" )
-    if ( NOT gtest_force_shared_crt )
-        message( FATAL_ERROR "Please run with -Dgtest_force_shared_crt=ON" )
-    endif()
-    if ( INSTALL_GTEST )
-        message( FATAL_ERROR "Please run with -DINSTALL_GTEST=OFF" )
-    endif()
-    
-    enable_testing()
-    
-    add_subdirectory( ${GOOGLETEST_ROOT_DIR} )
-    SET(GOOGLETEST_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googletest)
-    SET(GMOCK_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googlemock)
-    set_target_properties( gmock PROPERTIES FOLDER GoogleTest )
-    set_target_properties( gmock_main PROPERTIES FOLDER GoogleTest )
-    set_target_properties( gtest PROPERTIES FOLDER GoogleTest )
-    set_target_properties( gtest_main PROPERTIES FOLDER GoogleTest )
-endif()
+include( Modules/EnableGoogleTesting.cmake )
 
 if ( MKVUTILS )
     SET(NO_USE_MEDIAINFO_INSTALL ON)
     set(BUILD_SHARED_LIBS ON)
     add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
+    add_subdirectory( MKVReader )
 endif()
 
-add_subdirectory( MKVReader )
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 

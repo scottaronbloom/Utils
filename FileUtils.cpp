@@ -1478,6 +1478,141 @@ namespace NSABUtils
             return fileHasAttribute(file, EAttribute::eReadOnly);
         }
 
+        QString getCorrectPathCase( const QDir & dir, const QStringList & childPaths ) // note, on linux returns path, windows does the actual analysis
+        {
+            if ( !dir.exists() )
+                return {};
+
+            if ( childPaths.isEmpty() )
+                return dir.absolutePath();
+
+            auto entries = dir.entryList( QStringList() << childPaths[ 0 ] );
+            if ( entries.isEmpty() )
+                return {};
+
+            QString nextChild;
+            if ( entries.size() == 1 )
+                nextChild = entries[ 0 ];
+            else
+            {
+                for ( auto && ii : qAsConst( entries ) )
+                {
+                    if ( ii == childPaths[ 0 ] )
+                    {
+                        nextChild = ii;
+                        break;
+                    }
+                }
+                if ( nextChild.isEmpty() )
+                    nextChild = entries[ 0 ];
+            }
+
+            auto children = childPaths.mid( 1 );
+            if ( children.isEmpty() )
+                return dir.absoluteFilePath( nextChild );
+            return getCorrectPathCase( QDir( dir.absoluteFilePath( nextChild ) ), children );
+        }
+
+        QString getCorrectPathCase( QString path ) // note, on linux returns path, windows does the actual analysis
+        {
+#ifndef _WINDOWS
+            return path;
+#else
+            path = QDir::toNativeSeparators( QFileInfo( path.toLower() ).absoluteFilePath() );
+
+            static std::unordered_map< QString, QString > sMap;
+            auto pos = sMap.find( path );
+            if ( pos != sMap.end() )
+                return ( *pos ).second;
+
+            static QString sDoubleSeparator = QString( "%1%1" ).arg( QDir::separator() );
+            auto retVal = path;
+            QStringList parts;
+            if ( retVal.startsWith( sDoubleSeparator ) ) // network path, first part is //XXXXX not //
+            {
+                auto pos = retVal.indexOf( QDir::separator(), 2 );
+                if ( pos == -1 )
+                {
+                    retVal = retVal.toLower();
+                    if ( !QFileInfo( retVal ).exists() )
+                        retVal = QString();
+                    sMap[ path ] = retVal;
+                    return retVal;
+                }
+                else
+                {
+                    parts.push_back( retVal.left( pos ).toLower() );
+                    parts << retVal.mid( pos + 1 ).split( QDir::separator() );
+                }
+            }
+            else
+                parts = retVal.split( QDir::separator() );
+
+            if ( parts.isEmpty() )
+            {
+                sMap[ path ] = QString();
+                return {};
+            }
+
+            if ( ( parts[ 0 ].length() == 2 ) && ( parts[ 0 ][ 1 ] == ":" ) ) // its a drive
+            {
+                parts[ 0 ] = parts[ 0 ].toUpper() + QDir::separator();
+            }
+            QDir currDir;
+            int startPart = 0;
+            for ( startPart = 0; startPart < parts.length(); ++startPart )
+            {
+                auto currKey = parts.mid( 0, startPart + 1 ).join( QDir::separator() );
+                if ( currKey.length() >= 4 && currKey.mid( 2, 2 ) == sDoubleSeparator )
+                    currKey.remove( 2, 1 );
+
+                auto pos = sMap.find( currKey );
+                if ( pos == sMap.end() )
+                    break;
+                retVal = ( *pos ).second;
+            }
+            Q_ASSERT( startPart < parts.length() );
+            if ( startPart >= parts.length() ) // no missing key was found
+                return {};
+
+            if ( startPart == 0 )
+            {
+                retVal = parts[ 0 ];
+                sMap[ parts[ 0 ] ] = retVal.replace( "\\", "/" );
+                startPart++;
+            }
+
+            for ( int ii = startPart; ii < parts.length(); ++ii )
+            {
+                auto currKey = parts.mid( 0, ii + 1 ).join( QDir::separator() );
+                if ( currKey.length() >= 4 && currKey.mid( 2, 2 ) == sDoubleSeparator )
+                    currKey.remove( 2, 1 );
+
+                currDir = QDir( retVal );
+                auto entries = currDir.entryInfoList( QDir::AllEntries | QDir::NoDotAndDotDot );
+                std::optional< QFileInfo > currFi;
+                for ( auto && jj : qAsConst( entries ) )
+                {
+                    if ( jj.fileName().compare( parts[ ii ], Qt::CaseInsensitive ) == 0 )
+                    {
+                        currFi = jj;
+                        break;
+                    }
+                }
+
+                if ( !currFi.has_value() )
+                {
+                    sMap[ currKey ] = QString();
+                    return {};
+                }
+
+                retVal = currFi.value().absoluteFilePath();
+                sMap[ currKey ] = retVal;
+            }
+            sMap[ path ] = retVal;
+            return retVal;
+#endif
+        }
     }
 }
 

@@ -679,7 +679,7 @@ namespace NSABUtils
             msg = "Invalid Query Setup";
             return false;
         }
-        auto data = NQtUtils::getStrings(query, queryStrings);
+        auto data = NSABUtils::getStrings(query, queryStrings);
         for (auto && ii : data)
         {
             auto jj = ii.begin();
@@ -688,7 +688,7 @@ namespace NSABUtils
             for (; jj != ii.end() && kk != queries.end(); ++jj, ++kk)
             {
                 if ((*kk).second)
-                    (*jj) = NQtUtils::getFile(relToDir, *jj);
+                    (*jj) = NSABUtils::getFile(relToDir, *jj);
                 currRow.push_back(*jj);
             }
             if (clear)

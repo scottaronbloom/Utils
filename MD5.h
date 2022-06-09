@@ -28,6 +28,8 @@
 class QByteArray;
 class QFileInfo;
 class QString;
+class QIcon;
+class QPixmap;
 #include <QRunnable>
 #include <string>
 #include <QObject>
@@ -39,9 +41,11 @@ namespace NSABUtils
     SABUTILS_EXPORT QString getMd5(const QFileInfo & fi);
     SABUTILS_EXPORT QByteArray getMd5( const QStringList & data );
     SABUTILS_EXPORT QString getMd5(const QString & data, bool isFileName = false);
-    SABUTILS_EXPORT std::string getMd5(const std::string & data, bool isFileName = false);
-    SABUTILS_EXPORT QByteArray formatMd5(const QByteArray & digest, bool isHex);
-
+    SABUTILS_EXPORT QByteArray getMd5( const QIcon & icon );
+    SABUTILS_EXPORT QByteArray getMd5( const QPixmap & pixmap );
+    SABUTILS_EXPORT std::string getMd5( const std::string & data, bool isFileName = false );
+    SABUTILS_EXPORT QByteArray formatMd5( const QByteArray & digest, bool isHex );
+    
 
     class SABUTILS_EXPORT CComputeMD5 : public QObject, public QRunnable
     {
