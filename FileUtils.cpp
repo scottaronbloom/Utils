@@ -356,9 +356,9 @@ namespace NSABUtils
             return lRetVal;
         }
 
-        QString fileSizeString(const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision)
+        QString byteSizeString(const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision)
         {
-            return fileSizeString(fi.size(), prettyPrint, byteSize, precision);
+            return byteSizeString(fi.size(), prettyPrint, byteSize, precision);
         }
 
         bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck)
@@ -427,12 +427,7 @@ namespace NSABUtils
             return std::make_pair(value, overflow);
         }
 
-        //if ( remainder > 500 )
-        //size++;
-        //remainder = 0;
-
-
-        QString fileSizeString(uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision)
+        QString byteSizeString(uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision)
         {
             if (!prettyPrint)
             {
@@ -444,7 +439,7 @@ namespace NSABUtils
 
             auto base = static_cast<uint64_t>(byteSize ? 1024 : 1000);
             auto suffixPos = 0U;
-            while ((size > (base * base)) && (suffixPos < suffixes.size()))
+            while ((size >= (base * base)) && (suffixPos < suffixes.size()))
             {
                 auto remainder = size % base;
                 size -= remainder;
@@ -452,7 +447,7 @@ namespace NSABUtils
                 suffixPos++;
             }
             uint64_t remainder = 0;
-            if (size > base)
+            if (size >= base)
             {
                 remainder = size % base;
                 size /= base;

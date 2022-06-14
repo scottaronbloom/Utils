@@ -113,8 +113,8 @@ namespace NSABUtils
         SABUTILS_EXPORT bool setTimeStamp(const QString& path, bool allTimeStamps, QString* msg = nullptr); // uses QDateTime::currentDateTime
         SABUTILS_EXPORT bool setTimeStamps(const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > & timeStamps, QString *msg = nullptr);
 
-        SABUTILS_EXPORT QString fileSizeString(const QFileInfo & fi, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
-        SABUTILS_EXPORT QString fileSizeString(uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1);
+        SABUTILS_EXPORT QString byteSizeString(const QFileInfo & fi, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
+        SABUTILS_EXPORT QString byteSizeString(uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1);
 
         enum class EAttribute
         {
