@@ -91,7 +91,7 @@ FUNCTION(SAB_UNIT_TEST_RESOURCE name)
     set( ${RESOURCE_LIB_NAME} ${RESOURCE_LIB_NAME} PARENT_SCOPE )
 ENDFUNCTION()
 
-FUNCTION(SAB_UNIT_TEST name file libs)
+FUNCTION(SAB_UNIT_TEST name file libs tgtNameVar )
     #MESSAGE( STATUS "name=${name}" )
     #MESSAGE( STATUS "file=${file}" )
     #MESSAGE( STATUS "libs=${libs}" )
@@ -158,5 +158,6 @@ FUNCTION(SAB_UNIT_TEST name file libs)
     set_target_properties( ${TARGET_NAME} PROPERTIES FOLDER CMakePredefinedTargets/UnitTests )
 
     CreateUserProj( Test_${PROJECT_NAME} )
+    set(${tgtNameVar} ${TEST_NAME} PARENT_SCOPE )
 ENDFUNCTION()
 
