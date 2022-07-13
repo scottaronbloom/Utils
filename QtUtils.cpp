@@ -40,6 +40,7 @@
 #include <QComboBox>
 #include <QTableView>
 #include <QHeaderView>
+#include <QTreeWidget>
 
 #ifdef QT_XMLPATTERNS_LIB
 #include <QXmlQuery>
@@ -1152,5 +1153,28 @@ namespace NSABUtils
         return comboBox->width();
     }
 
+    QTreeWidgetItem * nextVisibleItem( QTreeWidgetItem * item )
+    {
+        if ( !item )
+            return nullptr;
+
+        auto treeWidget = item->treeWidget();
+        if ( item && item->isHidden() )
+        {
+            QTreeWidgetItem * sibling = item;
+            while ( sibling && sibling->isHidden() )
+                sibling = treeWidget->topLevelItem( treeWidget->indexOfTopLevelItem( sibling ) + 1 );
+            item = sibling;
+        }
+
+        if ( item && item->isHidden() )
+        {
+            QTreeWidgetItem * sibling = item;
+            while ( sibling && sibling->isHidden() )
+                sibling = treeWidget->topLevelItem( treeWidget->indexOfTopLevelItem( sibling ) - 1 );
+            item = sibling;
+        }
+        return item;
+    }
 
 }
