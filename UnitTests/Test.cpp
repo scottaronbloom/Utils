@@ -622,12 +622,15 @@ namespace
 #endif
 
 #ifdef WIN32
-#define USER QString( R"(sbloom)" )
+#define USER QString( R"(scott.TOWEL42)" )
 #define HOME_DIR QString( R"(C:\Users\)" ) + USER
 
     TEST( TestUtils, TestWordExp )
     {
         using namespace NSABUtils;
+
+        ASSERT_EQ( USER, CWordExp::getUserName() );
+
         bool aOK = false;
         EXPECT_EQ( HOME_DIR, CWordExp::getHomeDir( USER, &aOK ) );
         EXPECT_TRUE( aOK );
@@ -823,7 +826,20 @@ namespace
 
     TEST( TestUtils, TestTimeString )
     {
-        EXPECT_EQ( QString( "00:00:00:01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString() );
+        EXPECT_EQ( QString( "00:00:00:01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString( false ) );
+        EXPECT_EQ( QString( "01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString() );
+        
+        EXPECT_EQ( QString( "00:00:00:00.001001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 1001 ) ).toString( false ) );
+        EXPECT_EQ( QString( "00.001001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 1001 ) ).toString() );
+
+        EXPECT_EQ( QString( "00:00:00:00.000001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::nanoseconds( 1001 ) ).toString( false ) );
+        EXPECT_EQ( QString( "00.000001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::nanoseconds( 1001 ) ).toString() );
+
+        EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString( false ) );
+        EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString() );
+
+        EXPECT_EQ( QString( "00:00:00:00.000 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString( false ) );
+        EXPECT_EQ( QString( "00:00:00:00.000 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString() );
     }
 
     TEST( TestUtils, Help )
