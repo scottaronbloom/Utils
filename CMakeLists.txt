@@ -107,5 +107,5 @@ else()
 endif()
 
 if( SAB_ENABLE_TESTING )
-	add_subdirectory(UnitTests)
+    add_subdirectory(UnitTests)
 endif()
