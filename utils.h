@@ -165,20 +165,106 @@ namespace NSABUtils
     
     SABUTILS_EXPORT QString secsToString( quint64 seconds );
 
+    template <typename U, typename V>
+    constexpr auto durationDiff( const U & lhs, const V & rhs )
+        -> typename std::common_type<U, V>::type
+    {
+        typedef typename std::common_type<U, V>::type Common;
+        return Common( lhs ) - Common( rhs );
+    }
+
+    template< typename T = std::chrono::microseconds >
     class SABUTILS_EXPORT CTimeString
     {
     public:
-        CTimeString(const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > &startEndTime); // highprecsion is microseconds
-        CTimeString(const std::chrono::system_clock::time_point & startTime, const std::chrono::system_clock::time_point & endTime);
-        CTimeString(const std::chrono::system_clock::duration & duration);
+        using TDays = std::chrono::duration< int, std::ratio< 3600 * 24 > >;
+  
+        CTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > & startEndTime ) : // highprecsion is microseconds
+            CTimeString( startEndTime.second, startEndTime.first )
+        {
+        }
+        
+        CTimeString( const std::chrono::system_clock::time_point & startTime, const std::chrono::system_clock::time_point & endTime ) :
+            CTimeString( endTime - startTime )
+        {
+        }
 
-        CTimeString(const QDateTime &startTime, const QDateTime &endTime); // limited to milliseconds
-        CTimeString(uint64_t msecs);
+        CTimeString( const QDateTime & startTime, const QDateTime & endTime ) : // limited to milliseconds
+            CTimeString( startTime.msecsTo( endTime ) )
+        {
+        }
 
-        QString toString(const QString & format = "dd:hh:mm:ss.zzz (SS seconds)") const; // dd -> days, hh -> hours, mm minutes, ss seconds, zzz milliseconds for Qt and microseconds for chrono based SS total seconds
-        std::string toStdString(const QString &format = "dd:hh:mm:ss.zzz (SS seconds)") const;
+        template<typename U, std::enable_if_t< !std::is_integral< U >::value, int > = 0 >
+        CTimeString( const U & duration )
+        {
+            fMicroSecondsAvailable = ( U::period::num == 1 ) && ( U::period::den >= 1000000ULL );
+            fDuration = std::chrono::duration_cast<std::chrono::microseconds>( duration );
+        }
+
+        template<typename U, std::enable_if_t< std::is_integral< U >::value, int > = 0 >
+        CTimeString( const U & duration ) :
+            CTimeString( std::chrono::milliseconds( duration ) )
+        {
+        }
+
+        QString toString( bool autoTrim ) const
+        {
+            return toString( "dd:hh:mm:ss.zzz (SS seconds)", autoTrim );
+        }
+
+        // dd -> days, hh -> hours, mm minutes, ss seconds, zzz milliseconds for Qt and microseconds for chrono based SS total seconds.  When autotrim is true, trims off days/hours/minutes if zero only when followed by a colon minutes and fractional are not removed
+        QString toString( const QString & format = "dd:hh:mm:ss.zzz (SS seconds)", bool autoTrim = true ) const
+        {
+            auto totalSeconds = std::chrono::duration_cast<std::chrono::seconds>( fDuration ).count();
+
+            auto remaining = std::chrono::duration_cast<std::chrono::microseconds>( fDuration );
+
+            auto uSecs = durationDiff( remaining, std::chrono::duration_cast<std::chrono::seconds>( remaining ) );
+            auto fracSeconds = fMicroSecondsAvailable ? std::chrono::duration_cast<std::chrono::microseconds>( uSecs ).count() : std::chrono::duration_cast<std::chrono::milliseconds>( uSecs ).count();
+            remaining = durationDiff( remaining, uSecs );
+
+            auto secsDuration = durationDiff( remaining, std::chrono::duration_cast<std::chrono::minutes>( remaining ) );
+            auto secs = std::chrono::duration_cast<std::chrono::seconds>( secsDuration ).count();
+            remaining = durationDiff( remaining, secsDuration );
+
+            auto minsDuration = durationDiff( remaining, std::chrono::duration_cast<std::chrono::hours>( remaining ) );
+            auto mins = std::chrono::duration_cast<std::chrono::minutes>( minsDuration ).count();
+            remaining = durationDiff( remaining, minsDuration );
+
+            auto hoursDuration = durationDiff( remaining, std::chrono::duration_cast<TDays>( remaining ) );
+            auto hours = std::chrono::duration_cast<std::chrono::hours>( hoursDuration ).count();
+            remaining = durationDiff( remaining, hoursDuration );
+
+            auto days = std::chrono::duration_cast<TDays>( remaining ).count();
+
+            QLocale locale;
+            QString retVal = format;
+            if ( autoTrim && ( days == 0 ) )
+                retVal.replace( "dd:", QString() );
+            else
+                retVal.replace( "dd", QString( "%1" ).arg( days, 2, 10, QChar( '0' ) ) );
+
+            if ( autoTrim && ( hours == 0 ) )
+                retVal.replace( "hh:", QString() );
+            else
+                retVal.replace( "hh", QString( "%1" ).arg( hours, 2, 10, QChar( '0' ) ) );
+            if ( autoTrim && ( mins == 0 ) )
+                retVal.replace( "mm:", QString() );
+            else
+                retVal.replace( "mm", QString( "%1" ).arg( mins, 2, 10, QChar( '0' ) ) );
+
+            retVal.replace( "ss", QString( "%1" ).arg( secs, 2, 10, QChar( '0' ) ) );
+            retVal.replace( "zzz", QString( "%1" ).arg( fracSeconds, ( fMicroSecondsAvailable ? 6 : 3 ), 10, QChar( '0' ) ) );
+            retVal.replace( "SS", locale.toString( totalSeconds ) );
+
+            return retVal;
+        }
+        std::string toStdString(const QString &format = "dd:hh:mm:ss.zzz (SS seconds)") const
+        {
+            return toString( format ).toStdString();
+        }
     private:
-        std::chrono::system_clock::duration fDuration;
+        T fDuration;
         bool fMicroSecondsAvailable{ false };
     };
 
