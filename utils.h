@@ -40,7 +40,7 @@
 #include <iostream>
 #include <optional>
 #include <QString>
-class QDateTime;
+#include <QDateTime>
 class QFont;
 class QPoint;
 
@@ -172,6 +172,9 @@ namespace NSABUtils
         typedef typename std::common_type<U, V>::type Common;
         return Common( lhs ) - Common( rhs );
     }
+
+    SABUTILS_EXPORT QTime msecsToTime( uint64_t msecs );
+
 
     template< typename T = std::chrono::microseconds >
     class SABUTILS_EXPORT CTimeString

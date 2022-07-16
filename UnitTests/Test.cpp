@@ -824,6 +824,13 @@ namespace
         EXPECT_EQ( QString( "1KiB" ), NSABUtils::NFileUtils::byteSizeString( 1024, true, true, 0U ) );
     }
 
+    TEST( TestUtils, TestTimeFromMSecs )
+    {
+        EXPECT_EQ( QTime( 0, 0, 1, 1 ), NSABUtils::msecsToTime( 1001 ) );
+        EXPECT_EQ( QTime( 0, 0, 1, 1 ), QTime::fromMSecsSinceStartOfDay( 1001 ) );
+
+    }
+
     TEST( TestUtils, TestTimeString )
     {
         EXPECT_EQ( QString( "00:00:00:01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString( false ) );
@@ -838,8 +845,8 @@ namespace
         EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString( false ) );
         EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString() );
 
-        EXPECT_EQ( QString( "00:00:00:00.000 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString( false ) );
-        EXPECT_EQ( QString( "00:00:00:00.000 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString() );
+        EXPECT_EQ( QString( "00:00:09:12.800482 (552 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString( false ) );
+        EXPECT_EQ( QString( "09:12.800482 (552 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString() );
     }
 
     TEST( TestUtils, Help )

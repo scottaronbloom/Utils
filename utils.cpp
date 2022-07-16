@@ -446,6 +446,33 @@ namespace NSABUtils
         return false;
     }
 
+    QTime msecsToTime( uint64_t msecs )
+    {
+        auto duration = std::chrono::milliseconds( msecs );
+
+        auto totalSeconds = std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
+
+        auto remaining = std::chrono::duration_cast<std::chrono::microseconds>( duration );
+
+        auto uSecs = durationDiff( remaining, std::chrono::duration_cast<std::chrono::seconds>( remaining ) );
+        auto fracSeconds = std::chrono::duration_cast<std::chrono::milliseconds>( uSecs ).count();
+        remaining = durationDiff( remaining, uSecs );
+
+        auto secsDuration = durationDiff( remaining, std::chrono::duration_cast<std::chrono::minutes>( remaining ) );
+        auto secs = std::chrono::duration_cast<std::chrono::seconds>( secsDuration ).count();
+        remaining = durationDiff( remaining, secsDuration );
+
+        auto minsDuration = durationDiff( remaining, std::chrono::duration_cast<std::chrono::hours>( remaining ) );
+        auto mins = std::chrono::duration_cast<std::chrono::minutes>( minsDuration ).count();
+        remaining = durationDiff( remaining, minsDuration );
+
+        auto hours = std::chrono::duration_cast<std::chrono::hours>( remaining ).count();
+
+        QTime retVal( hours, mins, secs );
+        retVal = retVal.addMSecs( fracSeconds );
+        return retVal;
+    }
+
 #ifdef Q_OS_WINDOWS
     QString getLastError()
     {
