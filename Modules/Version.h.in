@@ -90,6 +90,12 @@ namespace NVersion
             retVal += " Build Date: " + BUILD_DATE;
         return retVal;
     }
+
+    inline std::string getWindowTitle() 
+    { 
+        auto retVal = APP_NAME + " v" + getVersionString( true ) + " - http://" + HOMEPAGE;
+        return retVal;
+    }
 }
 
 #endif
