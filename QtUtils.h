@@ -39,6 +39,7 @@ class QTextStream;
 class QTimer;
 class QLayout;
 class QAbstractItemView;
+class QTreeWidgetItem;
 
 class QTableView;
 class QTreeView;
@@ -153,6 +154,7 @@ namespace NSABUtils
     SABUTILS_EXPORT int autoSize( QAbstractItemView * view ); // autoSize( table, table->horizontalHeader )
     SABUTILS_EXPORT int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth = 150 );
 
+    SABUTILS_EXPORT QTreeWidgetItem * nextVisibleItem( QTreeWidgetItem * item );
     SABUTILS_EXPORT void fetchMore( QAbstractItemModel * model, int maxFetches = 3 );
 
     template< typename T >

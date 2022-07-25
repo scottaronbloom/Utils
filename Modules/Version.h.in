@@ -27,20 +27,9 @@
 
 namespace NVersion
 {
-#cmakedefine VERSION_FILE_MAJOR_VERSION
-#ifdef VERSION_FILE_MAJOR_VERSION
     inline const int         MAJOR_VERSION    =  @VERSION_FILE_MAJOR_VERSION@;
-#endif
-
-#cmakedefine VERSION_FILE_MINOR_VERSION
-#ifdef VERSION_FILE_MINOR_VERSION
     inline const int         MINOR_VERSION    =  @VERSION_FILE_MINOR_VERSION@;
-#endif
-
-#cmakedefine VERSION_FILE_PATCH_VERSION
-#ifdef VERSION_FILE_PATCH_VERSION
     inline const std::string PATCH_VERSION    = "@VERSION_FILE_PATCH_VERSION@"; // string from git
-#endif
 
 #cmakedefine VERSION_FILE_DIFF
 #ifdef VERSION_FILE_DIFF
@@ -49,11 +38,7 @@ namespace NVersion
     inline const bool        MODIFIED         =  false;
 #endif
 
-#cmakedefine VERSION_FILE_APP_NAME
-#ifdef VERSION_FILE_APP_NAME
     inline const std::string APP_NAME         = "@VERSION_FILE_APP_NAME@";
-#endif
-
 #cmakedefine VERSION_FILE_VENDOR
 #ifdef VERSION_FILE_VENDOR
     inline const std::string VENDOR           = "@VERSION_FILE_VENDOR@";
@@ -88,6 +73,12 @@ namespace NVersion
             retVal += "*";
         if ( !BUILD_DATE.empty() )
             retVal += " Build Date: " + BUILD_DATE;
+        return retVal;
+    }
+
+    inline std::string getWindowTitle() 
+    { 
+        auto retVal = APP_NAME + " v" + getVersionString( true ) + " - http://" + HOMEPAGE;
         return retVal;
     }
 }
