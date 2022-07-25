@@ -37,6 +37,7 @@
 #include <unordered_set>
 #include <chrono>
 #include <QString>
+#include <cctype>
 
 #include "EnumUtils.h"
 #include "StringComparisonClasses.h"
