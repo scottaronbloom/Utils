@@ -36,6 +36,7 @@
 #include <cstdint>
 #include <unordered_set>
 #include <chrono>
+#include <cctype>
 #include <QString>
 #include <cctype>
 
