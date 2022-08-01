@@ -27,42 +27,43 @@ ELSE()
 ENDIF()
 
 set(qtproject_SRCS
-    AutoWaitCursor.cpp
     AutoFetch.cpp
+    AutoWaitCursor.cpp
     BackgroundFileCheck.cpp
     ButtonEnabler.cpp
-    WidgetEnabler.cpp
+    CollapsableGroupBox.cpp
     ConsoleUtils.cpp
     DelayComboBox.cpp
     DelayLineEdit.cpp
     DelaySpinBox.cpp
     DoubleProgressDlg.cpp
-    ImageScrollBar.cpp
-    utils.cpp
     FileCompare.cpp
     FileUtils.cpp
     FromString.cpp
+    HyperLinkLineEdit.cpp
+    ImageScrollBar.cpp
     JsonUtils.cpp
     MD5.cpp
     MenuBarEx.cpp
-    SelectFileUrl.cpp
-    StringUtils.cpp
-    StringComparisonClasses.cpp
+    QtDumper.cpp
     QtUtils.cpp
+    SABUtilsResources.cpp
     ScrollMessageBox.cpp
+    SelectFileUrl.cpp
     SpinBox64.cpp
     SpinBox64U.cpp
-    CollapsableGroupBox.cpp
-    WordExp.cpp
-    QtDumper.cpp
+    StayAwake.cpp
+    StringComparisonClasses.cpp
+    StringUtils.cpp
+    ${SYSTEMINFO_SRCS} 
     ThreadedProgressDialog.cpp
     UtilityModels.cpp
     UtilityViews.cpp
-    VSInstallUtils.cpp
-    StayAwake.cpp   
+    utils.cpp
     ValidateOpenSSL.cpp
-    SABUtilsResources.cpp
-    ${SYSTEMINFO_SRCS} SystemInfo.cpp
+    VSInstallUtils.cpp
+    WidgetEnabler.cpp
+    WordExp.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -72,47 +73,48 @@ set(qtproject_H
     AutoWaitCursor.h
     BackgroundFileCheck.h
     ButtonEnabler.h
-    WidgetEnabler.h
+    CollapsableGroupBox.h
     DelayComboBox.h
     DelayLineEdit.h
     DelaySpinBox.h
     DoubleProgressDlg.h
+    HyperLinkLineEdit.h
     ImageScrollBar.h
     MD5.h
+    MenuBarEx.h
+    ScrollMessageBox.h
+    SelectFileUrl.h
     SpinBox64.h
     SpinBox64U.h
-    ScrollMessageBox.h
-    CollapsableGroupBox.h
     ThreadedProgressDialog.h
     UtilityModels.h
     UtilityViews.h
-    MenuBarEx.h
-    SelectFileUrl.h
+    WidgetEnabler.h
 )
 
 set(project_H
     AutoFetch.h
     ConsoleUtils.h
-    utils.h
+    EnumUtils.h
     FileCompare.h
     FileUtils.h
     FromString.h
-    JsonUtils.h
-    SpinBox64_StepType.h
-    QtUtils.h
     HashUtils.h
-    EnumUtils.h
-    StringComparisonClasses.h
-    StringUtils.h
-    WordExp.h
+    JsonUtils.h
     QtDumper.h
+    QtUtils.h
     RevertValue.h
-    VSInstallUtils.h
-    StayAwake.h   
-    ValidateOpenSSL.h
     SABUtilsExport.h
     SABUtilsResources.h
+    SpinBox64_StepType.h
+    StayAwake.h   
+    StringComparisonClasses.h
+    StringUtils.h
     SystemInfo.h
+    utils.h
+    WordExp.h
+    ValidateOpenSSL.h
+    VSInstallUtils.h
 )
 
 set(qtproject_UIS
