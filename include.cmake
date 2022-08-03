@@ -32,7 +32,6 @@ set(qtproject_SRCS
     BackgroundFileCheck.cpp
     ButtonEnabler.cpp
     CollapsableGroupBox.cpp
-    ConsoleUtils.cpp
     DelayComboBox.cpp
     DelayLineEdit.cpp
     DelaySpinBox.cpp
@@ -94,7 +93,6 @@ set(qtproject_H
 
 set(project_H
     AutoFetch.h
-    ConsoleUtils.h
     EnumUtils.h
     FileCompare.h
     FileUtils.h
@@ -116,6 +114,11 @@ set(project_H
     ValidateOpenSSL.h
     VSInstallUtils.h
 )
+
+if(WIN32)
+    set(qtproject_SRCS ${qtproject_SRCS} ConsoleUtils.cpp)
+    set(project_H ${project_H} ConsoleUtils.h)
+endif()
 
 set(qtproject_UIS
     ScrollMessageBox.ui
