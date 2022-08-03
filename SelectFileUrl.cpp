@@ -38,6 +38,9 @@
 
 namespace NSABUtils
 {
+#ifndef Q_OS_WIN
+#define S_OK 0
+#endif
     CSelectFileUrl::CSelectFileUrl( QObject * parent ) :
         QObject( parent )
     {

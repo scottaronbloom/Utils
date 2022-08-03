@@ -126,8 +126,6 @@ namespace NSABUtils
         fSystemInformation.push_back( { "Total Swap", locale.toString( (qlonglong)info.totalswap ).toStdString() } );
         fSystemInformation.push_back( { "Free Swap", locale.toString( (qlonglong)info.freeswap ).toStdString() } );
         fSystemInformation.push_back( { "Number of Processes", locale.toString( (qlonglong)info.procs ).toStdString() } );
-
-    
     }
 
     void CSystemInfo::LoadNICInfo()

@@ -48,7 +48,7 @@ function(print_target_properties tgt)
     endforeach(prop)
 endfunction(print_target_properties)
 
-if( NOT WIN32 )
+if ( NOT WIN32 )
     find_package( OpenSSL REQUIRED )
 endif()
 

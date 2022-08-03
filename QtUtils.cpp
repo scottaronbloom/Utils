@@ -990,8 +990,7 @@ namespace NSABUtils
         for ( int ii = 0; ii < size; ++ii )
         {
             auto offset = &arr[ii] - baseArray;
-            auto memZero = (intptr_t)&arr[ii];
-            (void)memZero;
+            // auto memZero = (intptr_t)&arr[ii];
             if ( colCount == 0 )
                 retVal += QString( "%1-%2: " ).arg( getHexValue( offset ) );// .arg( getHexValue( memZero ) );
             else

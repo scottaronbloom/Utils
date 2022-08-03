@@ -672,8 +672,8 @@ namespace NSABUtils
         }
         else
         {
-            if ( ( !fSetValueCalled && ( (fPrimaryBar->value() == 0) && (fSecondaryBar->value() == 0) ) )
-                || (fPrimaryBar->isValueMinimum() && fSecondaryBar->isValueMinimum()))
+            if ( ( !fSetValueCalled && ( ( fPrimaryBar->value() == 0 ) && ( fSecondaryBar->value() == 0 ) ) )
+                || ( fPrimaryBar->isValueMinimum() && fSecondaryBar->isValueMinimum() ) )
             {
                 if (primValueChanged)
                     fStartPrimaryTime.start();

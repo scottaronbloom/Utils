@@ -465,7 +465,7 @@ namespace NSABUtils
                 suffix = suffix.left(1);
 
             QLocale locale;
-            auto retVal = QString("%1%2%3B").arg(locale.toString( static_cast< qulonglong >( size ) ) ).arg(remainder != 0 ? QString(".%1").arg(remainder) : QString()).arg(suffix);
+            auto retVal = QString("%1%2%3B").arg( locale.toString( static_cast< qulonglong >( size ) ) ).arg(remainder != 0 ? QString(".%1").arg(remainder) : QString()).arg(suffix);
             return retVal;
         }
 
@@ -1277,6 +1277,7 @@ namespace NSABUtils
             (void)dt;
             (void)ft;
             (void)msg;
+            retVal = true;
 #endif
             return retVal;
         }

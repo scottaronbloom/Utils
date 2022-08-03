@@ -46,6 +46,12 @@
 
 #include <locale>
 
+#ifdef Q_OS_WIN32
+#    define NODISCARD [[nodiscard]]
+#else
+#    define NODISCARD 
+#endif
+
 namespace NSABUtils
 {
     namespace NStringUtils
