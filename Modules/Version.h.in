@@ -66,7 +66,10 @@ namespace NVersion
 
     inline std::string getVersionString(bool full) 
     { 
-        auto retVal = std::to_string( MAJOR_VERSION ) + "." + std::to_string( MINOR_VERSION );
+        auto retVal = std::to_string( MAJOR_VERSION ) + ".";
+        if ( MINOR_VERSION < 10 )
+            retVal += '0';
+        retVal += std::to_string( MINOR_VERSION );
         if ( full )
             retVal += "." + PATCH_VERSION;
         if ( MODIFIED )
