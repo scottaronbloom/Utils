@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "SystemInfo.h"
-#include "nodsicard.h"
+#include "nodiscard.h"
 
 #include <QDateTime>
 #include <QTimeZone>
