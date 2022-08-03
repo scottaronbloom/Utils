@@ -99,9 +99,13 @@ if ( SABUTILS_DLL )
     set_target_properties( SABUtils PROPERTIES 
                                 FOLDER SharedLibs 
                                 DEBUG_POSTFIX d
-                          )
+   ) 
+if ( WIN32 )
     INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.dll DESTINATION . )
     INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
+else()
+    INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/lib$<TARGET_FILE_BASE_NAME:SABUtils>.so DESTINATION . )
+endif()
 else()
     set_target_properties( SABUtils PROPERTIES FOLDER Libs )
 endif()
