@@ -32,6 +32,8 @@
 #include <combaseapi.h>
 #include <shtypes.h>
 #include <ShlObj_core.h>
+#else
+#define S_OK 0
 #endif
 
 namespace NSABUtils
@@ -57,6 +59,8 @@ namespace NSABUtils
 
             path = path.replace( "/", "\\" );
             fPath = ILCreateFromPath( reinterpret_cast<const wchar_t *>(path.utf16()) );
+#else
+            (void)path;
 #endif
         }
 
