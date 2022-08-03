@@ -432,7 +432,7 @@ namespace NSABUtils
             if (!prettyPrint)
             {
                 QLocale locale;
-                return locale.toString(size);
+                return locale.toString( static_cast< qulonglong >( size ) );
             }
 
             auto suffixes = std::vector< QString >({ "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" });
@@ -465,7 +465,7 @@ namespace NSABUtils
                 suffix = suffix.left(1);
 
             QLocale locale;
-            auto retVal = QString("%1%2%3B").arg(locale.toString(size)).arg(remainder != 0 ? QString(".%1").arg(remainder) : QString()).arg(suffix);
+            auto retVal = QString("%1%2%3B").arg(locale.toString( static_cast< qulonglong >( size ) ) ).arg(remainder != 0 ? QString(".%1").arg(remainder) : QString()).arg(suffix);
             return retVal;
         }
 
@@ -1140,6 +1140,7 @@ namespace NSABUtils
             return retVal;
         }
 
+#ifdef Q_OS_WINDOWS
         QString getWindowsError(int errorCode)
         {
             QString ret;
@@ -1176,7 +1177,6 @@ namespace NSABUtils
             return ret;
         }
 
-#ifdef Q_OS_WINDOWS
         static inline bool toFileTime(const QDateTime &date, FILETIME *fileTime)
         {
             SYSTEMTIME sTime;
@@ -1272,6 +1272,11 @@ namespace NSABUtils
             }
             retVal = setDirTimeStamp(handle, dt, ft, msg);
             CloseHandle(handle);
+#else
+            (void)path;
+            (void)dt;
+            (void)ft;
+            (void)msg;
 #endif
             return retVal;
         }
