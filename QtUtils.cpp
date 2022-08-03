@@ -46,6 +46,8 @@
 #include <QXmlQuery>
 #endif
 
+#include <cstring>
+
 namespace NSABUtils
 {
     QString allFilesFilter()
@@ -989,6 +991,7 @@ namespace NSABUtils
         {
             auto offset = &arr[ii] - baseArray;
             auto memZero = (intptr_t)&arr[ii];
+            (void)memZero;
             if ( colCount == 0 )
                 retVal += QString( "%1-%2: " ).arg( getHexValue( offset ) );// .arg( getHexValue( memZero ) );
             else
