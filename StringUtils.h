@@ -24,6 +24,7 @@
 #define __STRINGUTILS_H
 
 #include "SABUtilsExport.h"
+#include "nodiscard.h"
 
 #include <list>
 #include <set>
@@ -454,7 +455,7 @@ namespace NSABUtils
         SABUTILS_EXPORT bool isSimilar(const QString &lhs, const QString &rhs, bool inorder); // is every important word in the rhs in the left
 
         template< typename T >
-        T [[nodiscard]] rtrim( T string )
+        T NODISCARD rtrim( T string )
         {
             string.erase( std::find_if( string.rbegin(), string.rend(), []( unsigned char ch )
                      {
@@ -464,7 +465,7 @@ namespace NSABUtils
         }
 
         template< typename T >
-        T [[nodiscard]] ltrim( T string )
+        T NODISCARD ltrim( T string )
         {
             string.erase( string.begin(), std::find_if( string.begin(), string.end(), []( unsigned char ch )
                      {
@@ -474,7 +475,7 @@ namespace NSABUtils
         }
 
         template< typename T >
-        T [[nodiscard]] trim( T string )
+        T NODISCARD trim( T string )
         {
             auto retVal = rtrim( string );
             retVal = ltrim( retVal );

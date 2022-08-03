@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "SystemInfo.h"
+#include "nodsicard.h"
+
 #include <QDateTime>
 #include <QTimeZone>
 #include <QDebug>
@@ -599,7 +601,7 @@ namespace NSABUtils
         {
         }
 
-        [[nodiscard]] std::list< uint64_t > findCPUsForPackage( const std::unordered_map< uint64_t, std::shared_ptr< SCPUInfo > > & cpus )
+        NODISCARD std::list< uint64_t > findCPUsForPackage( const std::unordered_map< uint64_t, std::shared_ptr< SCPUInfo > > & cpus )
         {
             std::list< uint64_t > retVal;
             for ( auto && ii : cpus )
@@ -669,7 +671,7 @@ namespace NSABUtils
         std::list< std::shared_ptr< SCPUInfo > > fProcessors; // only valid when it is a package
     };
 
-    [[nodiscard]] std::list< std::shared_ptr< SPackageInfo > > getCPUs()
+    NODISCARD std::list< std::shared_ptr< SPackageInfo > > getCPUs()
     {
         DWORD size = 0;
         auto rc = GetLogicalProcessorInformation( nullptr, &size );

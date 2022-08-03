@@ -24,6 +24,7 @@
 #define __QTUTILS_H
 
 #include "SABUtilsExport.h"
+#include "nodiscard.h"
 
 class QString;
 class QStringRef;
@@ -127,8 +128,8 @@ namespace NSABUtils
     {
         SDateSearchOptions() {}
         SDateSearchOptions( bool includeHuristics, bool includeDateTimeFormat ) :
-            fIncludeHuristics( includeHuristics ),
-            fIncludeDateTimeFormats( includeDateTimeFormat )
+            fIncludeDateTimeFormats( includeDateTimeFormat ),
+            fIncludeHuristics( includeHuristics )
         {}
         bool fIncludeDateTimeFormats{ true };
         bool fIncludeHuristics{ true };
@@ -210,7 +211,7 @@ namespace NSABUtils
 
     SABUTILS_EXPORT void appendToLog(QPlainTextEdit * te, const QString & txt, std::pair< QString, bool > & previousText, QTextStream * ts = nullptr);
 
-    SABUTILS_EXPORT [[nodiscard]] uint8_t * imageToPixels(const QImage & image); // allocates the space, user is responsible for memory deletion using array delete
+    SABUTILS_EXPORT NODISCARD uint8_t * imageToPixels(const QImage & image); // allocates the space, user is responsible for memory deletion using array delete
 
     SABUTILS_EXPORT QString getHexValue(intptr_t value);
     SABUTILS_EXPORT QString dumpArray(const char * title, const uint8_t * arr, const uint8_t * baseArray, int size, bool asRGB = false, int colsPerRow = 20);
