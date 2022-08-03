@@ -41,6 +41,8 @@
 #include <optional>
 #include <QString>
 #include <QDateTime>
+#include <QLocale>
+
 class QFont;
 class QPoint;
 
