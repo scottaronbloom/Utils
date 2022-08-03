@@ -666,6 +666,8 @@ namespace
         //EXPECT_TRUE( aOK );
     }
 #elif DONTTEST
+#define USER QString( R"(scott)" )
+#define HOME_DIR QString( R"(/home/)" ) + USER
     TEST( TestUtils, TestWordExp )
     {
         bool aOK = false;
@@ -674,11 +676,11 @@ namespace
         EXPECT_EQ( "", CWordExp::getHomeDir( "unknown", &aOK ) );
         EXPECT_FALSE( aOK );
 
-        EXPECT_EQ( "/home/" USER, CWordExp::expandTildePath( "~" HOME, &aOK ) );
+        EXPECT_EQ( "/home/" USER, CWordExp::expandTildePath( "~" + HOME, &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~" HOME/", &aOK ) );
+        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~" + HOME + "/", &aOK ) );
         EXPECT_TRUE( aOK );
-        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~" HOME\\", &aOK ) );
+        EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~" + HOME + "\\", &aOK ) );
         EXPECT_TRUE( aOK );
         EXPECT_EQ( "/home/" USER "/", CWordExp::expandTildePath( "~\\", &aOK ) );
         EXPECT_TRUE( aOK );

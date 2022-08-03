@@ -30,7 +30,9 @@
 #include <QTimer>
 #include <optional>
 
+#ifdef Q_OS_WINDOWS
 extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
+#endif
 
 #ifdef _DEBUG
 //#define DEBUG_BACKGROUND_FILE_CHECK
@@ -144,11 +146,13 @@ namespace NSABUtils
             return;
         }
 
+#ifdef Q_OS_WINDOWS
         CRevertValue revertValue( qt_ntfs_permission_lookup );
         if ( fImpl->fUseNTFSPermissions )
         {
             qt_ntfs_permission_lookup++;
         }
+#endif
 
         fImpl->dumpDebug( "checkPathInternal exists: " );
         auto fi = QFileInfo( fImpl->fPathName );

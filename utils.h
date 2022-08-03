@@ -260,7 +260,7 @@ namespace NSABUtils
 
             retVal.replace( "ss", QString( "%1" ).arg( secs, 2, 10, QChar( '0' ) ) );
             retVal.replace( "zzz", QString( "%1" ).arg( fracSeconds, ( fMicroSecondsAvailable ? 6 : 3 ), 10, QChar( '0' ) ) );
-            retVal.replace( "SS", locale.toString( totalSeconds ) );
+            retVal.replace( "SS", locale.toString( static_cast< qulonglong >( totalSeconds ) ) );
 
             return retVal;
         }

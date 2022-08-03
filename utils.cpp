@@ -287,67 +287,6 @@ namespace NSABUtils
         return retVal;
     }
 
-    //std::string getTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > &startEndTime, bool reportTotalSeconds, bool highPrecision, bool alwaysShowDaysAndHours )
-    //{
-    //    auto duration = startEndTime.second - startEndTime.first;
-    //    return getTimeString( duration );
-    //}
-
-    //QString getTimeString( const QDateTime &startTime, const QDateTime &endTime, bool reportTotalSeconds, bool highPrecision, bool alwaysShowDaysAndHours )
-    //{
-    //    auto msecs = startTime.msecsTo( endTime );
-    //    return getTimeString( msecs );
-    //}
-
-
-    //std::string getTimeString( const std::chrono::system_clock::duration &duration, bool reportTotalSeconds, bool highPrecision, bool alwaysShowHours )
-    //{
-    //    auto totalSeconds = getSeconds( duration, highPrecision );
-    //    auto hrs = static_cast<int64_t>( std::chrono::duration_cast<std::chrono::hours>( duration ).count() );
-    //    auto mins = static_cast<int64_t>( std::chrono::duration_cast<std::chrono::minutes>( duration ).count() - ( hrs * 60 ) );
-    //    double secs = 1.0 * std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
-    //    if ( highPrecision )
-    //        secs = ( std::chrono::duration_cast<std::chrono::duration< double, std::micro >>( duration ).count() ) / 1000000.0;
-    //    secs -= ( ( mins * 60 ) + ( hrs * 3600 ) );
-
-    //    std::ostringstream oss;
-    //    if ( alwaysShowHours || ( hrs > 0 ) )
-    //    {
-    //        oss << hrs << " hour";
-    //        if ( hrs != 1 )
-    //            oss << "s";
-    //        oss << ", ";
-    //    }
-
-    //    if ( mins > 0 )
-    //    {
-    //        oss << mins << " minute";
-    //        if ( mins != 1 )
-    //            oss << "s";
-    //        oss << ", ";
-    //    }
-
-    //    if ( highPrecision )
-    //    {
-    //        oss.setf( std::ios::fixed, std::ios::floatfield );
-    //        oss.precision( 6 );
-    //    }
-
-    //    oss << secs << " second";
-
-    //    if ( secs != 1 )
-    //        oss << "s";
-    //    if ( reportTotalSeconds && ( totalSeconds > 60 ) )
-    //    {
-    //        oss << ", (" << totalSeconds << " second";
-    //        if ( totalSeconds != 1 )
-    //            oss << "s";
-    //        oss << ")";
-    //    }
-    //    return oss.str();
-    //}
-
-
     QString secsToString( quint64 seconds)
     {
         CTimeString ts( seconds * 1000 );
@@ -376,13 +315,13 @@ namespace NSABUtils
 #else
     char GetChar()
     {
-        char ch = 0;
         struct termios oldt, newt;
 
         tcgetattr(fileno( stdin ), &oldt);
         newt = oldt;
         newt.c_lflag &= ~(ICANON | ECHO);
         auto aOK = tcsetattr(fileno(stdin), TCSANOW, &newt);
+        (void)aOK;
         auto ch = getchar();
         tcsetattr(fileno(stdin), TCSANOW, &oldt);
         return ch;
@@ -450,8 +389,6 @@ namespace NSABUtils
     {
         auto duration = std::chrono::milliseconds( msecs );
 
-        auto totalSeconds = std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
-
         auto remaining = std::chrono::duration_cast<std::chrono::microseconds>( duration );
 
         auto uSecs = durationDiff( remaining, std::chrono::duration_cast<std::chrono::seconds>( remaining ) );
@@ -501,6 +438,7 @@ namespace NSABUtils
 #else
     QString getLastError(int errorID) 
     {
+        (void)errorID;
         return QString();
     }
     
