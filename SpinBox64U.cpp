@@ -30,6 +30,8 @@
 #include <QApplication>
 #include <cmath>
 
+Q_DECLARE_METATYPE(qulonglong);
+
 namespace NSABUtils
 {
     enum class EEmitPolicy
@@ -428,8 +430,6 @@ namespace NSABUtils
 
         return str;
     }
-
-    Q_DECLARE_METATYPE(qulonglong);
 
     CSpinBox64U::CSpinBox64U(QWidget* parent /*= 0 */) :
         QAbstractSpinBox(parent),

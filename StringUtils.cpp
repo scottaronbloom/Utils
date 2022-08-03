@@ -2951,6 +2951,7 @@ namespace NSABUtils
 
             bool aOK;
             int value = romanToDecimal( string, aOK );
+            (void)value;
             return aOK;
         }
 

@@ -31,9 +31,10 @@
 
 #include <cmath>
 
+Q_DECLARE_METATYPE(qlonglong);
+
 namespace NSABUtils
 {
-
     enum class EEmitPolicy
     {
         eEmitIfChanged,
@@ -430,8 +431,6 @@ namespace NSABUtils
 
         return str;
     }
-
-    Q_DECLARE_METATYPE(qlonglong);
 
     CSpinBox64::CSpinBox64(QWidget* parent /*= 0 */) :
         QAbstractSpinBox(parent),

@@ -24,9 +24,9 @@
 #include "StayAwake.h"
 #include <QThread>
 
+#ifdef Q_OS_WINDOWS
 #include <qt_windows.h>
 
-#ifdef Q_OS_WINDOWS
 namespace NSABUtils
 {
     void CStayAwake::run()

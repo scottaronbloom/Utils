@@ -29,42 +29,40 @@
 #include <sys/resource.h>
 #include <sys/utsname.h>
 
-#include "qt_prolog.h"
 #include <QLocale>
-#include "qt_epilog.h"
 
-namespace NSystemInfo
+namespace NSABUtils
 {
-    bool SSystemInfo::hasSystemInfo()
+    bool CSystemInfo::hasSystemInfo()
     {
         return true;
     }
 
-    void SSystemInfo::LoadMemoryInfo( bool baseInfo )
+    void CSystemInfo::LoadMemoryInfo( bool baseInfo )
     {
         QLocale locale;
         struct sysinfo info;
         if ( sysinfo( &info ) != 0 )
             return;
         
-        fSystemMemoryData.push_back( QPair< QString, QString >( "Total Physical", locale.toString( (qlonglong)info.totalram * info.mem_unit) ) );
-        fSystemMemoryData.push_back( QPair< QString, QString >( "Available Physical", locale.toString( (qlonglong)info.freeram * info.mem_unit) ) );
-        fSystemMemoryData.push_back( QPair< QString, QString >( "Shared Ram", locale.toString( (qlonglong)info.sharedram * info.mem_unit) ) );
-        fSystemMemoryData.push_back( QPair< QString, QString >( "Buffer Ram", locale.toString( (qlonglong)info.bufferram * info.mem_unit) ) );
-        fSystemMemoryData.push_back( QPair< QString, QString >( "Total high memory size", locale.toString( (qlonglong)info.totalhigh * info.mem_unit) ) );
-        fSystemMemoryData.push_back( QPair< QString, QString >( "Available high memory size", locale.toString( (qlonglong)info.freehigh * info.mem_unit) ) );
+        fSystemMemoryData.push_back( { "Total Physical", locale.toString( (qlonglong)info.totalram * info.mem_unit).toStdString() } );
+        fSystemMemoryData.push_back( { "Available Physical", locale.toString( (qlonglong)info.freeram * info.mem_unit).toStdString() } );
+        fSystemMemoryData.push_back( { "Shared Ram", locale.toString( (qlonglong)info.sharedram * info.mem_unit).toStdString() } );
+        fSystemMemoryData.push_back( { "Buffer Ram", locale.toString( (qlonglong)info.bufferram * info.mem_unit).toStdString() } );
+        fSystemMemoryData.push_back( { "Total high memory size", locale.toString( (qlonglong)info.totalhigh * info.mem_unit).toStdString() } );
+        fSystemMemoryData.push_back( { "Available high memory size", locale.toString( (qlonglong)info.freehigh * info.mem_unit).toStdString() } );
 
         struct rusage rUsage;
         bool aOK = getrusage( RUSAGE_SELF, &rUsage ) == 0;
         if ( aOK )
         {
-            fApplicationMemoryData.push_back( QPair< QString, QString >( "Maximum resident set size", locale.toString( (qlonglong)rUsage.ru_maxrss ) ) );
+            fApplicationMemoryData.push_back( { "Maximum resident set size", locale.toString( (qlonglong)rUsage.ru_maxrss ).toStdString() } );
             if ( baseInfo )
-                sBaseApplicationMemory = locale.toString( (qlonglong)rUsage.ru_maxrss );
+                sBaseApplicationMemory = locale.toString( (qlonglong)rUsage.ru_maxrss ).toStdString();
 
-            fApplicationMemoryData.push_back( QPair< QString, QString >( "Integral shared memory size", locale.toString( (qlonglong)rUsage.ru_ixrss ) ) );
-            fApplicationMemoryData.push_back( QPair< QString, QString >( "Integral unshared data size", locale.toString( (qlonglong)rUsage.ru_idrss ) ) );
-            fApplicationMemoryData.push_back( QPair< QString, QString >( "Integral unshared stack size", locale.toString( (qlonglong)rUsage.ru_isrss ) ) );
+            fApplicationMemoryData.push_back( { "Integral shared memory size", locale.toString( (qlonglong)rUsage.ru_ixrss ).toStdString() } );
+            fApplicationMemoryData.push_back( { "Integral unshared data size", locale.toString( (qlonglong)rUsage.ru_idrss ).toStdString() } );
+            fApplicationMemoryData.push_back( { "Integral unshared stack size", locale.toString( (qlonglong)rUsage.ru_isrss ).toStdString() } );
         }
     }
 
@@ -82,7 +80,7 @@ namespace NSystemInfo
         osVersion += uts.version ? uts.version : "";
     }
 
-    std::string SSystemInfo::getOSVersion()
+    std::string CSystemInfo::getOSVersion()
     {
         std::string version;
         std::string name;
@@ -90,7 +88,7 @@ namespace NSystemInfo
         return version;
     }
 
-    std::string SSystemInfo::getOSName()
+    std::string CSystemInfo::getOSName()
     {
         std::string version;
         std::string name;
@@ -98,7 +96,7 @@ namespace NSystemInfo
         return name;
     }
 
-    void SSystemInfo::LoadSystemInfo()
+    void CSystemInfo::LoadSystemInfo()
     {
         QLocale locale;
         struct sysinfo info;
@@ -108,31 +106,31 @@ namespace NSystemInfo
         std::string version;
         std::string name;
         getOSInfo( name, version );
-        fSystemInformation.push_back( QPair< QString, QString >( "OS", QString::fromStdString( name ) ) );
-        fSystemInformation.push_back( QPair< QString, QString >( "OS Version", QString::fromStdString( version ) ) );
+        fSystemInformation.push_back( { "OS", QString::fromStdString( name ).toStdString() } );
+        fSystemInformation.push_back( { "OS Version", QString::fromStdString( version ).toStdString() } );
 
         int days = info.uptime / 86400;
         int hours = ( info.uptime / 3600 ) - ( days * 24 );
         int mins = ( info.uptime / 60 ) - ( days * 1440 ) - ( hours * 60 );
-        fSystemInformation.push_back( QPair< QString, QString >( "Uptime", QString( "%1 days, %2 hours, %3 minutes, %4 seconds" )
+        fSystemInformation.push_back( { "Uptime", QString( "%1 days, %2 hours, %3 minutes, %4 seconds" )
                     .arg( days )
                     .arg( hours )
                     .arg( mins )
-                    .arg( info.uptime % 60 ) ) )
+                    .arg( info.uptime % 60 ).toStdString() } )
                     ;
-        fSystemInformation.push_back( QPair< QString, QString >( "Load Avgs", QString( "1min(%1) 5min(%2) 15min(%3)" )
+        fSystemInformation.push_back( { "Load Avgs", QString( "1min(%1) 5min(%2) 15min(%3)" )
                     .arg( locale.toString( info.loads[ 0 ]/65536.0, 'g', 3 ) )
                     .arg( locale.toString( info.loads[ 1 ]/65536.0, 'g', 3 ) )
-                    .arg( locale.toString( info.loads[ 2 ]/65536.0, 'g', 3 ) ) ) )
+                    .arg( locale.toString( info.loads[ 2 ]/65536.0, 'g', 3 ) ).toStdString() } )
                     ;
-        fSystemInformation.push_back( QPair< QString, QString >( "Total Swap", locale.toString( (qlonglong)info.totalswap ) ) );
-        fSystemInformation.push_back( QPair< QString, QString >( "Free Swap", locale.toString( (qlonglong)info.freeswap ) ) );
-        fSystemInformation.push_back( QPair< QString, QString >( "Number of Processes", locale.toString( (qlonglong)info.procs ) ) );
+        fSystemInformation.push_back( { "Total Swap", locale.toString( (qlonglong)info.totalswap ).toStdString() } );
+        fSystemInformation.push_back( { "Free Swap", locale.toString( (qlonglong)info.freeswap ).toStdString() } );
+        fSystemInformation.push_back( { "Number of Processes", locale.toString( (qlonglong)info.procs ).toStdString() } );
 
     
     }
 
-    void SSystemInfo::LoadNICInfo()
+    void CSystemInfo::LoadNICInfo()
     {
     }
 }
