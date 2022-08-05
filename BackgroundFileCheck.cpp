@@ -146,6 +146,12 @@ namespace NSABUtils
             return;
         }
 
+        if ( fImpl->fPathName.startsWith( R"(\\)" ) || fImpl->fPathName.startsWith( "//" ) )
+        {
+            fImpl->fRetVal = std::make_pair( true, QString() );
+            return;
+        }
+
 #ifdef Q_OS_WINDOWS
         CRevertValue revertValue( qt_ntfs_permission_lookup );
         if ( fImpl->fUseNTFSPermissions )

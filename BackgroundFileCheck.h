@@ -35,7 +35,7 @@ namespace NSABUtils
         Q_OBJECT;
     public:
         CBackgroundFileCheck( QObject * parent = nullptr );
-        ~CBackgroundFileCheck();
+        virtual ~CBackgroundFileCheck();
         
         void stop( bool markAsStopped=true );
 
