@@ -43,14 +43,9 @@
 
 #include "EnumUtils.h"
 #include "StringComparisonClasses.h"
+#include "nodiscard.h"
 
 #include <locale>
-
-#ifdef Q_OS_WIN32
-#    define NODISCARD [[nodiscard]]
-#else
-#    define NODISCARD 
-#endif
 
 namespace NSABUtils
 {
