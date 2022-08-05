@@ -41,9 +41,6 @@ SAB_UNIT_TEST(Utils
     testProjectName
     )
 
-message( STATUS "DEBUG_PATH=${DEBUG_PATH}" )
-
-message( STATUS "testProjectName=${testProjectName}" )
 set_target_properties( ${testProjectName} PROPERTIES 
                                     VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${testProjectName}>" 
                                     VS_DEBUGGER_COMMAND "$<TARGET_FILE:${testProjectName}>" 
