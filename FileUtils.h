@@ -31,6 +31,8 @@
 #include <unordered_map>
 #include <QStringList>
 #include <QFileDevice>
+#include <QList>
+
 class QFileInfo;
 class QDateTime;
 class QString;
@@ -137,6 +139,8 @@ namespace NSABUtils
         SABUTILS_EXPORT QString getWindowsError( int errorCode ); // returns empty string for non-windows
 
         SABUTILS_EXPORT QString getCorrectPathCase( QString path ); // note, on linux returns path, windows does the actual analysis, and returns the absolute path
+
+        SABUTILS_EXPORT QList< QFileInfo > findFilesInDir( const QDir & dir, const QStringList & nameFilters, bool recursive );
     }
 }
 #endif

@@ -392,6 +392,22 @@ namespace NSABUtils
             return true;
         }
 
+        QList< QFileInfo > findFilesInDir( const QDir & dir, const QStringList & nameFilters, bool recursive )
+        {
+
+            //qDebug() << dir.absolutePath();
+            auto retVal = dir.entryInfoList( nameFilters );
+            if ( recursive )
+            {
+                auto subDirs = dir.entryInfoList( QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot );
+                for ( auto && ii : subDirs )
+                {
+                    retVal << findFilesInDir( QDir( ii.absoluteFilePath() ), nameFilters, recursive );
+                }
+            }
+            return retVal;
+        }
+
         template< typename T >
         std::pair< T, T > correctFixedPointRemainder(T inValue, uint8_t precisionIn, uint8_t precisionOut)
         {
