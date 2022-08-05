@@ -486,6 +486,8 @@ namespace NSABUtils
 
         SABUTILS_EXPORT QString removeDiacriticalCharacters( const QString & str );
         SABUTILS_EXPORT bool isDiacriticalCharacter( const QChar & ch, QString * ascii = nullptr );
+
+        SABUTILS_EXPORT bool startsOrEndsWithNumber( const QString & string, QString * number = nullptr, QString * extra = nullptr, bool * numIsPrefix = nullptr ); // number_extra or extra_number, prefix = true means the number is a prefix
     }
 }
 #endif 

@@ -2764,6 +2764,39 @@ namespace NSABUtils
             return true;
         }
 
+        bool startsOrEndsWithNumber( const QString & string, QString * number /*= nullptr*/, QString * extra /*= nullptr*/, bool * numIsPrefix /*= nullptr*/ ) // a numbers separated by a non A-Z 
+        {
+            if ( number )
+                number->clear();
+            if ( extra )
+                extra->clear();
+            if ( numIsPrefix )
+                *numIsPrefix = false;
+            auto regExp = QRegularExpression( R"((^((?<prefixNumber>\d+)_)(?<numIsPrefix>.*)$)|((?<numIsSuffix>.*)(_(?<suffixNumber>\d+))$))" );
+            auto match = regExp.match( string );
+            if ( !match.hasMatch() )
+                return false;
+            if ( !match.captured( "numIsPrefix" ).isEmpty() )
+            {
+                if ( numIsPrefix )
+                    *numIsPrefix = true;
+                if ( extra )
+                    *extra = match.captured( "numIsPrefix" );
+                if ( number )
+                    *number = match.captured( "prefixNumber" );
+            }
+            else /*if ( !match.captured( "numIsSuffix" ).isEmpty() )*/
+            {
+                if ( numIsPrefix )
+                    *numIsPrefix = false;
+                if ( extra )
+                    *extra = match.captured( "numIsSuffix" );
+                if ( number )
+                    *number = match.captured( "suffixNumber" );
+            }
+            return true;
+        }
+
         QString removeDiacriticalCharacters( const QString & str )
         {
             QString retVal;
