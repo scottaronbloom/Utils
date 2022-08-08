@@ -152,10 +152,7 @@ namespace NSABUtils
             return;
         }
 
-<<<<<<< Updated upstream
 #ifdef Q_OS_WINDOWS
-=======
->>>>>>> Stashed changes
         CRevertValue revertValue( qt_ntfs_permission_lookup );
         if ( fImpl->fUseNTFSPermissions )
         {
