@@ -22,6 +22,7 @@
 
 #include "FileUtils.h"
 #include "StringUtils.h"
+#include "HashUtils.h"
 #include "utils.h"
 
 #include <Qt>
