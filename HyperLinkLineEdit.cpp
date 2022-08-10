@@ -72,6 +72,16 @@ void CHyperLinkLineEdit::keyPressEvent( QKeyEvent * event )
         event->ignore();
         return;
     }
+    else if ( event->key() == Qt::Key_Tab )
+    {
+        event->ignore();
+        return;
+    }
+    else if ( event->key() == Qt::Key_Backtab )
+    {
+        event->ignore();
+        return;
+    }
     QTextEdit::keyPressEvent( event );
 }
 
