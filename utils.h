@@ -264,7 +264,7 @@ namespace NSABUtils
 
             return retVal;
         }
-        std::string toStdString(const QString &format = "dd:hh:mm:ss.zzz (SS seconds)") const
+        std::string toStdString(const std::string &format = "dd:hh:mm:ss.zzz (SS seconds)") const
         {
             return toString( format ).toStdString();
         }

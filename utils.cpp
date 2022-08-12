@@ -293,7 +293,6 @@ namespace NSABUtils
         return ts.toString( "dd days, hh hours, mm minutes, ss seconds" );
     }
 
-
 #ifdef Q_OS_WINDOWS
     char GetChar()
     {
