@@ -20,19 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.21)
 if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
 project(SABUtils)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
-SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
-SET( MKVUTILS OFF CACHE BOOL "Support for MKV Utilities" )
-SET( BIFSUPPORT OFF CACHE BOOL "Support for BIF Utilities" )
-SET( GIFSUPPORT OFF CACHE BOOL "Support for GIF Utilities" )
-SET( SAB_ENABLE_TESTING OFF CACHE BOOL "Enable Testing" )
+
+SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH} )
+
+SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" PARENT_SCOPE )
+SET( MKVUTILS OFF CACHE BOOL "Support for MKV Utilities" PARENT_SCOPE )
+SET( BIFSUPPORT OFF CACHE BOOL "Support for BIF Utilities" PARENT_SCOPE )
+SET( GIFSUPPORT OFF CACHE BOOL "Support for GIF Utilities" PARENT_SCOPE )
+SET( SAB_ENABLE_TESTING OFF CACHE BOOL "Enable Testing" PARENT_SCOPE )
    
 message( STATUS "Building for DLL=${SABUTILS_DLL}" )
 message( STATUS "Building MKVUTILS=${MKVUTILS}" )
@@ -51,6 +53,7 @@ include( Modules/EnableGoogleTesting.cmake )
 if ( MKVUTILS )
     SET(NO_USE_MEDIAINFO_INSTALL ON)
     set(BUILD_SHARED_LIBS ON)
+	option(LARGE_FILES "Enable large files support" OFF)
     add_subdirectory( MediaInfo/ProjectFiles/MediaInfoLib )
     add_subdirectory( MKVReader )
 endif()
