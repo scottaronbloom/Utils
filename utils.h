@@ -129,7 +129,7 @@ namespace NSABUtils
     using TLargestType = typename std::conditional< (sizeof(T1) >= sizeof(T2)), T1, T2 >::type;
 
     template < typename T1, typename T2 >
-    // FLOATING POINT just use std::pow 
+    // FLOATING POINT just use std::pow
     // the return type is the larger of the two T1 and T2 types
     auto power(T1 x, T2 y)
         -> typename std::enable_if< std::is_floating_point<T1>::value || std::is_floating_point<T2>::value, TLargestType< T1, T2 > >::type
@@ -164,7 +164,7 @@ namespace NSABUtils
     SABUTILS_EXPORT void toDigits(int64_t val, int base, std::pair< int8_t*, uint32_t > & retVal, size_t& numDigits, bool * aOK = nullptr);
     SABUTILS_EXPORT std::string toString(int64_t val, int base);
     SABUTILS_EXPORT int64_t fromString(const std::string &str, int base);
-    
+
     SABUTILS_EXPORT QString secsToString( quint64 seconds );
 
     template <typename U, typename V>
@@ -183,12 +183,12 @@ namespace NSABUtils
     {
     public:
         using TDays = std::chrono::duration< int, std::ratio< 3600 * 24 > >;
-  
+
         CTimeString( const std::pair< std::chrono::system_clock::time_point, std::chrono::system_clock::time_point > & startEndTime ) : // highprecsion is microseconds
             CTimeString( startEndTime.second, startEndTime.first )
         {
         }
-        
+
         CTimeString( const std::chrono::system_clock::time_point & startTime, const std::chrono::system_clock::time_point & endTime ) :
             CTimeString( endTime - startTime )
         {
@@ -266,7 +266,7 @@ namespace NSABUtils
         }
         std::string toStdString(const std::string &format = "dd:hh:mm:ss.zzz (SS seconds)") const
         {
-            return toString( format ).toStdString();
+            return toString( QString::fromStdString( format ) ).toStdString();
         }
     private:
         T fDuration;
@@ -352,8 +352,8 @@ namespace NSABUtils
         size_t start, size_t end,
         size_t index, size_t r, const std::function< void(const std::vector< T > & sub) >& func)
     {
-        // Current combination is ready 
-        // to be printed, print it  
+        // Current combination is ready
+        // to be printed, print it
         if (index == r)
         {
             if (func)
@@ -363,11 +363,11 @@ namespace NSABUtils
             return;
         }
 
-        // replace index with all possible  
-        // elements. The condition "end-i+1 >= r-index" 
-        // makes sure that including one element  
-        // at index will make a combination with  
-        // remaining elements at remaining positions  
+        // replace index with all possible
+        // elements. The condition "end-i+1 >= r-index"
+        // makes sure that including one element
+        // at index will make a combination with
+        // remaining elements at remaining positions
         for (size_t i = start; (i <= end) && (end - i + 1) >= (r - index); i++)
         {
             data[index] = arr[i];
@@ -379,12 +379,12 @@ namespace NSABUtils
     template< typename T >
     void allCombinations(const std::vector< T >& arr, size_t r, const std::function< void(const std::vector< T > & sub) >& func)
     {
-        // A temporary array to store 
-        // all combination one by one  
+        // A temporary array to store
+        // all combination one by one
         std::vector< T > data(r);
 
-        // Print all combination using 
-        // temprary array 'data[]'  
+        // Print all combination using
+        // temprary array 'data[]'
         combinationUtil(arr, data, 0, arr.size() - 1, 0, r, func);
     }
 

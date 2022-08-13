@@ -27,7 +27,6 @@ endif()
 
 project(SABUtils)
 
-
 SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH} )
 
 SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" PARENT_SCOPE )
