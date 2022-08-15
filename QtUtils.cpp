@@ -1079,7 +1079,7 @@ namespace NSABUtils
         }
     }
 
-    int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth/*=150*/ )
+    int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth/*=-1*/ )
     {
         if ( !view || !view->model() || !header )
             return -1;
@@ -1123,35 +1123,37 @@ namespace NSABUtils
         return totalWidth;
     }
 
-    int autoSize( QTableView * table )
+    int autoSize( QTableView * table, int minWidth /*= -1*/ )
     {
-        return autoSize( table, table->horizontalHeader() );
+        return autoSize( table, table->horizontalHeader(), minWidth );
     }
 
-    int autoSize( QTreeView * tree )
+    int autoSize( QTreeView * tree, int minWidth /*= -1*/ )
     {
-        return autoSize( tree, tree->header() );
+        return autoSize( tree, tree->header(), minWidth );
     }
 
-    int autoSize( QAbstractItemView * view )
+    int autoSize( QAbstractItemView * view, int minWidth /*= -1*/ )
     {
         auto treeView = dynamic_cast<QTreeView *>( view );
         if ( treeView )
-            return autoSize( treeView );
+            return autoSize( treeView, minWidth );
 
         auto tableView = dynamic_cast<QTableView *>( view );
         if ( tableView )
-            return autoSize( tableView );
+            return autoSize( tableView, minWidth );
         return -1;
     }
 
-    int autoSize( QComboBox * comboBox )
+    int autoSize( QComboBox * comboBox, int minCharWidth /*= -1*/ )
     {
         if ( !comboBox )
             return -1;
 
         comboBox->view()->setTextElideMode( Qt::ElideNone );
         comboBox->setSizeAdjustPolicy( QComboBox::AdjustToContents );
+        if ( minCharWidth != -1 )
+            comboBox->setMinimumContentsLength( minCharWidth );
         return comboBox->width();
     }
 

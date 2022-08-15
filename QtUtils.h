@@ -149,11 +149,11 @@ namespace NSABUtils
     SABUTILS_EXPORT QStringList getHuristicDateFormats();
     SABUTILS_EXPORT QStringList getDateFormats( const SDateSearchOptions & options = {} );
 
-    SABUTILS_EXPORT int autoSize( QTableView * table ); // autoSize( table, table->horizontalHeader )
-    SABUTILS_EXPORT int autoSize( QTreeView * treeView ); // autoSize( table, table->header )
-    SABUTILS_EXPORT int autoSize( QComboBox * comboBox );
-    SABUTILS_EXPORT int autoSize( QAbstractItemView * view ); // autoSize( table, table->horizontalHeader )
-    SABUTILS_EXPORT int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth = 150 );
+    SABUTILS_EXPORT int autoSize( QTableView * table, int minWidth = -1 ); // autoSize( table, table->horizontalHeader )
+    SABUTILS_EXPORT int autoSize( QTreeView * treeView, int minWidth = -1 ); // autoSize( table, table->header )
+    SABUTILS_EXPORT int autoSize( QAbstractItemView * view, int minWidth = -1 ); // autoSize( table, table->horizontalHeader )
+    SABUTILS_EXPORT int autoSize( QAbstractItemView * view, QHeaderView * header, int minWidth = -1 );
+    SABUTILS_EXPORT int autoSize( QComboBox * comboBox, int minCharWidth = -1 );
 
     SABUTILS_EXPORT QTreeWidgetItem * nextVisibleItem( QTreeWidgetItem * item );
     SABUTILS_EXPORT void fetchMore( QAbstractItemModel * model, int maxFetches = 3 );
