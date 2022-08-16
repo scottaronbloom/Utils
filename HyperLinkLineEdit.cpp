@@ -28,6 +28,7 @@
 #include <QKeyEvent>
 #include <QRegularExpression>
 #include <QDesktopServices>
+#include <QDebug>
 
 CHyperLinkLineEdit::CHyperLinkLineEdit( QWidget * parent /*= nullptr */ ) :
     QTextEdit( parent )
@@ -51,6 +52,9 @@ CHyperLinkLineEdit::CHyperLinkLineEdit( QWidget * parent /*= nullptr */ ) :
     setAcceptRichText( true );
 
     setMouseTracking( true );
+    Q_ASSERT( parent );
+    if ( parent )
+        parent->installEventFilter( this );
 }
 
 CHyperLinkLineEdit::CHyperLinkLineEdit( const QString & text, QWidget * parent /*= nullptr */ ) :
@@ -95,6 +99,20 @@ void CHyperLinkLineEdit::mouseMoveEvent( QMouseEvent * event )
     }
     else
         QApplication::restoreOverrideCursor();
+}
+
+bool CHyperLinkLineEdit::eventFilter( QObject * watched, QEvent * /*event*/ )
+{
+    if ( watched != this )
+    {
+        auto globalPos = QCursor::pos();
+        auto myPos = this->mapFromGlobal( globalPos );
+        if ( !rect().contains( myPos ) )
+        {
+            QApplication::restoreOverrideCursor();
+        }
+    }
+    return false;
 }
 
 void CHyperLinkLineEdit::mouseReleaseEvent( QMouseEvent * /*event*/ )
