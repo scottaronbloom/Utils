@@ -119,6 +119,8 @@ void CHyperLinkLineEdit::mouseReleaseEvent( QMouseEvent * /*event*/ )
 {
     if ( !fAnchor.isEmpty() )
     {
+        if ( fAnchor.indexOf( "://" ) == -1 )
+            fAnchor = "http://" + fAnchor;
         QDesktopServices::openUrl( QUrl( fAnchor ) );
         QApplication::restoreOverrideCursor();
     }
@@ -162,6 +164,12 @@ QString CHyperLinkLineEdit::addText( const QString & text, bool & urlFound ) con
     isURL = isURL || remaining.startsWith( "www" );
     isURL = isURL || remaining.startsWith( "http://" );
     isURL = isURL || remaining.startsWith( "https://" );
+    if ( !isURL )
+    {
+        auto match = QRegularExpression( R"(\:\d+)" ).match( remaining );
+        if ( match.hasMatch() && match.capturedEnd() == remaining.length() )
+            isURL = true;
+    }
 
     if ( isURL )
     {
