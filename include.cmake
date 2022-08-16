@@ -62,6 +62,7 @@ set(qtproject_SRCS
     ValidateOpenSSL.cpp
     VSInstallUtils.cpp
     WidgetEnabler.cpp
+    WidgetChanged.cpp
     WordExp.cpp
 )
 
@@ -110,6 +111,7 @@ set(project_H
     StringUtils.h
     SystemInfo.h
     utils.h
+    WidgetChanged.h
     WordExp.h
     ValidateOpenSSL.h
     VSInstallUtils.h

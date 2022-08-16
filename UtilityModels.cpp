@@ -103,29 +103,6 @@ namespace NSABUtils
     CCheckableStringListModel::CCheckableStringListModel(QObject * parent) :
         QStringListModel(parent)
     {
-        QObject::disconnect(this, &CCheckableStringListModel::dataChanged, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::dataChanged, this, &CCheckableStringListModel::sigChanged);
-
-        QObject::disconnect(this, &CCheckableStringListModel::modelReset, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::modelReset, this, &CCheckableStringListModel::sigChanged);
-
-        QObject::disconnect(this, &CCheckableStringListModel::rowsInserted, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::rowsInserted, this, &CCheckableStringListModel::sigChanged);
-
-        QObject::disconnect(this, &CCheckableStringListModel::rowsRemoved, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::rowsRemoved, this, &CCheckableStringListModel::sigChanged);
-
-        QObject::disconnect(this, &CCheckableStringListModel::rowsMoved, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::rowsMoved, this, &CCheckableStringListModel::sigChanged);
-
-        QObject::disconnect(this, &CCheckableStringListModel::columnsInserted, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::columnsInserted, this, &CCheckableStringListModel::sigChanged);
-
-        QObject::disconnect(this, &CCheckableStringListModel::columnsRemoved, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::columnsRemoved, this, &CCheckableStringListModel::sigChanged);
-
-        QObject::disconnect(this, &CCheckableStringListModel::columnsMoved, this, &CCheckableStringListModel::sigChanged);
-        QObject::connect(this, &CCheckableStringListModel::columnsMoved, this, &CCheckableStringListModel::sigChanged);
     }
 
     bool CCheckableStringListModel::isChecked( int rowNum ) const
