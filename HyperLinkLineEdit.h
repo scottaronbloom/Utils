@@ -39,7 +39,7 @@ public:
     virtual void keyPressEvent( QKeyEvent * event ) override;
     virtual void mouseMoveEvent( QMouseEvent * event ) override;
     virtual void mouseReleaseEvent( QMouseEvent * event ) override;
-    virtual bool eventFilter( QObject * watched, QEvent * event ) override;
+    virtual void leaveEvent( QEvent * /*event*/ ) override;
 
     QString text() const;
     void setText( const QString & text );
