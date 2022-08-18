@@ -110,7 +110,7 @@ namespace NSABUtils
     }
 
     template< typename T >
-    void setupWidgetChanged( QAbstractItemView * view, std::unordered_set<QObject *> & handled, const QWidget * parentWidget, T member, bool isExcluded )
+    void setupWidgetChanged( QAbstractItemView * view, std::unordered_map< QObject *, bool > & handled, const QWidget * parentWidget, T member, bool isExcluded )
     {
         QAbstractItemModel * model = view->model();
         if ( !model )
@@ -121,7 +121,7 @@ namespace NSABUtils
 
         if ( handled.find( model ) != handled.end() )
             return;
-        handled.insert( model );
+        handled.insert( { model, false } );
 
         setupModelChanged( model, parentWidget, member, isExcluded );
     }
@@ -323,61 +323,98 @@ namespace NSABUtils
             QObject::connect( dateTimeEdit, QMetaMethod::fromSignal( &QDateTimeEdit::dateTimeChanged ), parentWidget, member );
     }
 
-    void setupWidgetChanged( const QWidget * parentWidget, const char * member, const std::set< QWidget * > & excluded /*= {}*/, bool excludeAll /*= false*/ )
+
+
+    bool excludeWidget( bool excludeAll, const std::set<QWidget *> & excludedWidgets, QWidget * widget, const QWidget * parentWidget, bool & isSkipWidget, std::unordered_map< QObject *, bool > & handled )
+    {
+        auto pos = handled.find( widget );
+        if ( pos != handled.end() )
+            return ( *pos ).second;
+        handled.insert( { widget, false } );
+
+        QString className = widget->metaObject()->className();
+        //qDebug() << "Testing-" << widget << "-" << className << widget->objectName();
+
+        QAbstractButton * button = dynamic_cast<QAbstractButton *>( widget );
+#ifndef QT_NO_NDEBUG
+        QLabel * label = dynamic_cast<QLabel *>( widget );
+        QToolButton * tb = dynamic_cast<QToolButton *>( widget );
+        QDialogButtonBox * dbb = dynamic_cast<QDialogButtonBox *>( widget );
+        QScrollBar * scrollbar = dynamic_cast<QScrollBar *>( widget );
+#ifdef QT_WEBVIEW_LIB
+        auto webview = dynamic_cast<QWebEngineView *>( widget );
+#else
+        QWidget * webview = nullptr;
+#endif
+#endif
+        if ( label || tb || dbb || button || scrollbar || webview
+             || ( className == "QColumnViewGrip" )
+             || ( className == "QFrame" )
+             || ( className == "QTableCornerButton" )
+             || ( className == "QWidget" )
+             || ( className == "QSplitter" )
+             || ( className == "QRubberBand" )
+             || ( className == "QSplitterHandle" )
+             || ( className == "QToolBar" )
+             || ( className == "QToolBarSeparator" )
+             || ( className == "QMenu" )
+             || ( className == "QMenuBar" )
+             || ( className == "QDockWidget" )
+             || ( className == "QStackedWidget" )
+             || ( className == "QChartView" )
+             || ( widget->objectName() == QString( "qt_scrollarea_viewport" ) )
+             || ( widget->objectName() == QString( "qt_scrollarea_hcontainer" ) )
+             || ( widget->objectName() == QString( "qt_scrollarea_vcontainer" ) )
+             || ( className.indexOf( "private", 0, Qt::CaseInsensitive ) != -1 )
+        )
+        {
+            isSkipWidget = true;
+            //qDebug() << "|---> Skipped Widget" << widget << "-" << widget->metaObject()->className() << widget->objectName();
+            handled[ widget ] = true;
+            return true;
+        }
+
+
+        QWidget * parent = widget->parentWidget();
+        bool isExcluded = excludeAll || ( excludedWidgets.find( widget ) != excludedWidgets.end() );
+        if ( !isExcluded && parent && ( parent != parentWidget ) )
+            return excludeWidget( excludeAll, excludedWidgets, parent, parentWidget, isSkipWidget, handled );
+        //if ( isExcluded )
+        //    qDebug() << "|---> Excluded Widget" << widget << "-" << widget->metaObject()->className() << widget->objectName();
+        //else
+        //    qDebug() << "|---> NOT Excluded Widget" << widget << "-" << widget->metaObject()->className() << widget->objectName();
+        handled[ widget ] = isExcluded;
+        return isExcluded;
+    }
+
+    void setupWidgetChanged( const QWidget * parentWidget, const char * member, const std::set< QWidget * > & excludedWidgets /*= {}*/, bool excludeAll /*= false*/ )
     {
         if ( !parentWidget )
             return;
 
         QList< QWidget * > children = parentWidget->findChildren< QWidget * >();
 
-        std::unordered_set< QObject * > handled;
+        std::unordered_map< QObject *, bool > handled;
         for ( QWidget * child : children )
         {
-            if ( handled.find( child ) != handled.end() )
-                continue;
-            handled.insert( child );
+            bool isSkipWidget = false;
+            bool isExcluded = excludeWidget( excludeAll, excludedWidgets, child, parentWidget, isSkipWidget, handled );
 
-            QWidget * parent = child->parentWidget();
-            bool isExcluded = excludeAll || ( excluded.find( child ) != excluded.end() );
-            while ( !isExcluded && parent )
-            {
-                if ( excluded.find( parent ) != excluded.end() )
-                {
-                    isExcluded = true;
-                    break;
-                }
-                parent = parent->parentWidget();
-            }
+            auto view = dynamic_cast<QAbstractItemView *>( child );
+            auto groupBox = dynamic_cast<QGroupBox *>( child );
+            auto comboBox = dynamic_cast<QComboBox *>( child );
+            auto lineEdit = dynamic_cast<QLineEdit *>( child );
+            auto spinBox = dynamic_cast<QSpinBox *>( child );
+            auto doubleSpinBox = dynamic_cast<QDoubleSpinBox *>( child );
+            auto timeEdit = dynamic_cast<QTimeEdit *>( child );
+            auto dateEdit = dynamic_cast<QDateEdit *>( child );
+            auto dateTimeEdit = dynamic_cast<QDateTimeEdit *>( child );
+            auto checkBox = dynamic_cast<QCheckBox *>( child );
+            auto plainTextEdit = dynamic_cast<QPlainTextEdit *>( child );
+            auto radioButton = dynamic_cast<QRadioButton *>( child );
+            auto button = dynamic_cast<QAbstractButton *>( child );
+            auto textEdit = dynamic_cast<QTextEdit *>( child );
 
-            QString className = child->metaObject()->className();
-            if ( className.indexOf( "private", 0, Qt::CaseInsensitive ) != -1 )
-                continue;
-
-            QAbstractItemView * view = dynamic_cast<QAbstractItemView *>( child );
-            QGroupBox * groupBox = dynamic_cast<QGroupBox *>( child );
-            QComboBox * comboBox = dynamic_cast<QComboBox *>( child );
-            QLineEdit * lineEdit = dynamic_cast<QLineEdit *>( child );
-            QSpinBox * spinBox = dynamic_cast<QSpinBox *>( child );
-            QDoubleSpinBox * doubleSpinBox = dynamic_cast<QDoubleSpinBox *>( child );
-            QTimeEdit * timeEdit = dynamic_cast<QTimeEdit *>( child );
-            QDateEdit * dateEdit = dynamic_cast<QDateEdit *>( child );
-            QDateTimeEdit * dateTimeEdit = dynamic_cast<QDateTimeEdit *>( child );
-            QCheckBox * checkBox = dynamic_cast<QCheckBox *>( child );
-            QPlainTextEdit * plainTextEdit = dynamic_cast<QPlainTextEdit *>( child );
-            QRadioButton * radioButton = dynamic_cast<QRadioButton *>( child );
-            QAbstractButton * button = dynamic_cast<QAbstractButton *>( child );
-            QTextEdit * textEdit = dynamic_cast<QTextEdit *>( child );
-#ifndef QT_NO_NDEBUG
-            QLabel * label = dynamic_cast<QLabel *>( child );
-            QToolButton * tb = dynamic_cast<QToolButton *>( child );
-            QDialogButtonBox * dbb = dynamic_cast<QDialogButtonBox *>( child );
-            QScrollBar * scrollbar = dynamic_cast<QScrollBar *>( child );
-#ifdef QT_WEBVIEW_LIB
-            auto webview = dynamic_cast<QWebEngineView *>( child );
-#else
-            QWidget * webview = nullptr;
-#endif
-#endif
             if ( view )
             {
                 setupWidgetChanged( view, handled, parentWidget, member, isExcluded );
@@ -436,89 +473,44 @@ namespace NSABUtils
                 setupWidgetChanged( dateTimeEdit, parentWidget, member, isExcluded );
             }
 #ifndef QT_NO_NDEBUG
-            else if ( label || tb || dbb || button || scrollbar || webview
-                      || ( className == "QColumnViewGrip" )
-                      || ( className == "QFrame" )
-                      || ( className == "QTableCornerButton" )
-                      || ( className == "QWidget" )
-                      || ( className == "QSplitter" )
-                      || ( className == "QRubberBand" )
-                      || ( className == "QSplitterHandle" )
-                      || ( className == "QToolBar" )
-                      || ( className == "QToolBarSeparator" )
-                      || ( className == "QMenu" )
-                      || ( className == "QMenuBar" )
-                      || ( className == "QDockWidget" )
-                      || ( className == "QStackedWidget" )
-                      || ( className == "QChartView" )
-                      || ( child->objectName() == QString( "qt_scrollarea_viewport" ) )
-                      || ( child->objectName() == QString( "qt_scrollarea_hcontainer" ) )
-                      || ( child->objectName() == QString( "qt_scrollarea_vcontainer" ) )
-                      )
+            else if ( isSkipWidget )
                 continue;
             else
             {
-                qDebug() << "UNHANDLED-" << child << "-" << className << child->objectName();
+                qDebug() << "UNHANDLED-" << child << "-" << child->metaObject()->className() << child->objectName();
             }
 #endif
         }
     }
 
-    void setupWidgetChanged( const QWidget * parentWidget, const QMetaMethod & member, const std::set< QWidget * > & excluded /*= {}*/, bool excludeAll /*= false*/ )
+    void setupWidgetChanged( const QWidget * parentWidget, const QMetaMethod & member, const std::set< QWidget * > & excludeWidgets /*= {}*/, bool excludeAll /*= false*/ )
     {
         if ( !parentWidget || !member.isValid() )
             return;
 
-        QList< QWidget * > children = parentWidget->findChildren< QWidget * >();
+        auto children = parentWidget->findChildren< QWidget * >();
 
-        std::unordered_set< QObject * > handled;
+        std::unordered_map< QObject *, bool > handled;
         for ( QWidget * child : children )
         {
-            if ( handled.find( child ) != handled.end() )
-                continue;
-            handled.insert( child );
+            bool isSkipWidget = false;
+            bool isExcluded = excludeWidget( excludeAll, excludeWidgets, child, parentWidget, isSkipWidget, handled );
 
-            QWidget * parent = child->parentWidget();
-            bool isExcluded = excludeAll || ( excluded.find( child ) != excluded.end() );
-            while ( !isExcluded && parent )
-            {
-                if ( excluded.find( parent ) != excluded.end() )
-                {
-                    isExcluded = true;
-                    break;
-                }
-                parent = parent->parentWidget();
-            }
+            auto view = dynamic_cast<QAbstractItemView *>( child );
+            auto groupBox = dynamic_cast<QGroupBox *>( child );
+            auto comboBox = dynamic_cast<QComboBox *>( child );
+            auto lineEdit = dynamic_cast<QLineEdit *>( child );
+            auto spinBox = dynamic_cast<QSpinBox *>( child );
+            auto doubleSpinBox = dynamic_cast<QDoubleSpinBox *>( child );
+            auto timeEdit = dynamic_cast<QTimeEdit *>( child );
+            auto dateEdit = dynamic_cast<QDateEdit *>( child );
+            auto dateTimeEdit = dynamic_cast<QDateTimeEdit *>( child );
+            auto checkBox = dynamic_cast<QCheckBox *>( child );
+            auto plainTextEdit = dynamic_cast<QPlainTextEdit *>( child );
+            auto radioButton = dynamic_cast<QRadioButton *>( child );
+            auto button = dynamic_cast<QAbstractButton *>( child );
+            auto textEdit = dynamic_cast<QTextEdit *>( child );
 
-            QString className = child->metaObject()->className();
-            if ( className.indexOf( "private", 0, Qt::CaseInsensitive ) != -1 )
-                continue;
-
-            QAbstractItemView * view = dynamic_cast<QAbstractItemView *>( child );
-            QGroupBox * groupBox = dynamic_cast<QGroupBox *>( child );
-            QComboBox * comboBox = dynamic_cast<QComboBox *>( child );
-            QLineEdit * lineEdit = dynamic_cast<QLineEdit *>( child );
-            QSpinBox * spinBox = dynamic_cast<QSpinBox *>( child );
-            QDoubleSpinBox * doubleSpinBox = dynamic_cast<QDoubleSpinBox *>( child );
-            QTimeEdit * timeEdit = dynamic_cast<QTimeEdit *>( child );
-            QDateEdit * dateEdit = dynamic_cast<QDateEdit *>( child );
-            QDateTimeEdit * dateTimeEdit = dynamic_cast<QDateTimeEdit *>( child );
-            QCheckBox * checkBox = dynamic_cast<QCheckBox *>( child );
-            QPlainTextEdit * plainTextEdit = dynamic_cast<QPlainTextEdit *>( child );
-            QRadioButton * radioButton = dynamic_cast<QRadioButton *>( child );
-            QAbstractButton * button = dynamic_cast<QAbstractButton *>( child );
-            QTextEdit * textEdit = dynamic_cast<QTextEdit *>( child );
-#ifndef QT_NO_NDEBUG
-            QLabel * label = dynamic_cast<QLabel *>( child );
-            QToolButton * tb = dynamic_cast<QToolButton *>( child );
-            QDialogButtonBox * dbb = dynamic_cast<QDialogButtonBox *>( child );
-            QScrollBar * scrollbar = dynamic_cast<QScrollBar *>( child );
-#ifdef QT_WEBVIEW_LIB
-            auto webview = dynamic_cast<QWebEngineView *>( child );
-#else
-            QWidget * webview = nullptr;
-#endif
-#endif
             if ( view )
             {
                 setupWidgetChanged( view, handled, parentWidget, member, isExcluded );
@@ -546,7 +538,6 @@ namespace NSABUtils
             else if ( spinBox )
             {
                 setupWidgetChanged( spinBox, parentWidget, member, isExcluded );
-
             }
             else if ( doubleSpinBox )
             {
@@ -577,29 +568,11 @@ namespace NSABUtils
                 setupWidgetChanged( dateTimeEdit, parentWidget, member, isExcluded );
             }
 #ifndef QT_NO_NDEBUG
-            else if ( label || tb || dbb || button || scrollbar || webview
-                      || ( className == "QColumnViewGrip" )
-                      || ( className == "QFrame" )
-                      || ( className == "QTableCornerButton" )
-                      || ( className == "QWidget" )
-                      || ( className == "QSplitter" )
-                      || ( className == "QRubberBand" )
-                      || ( className == "QSplitterHandle" )
-                      || ( className == "QToolBar" )
-                      || ( className == "QToolBarSeparator" )
-                      || ( className == "QMenu" )
-                      || ( className == "QMenuBar" )
-                      || ( className == "QDockWidget" )
-                      || ( className == "QStackedWidget" )
-                      || ( className == "QChartView" )
-                      || ( child->objectName() == QString( "qt_scrollarea_viewport" ) )
-                      || ( child->objectName() == QString( "qt_scrollarea_hcontainer" ) )
-                      || ( child->objectName() == QString( "qt_scrollarea_vcontainer" ) )
-                      )
+            else if ( isSkipWidget )
                 continue;
             else
             {
-                qDebug() << "UNHANDLED-" << child << "-" << className << child->objectName();
+                qDebug() << "UNHANDLED-" << child << "-" << child->metaObject()->className() << child->objectName();
             }
 #endif
         }
