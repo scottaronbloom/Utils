@@ -336,7 +336,6 @@ namespace NSABUtils
         //qDebug() << "Testing-" << widget << "-" << className << widget->objectName();
 
         QAbstractButton * button = dynamic_cast<QAbstractButton *>( widget );
-#ifndef QT_NO_NDEBUG
         QLabel * label = dynamic_cast<QLabel *>( widget );
         QToolButton * tb = dynamic_cast<QToolButton *>( widget );
         QDialogButtonBox * dbb = dynamic_cast<QDialogButtonBox *>( widget );
@@ -345,7 +344,6 @@ namespace NSABUtils
         auto webview = dynamic_cast<QWebEngineView *>( widget );
 #else
         QWidget * webview = nullptr;
-#endif
 #endif
         if ( label || tb || dbb || button || scrollbar || webview
              || ( className == "QColumnViewGrip" )
