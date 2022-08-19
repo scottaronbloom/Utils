@@ -246,7 +246,6 @@ namespace NSABUtils
         return std::unordered_set< T2 >( { values.begin(), values.end() } );
     }
 
-    SABUTILS_EXPORT void fetchMore( QAbstractItemModel * model, int maxFetch );
     SABUTILS_EXPORT void setDPIAwarenessToMode( int & argc, char **& argv, const char * mode );
 }
 
