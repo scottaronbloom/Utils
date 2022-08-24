@@ -3,7 +3,7 @@ find_package(InstallFile REQUIRED)
 MACRO(CreateVersion dir)
 
     set( options )
-    set( oneValueArgs MAJOR MINOR PATCH DIFF APP_NAME VENDOR HOMEPAGE PRODUCT_HOMEPAGE EMAIL BUILD_DATE )
+    set( oneValueArgs MAJOR MINOR PATCH DIFF APP_NAME VENDOR HOMEPAGE PRODUCT_HOMEPAGE EMAIL BUILD_DATE BUILD_TIME)
     set( multiValueArgs )
     cmake_parse_arguments(
         _CREATE_VERSION
@@ -34,6 +34,7 @@ MACRO(CreateVersion dir)
     set(VERSION_FILE_PRODUCT_HOMEPAGE ${_CREATE_VERSION_PRODUCT_HOMEPAGE})
     set(VERSION_FILE_EMAIL         ${_CREATE_VERSION_EMAIL})
     set(VERSION_FILE_BUILD_DATE    ${_CREATE_VERSION_BUILD_DATE})
+    set(VERSION_FILE_BUILD_TIME    ${_CREATE_VERSION_BUILD_TIME})
 
     configure_file(
         "${IN_FILE}"
