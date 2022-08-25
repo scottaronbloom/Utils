@@ -57,6 +57,11 @@ namespace NSABUtils
         fManager = new QNetworkAccessManager( this );
         connect( fManager, &QNetworkAccessManager::authenticationRequired, this, &CGitHubGetVersions::slotAuthenticationRequired );
         connect( fManager, &QNetworkAccessManager::finished, this, &CGitHubGetVersions::slotFinished );
+
+        connect( fManager, &QNetworkAccessManager::encrypted, this, &CGitHubGetVersions::slotEncrypted );
+        connect( fManager, &QNetworkAccessManager::preSharedKeyAuthenticationRequired, this, &CGitHubGetVersions::slotPreSharedKeyAuthenticationRequired );
+        connect( fManager, &QNetworkAccessManager::proxyAuthenticationRequired, this, &CGitHubGetVersions::slotProxyAuthenticationRequired );
+        connect( fManager, &QNetworkAccessManager::sslErrors, this, &CGitHubGetVersions::slotSSlErrors );
     }
 
 
@@ -76,38 +81,35 @@ namespace NSABUtils
     {
     }
 
-    void CGitHubGetVersions::slotFinished( QNetworkReply * /*reply*/ )
+    void CGitHubGetVersions::slotEncrypted( QNetworkReply * /*reply*/ )
     {
+        //qDebug() << "slotEncrypted:" << reply << reply->url().toString();
     }
 
-    void CGitHubGetVersions::requestLatestVersion()
+    void CGitHubGetVersions::slotPreSharedKeyAuthenticationRequired( QNetworkReply * /*reply*/, QSslPreSharedKeyAuthenticator * /*authenticator*/ )
     {
-        QUrl url( fURLPath );
+        //qDebug() << "slotPreSharedKeyAuthenticationRequired: 0x" << Qt::hex << reply << reply->url().toString() << authenticator;
+    }
 
-        fErrorString = "";
-        fHasError = false;
+    void CGitHubGetVersions::slotProxyAuthenticationRequired( const QNetworkProxy & /*proxy*/, QAuthenticator * /*authenticator*/ )
+    {
+        //qDebug() << "slotProxyAuthenticationRequired: 0x" << Qt::hex << &proxy << authenticator;
+    }
 
-        QNetworkRequest request;
-        request.setUrl( url );
+    void CGitHubGetVersions::slotSSlErrors( QNetworkReply * /*reply*/, const QList<QSslError> & /*errors*/ )
+    {
+        //qDebug() << "slotSSlErrors: 0x" << Qt::hex << reply << errors;
+    }
 
-        request.setRawHeader( QByteArray( "Accept" ), QByteArray( "application/vnd.github+json" ) );
-        //request.setRawHeader( QByteArray( "Authorization" ), QByteArray( "token " ) + fGitHubToken );
-        fReply = fManager->get( request );
-
-        QEventLoop eLoop;
-        int delay = getTimeOutDelay();
-        QTimer::singleShot( delay, this, &CGitHubGetVersions::slotKillCurrentReply );
-        connect( this, &CGitHubGetVersions::sigKillLoop, &eLoop, &QEventLoop::quit );
-        connect( fManager, &QNetworkAccessManager::finished, &eLoop, &QEventLoop::quit );
-        eLoop.exec( QEventLoop::AllEvents );
-
+    void CGitHubGetVersions::slotFinished( QNetworkReply * reply )
+    {
         if ( !fErrorString.isEmpty() )
         {
-            fErrorString = fReply->errorString();
-            fHasError = ( fReply->error() != QNetworkReply::NoError );
+            fErrorString = reply->errorString();
+            fHasError = ( reply->error() != QNetworkReply::NoError );
         }
 
-        auto data = fReply->readAll();
+        auto data = reply->readAll();
         if ( data.isEmpty() )
         {
             fErrorString = QObject::tr( "Error in reply: Empty Response" );
@@ -132,8 +134,24 @@ namespace NSABUtils
 
             loadResults( json.array() );
         }
-        fReply->deleteLater();
-        fReply = nullptr;
+        reply->deleteLater();
+        emit sigVersionsDownloaded();
+    }
+
+    void CGitHubGetVersions::requestLatestVersion()
+    {
+        QUrl url( fURLPath );
+
+        fErrorString = "";
+        fHasError = false;
+
+        QNetworkRequest request;
+        request.setUrl( url );
+        request.setTransferTimeout( getTimeOutDelay() );
+
+        request.setRawHeader( QByteArray( "Accept" ), QByteArray( "application/vnd.github+json" ) );
+        //request.setRawHeader( QByteArray( "Authorization" ), QByteArray( "token " ) + fGitHubToken );
+        fManager->get( request );
     }
 
     int CGitHubGetVersions::getTimeOutDelay() const
@@ -149,83 +167,6 @@ namespace NSABUtils
         }
         return delay;
     }
-
-    void CGitHubGetVersions::slotKillCurrentReply()
-    {
-        if ( fReply && !fReply->isFinished() )
-        {
-            fHasError = true;
-            fErrorString = tr( "Error connecting to: %1<br>Connection timed out after %2ms." ).arg( fURLPath ).arg( getTimeOutDelay() );
-            fReply->abort();
-        }
-        Q_EMIT sigKillLoop();
-    }
-
-    //bool SDownloadInfo::load( QXmlStreamReader & reader )
-    //{
-    //    fPlatform = reader.attributes().value( "platform" ).toString();
-    //    if ( fPlatform.isEmpty() )
-    //        reader.raiseError( QString( "download element missing platform attribute" ) );
-    //    fApplicationName = reader.attributes().value( "ApplicationName" ).toString();
-    //    if ( fPlatform.isEmpty() )
-    //        reader.raiseError( QString( "download element missing ApplicationName attribute" ) );
-    //    if ( !reader.hasError() )
-    //        fSize = NQtUtils::getInt( reader.attributes().value( "size" ), reader );
-    //    if ( !reader.hasError() )
-    //    {
-    //        QStringRef tmp = reader.attributes().value( "url" );
-    //        fUrl = QUrl( tmp.toString() );
-    //        if ( !fUrl.isValid() )
-    //            reader.raiseError( QString( "url is not valid '%1'" ).arg( tmp.toString() ) );
-    //    }
-    //    if ( !reader.hasError() )
-    //    {
-    //        auto tmp = reader.attributes().value( "md5sum" );
-    //        if ( tmp.isEmpty() )
-    //            reader.raiseError( QString( "download element missing md5sum attribute" ) );
-    //        else
-    //            fMD5 = QString::fromLatin1( NUtils::formatMd5( tmp.toLocal8Bit(), true ) );
-    //    }
-    //    return !reader.hasError();
-    //}
-
-    //QString SDownloadInfo::getSize() const
-    //{
-    //    QString retVal;
-    //    quint64 tmp = fSize;
-    //    quint64 prev = fSize;
-    //    if ( tmp < 1024 )
-    //        return QString::number( fSize );
-    //
-    //    prev = tmp;
-    //    tmp /= 1024;
-    //    if ( tmp < 1024 )
-    //        return QString( "%1" ).arg( 1.0*prev/1024.0, 5 ) + "kB";
-    // 
-    //    prev = tmp;
-    //    tmp /= 1024;
-    //    if ( tmp < 1024 )
-    //        return QString( "%1" ).arg( 1.0*prev/1024.0, 0, 'g', 5 ) + "MB";
-    //
-    //    prev = tmp;
-    //    tmp /= 1024;
-    //    if ( tmp < 1024 )
-    //        return QString( "%1" ).arg( 1.0*prev/1024.0, 0, 'g', 5 ) + "GB";
-    //
-    //    prev = tmp;
-    //    tmp /= 1024;
-    //    return QString( "%1" ).arg( 1.0*prev/1024.0, 0, 'g', 5 )  + "TB";
-    //}
-
-    //bool SVersion::load( QXmlStreamReader & reader )
-    //{
-    //    fMajor = NQtUtils::getInt( reader.attributes().value( "major" ), reader );
-    //    if ( !reader.hasError() )
-    //        fMinor = NQtUtils::getInt( reader.attributes().value( "minor" ), reader );
-    //    if ( !reader.hasError() )
-    //        fGitSHA = NQtUtils::getInt( reader.attributes().value( "build" ), reader );
-    //    return !reader.hasError();
-    //}
 
     void CGitHubGetVersions::loadResults( const QJsonArray & versions )
     {
@@ -273,7 +214,7 @@ namespace NSABUtils
 
     bool CGitHubGetVersions::hasUpdate() const
     {
-        return fLatestUpdate.has_value();
+        return fLatestUpdate.has_value() && fLatestUpdate.value().second;
     }
 
     QString CGitHubGetVersions::updateVersion() const
@@ -282,7 +223,9 @@ namespace NSABUtils
             return fErrorString;
         if ( !fLatestUpdate.has_value() )
             return {};
-        return fLatestUpdate.value().second->getTitle();
+        if ( fLatestUpdate.value().second )
+            return fLatestUpdate.value().second->getTitle();
+        return fLatestUpdate.value().first;
     }
 
     std::shared_ptr< SGitHubRelease > CGitHubGetVersions::updateRelease() const

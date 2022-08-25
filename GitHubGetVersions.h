@@ -35,6 +35,9 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QAuthenticator;
 class QJsonArray;
+class QSslPreSharedKeyAuthenticator;
+class QNetworkProxy;
+class QSslError;
 
 namespace NSABUtils
 {
@@ -154,12 +157,15 @@ public:
     bool hasError()const { return fHasError; }
     QString errorString() const{ return fErrorString; }
 private Q_SLOTS:
-    void slotAuthenticationRequired( QNetworkReply * reply, QAuthenticator * authenticator );
     void slotFinished( QNetworkReply * reply );
-    void slotKillCurrentReply();
+    void slotAuthenticationRequired( QNetworkReply * reply, QAuthenticator * authenticator );
+    void slotEncrypted( QNetworkReply * reply );
+    void slotPreSharedKeyAuthenticationRequired( QNetworkReply * reply, QSslPreSharedKeyAuthenticator * authenticator );
+    void slotProxyAuthenticationRequired( const QNetworkProxy & proxy, QAuthenticator * authenticator );
+    void slotSSlErrors( QNetworkReply * reply, const QList<QSslError> & errors );
 
 Q_SIGNALS:
-    void sigKillLoop();
+    void sigVersionsDownloaded();
 
 private:
     int getTimeOutDelay() const;
@@ -170,7 +176,6 @@ private:
     QByteArray fGitHubToken;
 
     QNetworkAccessManager * fManager{ nullptr };
-    QNetworkReply * fReply{ nullptr };
     bool fHasError{ false };
     QString fErrorString;
 
