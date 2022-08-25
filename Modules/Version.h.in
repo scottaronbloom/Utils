@@ -24,6 +24,10 @@
 #define __VERSION_H
 
 #include <string>
+#ifdef QT_VERSION
+#include <QString>
+#include <QDateTime>
+#endif
 
 namespace NVersion
 {
@@ -62,6 +66,17 @@ namespace NVersion
 #cmakedefine VERSION_FILE_BUILD_DATE
 #ifdef VERSION_FILE_BUILD_DATE
     inline const std::string BUILD_DATE       = "@VERSION_FILE_BUILD_DATE@";
+#endif
+
+#cmakedefine VERSION_FILE_BUILD_TIME
+#ifdef VERSION_FILE_BUILD_TIME
+    inline const std::string BUILD_TIME       = "@VERSION_FILE_BUILD_TIME@";
+#endif
+
+#if defined( VERSION_FILE_BUILD_DATE ) && defined( VERSION_FILE_BUILD_TIME )
+#ifdef QT_VERSION
+    inline QDateTime buildDateTime(){ return QDateTime( QDate::fromString( QString::fromStdString( NVersion::BUILD_DATE ), "MM/dd/yyyy" ), QTime::fromString( QString::fromStdString( NVersion::BUILD_TIME ), "HH:mm:ss" ) ); }
+#endif
 #endif
 
     inline std::string getVersionString(bool full) 
