@@ -25,7 +25,7 @@
 
 #include <QDialog>
 #include <QFile>
-#include <QTime>
+#include <QElapsedTimer>
 #include <memory>
 
 #include "SABUtilsExport.h"
@@ -70,7 +70,7 @@ namespace NSABUtils
         QString fDownloadFileName;
         QFile fOutputFile;
         QNetworkAccessManager * fManager;
-        QTime fDownloadTime;
+        QElapsedTimer fDownloadTime;
         bool fHasError;
         std::shared_ptr < SGitHubAsset > fAssett;
     };
