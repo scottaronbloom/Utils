@@ -91,7 +91,7 @@ namespace NSABUtils
         request.setUrl( url );
 
         request.setRawHeader( QByteArray( "Accept" ), QByteArray( "application/vnd.github+json" ) );
-        request.setRawHeader( QByteArray( "Authorization" ), QByteArray( "token " ) + fGitHubToken );
+        //request.setRawHeader( QByteArray( "Authorization" ), QByteArray( "token " ) + fGitHubToken );
         fReply = fManager->get( request );
 
         QEventLoop eLoop;
@@ -106,14 +106,22 @@ namespace NSABUtils
             fErrorString = fReply->errorString();
             fHasError = ( fReply->error() != QNetworkReply::NoError );
         }
+
+        auto data = fReply->readAll();
+        if ( data.isEmpty() )
+        {
+            fErrorString = QObject::tr( "Error in reply: Empty Response" );
+            fHasError = true;
+        }
+
         if ( !fHasError )
         {
             QJsonParseError error;
-            auto json = QJsonDocument::fromJson( fReply->readAll(), &error );
+            auto json = QJsonDocument::fromJson( data, &error );
 
             if ( error.error != QJsonParseError::NoError )
             {
-                fErrorString += QObject::tr( "Error in Reply: '%1' @ %2" ).arg( error.errorString() ).arg( error.offset );
+                fErrorString += QObject::tr( "Error in Reply from server %1: '%2' @ %3" ).arg( fURLPath ).arg( error.errorString() ).arg( error.offset );
                 fHasError = true;
             }
             if ( !json.isArray() )
@@ -126,9 +134,6 @@ namespace NSABUtils
         }
         fReply->deleteLater();
         fReply = nullptr;
-
-        if ( fHasError )
-            return;
     }
 
     int CGitHubGetVersions::getTimeOutDelay() const
