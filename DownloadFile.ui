@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CDownloadGitHubAsset</class>
- <widget class="QDialog" name="CDownloadGitHubAsset">
+ <class>CDownloadFile</class>
+ <widget class="QDialog" name="CDownloadFile">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>390</width>
-    <height>68</height>
+    <width>339</width>
+    <height>98</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Downloading Latest Version</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="3">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QFrame" name="downloadFrame">
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
@@ -61,27 +61,20 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="cancel">
-        <property name="text">
-         <string>&amp;Cancel</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="QCheckBox" name="installAfterDownload">
-     <property name="text">
-      <string>Install after Download?</string>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::No|QDialogButtonBox::Yes</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
-  <include location="application.qrc"/>
+  <include location="resources/SABUtils.qrc"/>
  </resources>
  <connections/>
 </ui>

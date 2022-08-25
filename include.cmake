@@ -28,7 +28,7 @@ ENDIF()
 
 set(qtproject_SRCS
     GitHubGetVersions.cpp
-	DownloadGitHubAsset.cpp
+	DownloadFile.cpp
     AutoFetch.cpp
     AutoWaitCursor.cpp
     BackgroundFileCheck.cpp
@@ -81,7 +81,7 @@ set(qtproject_H
     DelaySpinBox.h
     DoubleProgressDlg.h
     GitHubGetVersions.h
-	DownloadGitHubAsset.h
+	DownloadFile.h
     HyperLinkLineEdit.h
     ImageScrollBar.h
     MD5.h
@@ -128,7 +128,7 @@ endif()
 
 set(qtproject_UIS
     ScrollMessageBox.ui
-	DownloadGitHubAsset.ui
+	DownloadFile.ui
 )
 
 
