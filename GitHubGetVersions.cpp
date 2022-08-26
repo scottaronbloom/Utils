@@ -132,8 +132,14 @@ namespace NSABUtils
                 fHasError = true;
             }
 
-            loadResults( json.array() );
+            if ( !fHasError )
+                loadResults( json.array() );
         }
+
+        if ( fHasError )
+            emit sigLogMessage( tr( "Versions finished downloading from github with error - %1" ).arg( fErrorString ) );
+
+
         reply->deleteLater();
         emit sigVersionsDownloaded();
     }
@@ -148,6 +154,8 @@ namespace NSABUtils
         QNetworkRequest request;
         request.setUrl( url );
         request.setTransferTimeout( getTimeOutDelay() );
+
+        emit sigLogMessage( tr( "Requesting version info from - %1" ).arg( fURLPath ) );
 
         request.setRawHeader( QByteArray( "Accept" ), QByteArray( "application/vnd.github+json" ) );
         //request.setRawHeader( QByteArray( "Authorization" ), QByteArray( "token " ) + fGitHubToken );
@@ -173,6 +181,8 @@ namespace NSABUtils
         if ( fHasError )
             return;
 
+        emit sigLogMessage( tr( "Versions finished downloading from github - %1 versions found" ).arg( versions.count() ) );
+
         fReleases.clear();
         fLatestUpdate.reset();
         for ( auto && version : versions )
@@ -192,6 +202,7 @@ namespace NSABUtils
                 return lhsVal > rhsVal;
             } );
 
+        emit sigLogMessage( tr( "Searching for a newer version than '%1'" ).arg( fCurrentVersion.toString( true ) ) );
         for( auto && curr : fReleases )
         {
             if ( fLatestUpdate.has_value() )
@@ -199,7 +210,8 @@ namespace NSABUtils
 
             if ( curr->supportsOS() && ( curr->fVersion > fCurrentVersion ) )
             {
-                auto text = curr->fVersion.getVersion( true ) + "\n";
+                emit sigLogMessage( tr( "Newer version found '%1'" ).arg( curr->fVersion.toString( true ) ) );
+                auto text = curr->fVersion.toString( true ) + "\n";
                 for ( auto && asset : curr->fAssets )
                 {
                     text += "\tDownload: " + asset->fUrl.first + " (" + asset->getSize() + ")\n";
@@ -209,7 +221,10 @@ namespace NSABUtils
         }
 
         if ( !fLatestUpdate.has_value() )
-            fLatestUpdate = { "You are running the latest version of the release: " + fCurrentVersion.getVersion( true ), nullptr };
+        {
+            emit sigLogMessage( tr( "Newer version not found" ) );
+            fLatestUpdate = { "You are running the latest version of the release: " + fCurrentVersion.toString( true ), nullptr };
+        }
     }
 
     bool CGitHubGetVersions::hasUpdate() const
@@ -284,7 +299,7 @@ namespace NSABUtils
         return aOK;
     }
 
-    QString SVersion::getVersion( bool verbose ) const
+    QString SVersion::toString( bool verbose ) const
     {
         QString retVal;
         if ( verbose )

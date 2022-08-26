@@ -73,7 +73,7 @@ struct SABUTILS_EXPORT SVersion
         return fReleaseDate == rhs.fReleaseDate;
     }
 
-    QString getVersion( bool verbose ) const;
+    QString toString( bool verbose ) const;
     int fMajor{ -1 };
     int fMinor{ -1 };
     QDateTime fReleaseDate;
@@ -166,7 +166,7 @@ private Q_SLOTS:
 
 Q_SIGNALS:
     void sigVersionsDownloaded();
-
+    void sigLogMessage( const QString & message );
 private:
     int getTimeOutDelay() const;
     void loadResults( const QJsonArray & results );
