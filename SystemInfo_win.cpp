@@ -91,7 +91,7 @@ namespace NSABUtils
             for ( unsigned int ii = 0; ii < pNextAd->AddressLength; ++ii )
             {
                 macAddr <<= 8;
-                macAddr |= pNextAd->Address[ ii ];;
+                macAddr |= pNextAd->Address[ ii ];
             }
 
             std::ostringstream oss;
@@ -863,7 +863,7 @@ namespace NSABUtils
             oss << "-";
         oss << std::fixed << std::setw( 2 ) << std::setfill( '0' ) << tzHours << ":" << std::fixed << std::setw( 2 ) << std::setfill( '0' ) << tzMins;
 
-        currMap[ "CurrentTimeZone" ] = oss.str();;
+        currMap[ "CurrentTimeZone" ] = oss.str();
         maps.push_back( currMap );
         retVal[ "OS" ] = maps;
         return retVal;

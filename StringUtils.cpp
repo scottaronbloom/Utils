@@ -2096,7 +2096,7 @@ namespace NSABUtils
                 QString realHSC = QRegularExpression::escape(QString("%1").arg(hsc));
                 if (realHSC != origHSC)
                 {
-                    realHSC = QRegularExpression::escape(QString("\\%1").arg(hsc));;
+                    realHSC = QRegularExpression::escape(QString("\\%1").arg(hsc));
                 }
                 retVal = splitStringRegEx(pattern, realHSC.toStdString());
 
