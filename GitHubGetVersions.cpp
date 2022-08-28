@@ -299,6 +299,28 @@ namespace NSABUtils
         return aOK;
     }
 
+    bool operator>( const SVersion & lhs, const SVersion & rhs )
+    {
+        if ( lhs.fMajor != rhs.fMajor )
+            return lhs.fMajor > rhs.fMajor;
+        if ( lhs.fMinor != rhs.fMinor )
+            return lhs.fMinor > rhs.fMinor;
+        return lhs.fReleaseDate > rhs.fReleaseDate;
+    }
+
+    bool operator<( const SVersion & lhs, const SVersion & rhs )
+    {
+        return !operator==( lhs, rhs ) && !operator>( lhs, rhs );
+    }
+
+    bool operator==( const SVersion & lhs, const SVersion & rhs )
+    {
+        return    ( lhs.fMajor == rhs.fMajor )
+               && ( lhs.fMinor != rhs.fMinor )
+               && ( lhs.fReleaseDate == rhs.fReleaseDate )
+            ;
+    }
+
     QString SVersion::toString( bool verbose ) const
     {
         QString retVal;
@@ -333,6 +355,21 @@ namespace NSABUtils
             fAssets.push_back( assetInfo );
         }
         fAOK = !fAssets.empty();
+    }
+
+    bool SGitHubRelease::operator>( const SGitHubRelease & rhs ) const
+    {
+        return fVersion > rhs.fVersion;
+    }
+
+    bool SGitHubRelease::operator<( const SGitHubRelease & rhs ) const
+    {
+        return fVersion < rhs.fVersion;
+    }
+
+    bool SGitHubRelease::operator==( const SGitHubRelease & rhs ) const
+    {
+        return fVersion == rhs.fVersion;
     }
 
     bool SGitHubRelease::supportsOS() const

@@ -46,38 +46,15 @@ struct SABUTILS_EXPORT SVersion
     SVersion() {};
     bool setVersionInfo( const QString & tagName, const QString & createdDate );
 
-    bool operator>( const SVersion & rhs ) const
-    {
-        if ( fMajor != rhs.fMajor )
-            return fMajor > rhs.fMajor;
-        if ( fMinor != rhs.fMinor )
-            return fMinor > rhs.fMinor;
-        return fReleaseDate > rhs.fReleaseDate;
-    }
-
-    bool operator<( const SVersion & rhs ) const
-    {
-        if ( fMajor != rhs.fMajor )
-            return fMajor < rhs.fMajor;
-        if ( fMinor != rhs.fMinor )
-            return fMinor < rhs.fMinor;
-        return fReleaseDate < rhs.fReleaseDate;
-    }
-
-    bool operator==( const SVersion & rhs ) const
-    {
-        if ( fMajor == rhs.fMajor )
-            return false;
-        if ( fMinor != rhs.fMinor )
-            return false;
-        return fReleaseDate == rhs.fReleaseDate;
-    }
-
     QString toString( bool verbose ) const;
     int fMajor{ -1 };
     int fMinor{ -1 };
     QDateTime fReleaseDate;
 };
+
+SABUTILS_EXPORT bool operator<( const SVersion & lhs, const SVersion & rhs );
+SABUTILS_EXPORT bool operator>( const SVersion & lhs, const SVersion & rhs );
+SABUTILS_EXPORT bool operator==( const SVersion & lhs, const SVersion & rhs );
 
 struct SABUTILS_EXPORT SGitHubAsset
 {
@@ -108,20 +85,10 @@ struct SABUTILS_EXPORT SGitHubRelease
         return QString( "%1 - %2" ).arg( fTagName ).arg( fDescription );
     }
 
-    bool operator>( const SGitHubRelease & rhs ) const
-    {
-        return fVersion > rhs.fVersion;
-    }
+    bool operator>( const SGitHubRelease & rhs ) const;
+    bool operator<( const SGitHubRelease & rhs ) const;
+    bool operator==( const SGitHubRelease & rhs ) const;
 
-    bool operator<( const SGitHubRelease & rhs ) const
-    {
-        return fVersion < rhs.fVersion;
-    }
-
-    bool operator==( const SGitHubRelease & rhs ) const
-    {
-        return fVersion == rhs.fVersion;
-    }
     bool supportsOS() const;
     std::list< std::shared_ptr< SGitHubRelease > > splitAssets() const;
 
