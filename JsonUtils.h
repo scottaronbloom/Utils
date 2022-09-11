@@ -39,7 +39,14 @@ namespace NSABUtils
         obj = QJsonValue(value);
     }
 
+    template< typename T >
+    void ToJson( const T & value, QJsonValueRef & obj )
+    {
+        obj = QJsonValue( value );
+    }
+
     SABUTILS_EXPORT void ToJson(const QStringList& value, QJsonValue& obj);
+    SABUTILS_EXPORT void ToJson( const QStringList & value, QJsonValueRef & obj );
 
     template< typename T >
     void ToJson(const std::list< T > & value, QJsonValue& obj)
@@ -50,6 +57,19 @@ namespace NSABUtils
             QJsonValue curr;
             ToJson(ii, curr);
             retVal.append(curr);
+        }
+        obj = retVal;
+    }
+
+    template< typename T >
+    void ToJson( const std::list< T > & value, QJsonValueRef & obj )
+    {
+        QJsonArray retVal;
+        for ( auto && ii : value )
+        {
+            QJsonValue curr;
+            ToJson( ii, curr );
+            retVal.append( curr );
         }
         obj = retVal;
     }
@@ -66,6 +86,21 @@ namespace NSABUtils
         }
         obj = retVal;
     }
+
+
+    template< typename T >
+    void ToJson( const std::set< T > & value, QJsonValueRef & obj )
+    {
+        QJsonArray retVal;
+        for ( auto && ii : value )
+        {
+            QJsonValue curr;
+            ToJson( ii, curr );
+            retVal.append( curr );
+        }
+        obj = retVal;
+    }
+
     template< typename T1, typename T2 >
     void ToJson(const std::pair< T1, T2 >& value, QJsonValue& obj)
     {
@@ -82,6 +117,22 @@ namespace NSABUtils
         obj = retVal;
     }
 
+    template< typename T1, typename T2 >
+    void ToJson( const std::pair< T1, T2 > & value, QJsonValueRef & obj )
+    {
+        QJsonArray retVal;
+
+        QJsonValue first;
+        ToJson( value.first, first );
+        retVal.append( first );
+
+        QJsonValue second;
+        ToJson( value.second, second );
+        retVal.append( second );
+
+        obj = retVal;
+    }
+
     template< typename T2 >
     void ToJson(const std::unordered_map< QString, T2 >& value, QJsonValue& obj)
     {
@@ -91,6 +142,19 @@ namespace NSABUtils
             QJsonValue curr;
             ToJson(ii.second, curr);
             retVal[ii.first] = curr;
+        }
+        obj = retVal;
+    }
+
+    template< typename T2 >
+    void ToJson( const std::unordered_map< QString, T2 > & value, QJsonValueRef & obj )
+    {
+        QJsonObject retVal;
+        for ( auto && ii : value )
+        {
+            QJsonValue curr;
+            ToJson( ii.second, curr );
+            retVal[ ii.first ] = curr;
         }
         obj = retVal;
     }
