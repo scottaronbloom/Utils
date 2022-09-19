@@ -409,6 +409,20 @@ namespace NSABUtils
             return retVal;
         }
 
+        SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo & info )
+        {
+            auto path = info.canonicalFilePath();
+            if ( !path.startsWith( "//" ) && !path.startsWith( R"(\\)" ) )
+                return false;
+
+            auto block = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+            auto regExStr = QString( R"((//|\\\\)%1.%1.%1.%1(/|\\))" ).arg( block );
+            auto match = QRegularExpression( regExStr ).match( path );
+            if ( match.hasMatch() && match.capturedStart() == 0 )
+                return true;
+            return false;
+        }
+
         template< typename T >
         std::pair< T, T > correctFixedPointRemainder(T inValue, uint8_t precisionIn, uint8_t precisionOut)
         {

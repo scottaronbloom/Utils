@@ -24,6 +24,8 @@
 #include "BackgroundFileCheck.h"
 #include "RevertValue.h"
 
+#include "SABUtils/FileUtils.h"
+
 #include <QThread>
 #include <QFileInfo>
 #include <QDebug>
@@ -146,7 +148,7 @@ namespace NSABUtils
             return;
         }
 
-        if ( fImpl->fPathName.startsWith( R"(\\)" ) || fImpl->fPathName.startsWith( "//" ) )
+        if ( NSABUtils::NFileUtils::isIPAddressNetworkPath( fImpl->fPathName ) )
         {
             fImpl->fRetVal = std::make_pair( true, QString() );
             return;
