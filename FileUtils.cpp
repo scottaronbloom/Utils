@@ -1046,18 +1046,6 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool moveToTrashImpl(const QString & /*fileName*/) { return true; }
-        bool moveToTrash(const QString & fileName)
-        {
-            if (!moveToTrashImpl(fileName))
-                return remove(fileName);
-            return true;
-        }
-        bool moveToTrash(const std::string & fileName)
-        {
-            return moveToTrash(QString::fromStdString(fileName));
-        }
-
         static std::unordered_set< std::string, NStringUtils::noCaseStringHash, NStringUtils::noCaseStringEq > sSystemLibDirs;
         static std::unordered_map< std::string, std::string > sSystemFileMap;
 
@@ -1645,6 +1633,30 @@ namespace NSABUtils
             return retVal;
 #endif
         }
+
+
+        bool moveToTrashImpl( const QString & path, std::shared_ptr< SRecycleOptions > options );
+        bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options )
+        {
+            return moveToTrash( info.absoluteFilePath(), options );
+        }
+        bool moveToTrash( const std::string & path, std::shared_ptr< SRecycleOptions > options )
+        {
+            return moveToTrash( QString::fromStdString( path ), options );
+        }
+        bool moveToTrash( const QString & path, std::shared_ptr< SRecycleOptions > options )
+        {
+            if ( !moveToTrashImpl( path, options ) )
+            {
+                std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin.";
+                if ( options->fDeleteOnRecycleFailure )
+                    return remove( path );
+                else
+                    return false;
+            }
+            return true;
+        }
+
     }
 }
 

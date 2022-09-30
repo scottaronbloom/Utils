@@ -21,9 +21,9 @@
 # SOFTWARE.
 
 IF(WIN32)
-        set( SYSTEMINFO_SRCS SystemInfo.cpp SystemInfo_win.cpp )
+        set( OS_SRCS SystemInfo_win.cpp MoveToTrash_win.cpp)
 ELSE()
-        set( SYSTEMINFO_SRCS SystemInfo.cpp SystemInfo_linux.cpp )
+        set( OS_SRCS SystemInfo_linux.cpp MoveToTrash_linux.cpp)
 ENDIF()
 
 set(qtproject_SRCS
@@ -56,7 +56,7 @@ set(qtproject_SRCS
     StayAwake.cpp
     StringComparisonClasses.cpp
     StringUtils.cpp
-    ${SYSTEMINFO_SRCS} 
+    SystemInfo.cpp
     ThreadedProgressDialog.cpp
     UtilityModels.cpp
     UtilityViews.cpp
@@ -66,6 +66,7 @@ set(qtproject_SRCS
     WidgetEnabler.cpp
     WidgetChanged.cpp
     WordExp.cpp
+    ${OS_SRCS}
 )
 
 set(qtproject_CPPMOC_SRCS

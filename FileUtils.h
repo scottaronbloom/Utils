@@ -86,8 +86,16 @@ namespace NSABUtils
         SABUTILS_EXPORT std::list< std::string > getDirsFromPath( const std::string & searchPath );
         SABUTILS_EXPORT std::string getPathFromDirs( const std::list< std::string > & dirs );
 
-        SABUTILS_EXPORT bool moveToTrash( const QString & fileName );
-        SABUTILS_EXPORT bool moveToTrash( const std::string & fileName );
+        struct SABUTILS_EXPORT SRecycleOptions
+        {
+            SRecycleOptions() {}
+
+            bool fDeleteOnRecycleFailure{ true };
+        };
+
+        SABUTILS_EXPORT bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options = {} );
+        SABUTILS_EXPORT bool moveToTrash( const QString & fileName, std::shared_ptr< SRecycleOptions > options = {} );
+        SABUTILS_EXPORT bool moveToTrash( const std::string & fileName, std::shared_ptr< SRecycleOptions > options = {} );
 
         SABUTILS_EXPORT bool isBinaryFile( const std::string & fileName ); // if any char in the first 100 characters is non std::isprint return true
         SABUTILS_EXPORT bool isBinaryFile( const std::string & fileName, const std::string & relToDir ); // if any char in the first 100 characters is non std::isprint return true
