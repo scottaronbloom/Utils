@@ -141,7 +141,7 @@ FUNCTION(SAB_UNIT_TEST name file libs tgtNameVar )
 
     if( NOT ( ( ${pos1} EQUAL -1 ) AND ( ${pos2} EQUAL -1 ) ) )
         MESSAGE( STATUS "Adding Qt for Test: '${TEST_NAME}'" )
-        DeployQt( ${TEST_NAME} . NON_INSTALL_ONLY 1)
+        DeployQt( ${TEST_NAME} . NON_INSTALL_ONLY 1 NO_TRANSLATIONS 1)
     ENDIF()
     
     #MESSAGE( "FOLDER_NAME=${FOLDER_NAME}" )
