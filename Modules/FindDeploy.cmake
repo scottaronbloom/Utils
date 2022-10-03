@@ -103,24 +103,22 @@ function(DeployQt target directory)
     set( multiValueArgs )
 
     cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    if ( _NO_TRANSLATIONS )
+        SET( NO_TRANSLATIONS_OPT "--no-translations")
+    endif()
 
-    SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
-    IF( WIN32 )
-        SET(_QTDEPLOY_OPTIONS_LCL "--verbose=1;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb" )
-    ELSEIF( APPLE )
-        SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
-        SET(_QTDEPLOY_OPTIONS_LCL "--verbose=0;--no-compiler-runtime;--always-overwrite" )
-    ELSEIF( UNIX )
-        SET(_QTDEPLOY_OPTIONS_LCL "-verbose=0" )
-        return()
-    ENDIF()
-
-    IF ( _NO_TRANSLATIONS )
-        SET(_QTDEPLOY_OPTIONS_LCL "${_QTDEPLOY_OPTIONS_LCL};--no-translations")
-    ENDIF()
-    
-   
     if ( NOT _INSTALL_ONLY )
+        SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
+        IF( WIN32 )
+            SET(_QTDEPLOY_OPTIONS_LCL "--verbose=1;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb;${NO_TRANSLATIONS_OPT}" )
+        ELSEIF( APPLE )
+            SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
+            SET(_QTDEPLOY_OPTIONS_LCL "--verbose=1;--no-compiler-runtime;--always-overwrite;${NO_TRANSLATIONS_OPT}" )
+        ELSEIF( UNIX )
+            SET(_QTDEPLOY_OPTIONS_LCL "-verbose=1;${NO_TRANSLATIONS_OPT}" )
+            return()
+        ENDIF()
+
         # Run deployqt immediately after build to make the build area "complete"
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E echo "Deploying Qt to Build Area for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ..."
@@ -140,10 +138,6 @@ function(DeployQt target directory)
 
     # Before installation, run a series of commands that copy each of the Qt
     # runtime files to the appropriate directory for installation
-    if ( _NO_TRANSLATIONS )
-        SET( NO_TRANSLATIONS_OPT "--no-translations")
-    endif()
-
     if ( NOT _NON_INSTALL_ONLY )
         install(CODE
             "
@@ -169,19 +163,18 @@ function(DeployQt target directory)
             while(_files)
                 list(GET _files 0 _src)
                 list(GET _files 1 _dest)
-                MESSAGE( STATUS \"Deploying Qt file ${_src} to ${_dest}\" )
                 execute_process(
                     COMMAND \"${CMAKE_COMMAND}\" -E
-                        compare_files \"\${_src}\" \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
+                        compare_files \"\${_src}\" \"\${CMAKE_INSTALL_PREFIX}/\${directory}/\${_dest}\"
                         OUTPUT_VARIABLE _outvar
                         ERROR_VARIABLE _errvar
                         RESULT_VARIABLE _result_code
                 )
                 if( \${_result_code} )
-                    MESSAGE( STATUS \"Installing: \${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\" )
+                    MESSAGE( STATUS \"Installing: \${CMAKE_INSTALL_PREFIX}/\${directory}/\${_dest}\" )
                     execute_process(
                         COMMAND \"${CMAKE_COMMAND}\" -E
-                            copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
+                            copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/\${directory}/\${_dest}\"
                     )
                 ELSE()
                     MESSAGE( STATUS \"Up-to-date: \${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\" )
