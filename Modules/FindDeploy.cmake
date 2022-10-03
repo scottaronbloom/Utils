@@ -99,7 +99,7 @@ function(DeployQt target directory)
     endif()
 
     set( options )
-    set( oneValueArgs INSTALL_ONLY )
+    set( oneValueArgs INSTALL_ONLY NON_INSTALL_ONLY )
     set( multiValueArgs )
 
     cmake_parse_arguments( "" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -135,51 +135,53 @@ function(DeployQt target directory)
 
     # Before installation, run a series of commands that copy each of the Qt
     # runtime files to the appropriate directory for installation
-    install(CODE
-        "
-        file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_\${CMAKE_INSTALL_CONFIG_NAME}_path\" _file)
-        IF( WIN32 )
-            SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;--no-compiler-runtime;--no-angle;--no-opengl-sw\" )
-        ELSEIF( APPLE )
-            SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;\" )
-        ELSEIF( UNIX )
-            SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;\" )
-        ENDIF()
+    if ( NOT _NON_INSTALL_ONLY )
+        install(CODE
+            "
+            file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_\${CMAKE_INSTALL_CONFIG_NAME}_path\" _file)
+            IF( WIN32 )
+                SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;--no-compiler-runtime;--no-angle;--no-opengl-sw\" )
+            ELSEIF( APPLE )
+                SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;\" )
+            ELSEIF( UNIX )
+                SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;\" )
+            ENDIF()
 
-        MESSAGE( STATUS \"Deploying Qt to the Install Area '\${CMAKE_INSTALL_PREFIX}/${directory}' using '${DEPLOYQT_EXECUTABLE}' ...\" )
-        execute_process(
-            COMMAND \"${CMAKE_COMMAND}\" -E
-                env PATH=\"${_qt_bin_dir}\" \"${DEPLOYQT_EXECUTABLE}\"
-                    \${_QTDEPLOY_OPTIONS}
-                    \${_file}
-            OUTPUT_VARIABLE _output
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        separate_arguments(_files NATIVE_COMMAND \${_output})
-        while(_files)
-            list(GET _files 0 _src)
-            list(GET _files 1 _dest)
+            MESSAGE( STATUS \"Deploying Qt to the Install Area '\${CMAKE_INSTALL_PREFIX}/${directory}' for Project '${target}' using '${DEPLOYQT_EXECUTABLE}' ...\" )
             execute_process(
                 COMMAND \"${CMAKE_COMMAND}\" -E
-                    compare_files \"\${_src}\" \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
-                    OUTPUT_VARIABLE _outvar
-                    ERROR_VARIABLE _errvar
-                    RESULT_VARIABLE _result_code
+                    env PATH=\"${_qt_bin_dir}\" \"${DEPLOYQT_EXECUTABLE}\"
+                        \${_QTDEPLOY_OPTIONS}
+                        \${_file}
+                OUTPUT_VARIABLE _output
+                OUTPUT_STRIP_TRAILING_WHITESPACE
             )
-            if( \${_result_code} )
-                MESSAGE( STATUS \"Installing: \${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\" )
+            separate_arguments(_files NATIVE_COMMAND \${_output})
+            while(_files)
+                list(GET _files 0 _src)
+                list(GET _files 1 _dest)
                 execute_process(
                     COMMAND \"${CMAKE_COMMAND}\" -E
-                        copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
+                        compare_files \"\${_src}\" \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
+                        OUTPUT_VARIABLE _outvar
+                        ERROR_VARIABLE _errvar
+                        RESULT_VARIABLE _result_code
                 )
-            ELSE()
-                MESSAGE( STATUS \"Up-to-date: \${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\" )
-            ENDIF()
-            list(REMOVE_AT _files 0 1)
-        endwhile()
-        MESSAGE( STATUS \"Finished deploying Qt\" )
-        "
-    )
+                if( \${_result_code} )
+                    MESSAGE( STATUS \"Installing: \${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\" )
+                    execute_process(
+                        COMMAND \"${CMAKE_COMMAND}\" -E
+                            copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
+                    )
+                ELSE()
+                    MESSAGE( STATUS \"Up-to-date: \${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\" )
+                ENDIF()
+                list(REMOVE_AT _files 0 1)
+            endwhile()
+            MESSAGE( STATUS \"Finished deploying Qt\" )
+            "
+        )
+    endif()
 endfunction()
 
 function (PrintList listVar)
