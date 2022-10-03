@@ -91,6 +91,7 @@ namespace NSABUtils
             SRecycleOptions() {}
 
             bool fDeleteOnRecycleFailure{ true };
+            bool fForce{ false };
         };
 
         SABUTILS_EXPORT bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options = {} );

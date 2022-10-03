@@ -37,7 +37,7 @@ namespace NSABUtils
             (void)options;
             QFileInfo fi( fileName );
             if ( !fi.exists() )
-                return false;
+                return options->fForce;
 
             auto path = fileName.toStdWString();
             path.append( 1, L'\0' );
@@ -49,7 +49,8 @@ namespace NSABUtils
             shfos.pTo = nullptr;       // not used for deletion operations
             shfos.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_NO_UI;
             const int retVal = SHFileOperationW( &shfos );
-            return retVal == 0;
+
+            return ( retVal == 0 ) || options->fForce;
         }
     }
 }
