@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2022 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -21,36 +21,33 @@
 // SOFTWARE.
 
 #include "MoveToTrash.h"
-
-#include <windows.h>
-#include <shellapi.h>
-
-#include <QString>
 #include <QFileInfo>
+#include <iostream>
 
 namespace NSABUtils
 {
     namespace NFileUtils
     {
-        bool moveToTrashImpl( const QString & fileName, std::shared_ptr< SRecycleOptions > options )
+        bool moveToTrashImpl( const QString & path, std::shared_ptr< SRecycleOptions > options );
+        bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options )
         {
-            (void)options;
-            QFileInfo fi( fileName );
-            if ( !fi.exists() )
-                return options->fForce;
-
-            auto path = fileName.toStdWString();
-            path.append( 1, L'\0' );
-
-            SHFILEOPSTRUCTW shfos = {};
-            shfos.hwnd = nullptr;       // handle to window that will own generated windows, if applicable
-            shfos.wFunc = FO_DELETE;
-            shfos.pFrom = path.c_str();
-            shfos.pTo = nullptr;       // not used for deletion operations
-            shfos.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_NO_UI;
-            const int retVal = SHFileOperationW( &shfos );
-
-            return ( retVal == 0 ) || options->fForce;
+            return moveToTrash( info.absoluteFilePath(), options );
+        }
+        bool moveToTrash( const std::string & path, std::shared_ptr< SRecycleOptions > options )
+        {
+            return moveToTrash( QString::fromStdString( path ), options );
+        }
+        bool moveToTrash( const QString & path, std::shared_ptr< SRecycleOptions > options )
+        {
+            if ( !moveToTrashImpl( path, options ) )
+            {
+                std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin.";
+                if ( options->fDeleteOnRecycleFailure )
+                    return QFile::remove( path );
+                else
+                    return false;
+            }
+            return true;
         }
     }
 }

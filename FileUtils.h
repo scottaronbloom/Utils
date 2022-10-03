@@ -59,9 +59,13 @@ namespace NSABUtils
         SABUTILS_EXPORT bool isReadable( const std::string & path );
         SABUTILS_EXPORT bool isRegularFile( const std::string & path );
         SABUTILS_EXPORT bool isDirectory( const std::string & path );
-        SABUTILS_EXPORT bool removeFile( const std::string & fileName );
+
+        SABUTILS_EXPORT bool exists( const QString & path );
+        SABUTILS_EXPORT bool isReadable( const QString & path );
+        SABUTILS_EXPORT bool isRegularFile( const QString & path );
+        SABUTILS_EXPORT bool isDirectory( const QString & path );
+
         SABUTILS_EXPORT bool renameFile( const std::string & oldfileName, const std::string & newFileName, bool force = false );
-        SABUTILS_EXPORT int changeDir( const std::string & newDir );
         SABUTILS_EXPORT std::string getWd();
         SABUTILS_EXPORT std::string tilda2Home( const std::string & fileName );
         SABUTILS_EXPORT std::string JoinPaths( const std::string & dir, const std::string & file );
@@ -70,10 +74,12 @@ namespace NSABUtils
         SABUTILS_EXPORT bool pathCompare( const std::string & lhs, const std::string & rhs );  // return is lhs is the same path as rhs
         SABUTILS_EXPORT std::string normalizePath( const std::string & path, const std::string & relToDir = std::string() ); // removes ".." and "." replaces all "\" with "/"
 
-        SABUTILS_EXPORT bool remove( const std::string & item );
+        SABUTILS_EXPORT bool removePath( const QString & item );
+        SABUTILS_EXPORT bool removePath( const std::string & item );
         SABUTILS_EXPORT bool removeInsideOfDir( const QString & dirStr );
         SABUTILS_EXPORT bool removeInsideOfDir( const std::string & dir );
         SABUTILS_EXPORT bool copy( const std::string & fileName, const std::string & newFileName );
+
         SABUTILS_EXPORT QString canonicalFilePath( const QString & fileName );
         SABUTILS_EXPORT std::string canonicalFilePath( const std::string & fileName );
 
@@ -85,18 +91,6 @@ namespace NSABUtils
         SABUTILS_EXPORT std::list< std::string > getSubDirs( const std::string & dir, bool recursive, bool includeTopDir );
         SABUTILS_EXPORT std::list< std::string > getDirsFromPath( const std::string & searchPath );
         SABUTILS_EXPORT std::string getPathFromDirs( const std::list< std::string > & dirs );
-
-        struct SABUTILS_EXPORT SRecycleOptions
-        {
-            SRecycleOptions() {}
-
-            bool fDeleteOnRecycleFailure{ true };
-            bool fForce{ false };
-        };
-
-        SABUTILS_EXPORT bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const QString & fileName, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const std::string & fileName, std::shared_ptr< SRecycleOptions > options = {} );
 
         SABUTILS_EXPORT bool isBinaryFile( const std::string & fileName ); // if any char in the first 100 characters is non std::isprint return true
         SABUTILS_EXPORT bool isBinaryFile( const std::string & fileName, const std::string & relToDir ); // if any char in the first 100 characters is non std::isprint return true

@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2022 Scott Aron Bloom
+// Copyright( c ) 2020-2021 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -20,39 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "MoveToTrash.h"
+#ifndef __MOVETOTRASH_H
+#define __MOVETOTRASH_H
 
-#include <windows.h>
-#include <shellapi.h>
+#include "SABUtilsExport.h"
 
-#include <QString>
-#include <QFileInfo>
+#include <string>
+#include <list>
+#include <set>
+#include <unordered_map>
+#include <QStringList>
+#include <QFileDevice>
+#include <QList>
+
+class QFileInfo;
+class QDateTime;
+class QString;
+class QDir;
 
 namespace NSABUtils
 {
     namespace NFileUtils
     {
-        bool moveToTrashImpl( const QString & fileName, std::shared_ptr< SRecycleOptions > options )
+        struct SABUTILS_EXPORT SRecycleOptions
         {
-            (void)options;
-            QFileInfo fi( fileName );
-            if ( !fi.exists() )
-                return options->fForce;
+            SRecycleOptions() {}
 
-            auto path = fileName.toStdWString();
-            path.append( 1, L'\0' );
+            bool fDeleteOnRecycleFailure{ true };
+            bool fForce{ false };
+        };
 
-            SHFILEOPSTRUCTW shfos = {};
-            shfos.hwnd = nullptr;       // handle to window that will own generated windows, if applicable
-            shfos.wFunc = FO_DELETE;
-            shfos.pFrom = path.c_str();
-            shfos.pTo = nullptr;       // not used for deletion operations
-            shfos.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT | FOF_NO_UI;
-            const int retVal = SHFileOperationW( &shfos );
-
-            return ( retVal == 0 ) || options->fForce;
-        }
+        SABUTILS_EXPORT bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options = {} );
+        SABUTILS_EXPORT bool moveToTrash( const QString & fileName, std::shared_ptr< SRecycleOptions > options = {} );
+        SABUTILS_EXPORT bool moveToTrash( const std::string & fileName, std::shared_ptr< SRecycleOptions > options = {} );
     }
 }
-
-
+#endif

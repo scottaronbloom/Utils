@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "FileUtils.h"
+#include "MoveToTrash.h"
 #include "StringUtils.h"
 #include "HashUtils.h"
 #include "utils.h"
@@ -43,18 +44,8 @@
 #include <iostream>
 #include <algorithm>
 #ifdef _WINDOWS
-#include <io.h>     // for _access()
-#include <direct.h> // for chdir
 #include <Windows.h>
-#define access _access
-#define chdir _chdir
-#define unlink _unlink
-#define R_OK 4
-#define W_OK 2
-#define X_OK 1
-#define F_OK 0
 #else
-#include <unistd.h> // for access()
 #include <wordexp.h>
 #include <sys/stat.h>
 #endif
@@ -579,63 +570,58 @@ namespace NSABUtils
         // Check to see if the named file exists. Return true
         // if it exists
         //////////////////////////////////////////////////////////////////////////
-        bool exists(const std::string & name)
+        bool exists( const std::string & name )
         {
-            if (name.empty())
-                return false;
-            if (access(name.c_str(), F_OK) == -1)
-                return false;
-            return true;
-
+            return exists( QString::fromStdString( name ) );
         }
 
-        bool isReadable(const std::string & name)
+        bool exists( const QString & name )
         {
-            if (name.empty())
+            if (name.isEmpty())
                 return false;
-            if (access(name.c_str(), R_OK) == -1)
-                return false;
-            return true;
-
+            return QFileInfo( name ).exists();
         }
 
-        //////////////////////////////////////////////////////////////////////////
-        // Check to see if the named file is a regular File. Return true
-        // if it is
-        //
-
-        //
-        //////////////////////////////////////////////////////////////////////////
-        bool isRegularFile(const std::string & name)
+        bool isReadable( const std::string & name )
         {
-            if (name.empty())
-                return false;
-            QFileInfo fi(QString::fromStdString(name));
-            return fi.isFile();
+            return isReadable( QString::fromStdString( name ) );
         }
 
-        //////////////////////////////////////////////////////////////////////////
-        // 
-        // Check to see if the named file is a directory File. Return true
-        // if it is
-        //
-
-        //
-        //////////////////////////////////////////////////////////////////////////
-        bool isDirectory(const std::string & name)
+        bool isReadable(const QString & name)
         {
-            if (name.empty())
+            if (name.isEmpty())
                 return false;
-            QFileInfo fi(QString::fromStdString(name));
-            return fi.isDir();
+            return QFileInfo( name ).isReadable();
+        }
+        bool isRegularFile( const std::string & name )
+        {
+            return isRegularFile( QString::fromStdString( name ) );
+        }
 
+        bool isRegularFile(const QString & name)
+        {
+            if (name.isEmpty())
+                return false;
+            return QFileInfo( name ).isFile();
+        }
+
+        bool isDirectory( const std::string & name )
+        {
+            return isDirectory( QString::fromStdString( name ) );
+        }
+
+        bool isDirectory(const QString & name)
+        {
+            if (name.isEmpty())
+                return false;
+            return QFileInfo( name ).isDir();
         }
 
         bool renameFile(const std::string & from, const std::string & to, bool force)
         {
             if (force && exists(to))
             {
-                if (!removeFile(to))
+                if (!removePath(to))
                 {
                     fprintf(stderr, "Error deleting file '%s' to rename '%s' to '%s'\n", to.c_str(), from.c_str(), to.c_str());
                     return false;
@@ -654,7 +640,7 @@ namespace NSABUtils
         {
             if (force && exists(to))
             {
-                if (!removeFile(to))
+                if (!removePath(to))
                 {
                     fprintf(stderr, "Error deleting file '%s' to rename '%s' to '%s'\n", to.c_str(), from.c_str(), to.c_str());
                     return false;
@@ -670,43 +656,13 @@ namespace NSABUtils
         }
 
         //////////////////////////////////////////////////////////////////////////
-        // removeFile() : remove the file 'fileName'
-        //////////////////////////////////////////////////////////////////////////
-        bool removeFile(const std::string & fileName)
-        {
-            return unlink(fileName.c_str()) == 0;
-        }
-
-        //////////////////////////////////////////////////////////////////////////
-        // changeDir() : change the working directory
-        //////////////////////////////////////////////////////////////////////////
-        int changeDir(const std::string & newDir)
-        {
-            return (chdir(newDir.c_str()));
-        }
-
-        //////////////////////////////////////////////////////////////////////////
         // getWd() : return the working directory in 'buffer'. With Windows,
         // you have to specify the maximum size of the buffer in maxLen.
         //////////////////////////////////////////////////////////////////////////
         std::string getWd()
         {
-            std::string retVal;
-#ifdef _WINDOWS
-            char * buffer;
-            if ((buffer = _getcwd(nullptr, 0)) != nullptr)
-            {
-                retVal = buffer;
-                free(buffer);
-            }
-#else
-            size_t sz = pathconf(".", _PC_PATH_MAX);
-            char * buff = new char[sz + 1];
-            getcwd(buff, sz);
-            retVal = buff;
-            delete[] buff;
-#endif
-            return canonicalFilePath(retVal);
+            auto retVal = QDir::currentPath();
+            return canonicalFilePath( retVal.toStdString() );
         }
 
         /******************************************************************
@@ -734,50 +690,31 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool remove(const QString & entry)
+        bool removePath( const std::string & path )
         {
-            QFileInfo fi(entry);
+            return removePath( QString::fromStdString( path ) );
+        }
+
+        bool removePath(const QString & path)
+        {
+            QFileInfo fi(path);
+            bool success = false;
             if (fi.isFile())
             {
-                bool success = QFile::remove(fi.absoluteFilePath());
-                return success;
+                success = QFile::remove(fi.absoluteFilePath());
             }
             else if (fi.isDir())
             {
-                bool aOK = removeInsideOfDir(fi.absoluteFilePath());
-                if (aOK)
-                {
-                    QDir dir(fi.absoluteFilePath());
-#ifdef Q_OS_WIN
-                    QString fileName = dir.absolutePath().replace("/", "\\");
-                    aOK = ::RemoveDirectoryW((LPCWSTR)fileName.utf16()) != 0;
-#else
-                    QString subDirName = dir.dirName();
-                    dir.cdUp();
-                    aOK = dir.rmdir(subDirName);
-#endif
-                }
-                return aOK;
+                QDir dir( path );
+                success = dir.removeRecursively();
             }
-            return !fi.exists();
-        }
-
-        bool remove(const std::string & dir)
-        {
-            return remove(QString::fromStdString(dir));
+            return success;
         }
 
         bool removeInsideOfDir(const QString & dirStr)
         {
             QDir dir(dirStr);
-            QFileInfoList entries = dir.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Files);
-            bool aOK = true;
-            for (int ii = 0; aOK && ii < entries.size(); ++ii)
-            {
-                aOK = remove(entries[ii].absoluteFilePath());
-            }
-
-            return aOK;
+            return dir.removeRecursively();
         }
 
         bool removeInsideOfDir(const std::string & dir)
@@ -848,7 +785,7 @@ namespace NSABUtils
                 if (useTrash && NFileUtils::exists(backupFile))
                     NFileUtils::moveToTrash(backupFile);
                 else
-                    NFileUtils::remove(backupFile);
+                    NFileUtils::removePath(backupFile);
 
                 if (moveFile)
                     return NFileUtils::renameFile(fileName, fileName + ".bak", true);
@@ -1633,30 +1570,6 @@ namespace NSABUtils
             return retVal;
 #endif
         }
-
-
-        bool moveToTrashImpl( const QString & path, std::shared_ptr< SRecycleOptions > options );
-        bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options )
-        {
-            return moveToTrash( info.absoluteFilePath(), options );
-        }
-        bool moveToTrash( const std::string & path, std::shared_ptr< SRecycleOptions > options )
-        {
-            return moveToTrash( QString::fromStdString( path ), options );
-        }
-        bool moveToTrash( const QString & path, std::shared_ptr< SRecycleOptions > options )
-        {
-            if ( !moveToTrashImpl( path, options ) )
-            {
-                std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin.";
-                if ( options->fDeleteOnRecycleFailure )
-                    return remove( path );
-                else
-                    return false;
-            }
-            return true;
-        }
-
     }
 }
 

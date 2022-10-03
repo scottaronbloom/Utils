@@ -45,6 +45,7 @@ set(qtproject_SRCS
     ImageScrollBar.cpp
     JsonUtils.cpp
     MD5.cpp
+    MoveToTrash.cpp
     MenuBarEx.cpp
     QtDumper.cpp
     QtUtils.cpp
@@ -105,6 +106,7 @@ set(project_H
     FromString.h
     HashUtils.h
     JsonUtils.h
+    MoveToTrash.h
     QtDumper.h
     QtUtils.h
     RevertValue.h
