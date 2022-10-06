@@ -48,6 +48,7 @@ namespace NSABUtils
 
             bool fDeleteOnRecycleFailure{ true };
             bool fForce{ false };
+            bool fVerbose{ false };
         };
 
         SABUTILS_EXPORT bool moveToTrash( const QFileInfo & info, std::shared_ptr< SRecycleOptions > options = {} );

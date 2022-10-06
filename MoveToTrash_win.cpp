@@ -27,6 +27,7 @@
 
 #include <QString>
 #include <QFileInfo>
+#include <iostream>
 
 namespace NSABUtils
 {

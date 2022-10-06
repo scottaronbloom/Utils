@@ -39,6 +39,14 @@ namespace NSABUtils
         }
         bool moveToTrash( const QString & path, std::shared_ptr< SRecycleOptions > options )
         {
+            QFileInfo fi( path );
+            if ( options->fVerbose )
+            {
+                if ( !fi.exists() )
+                    std::cout << "File or Directory '" << fileName.toStdString() << "' does not exist." << std::endl;
+                else
+                    std::cout << "Recycling " << ( fi.isFile() ? "file" : "directory" ) << " '" << path.toStdString() << "'" << std::endl;
+            }
             if ( !moveToTrashImpl( path, options ) )
             {
                 std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin.";
@@ -46,6 +54,11 @@ namespace NSABUtils
                     return QFile::remove( path );
                 else
                     return false;
+            }
+            if ( options->fVerbose )
+            {
+                if ( fi.exists() )
+                    std::cout << "Finished recycling " << ( fi.isFile() ? "file" : "directory" ) << " '" << path.toStdString() << "'" << std::endl;
             }
             return true;
         }
