@@ -43,7 +43,7 @@ namespace NSABUtils
             if ( options->fVerbose )
             {
                 if ( !fi.exists() )
-                    std::cout << "File or Directory '" << fileName.toStdString() << "' does not exist." << std::endl;
+                    std::cout << "File or Directory '" << path.toStdString() << "' does not exist." << std::endl;
                 else
                     std::cout << "Recycling " << ( fi.isFile() ? "file" : "directory" ) << " '" << path.toStdString() << "'" << std::endl;
             }

@@ -135,7 +135,9 @@ namespace NSABUtils
         fReply = fManager->get( request );
         connect( fReply, &QNetworkReply::downloadProgress, this, &CDownloadFile::slotDownloadProgress );
         connect( fReply, &QNetworkReply::encrypted, this, &CDownloadFile::slotEncryptedReply );
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
         connect( fReply, &QNetworkReply::errorOccurred, this, &CDownloadFile::slotErrorOccurred );
+#endif
         connect( fReply, &QNetworkReply::finished, this, &CDownloadFile::slotFinished );
         connect( fReply, &QNetworkReply::metaDataChanged, this, &CDownloadFile::slotMetaDataChanged );
         connect( fReply, &QNetworkReply::preSharedKeyAuthenticationRequired, this, &CDownloadFile::slotPreSharedKeyAuthenticationRequiredReply );

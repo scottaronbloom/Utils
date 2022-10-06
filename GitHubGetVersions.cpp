@@ -153,7 +153,9 @@ namespace NSABUtils
 
         QNetworkRequest request;
         request.setUrl( url );
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
         request.setTransferTimeout( getTimeOutDelay() );
+#endif
 
         emit sigLogMessage( tr( "Requesting version info from - %1" ).arg( fURLPath ) );
 
