@@ -331,7 +331,10 @@ namespace NSABUtils
             if ( options->fVerbose )
             {
                 if ( !QFileInfo( fileName ).exists() )
+                {
                     std::cout << "File or Directory '" << fileName.toStdString() << "' does not exist." << std::endl;
+                    return false;
+                }
             }
 
             HRESULT hr = CoInitializeEx( nullptr, COINIT_MULTITHREADED );

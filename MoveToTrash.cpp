@@ -43,9 +43,13 @@ namespace NSABUtils
         bool moveToTrash( const QString & path, std::shared_ptr< SRecycleOptions > options )
         {
             QFileInfo fi( path );
-            if ( !moveToTrashImpl( QDir::toNativeSeparators( fi.absoluteFilePath() ), options ) )
+            auto nativePath = QDir::toNativeSeparators( fi.absoluteFilePath() );
+            if ( options->fVerbose )
+                std::cout << "Starting Recycle of '" << nativePath.toStdString() << "'." << std::endl;
+
+            if ( !moveToTrashImpl( nativePath, options ) )
             {
-                std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin.";
+                std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin." << std::endl;
                 if ( options->fDeleteOnRecycleFailure )
                     return QFile::remove( path );
                 else
