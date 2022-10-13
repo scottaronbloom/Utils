@@ -41,23 +41,41 @@ namespace NSABUtils
 {
     namespace NFileUtils
     {
-        enum SINK_TYPE_ENUM
+        QString getWindowsError( int errorCode )
         {
-            SINK_TYPE_STARTOPERATIONS = 0,
-            SINK_TYPE_FINISHOPERATIONS,
-            SINK_TYPE_PRECOPYITEM,
-            SINK_TYPE_POSTCOPYITEM,
-            SINK_TYPE_UPDATEPROGRESS
-        };
+            QString ret;
+#ifndef Q_OS_WINRT
+            wchar_t * string = 0;
+            FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                nullptr,
+                errorCode,
+                MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                (LPWSTR)&string,
+                0,
+                nullptr );
+            ret = QString::fromWCharArray( string );
+            LocalFree( (HLOCAL)string );
+#else
+            wchar_t errorString[ 1024 ];
+            FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM,
+                nullptr,
+                errorCode,
+                MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                (LPWSTR)&errorString,
+                sizeof( errorString ) / sizeof( wchar_t ),
+                nullptr );
+            ret = QString::fromWCharArray( errorString );
+#endif  // Q_OS_WINRT
 
-        const PCWSTR g_rgpszSinkType[] =
-        {
-        L"StartOperations",
-        L"FinishOperations",
-        L"PreCopyItem",
-        L"PostCopyItem",
-        L"UpdateProgress"
-        };
+            if ( ret.isEmpty() && errorCode == ERROR_MOD_NOT_FOUND )
+                ret = QString::fromLatin1( "The specified module could not be found." );
+            if ( ret.endsWith( QLatin1String( "\r\n" ) ) )
+                ret.chop( 2 );
+            if ( ret.isEmpty() )
+                ret = QString::fromLatin1( "Unknown error 0x%1." )
+                .arg( unsigned( errorCode ), 8, 16, QLatin1Char( '0' ) );
+            return ret;
+        }
 
         class CFileOpProgSinkApp : public IFileOperationProgressSink
         {
@@ -96,7 +114,54 @@ namespace NSABUtils
                 return cRef;
             }
 
-            QString getPathNameForItem( IShellItem * psiItem, IShellItem * psiDestinationFolder );
+            QString getPathNameForItem( IShellItem * psiItem ) const;
+
+
+            bool verbose() const
+            {
+                return fOptions && fOptions->fVerbose;
+            }
+            const char * statusPrefix( HRESULT hrRename ) const
+            {
+                return ( SUCCEEDED( hrRename ) ? "" : "Error: " );
+            }
+
+            QString replaceSource( const QString & msg, IShellItem * psiItem ) const
+            {
+                auto pathName = getPathNameForItem( psiItem );
+                if ( !pathName.isEmpty() )
+                {
+                    pathName = QString( "%1 '%2'" ).arg( QFileInfo( pathName ).isFile() ? "file" : "directory" ).arg( pathName );
+                }
+                auto realMsg = msg;
+                realMsg.replace( "<SOURCE>", pathName );
+                return realMsg;
+            }
+
+            IFACEMETHODIMP startStatus( const QString & msg, IShellItem * srcItem = nullptr ) const
+            {
+                if ( verbose() )
+                    std::cout << replaceSource( msg, srcItem ).toStdString() << std::endl;
+                return S_OK;
+            }
+
+            IFACEMETHODIMP returnFinishedStatus( HRESULT hr, const QString & msg, IShellItem * srcItem = nullptr ) const
+            {
+                if ( verbose() )
+                {
+                    ( SUCCEEDED( hr ) ? std::cout : std::cerr )
+                        << statusPrefix( hr ) << replaceSource( msg, srcItem ).toStdString() << std::endl;
+                    if ( !SUCCEEDED( hr ) )
+                    {
+                        ( SUCCEEDED( hr ) ? std::cout : std::cerr )
+                            << statusPrefix( hr ) << "    " << getWindowsError( hr ).toStdString() << std::endl
+                            ;
+                    }
+
+                }
+                return hr;
+            }
+
 
             IFACEMETHODIMP StartOperations();
             IFACEMETHODIMP FinishOperations( HRESULT hrResult );
@@ -111,9 +176,6 @@ namespace NSABUtils
             IFACEMETHODIMP PostCopyItem( DWORD dwFlags, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pwszNewName, HRESULT hrCopy, IShellItem * psiNewlyCreated );
 
             IFACEMETHODIMP PreDeleteItem( DWORD /*dwFlags*/, IShellItem * psiItem );
-
-            bool verbose();
-
             IFACEMETHODIMP PostDeleteItem( DWORD /*dwFlags*/, IShellItem * /*psiItem*/, HRESULT /*hrDelete*/, IShellItem * /*psiNewlyCreated*/ );
 
             IFACEMETHODIMP PreNewItem( DWORD /*dwFlags*/, IShellItem * /*psiDestinationFolder*/, PCWSTR /*pszNewName*/ );
@@ -134,207 +196,126 @@ namespace NSABUtils
             HWND   _hwndLV;
         };
 
-        QString CFileOpProgSinkApp::getPathNameForItem( IShellItem * psiItem, IShellItem * psiDestinationFolder )
+        QString CFileOpProgSinkApp::getPathNameForItem( IShellItem * psiItem ) const
         {
+            if ( !psiItem )
+                return {};
             QString retVal;
             PWSTR pszItem;
             HRESULT hr = psiItem->GetDisplayName( SIGDN_FILESYSPATH, &pszItem );
-            retVal = QString::fromWCharArray( pszItem );
-            qDebug() << retVal;
-
-            if ( SUCCEEDED( hr ) && psiDestinationFolder )
-            {
-                PWSTR pszDest;
-                hr = psiDestinationFolder->GetDisplayName( SIGDN_FILESYSPATH, &pszDest );
-                if ( SUCCEEDED( hr ) )
-                {
-                    retVal = QString::fromWCharArray( pszDest );
-                    qDebug() << retVal;
-                    CoTaskMemFree( pszDest );
-                }
-                CoTaskMemFree( pszItem );
-            }
+            if ( SUCCEEDED( hr ) )
+                retVal = QString::fromWCharArray( pszItem );
+            CoTaskMemFree( pszItem );
             return retVal;
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::StartOperations()
         {
-            if ( verbose() )
-                std::cout << "Starting operation";
-            return S_OK;
+            return S_OK; // startStatus( "Starting operation" );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::FinishOperations( HRESULT hr )
         {
-            if ( verbose() )
-                std::cout << "Finished";
-            return SUCCEEDED( hr );
+            return hr; // returnFinishedStatus( hr, "Finished operation" );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::PreRenameItem( DWORD /*dwFlags*/, IShellItem * psiItem, PCWSTR pszNewName )
         {
-            if ( verbose() )
-            {
-                auto pathName = getPathNameForItem( psiItem, nullptr );
-                std::cout << "Renaming " << ( QFileInfo( pathName ).isFile() ? "file" : "directory" ) << " '" << pathName.toStdString() << "' to '" << pszNewName << "'." << std::endl;
-            }
-
-            return S_OK;
+            return startStatus( QString( "Renaming <SOURCE> to '%1'." ).arg( pszNewName ), psiItem );
         }
 
-        IFACEMETHODIMP CFileOpProgSinkApp::PostRenameItem( DWORD /*dwFlags*/, IShellItem * /*psiItem*/, PCWSTR /*pszNewName*/, HRESULT /*hrRename*/, IShellItem * /*psiNewlyCreated*/ )
+        IFACEMETHODIMP CFileOpProgSinkApp::PostRenameItem( DWORD /*dwFlags*/, IShellItem * psiItem, PCWSTR pszNewName, HRESULT hrRename, IShellItem * psiNewlyCreated )
         {
-            return S_OK;
+            auto pathName = getPathNameForItem( psiItem );
+            return returnFinishedStatus( hrRename,
+                QString( "Renamed <SOURCE> to '%1'.  Final path name: '%2'." )
+                .arg( pszNewName )
+                .arg( getPathNameForItem( psiNewlyCreated ) )
+            );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::PreMoveItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pszNewName )
         {
-            if ( verbose() )
-            {
-                auto pathName = getPathNameForItem( psiItem, nullptr );
-                auto destFolder = getPathNameForItem( psiDestinationFolder, nullptr );
-                std::cout << "Renaming " << ( QFileInfo( pathName ).isFile() ? "file" : "directory" ) << " '" << pathName.toStdString() << "' to directory '" << destFolder.toStdString() << "' with name '" << pszNewName << "'." << std::endl;
-            }
-            return S_OK;
+            return startStatus( QString( "Moving <SOURCE> to directory '%1' as '%3'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ), psiItem );
         }
 
-        IFACEMETHODIMP CFileOpProgSinkApp::PostMoveItem( DWORD /*dwFlags*/, IShellItem * /*psiItem*/, IShellItem * /*psiDestinationFolder*/, PCWSTR /*pszNewName*/, HRESULT /*hrNewName*/, IShellItem * /*psiNewlyCreated*/ )
+        IFACEMETHODIMP CFileOpProgSinkApp::PostMoveItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pszNewName, HRESULT hrNewName, IShellItem * psiNewlyCreated )
         {
-            return S_OK;
+            return returnFinishedStatus( hrNewName
+                , QString( "Moved <SOURCE> to directory '%1' as '%3'. Final path name '%4'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ).arg( getPathNameForItem( psiNewlyCreated ) )
+                , psiItem );
         }
 
-        IFACEMETHODIMP CFileOpProgSinkApp::PreCopyItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR )
+        IFACEMETHODIMP CFileOpProgSinkApp::PreCopyItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pszNewName )
         {
-            auto pathName = getPathNameForItem( psiItem, psiDestinationFolder );
-            qDebug() << pathName;
-            return S_OK;
+            return startStatus( QString( "Copying <SOURCE> to directory '%1' as '%2'.").arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ), psiItem );
         }
 
-        IFACEMETHODIMP CFileOpProgSinkApp::PostCopyItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR, HRESULT /*hrCopy*/, IShellItem * )
+        IFACEMETHODIMP CFileOpProgSinkApp::PostCopyItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pszNewName, HRESULT hrCopy, IShellItem * psiNewlyCreated )
         {
-            PWSTR pszItem;
-            HRESULT hr = psiItem->GetDisplayName( SIGDN_FILESYSPATH, &pszItem );
-            if ( SUCCEEDED( hr ) )
-            {
-                PWSTR pszDest;
-                hr = psiDestinationFolder->GetDisplayName( SIGDN_FILESYSPATH, &pszDest );
-                if ( SUCCEEDED( hr ) )
-                {
-                    qDebug() << pszDest;
-                    CoTaskMemFree( pszDest );
-                }
-                CoTaskMemFree( pszItem );
-            }
-            return S_OK;
+            return returnFinishedStatus( hrCopy, QString( "Copied <SOURCE> to directory '%1' as '%2'. Final path name '%4'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ).arg( getPathNameForItem( psiNewlyCreated ) ), psiItem );
         }
 
-        IFACEMETHODIMP CFileOpProgSinkApp::PreDeleteItem( DWORD /*dwFlags*/, IShellItem * psiItem )
+        IFACEMETHODIMP CFileOpProgSinkApp::PreDeleteItem( DWORD dwFlags, IShellItem * psiItem )
         {
-            if ( verbose() )
-            {
-                auto pathName = getPathNameForItem( psiItem, nullptr );
-                std::cout << "Recycling " << ( QFileInfo( pathName ).isFile() ? "file" : "directory" ) << " '" << pathName.toStdString() << "'" << std::endl;
-            }
-
-            return S_OK;
+            return startStatus( QString( "%1 <SOURCE>." ).arg( ( dwFlags & TSF_DELETE_RECYCLE_IF_POSSIBLE ) ? "Recycling" : "Deleting" ), psiItem );
         }
 
-        bool CFileOpProgSinkApp::verbose()
+        IFACEMETHODIMP CFileOpProgSinkApp::PostDeleteItem( DWORD dwFlags, IShellItem * psiItem, HRESULT hrDelete, IShellItem * /*psiNewlyCreated*/ )
         {
-            return fOptions && fOptions->fVerbose;
-        }
-
-        IFACEMETHODIMP CFileOpProgSinkApp::PostDeleteItem( DWORD /*dwFlags*/, IShellItem * /*psiItem*/, HRESULT /*hrDelete*/, IShellItem * /*psiNewlyCreated*/ )
-        {
-            return S_OK;
+            return returnFinishedStatus( hrDelete, QString( "%1 <SOURCE>." ).arg( ( dwFlags & TSF_DELETE_RECYCLE_IF_POSSIBLE ) ? "Recycled" : "Deleted" ), psiItem );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::PreNewItem( DWORD /*dwFlags*/, IShellItem * psiDestinationFolder, PCWSTR pszNewName )
         {
-            if ( verbose() )
-            {
-                auto destFolder = getPathNameForItem( psiDestinationFolder, nullptr );
-                std::cout << "Creating '" << pszNewName << "' in directory '" << destFolder.toStdString() << "'.'" << std::endl;
-            }
-            return S_OK;
+            return startStatus( QString( "Creating '%1' in directory '%2'." ).arg( pszNewName ).arg( getPathNameForItem( psiDestinationFolder ) ) );
         }
 
-        IFACEMETHODIMP CFileOpProgSinkApp::PostNewItem( DWORD /*dwFlags*/, IShellItem * /*psiDestinationFolder*/, PCWSTR /*pszNewName*/, PCWSTR /*pszTemplateName*/, DWORD /*dwFileAttributes*/, HRESULT /*hrNew*/, IShellItem * /*psiNewItem*/ )
+        IFACEMETHODIMP CFileOpProgSinkApp::PostNewItem( DWORD /*dwFlags*/, IShellItem * psiDestinationFolder, PCWSTR pszNewName, PCWSTR pszTemplateName, DWORD /*dwFileAttributes*/, HRESULT hrNew, IShellItem * psiNewItem )
         {
-            return S_OK;
+            return returnFinishedStatus( hrNew, QString( "Created '%1' in directory '%2'. Template Name: %3.  Final Path '%4'." )
+                .arg( pszNewName )
+                .arg( getPathNameForItem( psiDestinationFolder ) )
+                .arg( pszTemplateName )
+                .arg( getPathNameForItem( psiNewItem ) )
+            );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::UpdateProgress( UINT iWorkTotal, UINT iWorkSoFar )
         {
             if ( verbose() )
             {
-                std::cout << "Status " << iWorkSoFar << " of " << iWorkTotal << std::endl;
+                if ( iWorkTotal )
+                    std::cout << "Status " << iWorkSoFar << " of " << iWorkTotal << std::endl;
             }
             return S_OK;
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::ResetTimer()
         {
-            if ( verbose() )
-            {
-                std::cout << "Resetting timer" << std::endl;
-            }
+            //if ( verbose() )
+            //{
+            //    std::cout << "Resetting timer" << std::endl;
+            //}
             return S_OK;
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::PauseTimer()
         {
-            if ( verbose() )
-            {
-                std::cout << "Pausing timer" << std::endl;
-            }
+            //if ( verbose() )
+            //{
+            //    std::cout << "Pausing timer" << std::endl;
+            //}
             return S_OK;
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::ResumeTimer()
         {
-            if ( verbose() )
-            {
-                std::cout << "Resuming timer" << std::endl;
-            }
+            //if ( verbose() )
+            //{
+            //    std::cout << "Resuming timer" << std::endl;
+            //}
             return S_OK;
-        }
-
-        // List view column labels
-        QString getWindowsError( int errorCode )
-        {
-            QString ret;
-#ifndef Q_OS_WINRT
-            wchar_t * string = 0;
-            FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                            nullptr,
-                            errorCode,
-                            MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-                            (LPWSTR)&string,
-                            0,
-                            nullptr );
-            ret = QString::fromWCharArray( string );
-            LocalFree( (HLOCAL)string );
-#else
-            wchar_t errorString[ 1024 ];
-            FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM,
-                           nullptr,
-                           errorCode,
-                           MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-                           (LPWSTR)&errorString,
-                           sizeof( errorString ) / sizeof( wchar_t ),
-                           nullptr );
-            ret = QString::fromWCharArray( errorString );
-#endif  // Q_OS_WINRT
-
-            if ( ret.isEmpty() && errorCode == ERROR_MOD_NOT_FOUND )
-                ret = QString::fromLatin1( "The specified module could not be found." );
-            if ( ret.endsWith( QLatin1String( "\r\n" ) ) )
-                ret.chop( 2 );
-            if ( ret.isEmpty() )
-                ret = QString::fromLatin1( "Unknown error 0x%1." )
-                .arg( unsigned( errorCode ), 8, 16, QLatin1Char( '0' ) );
-            return ret;
         }
 
         bool showError( const QString & msg, HRESULT code, std::function< void() > runFunc )
@@ -405,13 +386,26 @@ namespace NSABUtils
             }
 
             auto pSync = new CFileOpProgSinkApp( options );
+            //DWORD dwCookie = 0;
+            //hr = fileOperation->Advise( pSync, &dwCookie );
+            //if ( FAILED( hr ) )
+            //{
+            //    return showError( "Failed to mark file/folder item for deletion", hr,
+            //        [ fileOrFolderItem, pSync ]()
+            //        {
+            //            fileOrFolderItem->Release();
+            //            if ( pSync )
+            //                pSync->Release();
+            //            CoUninitialize();
+            //        } );
+            //}
 
-            hr = fileOperation->DeleteItem( fileOrFolderItem, pSync ); //The second parameter is if you want to keep track of progress
+            hr = fileOperation->DeleteItem( fileOrFolderItem, pSync ); 
             fileOrFolderItem->Release();
             if ( FAILED( hr ) )
             {
                 return showError( "Failed to mark file/folder item for deletion", hr,
-                                  [fileOrFolderItem, fileOperation, pSync/*, sink*/]()
+                                  [fileOrFolderItem, fileOperation, pSync ]()
                                   {
                                       fileOperation->Release();
                                       if ( pSync )
