@@ -21,7 +21,10 @@
 // SOFTWARE.
 
 #include "MoveToTrash.h"
+
 #include <QFileInfo>
+#include <QDir>
+
 #include <iostream>
 
 namespace NSABUtils
@@ -40,25 +43,13 @@ namespace NSABUtils
         bool moveToTrash( const QString & path, std::shared_ptr< SRecycleOptions > options )
         {
             QFileInfo fi( path );
-            if ( options->fVerbose )
-            {
-                if ( !fi.exists() )
-                    std::cout << "File or Directory '" << path.toStdString() << "' does not exist." << std::endl;
-                else
-                    std::cout << "Recycling " << ( fi.isFile() ? "file" : "directory" ) << " '" << path.toStdString() << "'" << std::endl;
-            }
-            if ( !moveToTrashImpl( path, options ) )
+            if ( !moveToTrashImpl( QDir::toNativeSeparators( fi.absoluteFilePath() ), options ) )
             {
                 std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin.";
                 if ( options->fDeleteOnRecycleFailure )
                     return QFile::remove( path );
                 else
                     return false;
-            }
-            if ( options->fVerbose )
-            {
-                if ( fi.exists() )
-                    std::cout << "Finished recycling " << ( fi.isFile() ? "file" : "directory" ) << " '" << path.toStdString() << "'" << std::endl;
             }
             return true;
         }
