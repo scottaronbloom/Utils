@@ -22,21 +22,21 @@
 
 #include "MoveToTrash.h"
 
+#include <windows.h>
+
 #include <Shobjidl.h> //Required for IFileOperation Interface
 #include <shellapi.h> //Required for Flags set in "SetOperationFlags"
-
-#include <windows.h>
-#include <shellapi.h>
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 
 #include <QString>
 #include <QFileInfo>
-#include <iostream>
-
 #include <QDir>
-#include <functional>
-#include <Shlwapi.h>
-#pragma comment(lib, "Shlwapi.lib")
 #include <QDebug>
+
+#include <iostream>
+#include <functional>
+
 namespace NSABUtils
 {
     namespace NFileUtils
