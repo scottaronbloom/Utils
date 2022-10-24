@@ -1133,6 +1133,7 @@ namespace NSABUtils
             return ret;
         }
 
+
         static inline bool toFileTime(const QDateTime &date, FILETIME *fileTime)
         {
             SYSTEMTIME sTime;
