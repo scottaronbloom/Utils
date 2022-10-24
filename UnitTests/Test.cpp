@@ -625,9 +625,10 @@ namespace
 #define USER QString( R"(scott.TOWEL42)" )
 #define HOME_DIR QString( R"(C:\Users\)" ) + USER
 
-    TEST( TestUtils, TestWordExp )
+    TEST( TestUtils, DISABLED_TestWordExp )
     {
         using namespace NSABUtils;
+        GTEST_SKIP() << "Skipping CWordExp testing";
 
         ASSERT_EQ( USER, CWordExp::getUserName() );
 
@@ -884,7 +885,86 @@ namespace
     }
 
 
+    TEST( TestUtils, TestGroup )
+    {
+        auto source = std::list< int >( { 1, 2, 3, 6, 10, 22, 23, 24, 50 } );
 
+        auto grouped = NSABUtils::group( source );
+        ASSERT_EQ( 5, grouped.size() );
+
+        source.pop_back();
+        grouped = NSABUtils::group( source );
+        ASSERT_EQ( 4, grouped.size() );
+
+        source.push_front( -1 );
+        grouped = NSABUtils::group( source );
+        ASSERT_EQ( 5, grouped.size() );
+    }
+
+    TEST( TestUtils, TestIntsFromString )
+    {
+        auto ints = NSABUtils::intsFromString( "1 2 3" );
+        ASSERT_EQ( 3, ints.size() );
+        
+        auto ii = ints.begin();
+        EXPECT_EQ( 1, *ii++ );
+        EXPECT_EQ( 2, *ii++ );
+        EXPECT_EQ( 3, *ii++ );
+        EXPECT_EQ( ints.end(), ii );
+
+        ints = NSABUtils::intsFromString( "3 2 1", {}, false );
+        ASSERT_EQ( 3, ints.size() );
+
+        ii = ints.begin();
+        EXPECT_EQ( 3, *ii++ );
+        EXPECT_EQ( 2, *ii++ );
+        EXPECT_EQ( 1, *ii++ );
+        EXPECT_EQ( ints.end(), ii );
+
+        ints = NSABUtils::intsFromString( "3-1", {}, false );
+        ASSERT_EQ( 3, ints.size() );
+
+        ii = ints.begin();
+        EXPECT_EQ( 3, *ii++ );
+        EXPECT_EQ( 2, *ii++ );
+        EXPECT_EQ( 1, *ii++ );
+        EXPECT_EQ( ints.end(), ii );
+
+        ints = NSABUtils::intsFromString( "1-3", {}, false );
+        ASSERT_EQ( 3, ints.size() );
+
+        ii = ints.begin();
+        EXPECT_EQ( 1, *ii++ );
+        EXPECT_EQ( 2, *ii++ );
+        EXPECT_EQ( 3, *ii++ );
+        EXPECT_EQ( ints.end(), ii );
+
+        ints = NSABUtils::intsFromString( "E1 E2 E3", QString( R"((E|Episode\s*)?)" ), false );
+        ASSERT_EQ( 3, ints.size() );
+
+        ii = ints.begin();
+        EXPECT_EQ( 1, *ii++ );
+        EXPECT_EQ( 2, *ii++ );
+        EXPECT_EQ( 3, *ii++ );
+        EXPECT_EQ( ints.end(), ii );
+
+        ints = NSABUtils::intsFromString( "E1-E3", QString( R"((E|Episode\s*)?)" ), false );
+        ASSERT_EQ( 3, ints.size() );
+
+        ii = ints.begin();
+        EXPECT_EQ( 1, *ii++ );
+        EXPECT_EQ( 2, *ii++ );
+        EXPECT_EQ( 3, *ii++ );
+        EXPECT_EQ( ints.end(), ii );
+
+        ints = NSABUtils::intsFromString( "E1E3", QString( R"((E|Episode\s*)?)" ), false );
+        ASSERT_EQ( 2, ints.size() );
+
+        ii = ints.begin();
+        EXPECT_EQ( 1, *ii++ );
+        EXPECT_EQ( 3, *ii++ );
+        EXPECT_EQ( ints.end(), ii );
+    }
 }
 
 

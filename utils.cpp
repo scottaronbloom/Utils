@@ -409,6 +409,76 @@ namespace NSABUtils
         return retVal;
     }
 
+    std::list< int > intsFromString( const QString & string, const QString & prefixRegEx, bool sort , bool * aOK )
+    {
+        auto regExStr1 = prefixRegEx + QString( R"((?<num>\d+)(?!-))" ); // EXX
+        auto regExStr2 = prefixRegEx + R"((?<startNum>\d+)(?<dash>\-))";
+        if ( !prefixRegEx.isEmpty() )
+            regExStr2 += "?";
+        regExStr2 += prefixRegEx + R"((?<endNum>\d+))"; //EXX-E?YY
+
+        auto regExStr = QString( R"(((%1)|(%2)))" ).arg( regExStr1 ).arg( regExStr2 );
+
+        auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
+        //auto regEx2 = QRegularExpression( regExStr2, QRegularExpression::CaseInsensitiveOption );
+
+        if ( aOK )
+            *aOK = false;
+        Q_ASSERT( regEx.isValid() );
+
+        std::list< int > retVal;
+
+        auto ii = regEx.globalMatch( string );
+        bool matchFound = false;
+        while( ii.hasNext() )
+        {
+            auto match = ii.next();
+            if ( !match.captured( "num" ).isEmpty() )
+            {
+                bool localAOK;
+                int currValue = match.captured( "num" ).toInt( &localAOK );
+                if ( !localAOK )
+                    return {};
+                retVal.push_back( currValue );
+                matchFound = true;
+            }
+            else if ( !match.captured( "startNum" ).isEmpty() && !match.captured( "endNum" ).isEmpty() )
+            {
+                bool localAOK;
+                auto start = match.captured( "startNum" ).toInt( &localAOK );
+                if ( !localAOK )
+                    return {};
+                auto end = match.captured( "endNum" ).toInt( &localAOK );
+                if ( !localAOK )
+                    return {};
+
+                auto hasDash = !match.captured( "dash" ).isEmpty();
+                if ( hasDash )
+                {
+                    auto mustSwap = ( start > end );
+                    if ( mustSwap )
+                        std::swap( start, end );
+                    for ( int currValue = start; currValue <= end; ++currValue )
+                        retVal.push_back( currValue );
+                    if ( mustSwap )
+                        retVal.reverse();
+                }
+                else
+                {
+                    retVal.push_back( start );
+                    retVal.push_back( end );
+                }
+                matchFound = true;
+            }
+        }
+
+        if ( aOK )
+            *aOK = matchFound;
+        if ( sort )
+            retVal.sort();
+        return retVal;
+    }
+
 #ifdef Q_OS_WINDOWS
     QString getLastError()
     {
