@@ -51,12 +51,12 @@ namespace NSABUtils
 {
     namespace NStringUtils
     {
-#if (QT_VERSION < QT_VERSION_CHECK( 5, 15, 0 ))
-#define TSkipEmptyParts QString::SkipEmptyParts
-#define TKeepEmptyParts QString::KeepEmptyParts
+#if (QT_VERSION < QT_VERSION_CHECK( 5, 14, 0 ))
+        constexpr QString::SplitBehavior TSkipEmptyParts = QString::SkipEmptyParts;
+        constexpr QString::SplitBehavior TKeepEmptyParts = QString::KeepEmptyParts;
 #else
-#define TSkipEmptyParts Qt::SkipEmptyParts
-#define TKeepEmptyParts Qt::KeepEmptyParts
+        constexpr Qt::SplitBehavior TSkipEmptyParts = Qt::SkipEmptyParts;
+        constexpr Qt::SplitBehavior TKeepEmptyParts = Qt::KeepEmptyParts;
 #endif
 
         static const std::size_t sMAXLINE{ 2048 };

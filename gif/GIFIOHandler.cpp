@@ -24,7 +24,7 @@
 #include "GIFIOHandler.h"
 #include "../GIFWriter.h"
 #include <QImage>
-
+#include <QVariant>
 
 CGIFIOHandler::CGIFIOHandler()
 {

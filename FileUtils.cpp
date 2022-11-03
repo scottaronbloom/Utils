@@ -134,12 +134,12 @@ namespace NSABUtils
                 return false;
 
             QString qPattern = QString::fromStdString(pattern);
-            auto patternList = qPattern.split(QRegularExpression("[\\\\/]"), TSkipEmptyParts);
+            auto patternList = qPattern.split(QRegularExpression("[\\\\/]"), NStringUtils::TSkipEmptyParts);
             if (patternList.isEmpty())
                 return false;
 
             QString qFileName = QString::fromStdString(filename);
-            auto fileNameList = qFileName.split(QRegularExpression("[\\\\/]"), TSkipEmptyParts);
+            auto fileNameList = qFileName.split(QRegularExpression("[\\\\/]"), NStringUtils::TSkipEmptyParts);
             if (fileNameList.isEmpty())
                 return false;
 
@@ -522,11 +522,11 @@ namespace NSABUtils
 
             QString result;
 #if defined(Q_OS_WIN)
-            QStringList dirElts = dir.split(QLatin1Char('/'), TSkipEmptyParts);
-            QStringList fileElts = file.split(QLatin1Char('/'), TSkipEmptyParts);
+            QStringList dirElts = dir.split(QLatin1Char('/'), NStringUtils::TSkipEmptyParts);
+            QStringList fileElts = file.split(QLatin1Char('/'), NStringUtils::TSkipEmptyParts);
 #else
-            QVector<QStringRef> dirElts = dir.splitRef(QLatin1Char('/'), TSkipEmptyParts);
-            QVector<QStringRef> fileElts = file.splitRef(QLatin1Char('/'), TSkipEmptyParts);
+            QVector<QStringRef> dirElts = dir.splitRef(QLatin1Char('/'), NStringUtils::TSkipEmptyParts);
+            QVector<QStringRef> fileElts = file.splitRef(QLatin1Char('/'), NStringUtils::TSkipEmptyParts);
 #endif
             int ii = 0;
             while (ii < dirElts.size() && ii < fileElts.size() &&
