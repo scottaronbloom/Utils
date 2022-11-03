@@ -50,6 +50,12 @@ namespace NSABUtils
                 setCurrentIndex(0);
         }
 
+#if QT_VERSION < QT_VERSION_CHECK( 5,15, 0 )
+        QString placeholderText() const { return QString(); }
+        void setPlaceholderText( const QString & /*placeholderText*/ ) {}
+#endif
+
+
         void addCurrentItem();
     };
 }
