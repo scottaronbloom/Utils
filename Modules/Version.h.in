@@ -31,9 +31,11 @@
 
 namespace NVersion
 {
-    inline const int         MAJOR_VERSION    =  @VERSION_FILE_MAJOR_VERSION@;
-    inline const int         MINOR_VERSION    =  @VERSION_FILE_MINOR_VERSION@;
-    inline const std::string PATCH_VERSION    = "@VERSION_FILE_PATCH_VERSION@"; // string from git
+    inline const int         MAJOR_VERSION      =  @VERSION_FILE_MAJOR_VERSION@;
+    inline const int         MINOR_VERSION      =  @VERSION_FILE_MINOR_VERSION@;
+    inline const std::string PATCH_VERSION      = "@VERSION_FILE_PATCH_VERSION@"; // string from git
+    inline const uint16_t    PATCH_VERSION_LOW  = @VERSION_FILE_PATCH_VERSION_HIGH@; // string from git
+    inline const uint16_t    PATCH_VERSION_HIGH = @VERSION_FILE_PATCH_VERSION_LOW@; // string from git
 
 #cmakedefine VERSION_FILE_DIFF
 #ifdef VERSION_FILE_DIFF
@@ -61,6 +63,11 @@ namespace NVersion
 #cmakedefine VERSION_FILE_EMAIL
 #ifdef VERSION_FILE_EMAIL
     inline const std::string EMAIL            = "@VERSION_FILE_EMAIL@";
+#endif
+
+#cmakedefine VERSION_FILE_COPYRIGHT
+#ifdef VERSION_FILE_COPYRIGHT
+    inline const std::string COPYRIGHT            = "@VERSION_FILE_COPYRIGHT@";
 #endif
 
 #cmakedefine VERSION_FILE_BUILD_DATE
