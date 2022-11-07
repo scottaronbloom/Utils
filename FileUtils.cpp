@@ -402,7 +402,7 @@ namespace NSABUtils
 
         SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo & info )
         {
-            auto path = info.canonicalFilePath();
+            auto path = info.absoluteFilePath();
             if ( !path.startsWith( "//" ) && !path.startsWith( R"(\\)" ) )
                 return false;
 
