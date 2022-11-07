@@ -22,7 +22,10 @@
 
 #include "BIFFile.h"
 #include <QFile>
-#include <QFile>
+#include <QDir>
+#include <QRegularExpression>
+#include <QProcess>
+
 namespace NSABUtils
 {
     namespace NBIF
@@ -87,11 +90,11 @@ namespace NSABUtils
         {
             if (fState != EState::eReadingImages)
                 return QSize();
-            if (fBIFs.empty())
+            if (fBIFFrames.empty())
                 return QSize();
-            if (!fBIFs[0].fImage.has_value())
+            if (!fBIFFrames[0].fImage.has_value())
                 return QSize();
-            return fBIFs[0].fImage.value().second.size();
+            return fBIFFrames[0].fImage.value().second.size();
         }
 
         bool CFile::checkForOpen()
@@ -181,7 +184,101 @@ namespace NSABUtils
             return false;
         }
 
-        bool CFile::validateMagicNumber(const QByteArray & magicNumber)
+        bool CFile::createBIF( const QDir & dir, uint32_t timespan, const QString & outFile, const QString & bifTool, QString & msg )
+        {
+            if ( !dir.exists() || !dir.isReadable() )
+            {
+                msg = QString( "Directory '%1' does not exist." ).arg( dir.absolutePath() );
+                return false;
+            }
+
+            QFileInfo fi( bifTool );
+            if ( !fi.exists() || !fi.isExecutable() )
+            {
+                msg = QString( "biftool '%1' does not exist." ).arg( bifTool );
+                return false;
+            }
+
+            auto files = dir.entryList( { "img_*.jpg" }, QDir::Files, QDir::SortFlag::Name );
+            if ( files.isEmpty() )
+            {
+                msg = QString( "No images exists in dir '%1' of the format 'img_*.jpg'." ).arg( dir.absolutePath() );
+                return false;
+            }
+
+            auto num = extractImageNum( files.front() );
+            if ( num == -1 )
+            {
+                msg = QString( "Image number could not be determined on file '%1'" ).arg( files.front() );
+                return false;
+            }
+            if ( num == 1 )
+            {
+                for ( auto && ii : files )
+                {
+                    auto num = extractImageNum( ii );
+                    if ( num <= 0 )
+                    {
+                        msg = QString( "Image number could not be determined on file '%1'" ).arg( ii );
+                        return false;
+                    }
+                    auto absPath = dir.absoluteFilePath( ii );
+                    auto newName = dir.absoluteFilePath( QString( "%1.jpg" ).arg( num - 1, 5, 10, QChar( '0' ) ) );
+
+                    if ( !QFile::rename( absPath, newName ) )
+                    {
+                        msg = QString( "Could not rename image file from '%1' to '%2'" ).arg( absPath ).arg( newName );
+                        return false;
+                    }
+                }
+            }
+
+            auto args = QStringList() << "-v" << "-t" << QString::number( timespan ) << dir.absolutePath();
+            QProcess process;
+            process.start( bifTool, args );
+            if ( !process.waitForFinished( -1 ) || ( process.exitStatus() != QProcess::NormalExit ) || ( process.exitCode() != 0 ) )
+            {
+                msg = QString( "Error running biftool '%1' - " ).arg( bifTool ).arg( QString( process.readAllStandardError() ) );
+                return false;
+            }
+            msg = process.readAll();
+
+            auto tmpFile = QFileInfo( dir.dirName() + ".bif" );
+            if ( !tmpFile.exists() )
+            {
+                msg = QString( "Generated BIF file '%1' does not exist." ).arg( tmpFile.absoluteFilePath() );
+                return false;
+            }
+            if ( !QFile::rename( tmpFile.absoluteFilePath(), outFile ) )
+            {
+                msg = QString( "Could not move generated BIF file '%1' to '%2' does not exist." ).arg( tmpFile.absoluteFilePath() ).arg( outFile );
+                return false;
+            }
+            return true;
+        }
+
+        int CFile::extractImageNum( const QString & file )
+        {
+            static auto regExp = QRegularExpression( R"(img_(\d+)\.jpg)" );
+            auto match = regExp.match( file );
+            int num = -1;
+            if ( match.hasMatch() )
+            {
+                bool aOK;
+                num = match.captured( 1 ).toInt( &aOK );
+                if ( !aOK )
+                    num = -1;
+            }
+            return num;
+        }
+
+        bool CFile::save( const QString & fileName )
+        {
+            (void)fileName;
+            return true;
+        }
+
+        bool CFile::validateMagicNumber( const QByteArray & magicNumber )
         {
             static auto sMagicNumber = QByteArray("\x89\x42\x49\x46\x0d\x0a\x1a\x0a");
 
@@ -204,7 +301,7 @@ namespace NSABUtils
                 fErrorString = QObject::tr("Index data truncated");
                 return false;
             }
-            fBIFs.reserve(numEntries);
+            fBIFFrames.reserve(numEntries);
             SBIFImage * prev = nullptr;
             for (uint32_t ii = 0; ii < numEntries; ++ii)
             {
@@ -219,16 +316,16 @@ namespace NSABUtils
                 if (!aOK)
                     return false;
 
-                fBIFs.emplace_back(frameNum, absOffset, prev);
-                prev = &fBIFs.at(ii);
+                fBIFFrames.emplace_back(frameNum, absOffset, prev);
+                prev = &fBIFFrames.at(ii);
             }
 
-            if (!fBIFs.back().isLastFrame())
+            if (!fBIFFrames.back().isLastFrame())
             {
-                fErrorString = QObject::tr("BIF entry #%1 in file '%2' is not the End of BIFs token").arg(fBIFs.size()).arg(fBIFFile);
+                fErrorString = QObject::tr("BIF entry #%1 in file '%2' is not the End of BIFs token").arg(fBIFFrames.size()).arg(fBIFFile);
                 return false;
             }
-            fBIFs.pop_back();
+            fBIFFrames.pop_back();
             fState = EState::eReadHeaderIndex;
             return true;
         }
@@ -238,7 +335,7 @@ namespace NSABUtils
             if (fState != EState::eReadHeaderIndex)
                 return false;
 
-            for (uint32_t ii = 0; ii < fBIFs.size() - 1; ++ii)
+            for (uint32_t ii = 0; ii < fBIFFrames.size() - 1; ++ii)
             {
                 auto aOK = loadImage(ii, true);
                 if (!aOK.first)
@@ -252,7 +349,7 @@ namespace NSABUtils
 
         std::pair< bool, QString > CFile::loadImage(size_t frameNum, bool loadImageToFrame, int *insertStart, int *numInserted)
         {
-            if (frameNum >= fBIFs.size())
+            if (frameNum >= fBIFFrames.size())
                 return{ false, "Invalid argument" };
 
             auto aOK = std::make_pair(true, QString());
@@ -270,7 +367,7 @@ namespace NSABUtils
             {
                 while (fLastImageLoaded <= frameNum)
                 {
-                    auto curr = fBIFs[fLastImageLoaded].loadImage(device(), fBIFFile);
+                    auto curr = fBIFFrames[fLastImageLoaded].loadImage(device(), fBIFFile);
                     if (!curr.first)
                     {
                         fState = EState::eError;
@@ -285,25 +382,25 @@ namespace NSABUtils
             }
             else
             {
-                auto curr = fBIFs[frameNum].loadImage(device(), fBIFFile);
+                auto curr = fBIFFrames[frameNum].loadImage(device(), fBIFFile);
                 return curr;
             }
         }
 
         QImage CFile::imageToFrame(size_t imageNum, int *insertStart, int *numInserted)
         {
-            if (!loadImage(imageNum, true, insertStart, numInserted).first || !fBIFs[imageNum].fImage.has_value())
+            if (!loadImage(imageNum, true, insertStart, numInserted).first || !fBIFFrames[imageNum].fImage.has_value())
                 return QImage();
 
-            return fBIFs[imageNum].fImage.value().second;
+            return fBIFFrames[imageNum].fImage.value().second;
         }
 
         QImage CFile::image(size_t imageNum)
         {
-            if (!loadImage(imageNum, false).first || !fBIFs[imageNum].fImage.has_value())
+            if (!loadImage(imageNum, false).first || !fBIFFrames[imageNum].fImage.has_value())
                 return QImage();
 
-            return fBIFs[imageNum].fImage.value().second;
+            return fBIFFrames[imageNum].fImage.value().second;
         }
 
         void CFile::fetchMore()

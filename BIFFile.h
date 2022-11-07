@@ -35,6 +35,7 @@
 #include "SABUtilsExport.h"
 
 class QFile;
+class QDir;
 namespace NSABUtils
 {
     namespace NBIF
@@ -66,7 +67,7 @@ namespace NSABUtils
                 eError
             };
 
-            CFile(const QString &bifFile, bool loadImages); // looad the file and go
+            CFile(const QString &bifFile, bool loadImages); // load the file and go
             CFile(); // used for IOHandlerStream
             virtual ~CFile();
 
@@ -74,6 +75,9 @@ namespace NSABUtils
             bool isValid() const { return state() != EState::eError; }
             QString errorString() const { return fErrorString; }
 
+            static bool createBIF( const QDir & dir, uint32_t timespan, const QString & outFile, const QString & bifTool, QString & msg );
+
+            bool save( const QString & fileName );
             static bool validateMagicNumber(const QByteArray & magicNumber);
 
             std::pair< bool, QImage > read(QIODevice * device, int frameNumber);
@@ -85,11 +89,11 @@ namespace NSABUtils
             const T32BitValue & tsMultiplier() const { return fTSMultiplier; }
             QString reserved() const { return prettyPrint(fReserved); }
 
-            const TBIFIndex &bifs() const { return fBIFs; }
+            const TBIFIndex &bifFrames() const { return fBIFFrames; }
 
             QString fileName() const { return fBIFFile; }
 
-            std::size_t imageCount() const { return fBIFs.size(); }
+            std::size_t imageCount() const { return fBIFFrames.size(); }
             uint32_t imageDelay() const { return std::get< 2 >(tsMultiplier()); } // number of ms to delay per image
             QSize imageSize() const;
 
@@ -108,6 +112,7 @@ namespace NSABUtils
             void setLoopCount(int loopCount) { fLoopCount = loopCount; } // default is-1 which is infinite
             int loopCount() { return fLoopCount; }
         private:
+            static int extractImageNum( const QString & fileName );
             QIODevice * device() const;
             void loadBIFFromFile(bool loadImages);
             void loadBIFFromIODevice(bool loadImages);
@@ -131,7 +136,7 @@ namespace NSABUtils
             T32BitValue fVersion;
             T32BitValue fNumImages;
             T32BitValue fTSMultiplier;
-            TBIFIndex fBIFs;
+            TBIFIndex fBIFFrames;
             QByteArray fReserved;
             int fLastImageLoaded{ 0 };
             int fLoopCount{ -1 }; // infinite = -1
