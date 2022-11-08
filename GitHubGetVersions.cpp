@@ -195,17 +195,17 @@ namespace NSABUtils
             fReleases.push_back( curr );
         }
         fReleases.sort( []( std::shared_ptr< SGitHubRelease > lhs, std::shared_ptr< SGitHubRelease > rhs ) -> bool
-            {
-                if ( !lhs || !rhs )
-                    return false;
+                        {
+                            if ( !lhs || !rhs )
+                                return false;
 
-                SGitHubRelease lhsVal = *lhs;
-                SGitHubRelease rhsVal = *rhs;
-                return lhsVal > rhsVal;
-            } );
+                            SGitHubRelease lhsVal = *lhs;
+                            SGitHubRelease rhsVal = *rhs;
+                            return lhsVal > rhsVal;
+                        } );
 
         emit sigLogMessage( tr( "Searching for a newer version than '%1'" ).arg( fCurrentVersion.toString( true ) ) );
-        for( auto && curr : fReleases )
+        for ( auto && curr : fReleases )
         {
             if ( fLatestUpdate.has_value() )
                 break;
@@ -318,8 +318,8 @@ namespace NSABUtils
     bool operator==( const SVersion & lhs, const SVersion & rhs )
     {
         return    ( lhs.fMajor == rhs.fMajor )
-               && ( lhs.fMinor != rhs.fMinor )
-               && ( lhs.fReleaseDate == rhs.fReleaseDate )
+            && ( lhs.fMinor != rhs.fMinor )
+            && ( lhs.fReleaseDate == rhs.fReleaseDate )
             ;
     }
 
@@ -336,7 +336,7 @@ namespace NSABUtils
             retVal = retVal.arg( fReleaseDate.toString() );
         return retVal;
     }
-    
+
     SGitHubRelease::SGitHubRelease( const QJsonObject & version )
     {
         fTagName = version[ "tag_name" ].toString();

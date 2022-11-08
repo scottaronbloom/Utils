@@ -34,7 +34,7 @@ namespace NSABUtils
     class SABUTILS_EXPORT CWidgetEnabler : public QObject
     {
         Q_OBJECT;
-        CWidgetEnabler( const std::pair< QCheckBox *, QGroupBox * > & checker,  const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );
+        CWidgetEnabler( const std::pair< QCheckBox *, QGroupBox * > & checker, const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );
     public:
         CWidgetEnabler( QCheckBox * btn, QWidget * widget, QObject * parent = nullptr );
         CWidgetEnabler( QCheckBox * btn, const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );

@@ -40,39 +40,39 @@ namespace NSABUtils
     {
         Q_OBJECT
     public:
-        CGIFWriterDlg(QWidget * parent = nullptr);
-        CGIFWriterDlg::CGIFWriterDlg(std::shared_ptr< NBIF::CFile > bifFile, QWidget * parent = nullptr);
-        CGIFWriterDlg::CGIFWriterDlg(std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget * parent = nullptr);
+        CGIFWriterDlg( QWidget * parent = nullptr );
+        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, QWidget * parent = nullptr );
+        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget * parent = nullptr );
 
         ~CGIFWriterDlg();
 
-        void setBIF(std::shared_ptr< NBIF::CFile > bifFile);
+        void setBIF( std::shared_ptr< NBIF::CFile > bifFile );
         std::shared_ptr< NBIF::CFile > bifFile() const { return fBIF; }
 
         // speed multiplier uses the delay built into the BIF file
-        void setSpeedMultipler(int multiplier); // delay or multiplier (setting the bif as well) override each other, last one set wins
-        void setDelay(int msec);
+        void setSpeedMultipler( int multiplier ); // delay or multiplier (setting the bif as well) override each other, last one set wins
+        void setDelay( int msec );
         int delay() const;
 
-        void setDither(bool dither);
+        void setDither( bool dither );
         bool dither() const;
 
-        void setFlipImage(bool flipImage);
+        void setFlipImage( bool flipImage );
         bool flipImage() const;
 
-        void setLoopCount(int loopCount);
+        void setLoopCount( int loopCount );
         int loopCount() const;
 
-        void setStartFrame(int startFrame);
+        void setStartFrame( int startFrame );
         int startFrame() const;
 
-        void setEndFrame(int endFrame);
+        void setEndFrame( int endFrame );
         int endFrame() const;
 
         virtual void accept() override;
         int numFramesToSave() const;
 
-        void setUseNew(bool useNew);
+        void setUseNew( bool useNew );
         bool useNew() const;
     Q_SIGNALS:
     public Q_SLOTS:

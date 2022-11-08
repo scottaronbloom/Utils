@@ -43,20 +43,20 @@ namespace NSABUtils
         class BIF_PLUGIN_DECLSPEC CPlugin : public QImageIOPlugin
         {
             Q_OBJECT
-                Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "bif.json")
+                Q_PLUGIN_METADATA( IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "bif.json" )
         public:
             CPlugin();
             ~CPlugin();
 
-            Capabilities capabilities(QIODevice *device, const QByteArray &format) const override;
-            QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const override;
+            Capabilities capabilities( QIODevice * device, const QByteArray & format ) const override;
+            QImageIOHandler * create( QIODevice * device, const QByteArray & format = QByteArray() ) const override;
         };
     }
 }
 
 namespace NBIFPlugin
 {
-    extern "C" void BIF_PLUGIN_DECLSPEC setLoopCount(int loopCount);
+    extern "C" void BIF_PLUGIN_DECLSPEC setLoopCount( int loopCount );
 }
 
 #endif

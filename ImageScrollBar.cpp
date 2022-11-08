@@ -115,10 +115,10 @@ namespace NSABUtils
         if ( min == max )
             return;
 
-        auto percentage = 1.0 * value / (max - min);
+        auto percentage = 1.0 * value / ( max - min );
 
         auto numImagesLoaded = numImages();
-        auto imageNum = static_cast<int>(percentage * numImagesLoaded);
+        auto imageNum = static_cast<int>( percentage * numImagesLoaded );
         if ( imageNum >= numImagesLoaded )
             imageNum = numImagesLoaded;
         setCurrentImageNum( imageNum );
@@ -166,8 +166,8 @@ namespace NSABUtils
                 return max;
         }
 
-        auto percentage = 100.0 * pos / (spanMax - spanMin);
-        auto tmp = static_cast<int>(percentage * (range) / 100.0);
+        auto percentage = 100.0 * pos / ( spanMax - spanMin );
+        auto tmp = static_cast<int>( percentage * ( range ) / 100.0 );
         auto value = opt.upsideDown ? max - tmp : tmp + min;
         return value;
     }
@@ -245,7 +245,7 @@ namespace NSABUtils
                 QBuffer buffer( &data );
                 fCurrentImage.save( &buffer, "PNG" );
 
-                auto html = QString("<img src='data:image/png;base64, %1'><center>%2</center>").arg(QString(data.toBase64())).arg(message());
+                auto html = QString( "<img src='data:image/png;base64, %1'><center>%2</center>" ).arg( QString( data.toBase64() ) ).arg( message() );
                 QToolTip::showText( QCursor::pos(), html, this );
             }
         }
@@ -259,7 +259,7 @@ namespace NSABUtils
         QString format = fMsgFormat;
         auto num = fCurrentImageNum;
         auto numImages = this->numImages();
-        auto percentage = static_cast<int>(100.0 * num / 1.0 * numImages);
+        auto percentage = static_cast<int>( 100.0 * num / 1.0 * numImages );
 
         format = format.replace( "%v", QString::number( num ) );
         format = format.replace( "%m", QString::number( numImages ) );
@@ -271,7 +271,7 @@ namespace NSABUtils
     int CImageScrollBar::numImages() const
     {
         if ( !hasImages() )
-             return 0;
+            return 0;
 #ifdef BIF_SCROLLBAR_SUPPORT
         if ( fBIFFile )
             return fBIFFile->lastImageLoaded();
@@ -279,7 +279,7 @@ namespace NSABUtils
             return fBIFModel->rowCount();
         else
 #endif            
-            return static_cast< int >( fImages.size() );
+            return static_cast<int>( fImages.size() );
     }
 
     QImage CImageScrollBar::getImage( int imageNum ) const
@@ -293,10 +293,10 @@ namespace NSABUtils
         else if ( fBIFModel )
         {
             return fBIFModel->index( imageNum ).data( NBIF::CModel::ECustomRoles::eImage ).value< QImage >();
-    }
+        }
         else
 #endif            
-            return fImages[imageNum];
+            return fImages[ imageNum ];
     }
 
 }

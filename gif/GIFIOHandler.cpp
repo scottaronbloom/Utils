@@ -39,7 +39,7 @@ bool CGIFIOHandler::canRead() const
     return false;
 }
 
-bool CGIFIOHandler::canWrite(QIODevice * device)
+bool CGIFIOHandler::canWrite( QIODevice * device )
 {
     if ( !device )
     {
@@ -61,7 +61,7 @@ bool CGIFIOHandler::read( QImage * /*image*/ )
     return false;
 }
 
-bool CGIFIOHandler::jumpToImage(int imageNumber)
+bool CGIFIOHandler::jumpToImage( int imageNumber )
 {
     return QImageIOHandler::jumpToImage( imageNumber );
 }
@@ -76,7 +76,7 @@ QRect CGIFIOHandler::currentImageRect() const
     return QImageIOHandler::currentImageRect();
 }
 
-bool CGIFIOHandler::write(const QImage & image)
+bool CGIFIOHandler::write( const QImage & image )
 {
     NSABUtils::CGIFWriter writer( device() );
     writer.setDither( true );
@@ -86,12 +86,12 @@ bool CGIFIOHandler::write(const QImage & image)
     return writer.writeImage( image );
 }
 
-bool CGIFIOHandler::supportsOption(ImageOption option) const
+bool CGIFIOHandler::supportsOption( ImageOption option ) const
 {
     return option == Size;
 }
 
-QVariant CGIFIOHandler::option(ImageOption option) const
+QVariant CGIFIOHandler::option( ImageOption option ) const
 {
     return QImageIOHandler::option( option );
     //switch(option)
@@ -109,7 +109,7 @@ QVariant CGIFIOHandler::option(ImageOption option) const
     //return QVariant();
 }
 
-void CGIFIOHandler::setOption(ImageOption option, const QVariant &value)
+void CGIFIOHandler::setOption( ImageOption option, const QVariant & value )
 {
     return QImageIOHandler::setOption( option, value );
     //(void)option;
@@ -123,7 +123,7 @@ int CGIFIOHandler::nextImageDelay() const
 }
 
 int CGIFIOHandler::imageCount() const
-{ 
+{
     return QImageIOHandler::imageCount();
 
     //if (!fGIFFile || !fGIFFile->isValid())

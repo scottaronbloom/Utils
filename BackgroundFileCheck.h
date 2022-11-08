@@ -30,14 +30,14 @@
 namespace NSABUtils
 {
     class CBackgroundFileCheckImpl;
-    class SABUTILS_EXPORT CBackgroundFileCheck  : public QObject
+    class SABUTILS_EXPORT CBackgroundFileCheck : public QObject
     {
         Q_OBJECT;
     public:
         CBackgroundFileCheck( QObject * parent = nullptr );
         virtual ~CBackgroundFileCheck();
-        
-        void stop( bool markAsStopped=true );
+
+        void stop( bool markAsStopped = true );
 
         void checkPath();
         void checkPath( const QString & pathName );

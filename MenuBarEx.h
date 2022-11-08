@@ -33,44 +33,44 @@ namespace NSABUtils
     {
         Q_OBJECT
     public:
-        CMenuBarEx(QWidget *parent = nullptr);
+        CMenuBarEx( QWidget * parent = nullptr );
         ~CMenuBarEx();
 
         // the following is simply done to call updateConnections
         using QMenuBar::addAction;
-        QAction *addAction(const QString &text) { auto retVal = QMenuBar::addAction(text); updateConnections(); return retVal; }
-        QAction *addAction(const QString &text, const QObject *receiver, const char *member) { auto retVal = QMenuBar::addAction(text, receiver, member); updateConnections(); return retVal; }
+        QAction * addAction( const QString & text ) { auto retVal = QMenuBar::addAction( text ); updateConnections(); return retVal; }
+        QAction * addAction( const QString & text, const QObject * receiver, const char * member ) { auto retVal = QMenuBar::addAction( text, receiver, member ); updateConnections(); return retVal; }
 
 #ifdef Q_CLANG_QDOC
 #else
         // addAction(QString): Connect to a QObject slot / functor or function pointer (with context)
         template<typename Obj, typename Func1>
         inline typename std::enable_if<!std::is_same<const char *, Func1>::value
-            &&QtPrivate::IsPointerToTypeDerivedFromQObject<Obj *>::Value, QAction *>::type
-            addAction(const QString &text, const Obj *object, Func1 slot)
+            && QtPrivate::IsPointerToTypeDerivedFromQObject<Obj *>::Value, QAction *>::type
+            addAction( const QString & text, const Obj * object, Func1 slot )
         {
-            QAction *result = QMenuBar::addAction(text, object, slot);
+            QAction * result = QMenuBar::addAction( text, object, slot );
             updateConnections();
             return result;
         }
         // addAction(QString): Connect to a functor or function pointer (without context)
         template <typename Func1>
-        inline QAction *addAction(const QString &text, Func1 slot)
+        inline QAction * addAction( const QString & text, Func1 slot )
         {
-            QAction *result = QMenuBar::addAction(text, slot);
+            QAction * result = QMenuBar::addAction( text, slot );
             updateConnections();
             return result;
         }
 #endif // !Q_CLANG_QDOC
 
-        QAction *addMenu(QMenu *menu) { auto retVal = QMenuBar::addMenu(menu); updateConnections(); return retVal; }
-        QMenu *addMenu(const QString &title) { auto retVal = QMenuBar::addMenu(title); updateConnections(); return retVal; }
-        QMenu *addMenu(const QIcon &icon, const QString &title) { auto retVal = QMenuBar::addMenu(icon, title); updateConnections(); return retVal; }
+        QAction * addMenu( QMenu * menu ) { auto retVal = QMenuBar::addMenu( menu ); updateConnections(); return retVal; }
+        QMenu * addMenu( const QString & title ) { auto retVal = QMenuBar::addMenu( title ); updateConnections(); return retVal; }
+        QMenu * addMenu( const QIcon & icon, const QString & title ) { auto retVal = QMenuBar::addMenu( icon, title ); updateConnections(); return retVal; }
 
-        QAction *insertMenu(QAction *before, QMenu *menu) { auto retVal = QMenuBar::insertMenu(before, menu); updateConnections(); return retVal; }
+        QAction * insertMenu( QAction * before, QMenu * menu ) { auto retVal = QMenuBar::insertMenu( before, menu ); updateConnections(); return retVal; }
 
-        void addAction(QAction *action) { QMenuBar::addAction(action); updateConnections(); }
-        void addActions(QList<QAction *> actions) { QMenuBar::addActions(actions); updateConnections(); }
+        void addAction( QAction * action ) { QMenuBar::addAction( action ); updateConnections(); }
+        void addActions( QList<QAction *> actions ) { QMenuBar::addActions( actions ); updateConnections(); }
 
     Q_SIGNALS:
         void sigAboutToEngage();
@@ -81,7 +81,7 @@ namespace NSABUtils
         void slotMenuTimerExpired();
     private:
         void updateConnections();
-        QTimer *fTimer{ nullptr };
+        QTimer * fTimer{ nullptr };
         bool fEngaged{ false };
     };
 }

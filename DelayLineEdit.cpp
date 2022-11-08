@@ -30,54 +30,54 @@
 
 namespace NSABUtils
 {
-    CDelayLineEdit::CDelayLineEdit(QWidget* parent) :
-        CDelayLineEdit(QString(), 250, parent)
+    CDelayLineEdit::CDelayLineEdit( QWidget * parent ) :
+        CDelayLineEdit( QString(), 250, parent )
     {
     }
 
-    CDelayLineEdit::CDelayLineEdit(const QString & text, QWidget* parent) :
-        CDelayLineEdit(text, 250, parent)
+    CDelayLineEdit::CDelayLineEdit( const QString & text, QWidget * parent ) :
+        CDelayLineEdit( text, 250, parent )
     {
     }
 
-    CDelayLineEdit::CDelayLineEdit(const QString& text, int delayMS, QWidget* parent) :
-        QLineEdit(text, parent),
-        fDelayMS(delayMS)
+    CDelayLineEdit::CDelayLineEdit( const QString & text, int delayMS, QWidget * parent ) :
+        QLineEdit( text, parent ),
+        fDelayMS( delayMS )
     {
-        connectToEditor(true);
+        connectToEditor( true );
 
-        fChangedTimer = new QTimer(this);
-        fChangedTimer->setSingleShot(true);
-        connect(fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout);
+        fChangedTimer = new QTimer( this );
+        fChangedTimer->setSingleShot( true );
+        connect( fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout );
 
-        fEditedTimer = new QTimer(this);
-        fEditedTimer->setSingleShot(true);
-        connect(fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout);
+        fEditedTimer = new QTimer( this );
+        fEditedTimer->setSingleShot( true );
+        connect( fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout );
 
-        setDelay(delayMS);
+        setDelay( delayMS );
     }
 
-    void CDelayLineEdit::setText(const QString &text)
+    void CDelayLineEdit::setText( const QString & text )
     {
-        if (!isVisible())
+        if ( !isVisible() )
         {
-            connectToEditor(false);
+            connectToEditor( false );
         }
 
-        QLineEdit::setText(text);
+        QLineEdit::setText( text );
 
-        if (!isVisible())
+        if ( !isVisible() )
         {
-            connectToEditor(true);
+            connectToEditor( true );
             slotTextChanged();
         }
     }
 
-    void CDelayLineEdit::setDelay(int delayMS)
+    void CDelayLineEdit::setDelay( int delayMS )
     {
         fDelayMS = delayMS;
-        NSABUtils::updateTimer(fDelayMS, fChangedTimer);
-        NSABUtils::updateTimer(fDelayMS, fEditedTimer);
+        NSABUtils::updateTimer( fDelayMS, fChangedTimer );
+        NSABUtils::updateTimer( fDelayMS, fEditedTimer );
     }
 
     CDelayLineEdit::~CDelayLineEdit()
@@ -105,15 +105,15 @@ namespace NSABUtils
         }
     }
 
-    void CDelayLineEdit::keyPressEvent(QKeyEvent * event)
+    void CDelayLineEdit::keyPressEvent( QKeyEvent * event )
     {
-        if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+        if ( event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return )
         {
             fEditingFinished = true;
-            if (fStatus == ELineEditStatus::eOK)
+            if ( fStatus == ELineEditStatus::eOK )
                 emit sigFinishedEditingAfterDelay( text() );
         }
-        QLineEdit::keyPressEvent(event);
+        QLineEdit::keyPressEvent( event );
     }
 
     void CDelayLineEdit::slotChangedTimerTimeout()
@@ -124,7 +124,7 @@ namespace NSABUtils
     void CDelayLineEdit::changeTimeout( bool aOK )
     {
         setLineEditColor( aOK );
-        emit sigTextChangedAfterDelay(text());
+        emit sigTextChangedAfterDelay( text() );
     }
 
     void CDelayLineEdit::slotEditTimerTimeout()
@@ -140,29 +140,29 @@ namespace NSABUtils
             emit sigFinishedEditingAfterDelay( text() );
     }
 
-    void CDelayLineEdit::connectToEditor(bool connectOrDisconnect)
+    void CDelayLineEdit::connectToEditor( bool connectOrDisconnect )
     {
-        if (connectOrDisconnect)
+        if ( connectOrDisconnect )
         {
-            connect(this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged);
-            connect(this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited);
+            connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
+            connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
         }
         else
         {
-            disconnect(this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged);
-            disconnect(this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited);
+            disconnect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
+            disconnect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
         }
     }
 
-    void CDelayLineEdit::setLineEditColor(bool aOK)
+    void CDelayLineEdit::setLineEditColor( bool aOK )
     {
-        setLineEditColor(aOK ? ELineEditStatus::eOK : ELineEditStatus::eNotOK);
+        setLineEditColor( aOK ? ELineEditStatus::eOK : ELineEditStatus::eNotOK );
     }
 
-    void CDelayLineEdit::setLineEditColor(ELineEditStatus status)
+    void CDelayLineEdit::setLineEditColor( ELineEditStatus status )
     {
         fStatus = status;
-        setToolTip(QString());
+        setToolTip( QString() );
         if ( status == ELineEditStatus::ePending )
         {
             setStyleSheet( "QLineEdit { background-color: #b7bfaf }" );
@@ -173,16 +173,16 @@ namespace NSABUtils
             setStyleSheet( "QLineEdit { background-color: white }" );
             setToolTip( text() );
         }
-        else if (status == ELineEditStatus::eNotOK)
+        else if ( status == ELineEditStatus::eNotOK )
         {
             auto errorMsg = fIsOK.second;
-            if (!errorMsg.isEmpty())
+            if ( !errorMsg.isEmpty() )
             {
-                if (errorMsg.contains("%1"))
-                    errorMsg = errorMsg.arg(text());
-                setToolTip(errorMsg);
+                if ( errorMsg.contains( "%1" ) )
+                    errorMsg = errorMsg.arg( text() );
+                setToolTip( errorMsg );
             }
-            setStyleSheet("QLineEdit { background-color: red }");
+            setStyleSheet( "QLineEdit { background-color: red }" );
         }
     }
 
@@ -208,7 +208,7 @@ namespace NSABUtils
     {
         fFileChecker = new CBackgroundFileCheck;
         connect( fFileChecker, &CBackgroundFileCheck::sigFinished, this, &CPathBasedDelayLineEdit::slotFileCheckFinished );
-    
+
         disconnect( fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout );
         disconnect( fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout );
 

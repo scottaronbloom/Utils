@@ -80,7 +80,7 @@ namespace NSABUtils
         }
     }
 
- 
+
     void setupModelChanged( const QAbstractItemModel * model, const QObject * reciever, const QMetaMethod & member, bool isExcluded /*= false*/ )
     {
         Q_ASSERT_X( member.isValid(), "setupModelChanged", "Member is invalid" );
@@ -364,7 +364,7 @@ namespace NSABUtils
              || ( widget->objectName() == QString( "qt_scrollarea_hcontainer" ) )
              || ( widget->objectName() == QString( "qt_scrollarea_vcontainer" ) )
              || ( className.indexOf( "private", 0, Qt::CaseInsensitive ) != -1 )
-        )
+             )
         {
             isSkipWidget = true;
             //qDebug() << "|---> Skipped Widget" << widget << "-" << widget->metaObject()->className() << widget->objectName();

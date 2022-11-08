@@ -35,72 +35,72 @@ namespace NSABUtils
     {
         friend class CSpinBox64Impl;
 #if (QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 ))
-        Q_ENUM(StepType)
+        Q_ENUM( StepType )
 #endif
             Q_OBJECT;
-        Q_PROPERTY(bool wrapping READ wrapping WRITE setWrapping)
-            Q_PROPERTY(QString suffix READ suffix WRITE setSuffix)
-            Q_PROPERTY(QString prefix READ prefix WRITE setPrefix)
-            Q_PROPERTY(QString cleanText READ cleanText)
-            Q_PROPERTY(qlonglong minimum READ minimum WRITE setMinimum)
-            Q_PROPERTY(qlonglong maximum READ maximum WRITE setMaximum)
-            Q_PROPERTY(qlonglong singleStep READ singleStep WRITE setSingleStep)
-            Q_PROPERTY(StepType stepType READ stepType WRITE setStepType)
-            Q_PROPERTY(qlonglong value READ value WRITE setValue NOTIFY valueChanged USER true)
-            Q_PROPERTY(qlonglong displayIntegerBase READ displayIntegerBase WRITE setDisplayIntegerBase)
+        Q_PROPERTY( bool wrapping READ wrapping WRITE setWrapping )
+            Q_PROPERTY( QString suffix READ suffix WRITE setSuffix )
+            Q_PROPERTY( QString prefix READ prefix WRITE setPrefix )
+            Q_PROPERTY( QString cleanText READ cleanText )
+            Q_PROPERTY( qlonglong minimum READ minimum WRITE setMinimum )
+            Q_PROPERTY( qlonglong maximum READ maximum WRITE setMaximum )
+            Q_PROPERTY( qlonglong singleStep READ singleStep WRITE setSingleStep )
+            Q_PROPERTY( StepType stepType READ stepType WRITE setStepType )
+            Q_PROPERTY( qlonglong value READ value WRITE setValue NOTIFY valueChanged USER true )
+            Q_PROPERTY( qlonglong displayIntegerBase READ displayIntegerBase WRITE setDisplayIntegerBase )
     public:
-        explicit CSpinBox64(QWidget* parent = nullptr);
-        CSpinBox64(const CSpinBox64&) = delete;
-        CSpinBox64& operator=(const CSpinBox64&) = delete;
+        explicit CSpinBox64( QWidget * parent = nullptr );
+        CSpinBox64( const CSpinBox64 & ) = delete;
+        CSpinBox64 & operator=( const CSpinBox64 & ) = delete;
         ~CSpinBox64();
 
         qlonglong value() const;
 
         QString prefix() const;
-        void setPrefix(const QString& prefix);
+        void setPrefix( const QString & prefix );
 
         QString suffix() const;
-        void setSuffix(const QString& suffix);
+        void setSuffix( const QString & suffix );
 
         bool wrapping() const;
-        void setWrapping(bool wrapping);
+        void setWrapping( bool wrapping );
 
         QString cleanText() const;
 
         qlonglong singleStep() const;
-        void setSingleStep(qlonglong val);
+        void setSingleStep( qlonglong val );
 
         qlonglong minimum() const;
-        void setMinimum(qlonglong min);
+        void setMinimum( qlonglong min );
 
         qlonglong maximum() const;
-        void setMaximum(qlonglong max);
+        void setMaximum( qlonglong max );
 
-        void setRange(qlonglong min, qlonglong max);
+        void setRange( qlonglong min, qlonglong max );
 
         StepType stepType() const;
-        void setStepType(StepType stepType);
+        void setStepType( StepType stepType );
 
         int displayIntegerBase() const;
-        void setDisplayIntegerBase(int base);
+        void setDisplayIntegerBase( int base );
 
         QSize sizeHint() const override;
 
-        virtual void stepBy(int steps) override;
+        virtual void stepBy( int steps ) override;
 
         static qlonglong maxAllowed() { return std::numeric_limits< qlonglong >::max(); }
         static qlonglong minAllowed() { return std::numeric_limits< qlonglong >::min(); }
-        QValidator::State validate(QString& input, int& pos) const override;
-        virtual void fixup(QString& str) const override;
+        QValidator::State validate( QString & input, int & pos ) const override;
+        virtual void fixup( QString & str ) const override;
         virtual QAbstractSpinBox::StepEnabled stepEnabled() const override;
 
     public Q_SLOTS:
-        void setValue(qlonglong val);
-        void slotEditorCursorPositionChanged(int oldpos, int newpos);
-        void slotEditorTextChanged(const QString& t);
+        void setValue( qlonglong val );
+        void slotEditorCursorPositionChanged( int oldpos, int newpos );
+        void slotEditorTextChanged( const QString & t );
     Q_SIGNALS:
-        void valueChanged(qlonglong v);
-        void valueChanged(const QString & v);
+        void valueChanged( qlonglong v );
+        void valueChanged( const QString & v );
 
     protected:
         void connectLineEdit();

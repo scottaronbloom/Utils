@@ -47,60 +47,60 @@ namespace NSABUtils
 {
     namespace NBIF
     {
-        CWidget::CWidget(QWidget *parent)
-            : QFrame(parent),
-            fImpl(new NSABUtils::NBIF::Ui::CWidget)
+        CWidget::CWidget( QWidget * parent )
+            : QFrame( parent ),
+            fImpl( new NSABUtils::NBIF::Ui::CWidget )
         {
-            Q_INIT_RESOURCE(BIFPlayerResources);
-            fImpl->setupUi(this);
+            Q_INIT_RESOURCE( BIFPlayerResources );
+            fImpl->setupUi( this );
 
             fMovie = std::make_shared< QMovie >();
-            connect(fMovie.get(), &QMovie::frameChanged, this, &CWidget::slotFrameChanged);
-            connect(fMovie.get(), &QMovie::stateChanged, this, &CWidget::slotMovieStateChanged);
-            fImpl->imageLabel->setMovie(fMovie.get());
+            connect( fMovie.get(), &QMovie::frameChanged, this, &CWidget::slotFrameChanged );
+            connect( fMovie.get(), &QMovie::stateChanged, this, &CWidget::slotMovieStateChanged );
+            fImpl->imageLabel->setMovie( fMovie.get() );
 
-            setInfo(fImpl->skipBackwardDiscreteBtn, ":/BIFPlayerResources/skipbackward.png", tr("Skip Backward"), &CWidget::slotSkipBackard);
-            setInfo(fImpl->prevDiscreteBtn, ":/BIFPlayerResources/prev.png", tr("Previous Frame"), &CWidget::slotPrev);
-            setInfo(fImpl->playBtn, QString(), QString(), &CWidget::slotPlay);
-            setPlayPause(fImpl->playBtn, true);
-            setInfo(fImpl->pauseBtn, QString(), QString(), &CWidget::slotPause);
-            setPlayPause(fImpl->pauseBtn, false);
-            setInfo(fImpl->nextDiscreteBtn, ":/BIFPlayerResources/next.png", tr("Next Frame"), &CWidget::slotNext);
-            setInfo(fImpl->skipForwardDiscreteBtn, ":/BIFPlayerResources/skipforward.png", tr("Skip Forward"), &CWidget::slotSkipForward);
+            setInfo( fImpl->skipBackwardDiscreteBtn, ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ), &CWidget::slotSkipBackard );
+            setInfo( fImpl->prevDiscreteBtn, ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ), &CWidget::slotPrev );
+            setInfo( fImpl->playBtn, QString(), QString(), &CWidget::slotPlay );
+            setPlayPause( fImpl->playBtn, true );
+            setInfo( fImpl->pauseBtn, QString(), QString(), &CWidget::slotPause );
+            setPlayPause( fImpl->pauseBtn, false );
+            setInfo( fImpl->nextDiscreteBtn, ":/BIFPlayerResources/next.png", tr( "Next Frame" ), &CWidget::slotNext );
+            setInfo( fImpl->skipForwardDiscreteBtn, ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ), &CWidget::slotSkipForward );
 
-            setInfo(fImpl->skipBackwardToggleBtn, ":/BIFPlayerResources/skipbackward.png", tr("Skip Backward"), &CWidget::slotSkipBackard);
-            setInfo(fImpl->prevToggleBtn, ":/BIFPlayerResources/prev.png", tr("Previous Frame"), &CWidget::slotPrev);
-            setInfo(fImpl->playPauseBtn, QString(), QString(), &CWidget::slotTogglePlayPause);
-            setPlayPause(fImpl->playPauseBtn, true);
-            setInfo(fImpl->nextToggleBtn, ":/BIFPlayerResources/next.png", tr("Next Frame"), &CWidget::slotNext);
-            setInfo(fImpl->skipForwardToggleBtn, ":/BIFPlayerResources/skipforward.png", tr("Skip Forward"), &CWidget::slotSkipForward);
+            setInfo( fImpl->skipBackwardToggleBtn, ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ), &CWidget::slotSkipBackard );
+            setInfo( fImpl->prevToggleBtn, ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ), &CWidget::slotPrev );
+            setInfo( fImpl->playPauseBtn, QString(), QString(), &CWidget::slotTogglePlayPause );
+            setPlayPause( fImpl->playPauseBtn, true );
+            setInfo( fImpl->nextToggleBtn, ":/BIFPlayerResources/next.png", tr( "Next Frame" ), &CWidget::slotNext );
+            setInfo( fImpl->skipForwardToggleBtn, ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ), &CWidget::slotSkipForward );
 
             layoutButtons();
 
-            setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+            setFrameStyle( QFrame::StyledPanel | QFrame::Sunken );
         }
 
         CWidget::~CWidget()
         {
         }
 
-        void CWidget::setNumFramesToSkip(int numFrames)
+        void CWidget::setNumFramesToSkip( int numFrames )
         {
-            slotSetNumFramesToSkip(numFrames);
-            if (fNumFramesToSkipSB)
-                fNumFramesToSkipSB->setValue(fNumFramesToSkip);
+            slotSetNumFramesToSkip( numFrames );
+            if ( fNumFramesToSkipSB )
+                fNumFramesToSkipSB->setValue( fNumFramesToSkip );
         }
 
-        void CWidget::slotSetNumFramesToSkip(int numFrames)
+        void CWidget::slotSetNumFramesToSkip( int numFrames )
         {
             fNumFramesToSkip = numFrames;
         }
 
-        void CWidget::setSpeedMultiplier(int speedMultipler)
+        void CWidget::setSpeedMultiplier( int speedMultipler )
         {
-            slotSetPlayerSpeed(speedMultipler);
-            if (fPlayerSpeedMultiplerSB)
-                fPlayerSpeedMultiplerSB->setValue(speedMultipler);
+            slotSetPlayerSpeed( speedMultipler );
+            if ( fPlayerSpeedMultiplerSB )
+                fPlayerSpeedMultiplerSB->setValue( speedMultipler );
         }
 
         int CWidget::playerSpeedMultiplier() const
@@ -108,76 +108,76 @@ namespace NSABUtils
             return fMovie->speed() / 100;
         }
 
-        void CWidget::slotSetPlayerSpeed(int speedMultipler)
+        void CWidget::slotSetPlayerSpeed( int speedMultipler )
         {
             bool wasPlaying = this->isPlaying();
             int delay = fMovie->nextFrameDelay();
-            fMovie->setPaused(true);
-            fMovie->setSpeed(speedMultipler * 100);
+            fMovie->setPaused( true );
+            fMovie->setSpeed( speedMultipler * 100 );
             delay = fMovie->nextFrameDelay();
-            if (wasPlaying)
+            if ( wasPlaying )
             {
                 updateMovieSpeed();
-                fMovie->setPaused(false);
+                fMovie->setPaused( false );
             }
         }
 
-        void CWidget::setPlayCount(int playCount)
+        void CWidget::setPlayCount( int playCount )
         {
-            slotSetPlayCount(playCount);
+            slotSetPlayCount( playCount );
         }
 
         int CWidget::playCount() const
         {
             return fPlayCountSB ? fPlayCountSB->value() : -1;
         }
-        void CWidget::slotSetPlayCount(int playCount)
+        void CWidget::slotSetPlayCount( int playCount )
         {
-            if (isPlaying())
+            if ( isPlaying() )
                 return;
-            setBIFPluginPlayCount(playCount);
+            setBIFPluginPlayCount( playCount );
             fMovie->stop();
-            fMovie->jumpToFrame(0);
+            fMovie->jumpToFrame( 0 );
         }
 
         void CWidget::slotFrameChanged()
         {
             slotMovieStateChanged();
-            if (isValid())
+            if ( isValid() )
             {
-                auto labelText = tr("Frame #: %1 Time: %2").arg(fMovie->currentFrameNumber()).arg(NSABUtils::CTimeString(fMovie->currentFrameNumber() * std::get< 2 >(fBIF->tsMultiplier())).toString("hh:mm:ss.zzz"));
-                if (isPlaying())
-                    labelText += tr("\nPlaying at %3 fps").arg(computeFPS(), 5, 'f', 3);
+                auto labelText = tr( "Frame #: %1 Time: %2" ).arg( fMovie->currentFrameNumber() ).arg( NSABUtils::CTimeString( fMovie->currentFrameNumber() * fBIF->tsMultiplier().fValue ).toString( "hh:mm:ss.zzz" ) );
+                if ( isPlaying() )
+                    labelText += tr( "\nPlaying at %3 fps" ).arg( computeFPS(), 5, 'f', 3 );
 
-                fImpl->textLabel->setText(labelText);
-                fImpl->textLabel->setVisible(true);
+                fImpl->textLabel->setText( labelText );
+                fImpl->textLabel->setVisible( true );
             }
             else
-                fImpl->textLabel->setVisible(false);
+                fImpl->textLabel->setVisible( false );
         }
 
         void CWidget::slotMovieStateChanged()
         {
-            if (isPlaying())
+            if ( isPlaying() )
                 emit sigPlayingStarted();
-            validatePlayerActions(fMovie->currentFrameNumber() != -1);
+            validatePlayerActions( fMovie->currentFrameNumber() != -1 );
         }
 
         void CWidget::slotSkipBackard()
         {
             slotPause();
-            offsetFrameBy(-fNumFramesToSkip);
+            offsetFrameBy( -fNumFramesToSkip );
         }
 
         void CWidget::slotPrev()
         {
             slotPause();
-            offsetFrameBy(-1);
+            offsetFrameBy( -1 );
         }
 
         void CWidget::slotTogglePlayPause()
         {
-            if (isPlaying())
+            if ( isPlaying() )
                 slotPause();
             else
                 slotPlay();
@@ -185,7 +185,7 @@ namespace NSABUtils
 
         void CWidget::slotPause()
         {
-            fMovie->setPaused(true);
+            fMovie->setPaused( true );
             validatePlayerActions();
             slotFrameChanged();
         }
@@ -194,27 +194,27 @@ namespace NSABUtils
         {
             updateMovieSpeed();
 
-            if (fMovie->state() == QMovie::NotRunning)
-                fMovie->jumpToFrame(0);
-            fMovie->setPaused(false);
+            if ( fMovie->state() == QMovie::NotRunning )
+                fMovie->jumpToFrame( 0 );
+            fMovie->setPaused( false );
             validatePlayerActions();
         }
 
         void CWidget::slotNext()
         {
             slotPause();
-            offsetFrameBy(1);
+            offsetFrameBy( 1 );
         }
 
         void CWidget::slotSkipForward()
         {
             slotPause();
-            offsetFrameBy(fNumFramesToSkip);
+            offsetFrameBy( fNumFramesToSkip );
         }
 
-        void CWidget::setActive(bool isActive)
+        void CWidget::setActive( bool isActive )
         {
-            validatePlayerActions(isActive);
+            validatePlayerActions( isActive );
         }
 
         QString CWidget::fileName() const
@@ -227,207 +227,207 @@ namespace NSABUtils
             return fBIF && fBIF->isValid() && fMovie->isValid();
         }
 
-        void CWidget::validatePlayerActions(bool enabled)
+        void CWidget::validatePlayerActions( bool enabled )
         {
-            bool aOK = (enabled && fBIF && fBIF->isValid() && fMovie->isValid());
+            bool aOK = ( enabled && fBIF && fBIF->isValid() && fMovie->isValid() );
 
-            enableItem(fActionSkipBackward, aOK);
-            enableItem(fActionPrev, aOK);
-            enableItem(fActionPlay, aOK && !isPlaying());
-            enableItem(fActionPause, aOK && isPlaying());
-            enableItem(fActionTogglePlayPause, aOK);
-            setPlayPause(fImpl->playPauseBtn, !isPlaying());
-            setPlayPause(fActionTogglePlayPause, !isPlaying());
-            enableItem(fActionNext, aOK);
-            enableItem(fActionSkipForward, aOK);
+            enableItem( fActionSkipBackward, aOK );
+            enableItem( fActionPrev, aOK );
+            enableItem( fActionPlay, aOK && !isPlaying() );
+            enableItem( fActionPause, aOK && isPlaying() );
+            enableItem( fActionTogglePlayPause, aOK );
+            setPlayPause( fImpl->playPauseBtn, !isPlaying() );
+            setPlayPause( fActionTogglePlayPause, !isPlaying() );
+            enableItem( fActionNext, aOK );
+            enableItem( fActionSkipForward, aOK );
 
 
-            enableItem(fImpl->skipBackwardDiscreteBtn, aOK);
-            enableItem(fImpl->prevDiscreteBtn, aOK);
-            enableItem(fImpl->playBtn, aOK && !isPlaying());
-            enableItem(fImpl->pauseBtn, aOK && isPlaying());
-            enableItem(fImpl->skipForwardDiscreteBtn, aOK);
-            enableItem(fImpl->nextDiscreteBtn, aOK);
+            enableItem( fImpl->skipBackwardDiscreteBtn, aOK );
+            enableItem( fImpl->prevDiscreteBtn, aOK );
+            enableItem( fImpl->playBtn, aOK && !isPlaying() );
+            enableItem( fImpl->pauseBtn, aOK && isPlaying() );
+            enableItem( fImpl->skipForwardDiscreteBtn, aOK );
+            enableItem( fImpl->nextDiscreteBtn, aOK );
 
-            enableItem(fImpl->skipBackwardToggleBtn, aOK);
-            enableItem(fImpl->prevToggleBtn, aOK);
-            enableItem(fImpl->playPauseBtn, aOK);
-            enableItem(fImpl->skipForwardToggleBtn, aOK);
-            enableItem(fImpl->nextToggleBtn, aOK);
+            enableItem( fImpl->skipBackwardToggleBtn, aOK );
+            enableItem( fImpl->prevToggleBtn, aOK );
+            enableItem( fImpl->playPauseBtn, aOK );
+            enableItem( fImpl->skipForwardToggleBtn, aOK );
+            enableItem( fImpl->nextToggleBtn, aOK );
 
-            enableItem(fPlayCountSB, aOK && !isPlaying());
-            checkItem(fActionDiscreteLayout, false);
-            checkItem(fActionToggleLayout, false);
-            checkItem(fActionNoLayout, false);
-            enableItem(fActionSaveAsGIF, fBIF.operator bool());
+            enableItem( fPlayCountSB, aOK && !isPlaying() );
+            checkItem( fActionDiscreteLayout, false );
+            checkItem( fActionToggleLayout, false );
+            checkItem( fActionNoLayout, false );
+            enableItem( fActionSaveAsGIF, fBIF.operator bool() );
 
-            if (fButtonLayout == EButtonsLayout::eDiscretePlayPause)
-                checkItem(fActionDiscreteLayout, true);
-            else if (fButtonLayout == EButtonsLayout::eTogglePlayPause)
-                checkItem(fActionToggleLayout, true);
-            else if (fButtonLayout == EButtonsLayout::eNoButtons)
-                checkItem(fActionNoLayout, true);
+            if ( fButtonLayout == EButtonsLayout::eDiscretePlayPause )
+                checkItem( fActionDiscreteLayout, true );
+            else if ( fButtonLayout == EButtonsLayout::eTogglePlayPause )
+                checkItem( fActionToggleLayout, true );
+            else if ( fButtonLayout == EButtonsLayout::eNoButtons )
+                checkItem( fActionNoLayout, true );
         }
 
         bool CWidget::isPlaying() const
         {
-            return (fMovie->state() == QMovie::Running);
+            return ( fMovie->state() == QMovie::Running );
         }
 
-        void CWidget::offsetFrameBy(int offset)
+        void CWidget::offsetFrameBy( int offset )
         {
             auto curr = fMovie->currentFrameNumber();
-            if (curr < 0)
+            if ( curr < 0 )
                 curr = 0;
-            setCurrentFrame(curr + offset);
+            setCurrentFrame( curr + offset );
         }
 
-        void CWidget::setCurrentFrame(int frame)
+        void CWidget::setCurrentFrame( int frame )
         {
             int sz = fMovie->frameCount();
-            if (frame < 0)
+            if ( frame < 0 )
                 frame = sz + frame;
-            if (frame >= sz)
+            if ( frame >= sz )
                 frame = frame - sz;
-            fMovie->jumpToFrame(frame);
+            fMovie->jumpToFrame( frame );
         }
 
         void CWidget::clear()
         {
-            fImpl->imageLabel->setPixmap(QPixmap());
-            fImpl->textLabel->setText(QString());
-            fImpl->textLabel->setVisible(false);
+            fImpl->imageLabel->setPixmap( QPixmap() );
+            fImpl->textLabel->setText( QString() );
+            fImpl->textLabel->setVisible( false );
         }
 
-        std::shared_ptr< CFile > CWidget::setFileName(const QString & fileName)
+        std::shared_ptr< CFile > CWidget::setFileName( const QString & fileName )
         {
-            if (fileName.isEmpty() || !QFileInfo( fileName ).exists() )
+            if ( fileName.isEmpty() || !QFileInfo( fileName ).exists() )
                 fBIF.reset();
             else
-                fBIF = std::make_shared< NBIF::CFile >(fileName, false);
+                fBIF = std::make_shared< NBIF::CFile >( fileName, false );
 
-            fMovie->setFileName(fBIF ? fBIF->fileName() : QString());
-            fImpl->imageLabel->setMovie(fMovie.get());
-            validatePlayerActions(fBIF && fBIF->isValid() && fMovie->isValid());
+            fMovie->setFileName( fBIF ? fBIF->fileName() : QString() );
+            fImpl->imageLabel->setMovie( fMovie.get() );
+            validatePlayerActions( fBIF && fBIF->isValid() && fMovie->isValid() );
             return fBIF;
         }
 
-        QAction *CWidget::actionSkipBackward()
+        QAction * CWidget::actionSkipBackward()
         {
-            if (!fActionSkipBackward)
+            if ( !fActionSkipBackward )
             {
-                fActionSkipBackward = createAction("actionSkipBackward", ":/BIFPlayerResources/skipbackward.png", tr("Skip Backward"), &CWidget::slotSkipBackard);
+                fActionSkipBackward = createAction( "actionSkipBackward", ":/BIFPlayerResources/skipbackward.png", tr( "Skip Backward" ), &CWidget::slotSkipBackard );
             }
             return fActionSkipBackward;
         }
 
-        QAction *CWidget::actionPrev()
+        QAction * CWidget::actionPrev()
         {
-            if (!fActionPrev)
+            if ( !fActionPrev )
             {
-                fActionPrev = createAction("actionPrev", ":/BIFPlayerResources/prev.png", tr("Previous Frame"), &CWidget::slotPrev);
+                fActionPrev = createAction( "actionPrev", ":/BIFPlayerResources/prev.png", tr( "Previous Frame" ), &CWidget::slotPrev );
             }
             return fActionPrev;
         }
 
-        QAction *CWidget::actionTogglePlayPause(std::optional< bool > asPlayButton)
+        QAction * CWidget::actionTogglePlayPause( std::optional< bool > asPlayButton )
         {
-            if (!fActionTogglePlayPause)
+            if ( !fActionTogglePlayPause )
             {
-                fActionTogglePlayPause = createAction("actionTogglePlayPause", QString(), QString(), &CWidget::slotTogglePlayPause);
-                if (!asPlayButton.has_value())
-                    setPlayPause(fActionTogglePlayPause, true);
+                fActionTogglePlayPause = createAction( "actionTogglePlayPause", QString(), QString(), &CWidget::slotTogglePlayPause );
+                if ( !asPlayButton.has_value() )
+                    setPlayPause( fActionTogglePlayPause, true );
             }
-            if (asPlayButton.has_value())
-                setPlayPause(fActionTogglePlayPause, asPlayButton.value());
+            if ( asPlayButton.has_value() )
+                setPlayPause( fActionTogglePlayPause, asPlayButton.value() );
 
             return fActionTogglePlayPause;
         }
 
-        QAction *CWidget::actionPlay()
+        QAction * CWidget::actionPlay()
         {
-            if (!fActionPlay)
+            if ( !fActionPlay )
             {
-                fActionPlay = createAction(QString::fromUtf8("actionPlay"), QString(), QString(), &CWidget::slotPlay);
-                setPlayPause(fActionPlay, true);
+                fActionPlay = createAction( QString::fromUtf8( "actionPlay" ), QString(), QString(), &CWidget::slotPlay );
+                setPlayPause( fActionPlay, true );
             }
 
             return fActionPlay;
         }
 
-        QAction *CWidget::actionPause()
+        QAction * CWidget::actionPause()
         {
-            if (!fActionPause)
+            if ( !fActionPause )
             {
-                fActionPause = createAction(QString::fromUtf8("actionPause"), QString(), QString(), &CWidget::slotPause);
-                setPlayPause(fActionPause, false);
+                fActionPause = createAction( QString::fromUtf8( "actionPause" ), QString(), QString(), &CWidget::slotPause );
+                setPlayPause( fActionPause, false );
             }
 
             return fActionPause;
         }
 
-        QAction *CWidget::actionNext()
+        QAction * CWidget::actionNext()
         {
-            if (!fActionNext)
+            if ( !fActionNext )
             {
-                fActionNext = createAction(QString::fromUtf8("actionNext"), ":/BIFPlayerResources/next.png", tr("Next Frame"), &CWidget::slotNext);
+                fActionNext = createAction( QString::fromUtf8( "actionNext" ), ":/BIFPlayerResources/next.png", tr( "Next Frame" ), &CWidget::slotNext );
             }
             return fActionNext;
         }
 
-        QAction *CWidget::actionSkipForward()
+        QAction * CWidget::actionSkipForward()
         {
-            if (!fActionSkipForward)
+            if ( !fActionSkipForward )
             {
-                fActionSkipForward = createAction(QString::fromUtf8("actionSkipForward"), ":/BIFPlayerResources/skipforward.png", tr("Skip Forward"), &CWidget::slotSkipForward);
+                fActionSkipForward = createAction( QString::fromUtf8( "actionSkipForward" ), ":/BIFPlayerResources/skipforward.png", tr( "Skip Forward" ), &CWidget::slotSkipForward );
             }
             return fActionSkipForward;
         }
 
-        QAction *CWidget::actionDiscreteLayout()
+        QAction * CWidget::actionDiscreteLayout()
         {
-            if (!fActionDiscreteLayout)
+            if ( !fActionDiscreteLayout )
             {
-                fActionDiscreteLayout = createAction(QString::fromUtf8("actionDiscreteLayout"), QString(), tr("Discrete Play/Pause Buttons"), &CWidget::slotPlayerButtonDiscrete);
-                fActionDiscreteLayout->setCheckable(true);
+                fActionDiscreteLayout = createAction( QString::fromUtf8( "actionDiscreteLayout" ), QString(), tr( "Discrete Play/Pause Buttons" ), &CWidget::slotPlayerButtonDiscrete );
+                fActionDiscreteLayout->setCheckable( true );
             }
             return fActionDiscreteLayout;
         }
 
-        QAction *CWidget::actionToggleLayout()
+        QAction * CWidget::actionToggleLayout()
         {
-            if (!fActionToggleLayout)
+            if ( !fActionToggleLayout )
             {
-                fActionToggleLayout = createAction(QString::fromUtf8("actionToggleLayout"), QString(), tr("Single Toggleable Play/Pause Button"), &CWidget::slotPlayerButtonToggle);
-                fActionToggleLayout->setCheckable(true);
+                fActionToggleLayout = createAction( QString::fromUtf8( "actionToggleLayout" ), QString(), tr( "Single Toggleable Play/Pause Button" ), &CWidget::slotPlayerButtonToggle );
+                fActionToggleLayout->setCheckable( true );
             }
             return fActionToggleLayout;
         }
 
-        QAction *CWidget::actionNoLayout()
+        QAction * CWidget::actionNoLayout()
         {
-            if (!fActionNoLayout)
+            if ( !fActionNoLayout )
             {
-                fActionNoLayout = createAction(QString::fromUtf8("actionNoLayout"), QString(), tr("No Player Buttons"), &CWidget::slotPlayerButtonNone);
-                fActionNoLayout->setCheckable(true);
+                fActionNoLayout = createAction( QString::fromUtf8( "actionNoLayout" ), QString(), tr( "No Player Buttons" ), &CWidget::slotPlayerButtonNone );
+                fActionNoLayout->setCheckable( true );
             }
             return fActionNoLayout;
         }
 
         QAction * CWidget::actionSaveAsGIF()
         {
-            if (!fActionSaveAsGIF)
+            if ( !fActionSaveAsGIF )
             {
-                fActionSaveAsGIF = createAction(QString::fromUtf8("actionSaveAsGIF"), QString(), tr("Save As GIF..."), &CWidget::slotSaveAsGIF);
+                fActionSaveAsGIF = createAction( QString::fromUtf8( "actionSaveAsGIF" ), QString(), tr( "Save As GIF..." ), &CWidget::slotSaveAsGIF );
             }
             return fActionSaveAsGIF;
         }
 
 
 
-        void CWidget::setButtonsLayout(EButtonsLayout layout)
+        void CWidget::setButtonsLayout( EButtonsLayout layout )
         {
-            if (fButtonLayout == layout)
+            if ( fButtonLayout == layout )
                 return;
 
             fButtonLayout = layout;
@@ -440,67 +440,67 @@ namespace NSABUtils
 
         void CWidget::layoutButtons()
         {
-            if (fButtonLayout == EButtonsLayout::eNoButtons)
-                fImpl->stackedWidget->setVisible(false);
+            if ( fButtonLayout == EButtonsLayout::eNoButtons )
+                fImpl->stackedWidget->setVisible( false );
             else
             {
-                fImpl->stackedWidget->setVisible(true);
-                fImpl->stackedWidget->setCurrentIndex(static_cast<int>(fButtonLayout));
+                fImpl->stackedWidget->setVisible( true );
+                fImpl->stackedWidget->setCurrentIndex( static_cast<int>( fButtonLayout ) );
             }
         }
 
-        void CWidget::setInfo(QAction *item, const QString &iconPath, const QString &text, void (CWidget::*slot)())
+        void CWidget::setInfo( QAction * item, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) )
         {
             QIcon icon;
-            icon.addFile(iconPath, QSize(), QIcon::Normal, QIcon::Off);
-            item->setIcon(icon);
-            item->setToolTip(text);
-            item->setText(text);
-            if (slot)
-                connect(item, &QAction::triggered, this, slot);
+            icon.addFile( iconPath, QSize(), QIcon::Normal, QIcon::Off );
+            item->setIcon( icon );
+            item->setToolTip( text );
+            item->setText( text );
+            if ( slot )
+                connect( item, &QAction::triggered, this, slot );
         }
 
-        void CWidget::setInfo(QToolButton *item, const QString &iconPath, const QString &text, void (CWidget::*slot)())
+        void CWidget::setInfo( QToolButton * item, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) )
         {
             QIcon icon;
-            icon.addFile(iconPath, QSize(), QIcon::Normal, QIcon::Off);
-            item->setIcon(icon);
-            item->setToolTip(text);
-            item->setText(text);
-            if (slot)
-                connect(item, &QToolButton::clicked, this, slot);
+            icon.addFile( iconPath, QSize(), QIcon::Normal, QIcon::Off );
+            item->setIcon( icon );
+            item->setToolTip( text );
+            item->setText( text );
+            if ( slot )
+                connect( item, &QToolButton::clicked, this, slot );
         }
 
-        QAction *CWidget::createAction(const QString & name, const QString &iconPath, const QString &text, void (CWidget::*slot)())
+        QAction * CWidget::createAction( const QString & name, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) )
         {
-            auto retVal = new QAction(this);
-            retVal->setObjectName(name);
-            setInfo(retVal, iconPath, text, slot);
+            auto retVal = new QAction( this );
+            retVal->setObjectName( name );
+            setInfo( retVal, iconPath, text, slot );
             return retVal;
         }
 
         void CWidget::slotPlayerButtonDiscrete()
         {
-            setButtonsLayout(EButtonsLayout::eDiscretePlayPause);
+            setButtonsLayout( EButtonsLayout::eDiscretePlayPause );
         }
 
         void CWidget::slotPlayerButtonToggle()
         {
-            setButtonsLayout(EButtonsLayout::eTogglePlayPause);
+            setButtonsLayout( EButtonsLayout::eTogglePlayPause );
         }
 
         void CWidget::slotPlayerButtonNone()
         {
-            setButtonsLayout(EButtonsLayout::eNoButtons);
+            setButtonsLayout( EButtonsLayout::eNoButtons );
         }
 
-        QToolBar *CWidget::toolBar()
+        QToolBar * CWidget::toolBar()
         {
-            if (!fToolBar)
+            if ( !fToolBar )
             {
                 fToolBar = new QToolBar;
-                fToolBar->setObjectName("BIF Viewer Toolbar");
-                fToolBar->setWindowTitle(tr("BIF Viewer Toolbar"));
+                fToolBar->setObjectName( "BIF Viewer Toolbar" );
+                fToolBar->setWindowTitle( tr( "BIF Viewer Toolbar" ) );
 
                 updateToolBar();
                 validatePlayerActions();
@@ -508,13 +508,13 @@ namespace NSABUtils
             return fToolBar;
         }
 
-        QMenu *CWidget::menu()
+        QMenu * CWidget::menu()
         {
-            if (!fMenu)
+            if ( !fMenu )
             {
-                fMenu = new QMenu(this);
-                fMenu->setObjectName("BIF Viewer Menu");
-                fMenu->setTitle(tr("BIF Viewer"));
+                fMenu = new QMenu( this );
+                fMenu->setObjectName( "BIF Viewer Menu" );
+                fMenu->setTitle( tr( "BIF Viewer" ) );
 
                 updateMenu();
                 validatePlayerActions();
@@ -524,26 +524,26 @@ namespace NSABUtils
 
         void CWidget::updateMenu()
         {
-            if (!fMenu)
+            if ( !fMenu )
                 return;
 
             fMenu->clear();
-            auto subMenu = fMenu->addMenu(tr("BIF Player Type"));
-            subMenu->addAction(actionDiscreteLayout());
-            subMenu->addAction(actionToggleLayout());
-            subMenu->addAction(actionNoLayout());
+            auto subMenu = fMenu->addMenu( tr( "BIF Player Type" ) );
+            subMenu->addAction( actionDiscreteLayout() );
+            subMenu->addAction( actionToggleLayout() );
+            subMenu->addAction( actionNoLayout() );
             fMenu->addSeparator();
-            fMenu->addAction(actionSaveAsGIF());
+            fMenu->addAction( actionSaveAsGIF() );
 
-            if (fButtonLayout == EButtonsLayout::eNoButtons)
+            if ( fButtonLayout == EButtonsLayout::eNoButtons )
                 return;
 
-            updateItemForLayout(fMenu);
+            updateItemForLayout( fMenu );
         }
 
         void CWidget::updateToolBar()
         {
-            if (!fToolBar)
+            if ( !fToolBar )
                 return;
 
             fToolBar->clear();
@@ -551,139 +551,139 @@ namespace NSABUtils
             updateItemForLayout( fToolBar );
             fToolBar->addSeparator();
 
-            auto label = new QLabel(tr("Player Speed Multiplier:"));
-            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-            fToolBar->addWidget(label);
+            auto label = new QLabel( tr( "Player Speed Multiplier:" ) );
+            label->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+            fToolBar->addWidget( label );
 
             fPlayerSpeedMultiplerSB = new QSpinBox;
-            fPlayerSpeedMultiplerSB->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-            fPlayerSpeedMultiplerSB->setSuffix(tr("x"));
-            fPlayerSpeedMultiplerSB->setMinimum(0);
-            fPlayerSpeedMultiplerSB->setMaximum(10000);
-            fPlayerSpeedMultiplerSB->setSingleStep(50);
-            connect(fPlayerSpeedMultiplerSB, qOverload< int >(&QSpinBox::valueChanged), this, &CWidget::slotSetPlayerSpeed);
+            fPlayerSpeedMultiplerSB->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+            fPlayerSpeedMultiplerSB->setSuffix( tr( "x" ) );
+            fPlayerSpeedMultiplerSB->setMinimum( 0 );
+            fPlayerSpeedMultiplerSB->setMaximum( 10000 );
+            fPlayerSpeedMultiplerSB->setSingleStep( 50 );
+            connect( fPlayerSpeedMultiplerSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CWidget::slotSetPlayerSpeed );
 
-            fPlayerSpeedMultiplerSB->setValue(playerSpeedMultiplier());
+            fPlayerSpeedMultiplerSB->setValue( playerSpeedMultiplier() );
 
-            fToolBar->addWidget(fPlayerSpeedMultiplerSB); // takes ownership
+            fToolBar->addWidget( fPlayerSpeedMultiplerSB ); // takes ownership
             fToolBar->addSeparator();
 
-            label = new QLabel(tr("Frames to Skip:"));
-            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-            fToolBar->addWidget(label);
+            label = new QLabel( tr( "Frames to Skip:" ) );
+            label->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+            fToolBar->addWidget( label );
 
             fNumFramesToSkipSB = new QSpinBox;
-            fNumFramesToSkipSB->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-            fNumFramesToSkipSB->setSuffix(tr(" frames"));
-            fNumFramesToSkipSB->setMinimum(0);
-            fNumFramesToSkipSB->setMaximum(1000);
-            fNumFramesToSkipSB->setSingleStep(50);
-            fNumFramesToSkipSB->setValue(fNumFramesToSkip);
-            connect(fNumFramesToSkipSB, qOverload< int >(&QSpinBox::valueChanged), this, &CWidget::slotSetNumFramesToSkip);
-            fToolBar->addWidget(fNumFramesToSkipSB);
+            fNumFramesToSkipSB->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+            fNumFramesToSkipSB->setSuffix( tr( " frames" ) );
+            fNumFramesToSkipSB->setMinimum( 0 );
+            fNumFramesToSkipSB->setMaximum( 1000 );
+            fNumFramesToSkipSB->setSingleStep( 50 );
+            fNumFramesToSkipSB->setValue( fNumFramesToSkip );
+            connect( fNumFramesToSkipSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CWidget::slotSetNumFramesToSkip );
+            fToolBar->addWidget( fNumFramesToSkipSB );
             fToolBar->addSeparator();
 
-            label = new QLabel(tr("Number of Times to Play?"));
-            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-            fToolBar->addWidget(label);
+            label = new QLabel( tr( "Number of Times to Play?" ) );
+            label->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+            fToolBar->addWidget( label );
 
             fPlayCountSB = new QSpinBox;
-            fPlayCountSB->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+            fPlayCountSB->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
             //fPlayCountSB->setSuffix(tr(""));
-            fPlayCountSB->setSpecialValueText("Inifinite");
-            fPlayCountSB->setMinimum(0);
-            fPlayCountSB->setMaximum(std::numeric_limits< int >::max());
-            fPlayCountSB->setSingleStep(1);
-            fPlayCountSB->setValue(0);
-            connect(fPlayCountSB, qOverload< int >(&QSpinBox::valueChanged), this, &CWidget::slotSetPlayCount);
-            fToolBar->addWidget(fPlayCountSB);
+            fPlayCountSB->setSpecialValueText( "Inifinite" );
+            fPlayCountSB->setMinimum( 0 );
+            fPlayCountSB->setMaximum( std::numeric_limits< int >::max() );
+            fPlayCountSB->setSingleStep( 1 );
+            fPlayCountSB->setValue( 0 );
+            connect( fPlayCountSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CWidget::slotSetPlayCount );
+            fToolBar->addWidget( fPlayCountSB );
             fToolBar->addSeparator();
 
         }
 
         template< typename T>
-        void CWidget::updateItemForLayout(T * item)
+        void CWidget::updateItemForLayout( T * item )
         {
-            if (fButtonLayout == EButtonsLayout::eNoButtons)
+            if ( fButtonLayout == EButtonsLayout::eNoButtons )
                 return;
             auto actions = item->actions();
             if ( !actions.isEmpty() && !actions.back()->isSeparator() )
                 item->addSeparator();
 
-            item->addAction(actionSkipBackward());
-            item->addAction(actionPrev());
+            item->addAction( actionSkipBackward() );
+            item->addAction( actionPrev() );
             item->addSeparator();
-            if (fButtonLayout == EButtonsLayout::eDiscretePlayPause)
+            if ( fButtonLayout == EButtonsLayout::eDiscretePlayPause )
             {
-                item->addAction(actionPause());
-                item->addAction(actionPlay());
+                item->addAction( actionPause() );
+                item->addAction( actionPlay() );
             }
-            else if (fButtonLayout == EButtonsLayout::eTogglePlayPause)
+            else if ( fButtonLayout == EButtonsLayout::eTogglePlayPause )
             {
-                item->addAction(actionTogglePlayPause());
+                item->addAction( actionTogglePlayPause() );
             }
             item->addSeparator();
-            item->addAction(actionNext());
-            item->addAction(actionSkipForward());
+            item->addAction( actionNext() );
+            item->addAction( actionSkipForward() );
         }
 
 
         template< typename T >
-        void CWidget::setPlayPause(T *item, bool playPause)
+        void CWidget::setPlayPause( T * item, bool playPause )
         {
-            if (!item)
+            if ( !item )
                 return;
 
-            if (playPause)
-                setInfo(item, ":/BIFPlayerResources/play.png", tr("Play"), nullptr);
+            if ( playPause )
+                setInfo( item, ":/BIFPlayerResources/play.png", tr( "Play" ), nullptr );
             else
-                setInfo(item, ":/BIFPlayerResources/pause.png", tr("Pause"), nullptr);
+                setInfo( item, ":/BIFPlayerResources/pause.png", tr( "Pause" ), nullptr );
         }
 
         template< typename T >
-        void CWidget::checkItem(T *item, bool checked)
+        void CWidget::checkItem( T * item, bool checked )
         {
-            if (!item)
+            if ( !item )
                 return;
-            item->setChecked(checked);
+            item->setChecked( checked );
         }
 
         template< typename T >
-        void CWidget::setItemVisible(T *item, bool visible)
+        void CWidget::setItemVisible( T * item, bool visible )
         {
-            if (!item)
+            if ( !item )
                 return;
-            item->setVisible(visible);
+            item->setVisible( visible );
         }
 
         template< typename T >
-        void CWidget::enableItem(T *item, bool enable)
+        void CWidget::enableItem( T * item, bool enable )
         {
-            if (!item)
+            if ( !item )
                 return;
-            item->setEnabled(enable);
+            item->setEnabled( enable );
         }
 
-        void CWidget::setBIFPluginPlayCount(int playCount)
+        void CWidget::setBIFPluginPlayCount( int playCount )
         {
-            QDir pluginsDir(QCoreApplication::applicationDirPath());
-            pluginsDir.cd("imageformats");
-            const QStringList entries = pluginsDir.entryList(QDir::Files);
-            for (const QString & fileName : entries)
+            QDir pluginsDir( QCoreApplication::applicationDirPath() );
+            pluginsDir.cd( "imageformats" );
+            const QStringList entries = pluginsDir.entryList( QDir::Files );
+            for ( const QString & fileName : entries )
             {
-                if (fileName.startsWith("bif"))
+                if ( fileName.startsWith( "bif" ) )
                 {
-                    auto absPath = pluginsDir.absoluteFilePath(fileName);
-                    QPluginLoader pluginLoader(absPath);
-                    auto bifPlugin = dynamic_cast<CPlugin *>(pluginLoader.instance());
-                    if (bifPlugin)
+                    auto absPath = pluginsDir.absoluteFilePath( fileName );
+                    QPluginLoader pluginLoader( absPath );
+                    auto bifPlugin = dynamic_cast<CPlugin *>( pluginLoader.instance() );
+                    if ( bifPlugin )
                     {
-                        QLibrary lib(absPath);
-                        using TSetLoopCount = void(*)(int);
+                        QLibrary lib( absPath );
+                        using TSetLoopCount = void( * )( int );
 
-                        auto setLoopCount = (TSetLoopCount)lib.resolve("setLoopCount");
-                        if (setLoopCount)
-                            setLoopCount(playCount);
+                        auto setLoopCount = (TSetLoopCount)lib.resolve( "setLoopCount" );
+                        if ( setLoopCount )
+                            setLoopCount( playCount );
                     }
                     break;
                 }
@@ -692,66 +692,66 @@ namespace NSABUtils
 
         double CWidget::computeFPS() const
         {
-            if (!fBIF)
+            if ( !fBIF )
                 return 0;
             auto baseMSecPerFrame = 1.0 * fBIF->imageDelay();
             auto scaledMSecPerFrame = baseMSecPerFrame * 100 / fMovie->speed();
 
             auto secPerFrame = scaledMSecPerFrame / 1000;
-            auto fps = 1.0 / (1.0 * secPerFrame);
+            auto fps = 1.0 / ( 1.0 * secPerFrame );
             return fps;
         }
 
         void CWidget::updateMovieSpeed()
         {
             auto curr = fMovie->currentFrameNumber();
-            fMovie->jumpToFrame(curr + 1);
-            fMovie->jumpToFrame(curr);
+            fMovie->jumpToFrame( curr + 1 );
+            fMovie->jumpToFrame( curr );
         }
 
         QSize CWidget::sizeHint() const
         {
-            if (!isValid())
+            if ( !isValid() )
                 return QWidget::sizeHint();
 
             auto retVal = fBIF->imageSize();
-            retVal += QSize(6, 3);
-            if (fImpl->textLabel->isVisible())
+            retVal += QSize( 6, 3 );
+            if ( fImpl->textLabel->isVisible() )
             {
                 auto subSizeHint = fImpl->textLabel->sizeHint();
-                retVal.setWidth(std::max(subSizeHint.width(), retVal.width()));
-                retVal.setHeight(retVal.height() + subSizeHint.height());
-                retVal += QSize(0, 3);
+                retVal.setWidth( std::max( subSizeHint.width(), retVal.width() ) );
+                retVal.setHeight( retVal.height() + subSizeHint.height() );
+                retVal += QSize( 0, 3 );
             }
             auto subSizeHint = fImpl->skipBackwardToggleBtn->sizeHint();
-            retVal.setWidth(std::max(6 * subSizeHint.width(), retVal.width()));
-            retVal.setHeight(retVal.height() + subSizeHint.height());
+            retVal.setWidth( std::max( 6 * subSizeHint.width(), retVal.width() ) );
+            retVal.setHeight( retVal.height() + subSizeHint.height() );
             return retVal;
         }
 
         void CWidget::slotSaveAsGIF()
         {
-            if (!fBIF || (fBIF->imageCount() == 0))
+            if ( !fBIF || ( fBIF->imageCount() == 0 ) )
                 return;
 
-            CGIFWriterDlg dlg(this);
-            dlg.setBIF(fBIF);
-            dlg.setSpeedMultipler(fPlayerSpeedMultiplerSB->value());
-            dlg.setDelay(gifDelay());
-            dlg.setFlipImage(gifFlipImage());
-            dlg.setLoopCount(gifLoopCount());
-            dlg.setDither(gifDitherImage());
-            dlg.setStartFrame(gifStartFrame());
-            dlg.setEndFrame(gifEndFrame());
-            dlg.setUseNew(true);
-            if (dlg.exec() == QDialog::Accepted)
+            CGIFWriterDlg dlg( this );
+            dlg.setBIF( fBIF );
+            dlg.setSpeedMultipler( fPlayerSpeedMultiplerSB->value() );
+            dlg.setDelay( gifDelay() );
+            dlg.setFlipImage( gifFlipImage() );
+            dlg.setLoopCount( gifLoopCount() );
+            dlg.setDither( gifDitherImage() );
+            dlg.setStartFrame( gifStartFrame() );
+            dlg.setEndFrame( gifEndFrame() );
+            dlg.setUseNew( true );
+            if ( dlg.exec() == QDialog::Accepted )
             {
-                setGIFDitherImage(dlg.dither());
-                setGIFFlipImage(dlg.flipImage());
-                setGIFLoopCount(dlg.loopCount());
-                setGIFStartFrame(dlg.startFrame());
-                setGIFEndFrame(dlg.endFrame());
-                setGIFDelay(dlg.delay());
+                setGIFDitherImage( dlg.dither() );
+                setGIFFlipImage( dlg.flipImage() );
+                setGIFLoopCount( dlg.loopCount() );
+                setGIFStartFrame( dlg.startFrame() );
+                setGIFEndFrame( dlg.endFrame() );
+                setGIFDelay( dlg.delay() );
             }
         }
     }

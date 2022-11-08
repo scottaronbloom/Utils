@@ -38,19 +38,19 @@ namespace NSABUtils
     {
         Q_OBJECT;
     public:
-        explicit CTableWidgetWithSelectCommand(QWidget * parent);
-        virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index, const QEvent *event = nullptr) const override;
+        explicit CTableWidgetWithSelectCommand( QWidget * parent );
+        virtual QItemSelectionModel::SelectionFlags selectionCommand( const QModelIndex & index, const QEvent * event = nullptr ) const override;
     };
 
     class SABUTILS_EXPORT CTableViewWithSelectCommand : public QTableView
     {
         Q_OBJECT;
     public:
-        explicit CTableViewWithSelectCommand(QWidget * parent);
-        virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index, const QEvent *event = nullptr ) const override;
+        explicit CTableViewWithSelectCommand( QWidget * parent );
+        virtual QItemSelectionModel::SelectionFlags selectionCommand( const QModelIndex & index, const QEvent * event = nullptr ) const override;
     };
 
-    class SABUTILS_EXPORT CNoEditDelegate: public QItemDelegate
+    class SABUTILS_EXPORT CNoEditDelegate : public QItemDelegate
     {
         Q_OBJECT
 

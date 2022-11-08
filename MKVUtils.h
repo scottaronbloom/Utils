@@ -81,14 +81,14 @@ namespace NSABUtils
     SABUTILS_EXPORT EMediaTags fromDisplayName( const QString & tag );
     SABUTILS_EXPORT QString mediaInfoName( EMediaTags tag );
     SABUTILS_EXPORT QString getMKVEditName( EMediaTags tag );
-    
+
     SABUTILS_EXPORT QString getMediaTag( const QString & fileName, NSABUtils::EMediaTags tag );
     SABUTILS_EXPORT std::unordered_map< EMediaTags, QString > getMediaTags( const QString & fileName, const std::list< NSABUtils::EMediaTags > & tags = {} );
 
     SABUTILS_EXPORT bool isSettableTag( EMediaTags tag );
     SABUTILS_EXPORT std::unordered_map< EMediaTags, QString > getSettableMediaTags( const QString & fileName );
     SABUTILS_EXPORT SAllMediaInfo getAllMediaInfo( const QString & fileName );
-    SABUTILS_EXPORT bool setMediaTags( const QString & fileName, const std::unordered_map< EMediaTags, QString > & tags, const QString & mkvPropEdit, QString * msg=nullptr );
+    SABUTILS_EXPORT bool setMediaTags( const QString & fileName, const std::unordered_map< EMediaTags, QString > & tags, const QString & mkvPropEdit, QString * msg = nullptr );
 }
 
 namespace std
@@ -98,7 +98,7 @@ namespace std
     {
         std::size_t operator()( const NSABUtils::EMediaTags & ii ) const
         {
-            auto tmp = static_cast<int>(ii);
+            auto tmp = static_cast<int>( ii );
             return std::hash< int >()( tmp );
         }
     };

@@ -42,7 +42,7 @@
 
 namespace NSABUtils
 {
-    int fromChar( char ch, int base, bool& aOK )
+    int fromChar( char ch, int base, bool & aOK )
     {
         aOK = false;
         if ( base < 2 || base > 36 )
@@ -91,7 +91,7 @@ namespace NSABUtils
         do
         {
             int64_t quotient = val / base;
-            int8_t remainder = static_cast< int8_t >( val % base );
+            int8_t remainder = static_cast<int8_t>( val % base );
             retVal.first[ numDigits++ ] = remainder;
             if ( numDigits > retVal.second ) // not a string, can use the whole array
             {
@@ -120,7 +120,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    int64_t fromString( const std::string& str, int base )
+    int64_t fromString( const std::string & str, int base )
     {
         int64_t retVal = 0;
         bool aOK = false;
@@ -138,12 +138,12 @@ namespace NSABUtils
         return retVal;
     }
 
-    bool isNarcissisticDigits( int64_t val, int base, bool& aOK )
+    bool isNarcissisticDigits( int64_t val, int base, bool & aOK )
     {
         aOK = true;
-        int8_t rawDigits[ 4096 ] = {0};
+        int8_t rawDigits[ 4096 ] = { 0 };
         size_t numDigits;
-        auto digits = std::make_pair( rawDigits, static_cast< uint32_t >( 4096 ) );
+        auto digits = std::make_pair( rawDigits, static_cast<uint32_t>( 4096 ) );
         toDigits( val, base, digits, numDigits );
 
         int64_t sumOfPowers = 0;
@@ -165,7 +165,7 @@ namespace NSABUtils
     //153, 370, 371, 407, 1634
     //8208, 9474, 54748, 92727, 93084
     //548834
-    bool isNarcissistic( int64_t val, int base, bool& aOK )
+    bool isNarcissistic( int64_t val, int base, bool & aOK )
     {
         return isNarcissisticDigits( val, base, aOK );
     }
@@ -210,7 +210,7 @@ namespace NSABUtils
             num = num / 2;
         }
 
-        int64_t lastNum = static_cast< int64_t >( std::floor( std::sqrt( num ) ) );
+        int64_t lastNum = static_cast<int64_t>( std::floor( std::sqrt( num ) ) );
 
         for ( int64_t ii = 3; ii <= lastNum; ii = ii + 2 )
         {
@@ -224,7 +224,7 @@ namespace NSABUtils
             retVal.push_back( num );
         return retVal;
     }
-    
+
     std::pair< int64_t, std::list< int64_t > > getSumOfFactors( int64_t curr, bool properFactors )
     {
         auto factors = computeFactors( curr, properFactors );
@@ -240,7 +240,7 @@ namespace NSABUtils
         return std::make_pair( sum.first == num, sum.second );
     }
 
-    bool isSemiPerfect( const std::vector< int64_t >& factors, size_t n, int64_t num )
+    bool isSemiPerfect( const std::vector< int64_t > & factors, size_t n, int64_t num )
     {
         if ( num == 0 )
             return true;
@@ -270,7 +270,7 @@ namespace NSABUtils
     long double factorial( int64_t num )
     {
         double retVal = 1.0;
-        for ( int64_t ii = num; ii > 0; --ii)
+        for ( int64_t ii = num; ii > 0; --ii )
         {
             retVal *= ii;
         }
@@ -282,12 +282,12 @@ namespace NSABUtils
         auto t1 = factorial( numPossible );
         auto t2 = factorial( numSelections );
         auto t3 = factorial( numPossible - numSelections );
-        auto t4 = t1/( t2*t3 );
-        auto retVal = static_cast< uint64_t >( t4 );
+        auto t4 = t1 / ( t2 * t3 );
+        auto retVal = static_cast<uint64_t>( t4 );
         return retVal;
     }
 
-    QString secsToString( quint64 seconds)
+    QString secsToString( quint64 seconds )
     {
         CTimeString ts( seconds * 1000 );
         return ts.toString( "dd days, hh hours, mm minutes, ss seconds" );
@@ -296,86 +296,86 @@ namespace NSABUtils
 #ifdef Q_OS_WINDOWS
     char GetChar()
     {
-        auto stdInput = ::GetStdHandle(STD_INPUT_HANDLE);
+        auto stdInput = ::GetStdHandle( STD_INPUT_HANDLE );
 
         DWORD mode{ 0 };
-        GetConsoleMode(stdInput, &mode);
+        GetConsoleMode( stdInput, &mode );
 
-        auto newMode = mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
-        ::SetConsoleMode(stdInput, newMode);
+        auto newMode = mode & ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT );
+        ::SetConsoleMode( stdInput, newMode );
 
-        char ch[256]{ 0 };
+        char ch[ 256 ]{ 0 };
         DWORD bytesRead;
-        ReadConsole(stdInput, ch, 1, &bytesRead, nullptr);
+        ReadConsole( stdInput, ch, 1, &bytesRead, nullptr );
 
-        ::SetConsoleMode(stdInput, mode);
-        return ch[0];
+        ::SetConsoleMode( stdInput, mode );
+        return ch[ 0 ];
     }
 #else
     char GetChar()
     {
         struct termios oldt, newt;
 
-        tcgetattr(fileno( stdin ), &oldt);
+        tcgetattr( fileno( stdin ), &oldt );
         newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO);
-        auto aOK = tcsetattr(fileno(stdin), TCSANOW, &newt);
+        newt.c_lflag &= ~( ICANON | ECHO );
+        auto aOK = tcsetattr( fileno( stdin ), TCSANOW, &newt );
         (void)aOK;
         auto ch = getchar();
-        tcsetattr(fileno(stdin), TCSANOW, &oldt);
+        tcsetattr( fileno( stdin ), TCSANOW, &oldt );
         return ch;
     }
 #endif
-    int waitForPrompt(int returnCode, const char * prompt )
+    int waitForPrompt( int returnCode, const char * prompt )
     {
-        if (!prompt)
+        if ( !prompt )
             prompt = "Press any key to close this window . . .";
         std::cout << prompt;
         GetChar();
-        char buffer[2];
-        fgets(buffer, 1, stdin);
+        char buffer[ 2 ];
+        fgets( buffer, 1, stdin );
         return returnCode;
     }
 
-    bool isValidURL(const QString & url, int * start, int * length)
+    bool isValidURL( const QString & url, int * start, int * length )
     {
         auto regExStr = "((([a-z]+):\\/\\/)|(www\\.))(\\.?[a-z0-9\\-ßàÁâãóôþüúðæåïçèõöÿýòäœêëìíøùîûñé]{2,256})+(\\.[a-z]+)";
-        auto regEx = QRegularExpression(regExStr, QRegularExpression::CaseInsensitiveOption);
-        auto match = regEx.match(url);
-        if (!match.hasMatch())
+        auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
+        auto match = regEx.match( url );
+        if ( !match.hasMatch() )
             return false;
-        if (start)
+        if ( start )
             *start = match.capturedStart();
-        if (length)
+        if ( length )
             *length = match.capturedLength();
         return true;
     }
 
 
-    bool launchIfURLClicked(const QString & title, const QPoint & pt, const QFont & font)
+    bool launchIfURLClicked( const QString & title, const QPoint & pt, const QFont & font )
     {
         int urlStart;
         int urlLength;
-        auto hasUrl = NSABUtils::isValidURL(title, &urlStart, &urlLength);
-        if (hasUrl)
+        auto hasUrl = NSABUtils::isValidURL( title, &urlStart, &urlLength );
+        if ( hasUrl )
         {
             auto xLoc = pt.x();
-            if (xLoc >= 30)
+            if ( xLoc >= 30 )
             {
                 xLoc -= 30;
-                QFontMetrics fm(font);
+                QFontMetrics fm( font );
 
-                auto preURL = title.left(urlStart);
-                auto url = title.mid(urlStart, urlLength);
+                auto preURL = title.left( urlStart );
+                auto url = title.mid( urlStart, urlLength );
 
-                auto preRect = fm.boundingRect(preURL);
-                if (xLoc >= preRect.width())
+                auto preRect = fm.boundingRect( preURL );
+                if ( xLoc >= preRect.width() )
                 {
                     xLoc -= preRect.width();
-                    auto urlRect = fm.boundingRect(url);
-                    if (xLoc <= urlRect.width())
+                    auto urlRect = fm.boundingRect( url );
+                    if ( xLoc <= urlRect.width() )
                     {
-                        QDesktopServices::openUrl(url);
+                        QDesktopServices::openUrl( url );
                         return true;
                     }
                 }
@@ -409,7 +409,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    std::list< int > intsFromString( const QString & string, const QString & prefixRegEx, bool sort , bool * aOK )
+    std::list< int > intsFromString( const QString & string, const QString & prefixRegEx, bool sort, bool * aOK )
     {
         auto regExStr1 = prefixRegEx + QString( R"((?<num>\d+)(?!-))" ); // EXX
         auto regExStr2 = prefixRegEx + R"((?<startNum>\d+)(?<dash>\-))";
@@ -430,7 +430,7 @@ namespace NSABUtils
 
         auto ii = regEx.globalMatch( string );
         bool matchFound = false;
-        while( ii.hasNext() )
+        while ( ii.hasNext() )
         {
             auto match = ii.next();
             if ( !match.captured( "num" ).isEmpty() )
@@ -483,10 +483,10 @@ namespace NSABUtils
     QString getLastError()
     {
         auto errorID = ::GetLastError();
-        return getLastError(errorID);
+        return getLastError( errorID );
     }
 
-    QString getLastError( int errorID)
+    QString getLastError( int errorID )
     {
         LPWSTR lpMsgBuf = nullptr;
 
@@ -496,24 +496,24 @@ namespace NSABUtils
             FORMAT_MESSAGE_IGNORE_INSERTS,
             nullptr,
             errorID,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
             (LPWSTR)&lpMsgBuf,
-            0, nullptr);
+            0, nullptr );
 
-        QString result = QString::fromWCharArray(lpMsgBuf);
-        LocalFree(lpMsgBuf);
+        QString result = QString::fromWCharArray( lpMsgBuf );
+        LocalFree( lpMsgBuf );
         return result;
     }
 #else
-    QString getLastError(int errorID) 
+    QString getLastError( int errorID )
     {
         (void)errorID;
         return QString();
     }
-    
+
     QString getLastError()
     {
-        return QString(); 
+        return QString();
     }
 #endif
 }

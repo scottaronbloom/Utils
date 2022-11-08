@@ -45,14 +45,14 @@ namespace NSABUtils
         std::optional< std::pair< void *, void * > > SABUTILS_EXPORT initQuery(); // returns the handle to the query and the specific counter, the first needs to have free query called on it
         void SABUTILS_EXPORT freeQuery( std::pair< void *, void * > & query );
 
-        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations( uint64_t sampleTime=1000 ); // returns a map of logical processor id to %utilization over a 1000 msec sample
+        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations( uint64_t sampleTime = 1000 ); // returns a map of logical processor id to %utilization over a 1000 msec sample
         std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations( const std::pair< void *, void * > & query );
     }
 
     class SABUTILS_EXPORT CSystemInfo
     {
     public:
-        CSystemInfo( bool baseSettings=false );
+        CSystemInfo( bool baseSettings = false );
         enum class EFormat
         {
             eText,

@@ -58,10 +58,10 @@ namespace NSABUtils
 #ifdef Q_OS_WIN
             auto fi = QFileInfo( path );
             auto dirloc = fi.absolutePath().replace( "/", "\\" );
-            fDir = ILCreateFromPath( reinterpret_cast<const wchar_t *>(dirloc.utf16()) );
+            fDir = ILCreateFromPath( reinterpret_cast<const wchar_t *>( dirloc.utf16() ) );
 
             path = path.replace( "/", "\\" );
-            fPath = ILCreateFromPath( reinterpret_cast<const wchar_t *>(path.utf16()) );
+            fPath = ILCreateFromPath( reinterpret_cast<const wchar_t *>( path.utf16() ) );
 #else
             (void)path;
 #endif

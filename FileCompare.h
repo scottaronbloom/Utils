@@ -47,34 +47,34 @@ namespace NSABUtils
         class SABUTILS_EXPORT CFileCompare
         {
         public:
-            CFileCompare(const std::string & lhs, const std::string & rhs);
-            CFileCompare(const QString & lhs, const QString & rhs);
-            CFileCompare(const QFileInfo & lhs, const QFileInfo & rhs);
+            CFileCompare( const std::string & lhs, const std::string & rhs );
+            CFileCompare( const QString & lhs, const QString & rhs );
+            CFileCompare( const QFileInfo & lhs, const QFileInfo & rhs );
             virtual ~CFileCompare();
 
-            void setCheckSize(bool value); // default true
+            void setCheckSize( bool value ); // default true
             bool checkSize() const;
 
             void disableCheckTimeStamps();
-            void checkTimeStamp(std::list< QFileDevice::FileTime > timeStampsToCheck); // default modtime only
+            void checkTimeStamp( std::list< QFileDevice::FileTime > timeStampsToCheck ); // default modtime only
             std::list< QFileDevice::FileTime > timeStampsChecked() const;
 
-            void setTimeStampTolerance(int seconds); // default 2 seconds
+            void setTimeStampTolerance( int seconds ); // default 2 seconds
             int timeStampTolerance() const;
 
-            void compareArchiveBit(bool value); // default false
+            void compareArchiveBit( bool value ); // default false
             bool archiveBit() const;
 
-            void compareSystemBit(bool value); // default false
+            void compareSystemBit( bool value ); // default false
             bool systemBit() const;
 
-            void compareHiddenBit(bool value); // default false
+            void compareHiddenBit( bool value ); // default false
             bool hiddenBit() const;
 
-            void compareReadOnlyBit(bool value); // default false
+            void compareReadOnlyBit( bool value ); // default false
             bool readOnlyBit() const;
 
-            void compareMD5(bool value); // default true
+            void compareMD5( bool value ); // default true
             bool md5() const;
 
             bool compare() const;

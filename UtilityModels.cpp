@@ -32,76 +32,76 @@
 
 namespace NSABUtils
 {
-    CMoveStringListModel::CMoveStringListModel(QObject * parent) :
-        QStringListModel(parent)
+    CMoveStringListModel::CMoveStringListModel( QObject * parent ) :
+        QStringListModel( parent )
     {
     }
 
-    bool CMoveStringListModel::dropMimeData(const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent)
+    bool CMoveStringListModel::dropMimeData( const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent )
     {
         QModelIndex pidx = parent;
-        if (parent.isValid() && row == -1 && column == -1)
+        if ( parent.isValid() && row == -1 && column == -1 )
         {
             row = parent.row();
             column = parent.column();
             pidx = parent.parent();
         }
-        return QStringListModel::dropMimeData(data, action, row, column, pidx);
+        return QStringListModel::dropMimeData( data, action, row, column, pidx );
     }
 
-    bool CMoveStringListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+    bool CMoveStringListModel::setData( const QModelIndex & index, const QVariant & value, int role )
     {
-        if (index.data(role) == value.toString())
+        if ( index.data( role ) == value.toString() )
             return true;
-        return QStringListModel::setData(index, value, role);
+        return QStringListModel::setData( index, value, role );
     }
 
-    void CMoveStringListModel::addRow(const QString & value)
+    void CMoveStringListModel::addRow( const QString & value )
     {
-        insertRows(rowCount(), 1);
-        setData(index(rowCount() - 1, 0), value);
+        insertRows( rowCount(), 1 );
+        setData( index( rowCount() - 1, 0 ), value );
     }
 
-    QVariant CMoveStringListModel::headerData(int section, Qt::Orientation orientation, int role) const
+    QVariant CMoveStringListModel::headerData( int section, Qt::Orientation orientation, int role ) const
     {
-        if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole)
-            return tr("Name");
-        return QStringListModel::headerData(section, orientation, role);
+        if ( section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole )
+            return tr( "Name" );
+        return QStringListModel::headerData( section, orientation, role );
     }
 
-    CStringListModel::CStringListModel(QObject * parent) :
-        QStringListModel(parent)
+    CStringListModel::CStringListModel( QObject * parent ) :
+        QStringListModel( parent )
     {
     }
 
     void CStringListModel::addRow()
     {
-        addRow(QString());
+        addRow( QString() );
     }
 
-    void CStringListModel::addRow(const QString & value)
+    void CStringListModel::addRow( const QString & value )
     {
-        insertRows(rowCount(), 1);
-        setData(index(rowCount() - 1, 0), value);
+        insertRows( rowCount(), 1 );
+        setData( index( rowCount() - 1, 0 ), value );
     }
 
-    void CStringListModel::copy(const CStringListModel * rhs)
+    void CStringListModel::copy( const CStringListModel * rhs )
     {
-        setStringList(rhs ? rhs->stringList() : QStringList());
+        setStringList( rhs ? rhs->stringList() : QStringList() );
     }
 
-    QString CStringListModel::at(int ii) const
+    QString CStringListModel::at( int ii ) const
     {
-        return index(ii).data().toString();
+        return index( ii ).data().toString();
     }
 
-    bool CStringListModel::operator==(const CStringListModel & rhs) const
+    bool CStringListModel::operator==( const CStringListModel & rhs ) const
     {
         return stringList() == rhs.stringList();
     }
 
-    CCheckableStringListModel::CCheckableStringListModel(QObject * parent) :
-        QStringListModel(parent)
+    CCheckableStringListModel::CCheckableStringListModel( QObject * parent ) :
+        QStringListModel( parent )
     {
     }
 
@@ -110,80 +110,80 @@ namespace NSABUtils
         if ( rowNum > rowCount() )
             return false;
 
-        auto key = stringList()[rowNum];
+        auto key = stringList()[ rowNum ];
         return isChecked( key );
     }
 
     bool CCheckableStringListModel::isChecked( const QString & value ) const
     {
         auto key = value.toUpper();
-        auto pos = fEnabled.find(key);
-        if (pos == fEnabled.end())
+        auto pos = fEnabled.find( key );
+        if ( pos == fEnabled.end() )
             return false;
 
-        return (*pos).second.second;
+        return ( *pos ).second.second;
     }
 
-    void CCheckableStringListModel::setStringList(const std::list< std::pair< QString, bool > > & values)
+    void CCheckableStringListModel::setStringList( const std::list< std::pair< QString, bool > > & values )
     {
         beginResetModel();
         QStringList stringValues;
-        for (auto && ii : values)
+        for ( auto && ii : values )
         {
-            stringValues.push_back(ii.first);
+            stringValues.push_back( ii.first );
         }
-        QStringListModel::setStringList(stringValues);
-        for (auto && ii : values)
+        QStringListModel::setStringList( stringValues );
+        for ( auto && ii : values )
         {
-            setChecked(ii.first, ii.second, false);
+            setChecked( ii.first, ii.second, false );
         }
         endResetModel();
     }
 
-    void CCheckableStringListModel::setAliasMap(const std::map< QString, QString > & map)
+    void CCheckableStringListModel::setAliasMap( const std::map< QString, QString > & map )
     {
         fAliasMap = map;
-        for (auto && ii : map)
+        for ( auto && ii : map )
         {
-            fReverseAliasMap[ii.second] = ii.first;
+            fReverseAliasMap[ ii.second ] = ii.first;
         }
     }
 
-    QString CCheckableStringListModel::getAlias(const QString & key) const
+    QString CCheckableStringListModel::getAlias( const QString & key ) const
     {
-        auto pos = fAliasMap.find(key);
-        if (pos == fAliasMap.end())
+        auto pos = fAliasMap.find( key );
+        if ( pos == fAliasMap.end() )
             return key;
-        return (*pos).second;
+        return ( *pos ).second;
     }
 
-    bool CCheckableStringListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+    bool CCheckableStringListModel::setData( const QModelIndex & index, const QVariant & value, int role )
     {
-        if (role != Qt::CheckStateRole)
-            return QStringListModel::setData(index, value, role);
+        if ( role != Qt::CheckStateRole )
+            return QStringListModel::setData( index, value, role );
 
-        bool toCheck = (value.toInt() == Qt::Checked);
-        if (isChecked(index.row()) != toCheck)
+        bool toCheck = ( value.toInt() == Qt::Checked );
+        if ( isChecked( index.row() ) != toCheck )
         {
             QString orig = index.data().toString();
             QString key = orig.toUpper();
-            fEnabled[key] = std::make_pair(orig, toCheck);
-            emit dataChanged(index, index);
+            fEnabled[ key ] = std::make_pair( orig, toCheck );
+            emit dataChanged( index, index );
         }
         return true;
     }
 
-    QVariant CCheckableStringListModel::data(const QModelIndex & index, int role) const
+    QVariant CCheckableStringListModel::data( const QModelIndex & index, int role ) const
     {
-        if (role != Qt::CheckStateRole)
-            return QStringListModel::data(index, role);
+        if ( role != Qt::CheckStateRole )
+            return QStringListModel::data( index, role );
 
-        return isChecked(index.row()) ? Qt::Checked : Qt::Unchecked;
+        return isChecked( index.row() ) ? Qt::Checked : Qt::Unchecked;
     }
 
-    Qt::ItemFlags CCheckableStringListModel::flags(const QModelIndex & index) const
+    Qt::ItemFlags CCheckableStringListModel::flags( const QModelIndex & index ) const
     {
-        Qt::ItemFlags retVal = QAbstractItemModel::flags(index);
+        Qt::ItemFlags retVal = QAbstractItemModel::flags( index );
         retVal &= ~Qt::ItemIsDragEnabled;
         retVal &= ~Qt::ItemIsEditable;
         retVal |= Qt::ItemIsUserCheckable;
@@ -201,12 +201,12 @@ namespace NSABUtils
         return retVal;
     }
 
-    QStringList CCheckableStringListModel::getCheckedStrings(bool & allChecked) const
+    QStringList CCheckableStringListModel::getCheckedStrings( bool & allChecked ) const
     {
         QStringList retVal;
-        for (auto && ii : fEnabled )
+        for ( auto && ii : fEnabled )
         {
-            if ( ii.second.second)
+            if ( ii.second.second )
                 retVal << getAlias( ii.second.first );
         }
         allChecked = retVal.size() == rowCount();
@@ -216,54 +216,54 @@ namespace NSABUtils
     QStringList CCheckableStringListModel::getCheckedStrings() const
     {
         bool allChecked;
-        return getCheckedStrings(allChecked);
+        return getCheckedStrings( allChecked );
     }
 
-    bool CCheckableStringListModel::operator==(const CCheckableStringListModel & rhs) const
+    bool CCheckableStringListModel::operator==( const CCheckableStringListModel & rhs ) const
     {
         bool allChecked;
-        auto lhs = getCheckedStrings(allChecked);
+        auto lhs = getCheckedStrings( allChecked );
 #if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
-        QSet< QString > lhsSet(lhs.begin(), lhs.end());
+        QSet< QString > lhsSet( lhs.begin(), lhs.end() );
 #else
         QSet< QString > lhsSet = lhs.toSet();
 #endif
-        auto rhsList = rhs.getCheckedStrings(allChecked);
+        auto rhsList = rhs.getCheckedStrings( allChecked );
 #if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
-        QSet< QString > rhsSet(rhsList.begin(), rhsList.end());
+        QSet< QString > rhsSet( rhsList.begin(), rhsList.end() );
 #else
         QSet< QString > rhsSet = rhsList.toSet();
 #endif
         return lhsSet == rhsSet;
     }
 
-    void CCheckableStringListModel::copy(const CCheckableStringListModel & rhs)
+    void CCheckableStringListModel::copy( const CCheckableStringListModel & rhs )
     {
-        QStringListModel::setStringList(rhs.stringList());
+        QStringListModel::setStringList( rhs.stringList() );
         fEnabled = rhs.fEnabled;
     }
 
-    bool CCheckableStringListModel::setChecked(QString item, bool checked, bool update)
+    bool CCheckableStringListModel::setChecked( QString item, bool checked, bool update )
     {
-        auto pos = stringList().indexOf(item);
-        if (pos == -1)
+        auto pos = stringList().indexOf( item );
+        if ( pos == -1 )
         {
-            pos = stringList().indexOf(item.toUpper());
+            pos = stringList().indexOf( item.toUpper() );
         }
 
-        if (pos == -1)
+        if ( pos == -1 )
         {
-            auto ii = fReverseAliasMap.find(item);
-            if (ii == fReverseAliasMap.find(item))
-                ii = fReverseAliasMap.find(item.toUpper());
+            auto ii = fReverseAliasMap.find( item );
+            if ( ii == fReverseAliasMap.find( item ) )
+                ii = fReverseAliasMap.find( item.toUpper() );
 
-            if (ii != fReverseAliasMap.end())
-                item = (*ii).second;
+            if ( ii != fReverseAliasMap.end() )
+                item = ( *ii ).second;
 
-            pos = stringList().indexOf(item);
+            pos = stringList().indexOf( item );
         }
 
-        if ((pos == -1) && update)
+        if ( ( pos == -1 ) && update )
         {
             beginResetModel();
             endResetModel();
@@ -271,307 +271,307 @@ namespace NSABUtils
         }
 
         auto key = item.toUpper();
-        fEnabled[key] = std::make_pair(item, checked);
-        if (update)
-            emit sigBlockFilterUpdates(true);
+        fEnabled[ key ] = std::make_pair( item, checked );
+        if ( update )
+            emit sigBlockFilterUpdates( true );
 
         bool found = false;
-        for (int ii = 0; ii < rowCount(); ++ii)
+        for ( int ii = 0; ii < rowCount(); ++ii )
         {
-            if (stringList()[ii] == item)
+            if ( stringList()[ ii ] == item )
             {
-                if (update)
-                    emit dataChanged(index(ii, 0), index(ii, 0));
+                if ( update )
+                    emit dataChanged( index( ii, 0 ), index( ii, 0 ) );
                 found = true;
                 break;
             }
         }
-        if (!found && update)
+        if ( !found && update )
         {
             beginResetModel();
             endResetModel();
         }
-        if (update)
-            emit sigBlockFilterUpdates(false);
+        if ( update )
+            emit sigBlockFilterUpdates( false );
         return found;
     }
 
-    void CCheckableStringListModel::andChecked(const QStringList & strings, bool checked, bool update)
+    void CCheckableStringListModel::andChecked( const QStringList & strings, bool checked, bool update )
     {
-        if (update)
+        if ( update )
             beginResetModel();
 
-        for (int ii = 0; ii < strings.count(); ++ii)
+        for ( int ii = 0; ii < strings.count(); ++ii )
         {
-            setChecked(strings[ii], checked, false);
+            setChecked( strings[ ii ], checked, false );
         }
 
-        if (update)
+        if ( update )
             endResetModel();
     }
 
-    void CCheckableStringListModel::setChecked(const QStringList & strings, bool checked, bool update)
+    void CCheckableStringListModel::setChecked( const QStringList & strings, bool checked, bool update )
     {
-        if (update)
+        if ( update )
             beginResetModel();
 
         fEnabled.clear();
-        andChecked(strings, checked, false);
+        andChecked( strings, checked, false );
 
-        if (update)
+        if ( update )
             endResetModel();
     }
 
-    void CCheckableStringListModel::uncheckAll(bool update)
+    void CCheckableStringListModel::uncheckAll( bool update )
     {
         fEnabled.clear();
-        if (update)
-            emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
+        if ( update )
+            emit dataChanged( index( 0, 0 ), index( rowCount() - 1, 0 ) );
     }
 
-    void CCheckableStringListModel::checkAll(bool update)
+    void CCheckableStringListModel::checkAll( bool update )
     {
         fEnabled.clear();
         auto strings = stringList();
 
-        if (update)
+        if ( update )
             beginResetModel();
 
-        for (int ii = 0; ii < strings.size(); ++ii)
+        for ( int ii = 0; ii < strings.size(); ++ii )
         {
-            fEnabled[strings[ii].toUpper()] = std::make_pair(strings[ii], true);
+            fEnabled[ strings[ ii ].toUpper() ] = std::make_pair( strings[ ii ], true );
         }
 
-        if (update)
+        if ( update )
             endResetModel();
     }
 
-    QVariant CCheckableStringListModel::headerData(int section, Qt::Orientation orientation, int role) const
+    QVariant CCheckableStringListModel::headerData( int section, Qt::Orientation orientation, int role ) const
     {
-        if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole)
-            return tr("Name");
-        return QStringListModel::headerData(section, orientation, role);
+        if ( section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole )
+            return tr( "Name" );
+        return QStringListModel::headerData( section, orientation, role );
     }
 
-    CStringFilterModel::CStringFilterModel(QAbstractItemModel * sourceModel, QLineEdit * filter, QObject * parent) :
-        QSortFilterProxyModel(parent),
-        fFilter(filter)
+    CStringFilterModel::CStringFilterModel( QAbstractItemModel * sourceModel, QLineEdit * filter, QObject * parent ) :
+        QSortFilterProxyModel( parent ),
+        fFilter( filter )
     {
-        setFilterCaseSensitivity(Qt::CaseInsensitive);
-        setSourceModel(sourceModel);
-        setDynamicSortFilter(true);
+        setFilterCaseSensitivity( Qt::CaseInsensitive );
+        setSourceModel( sourceModel );
+        setDynamicSortFilter( true );
 
-        fTimer = new QTimer(this);
-        fTimer->setInterval(500);
-        fTimer->setSingleShot(true);
-        connect(fTimer, &QTimer::timeout, this, &CStringFilterModel::slotFilterChanged);
-        if (filter)
-            connect(filter, &QLineEdit::textChanged, fTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+        fTimer = new QTimer( this );
+        fTimer->setInterval( 500 );
+        fTimer->setSingleShot( true );
+        connect( fTimer, &QTimer::timeout, this, &CStringFilterModel::slotFilterChanged );
+        if ( filter )
+            connect( filter, &QLineEdit::textChanged, fTimer, static_cast<void ( QTimer:: * )( )>( &QTimer::start ) );
     }
 
-    CStringFilterModel::CStringFilterModel(QAbstractItemModel * sourceModel, QLineEdit * filter, QAbstractButton * btn, QObject * parent) :
-        QSortFilterProxyModel(parent),
-        fFilter(filter)
+    CStringFilterModel::CStringFilterModel( QAbstractItemModel * sourceModel, QLineEdit * filter, QAbstractButton * btn, QObject * parent ) :
+        QSortFilterProxyModel( parent ),
+        fFilter( filter )
     {
-        setFilterCaseSensitivity(Qt::CaseInsensitive);
-        connect(btn, &QAbstractButton::clicked, this, &CStringFilterModel::slotFilterChanged);
-        setSourceModel(sourceModel);
-        setDynamicSortFilter(true);
+        setFilterCaseSensitivity( Qt::CaseInsensitive );
+        connect( btn, &QAbstractButton::clicked, this, &CStringFilterModel::slotFilterChanged );
+        setSourceModel( sourceModel );
+        setDynamicSortFilter( true );
 
-        fTimer = new QTimer(this);
-        fTimer->setInterval(500);
-        fTimer->setSingleShot(true);
-        connect(fTimer, &QTimer::timeout, this, &CStringFilterModel::slotFilterChanged);
-        if (filter)
-            connect(filter, &QLineEdit::textChanged, fTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+        fTimer = new QTimer( this );
+        fTimer->setInterval( 500 );
+        fTimer->setSingleShot( true );
+        connect( fTimer, &QTimer::timeout, this, &CStringFilterModel::slotFilterChanged );
+        if ( filter )
+            connect( filter, &QLineEdit::textChanged, fTimer, static_cast<void ( QTimer:: * )( )>( &QTimer::start ) );
     }
 
     void CStringFilterModel::slotFilterChanged()
     {
         QString filter = fFilter->text();
-        if (filter.isEmpty())
-            setFilterWildcard(QString());
+        if ( filter.isEmpty() )
+            setFilterWildcard( QString() );
         else
-            setFilterWildcard(filter);
+            setFilterWildcard( filter );
     }
 
 
-    CCheckableListView::CCheckableListView(QWidget * parent) :
-        QListView(parent)
+    CCheckableListView::CCheckableListView( QWidget * parent ) :
+        QListView( parent )
     {
     }
 
-    void CCheckableListView::keyPressEvent(QKeyEvent *event)
+    void CCheckableListView::keyPressEvent( QKeyEvent * event )
     {
-        switch (event->key())
+        switch ( event->key() )
         {
-        case Qt::Key_Space:
-            if (selectionModel())
-            {
-                QModelIndexList indexes = selectionModel()->selectedRows();
-                emit sigBlockFilterUpdates(true);
-                for (const QModelIndex & idx : indexes)
+            case Qt::Key_Space:
+                if ( selectionModel() )
                 {
-                    if (!edit(idx, AnyKeyPressed, event))
+                    QModelIndexList indexes = selectionModel()->selectedRows();
+                    emit sigBlockFilterUpdates( true );
+                    for ( const QModelIndex & idx : indexes )
                     {
-                        event->ignore();
-                        return;
+                        if ( !edit( idx, AnyKeyPressed, event ) )
+                        {
+                            event->ignore();
+                            return;
+                        }
                     }
+                    emit sigBlockFilterUpdates( false );
+                    event->accept();
+                    return;
                 }
-                emit sigBlockFilterUpdates(false);
-                event->accept();
-                return;
-            }
-            break;
+                break;
         }
-        QListView::keyPressEvent(event);
+        QListView::keyPressEvent( event );
     }
 
-    CCheckableTableView::CCheckableTableView(QWidget * parent) :
-        QTableView(parent)
+    CCheckableTableView::CCheckableTableView( QWidget * parent ) :
+        QTableView( parent )
     {
     }
 
-    void CCheckableTableView::keyPressEvent(QKeyEvent *event)
+    void CCheckableTableView::keyPressEvent( QKeyEvent * event )
     {
-        switch (event->key())
+        switch ( event->key() )
         {
-        case Qt::Key_Space:
-            if (selectionModel())
-            {
-                QModelIndexList indexes = selectionModel()->selectedRows();
-                emit sigBlockFilterUpdates(true);
-                for (const QModelIndex & idx : indexes)
+            case Qt::Key_Space:
+                if ( selectionModel() )
                 {
-                    if (!edit(idx, AnyKeyPressed, event))
+                    QModelIndexList indexes = selectionModel()->selectedRows();
+                    emit sigBlockFilterUpdates( true );
+                    for ( const QModelIndex & idx : indexes )
                     {
-                        event->ignore();
-                        return;
+                        if ( !edit( idx, AnyKeyPressed, event ) )
+                        {
+                            event->ignore();
+                            return;
+                        }
                     }
+                    emit sigBlockFilterUpdates( false );
+                    event->accept();
+                    return;
                 }
-                emit sigBlockFilterUpdates(false);
-                event->accept();
-                return;
-            }
-            break;
+                break;
         }
-        QTableView::keyPressEvent(event);
+        QTableView::keyPressEvent( event );
     }
 
-    CCheckableTreeView::CCheckableTreeView(QWidget * parent) :
-        QTreeView(parent)
+    CCheckableTreeView::CCheckableTreeView( QWidget * parent ) :
+        QTreeView( parent )
     {
     }
 
-    void CCheckableTreeView::keyPressEvent(QKeyEvent *event)
+    void CCheckableTreeView::keyPressEvent( QKeyEvent * event )
     {
-        switch (event->key())
+        switch ( event->key() )
         {
-        case Qt::Key_Space:
-            if (selectionModel())
-            {
-                QModelIndexList indexes = selectionModel()->selectedRows();
-                emit sigBlockFilterUpdates(true);
-                for (const QModelIndex & idx : indexes)
+            case Qt::Key_Space:
+                if ( selectionModel() )
                 {
-                    if (!edit(idx, AnyKeyPressed, event))
+                    QModelIndexList indexes = selectionModel()->selectedRows();
+                    emit sigBlockFilterUpdates( true );
+                    for ( const QModelIndex & idx : indexes )
                     {
-                        event->ignore();
-                        return;
+                        if ( !edit( idx, AnyKeyPressed, event ) )
+                        {
+                            event->ignore();
+                            return;
+                        }
                     }
+                    emit sigBlockFilterUpdates( false );
+                    event->accept();
+                    return;
                 }
-                emit sigBlockFilterUpdates(false);
-                event->accept();
-                return;
-            }
-            break;
+                break;
         }
-        QTreeView::keyPressEvent(event);
+        QTreeView::keyPressEvent( event );
     }
 
-    CStringTupleModel::CStringTupleModel(const QStringList & columnNames, QObject * parent) :
-        QAbstractTableModel(parent),
-        fColumnNames(columnNames),
-        fIsKeyEditable(true)
+    CStringTupleModel::CStringTupleModel( const QStringList & columnNames, QObject * parent ) :
+        QAbstractTableModel( parent ),
+        fColumnNames( columnNames ),
+        fIsKeyEditable( true )
     {
     }
 
-    CStringTupleModel::CStringTupleModel(int numColumns, QObject * parent) :
-        CStringTupleModel(QStringList("Key"), parent)
+    CStringTupleModel::CStringTupleModel( int numColumns, QObject * parent ) :
+        CStringTupleModel( QStringList( "Key" ), parent )
     {
-        for (int ii = 1; ii <= numColumns; ++ii)
-            fColumnNames << QString("Value%1").arg(ii);
+        for ( int ii = 1; ii <= numColumns; ++ii )
+            fColumnNames << QString( "Value%1" ).arg( ii );
     }
 
 
-    QVariant CStringTupleModel::data(const QModelIndex &index, int role) const
+    QVariant CStringTupleModel::data( const QModelIndex & index, int role ) const
     {
-        if (index.row() <= -1 || index.row() >= rowCount(index.parent()) || index.column() <= -1 || index.column() >= columnCount(index.parent()))
+        if ( index.row() <= -1 || index.row() >= rowCount( index.parent() ) || index.column() <= -1 || index.column() >= columnCount( index.parent() ) )
             return {};
 
-        if (role != Qt::DisplayRole && role != Qt::EditRole)
+        if ( role != Qt::DisplayRole && role != Qt::EditRole )
             return {};
 
-        return fData[index.row()][index.column()];
+        return fData[ index.row() ][ index.column() ];
     }
 
-    bool CStringTupleModel::setData(const QModelIndex &index, const QVariant &value, int role)
+    bool CStringTupleModel::setData( const QModelIndex & index, const QVariant & value, int role )
     {
-        if (index.row() <= -1 || index.row() >= rowCount() || index.column() <= -1 || index.column() >= columnCount())
+        if ( index.row() <= -1 || index.row() >= rowCount() || index.column() <= -1 || index.column() >= columnCount() )
             return false;
 
-        if (role != Qt::DisplayRole && role != Qt::EditRole)
+        if ( role != Qt::DisplayRole && role != Qt::EditRole )
             return false;
 
-        if (index.column() == 0 && (fColumnNames.count() == 2))
+        if ( index.column() == 0 && ( fColumnNames.count() == 2 ) )
         {
             QString tmp = value.toString();
-            int pos = value.toString().indexOf('=');
+            int pos = value.toString().indexOf( '=' );
 
-            if (pos > 0)
+            if ( pos > 0 )
             {
-                fData[index.row()][0] = tmp.left(pos);
-                fData[index.row()][1] = tmp.mid(pos + 1);
-                emit dataChanged(createIndex(index.row(), 0), createIndex(index.row(), 1));
+                fData[ index.row() ][ 0 ] = tmp.left( pos );
+                fData[ index.row() ][ 1 ] = tmp.mid( pos + 1 );
+                emit dataChanged( createIndex( index.row(), 0 ), createIndex( index.row(), 1 ) );
             }
             else
             {
-                fData[index.row()][0] = tmp;
-                emit dataChanged(index, index);
+                fData[ index.row() ][ 0 ] = tmp;
+                emit dataChanged( index, index );
             }
         }
         else
         {
-            fData[index.row()][index.column()] = value.toString();
-            emit dataChanged(index, index);
+            fData[ index.row() ][ index.column() ] = value.toString();
+            emit dataChanged( index, index );
         }
         return true;
     }
 
-    QVariant CStringTupleModel::headerData(int section, Qt::Orientation orientation, int role) const
+    QVariant CStringTupleModel::headerData( int section, Qt::Orientation orientation, int role ) const
     {
-        if (section >= columnCount() || orientation != Qt::Horizontal || role != Qt::DisplayRole)
-            return QAbstractTableModel::headerData(section, orientation, role);
-        return fColumnNames[section];
+        if ( section >= columnCount() || orientation != Qt::Horizontal || role != Qt::DisplayRole )
+            return QAbstractTableModel::headerData( section, orientation, role );
+        return fColumnNames[ section ];
     }
 
-    bool CStringTupleModel::removeRows(int row, int count, const QModelIndex & parent)
+    bool CStringTupleModel::removeRows( int row, int count, const QModelIndex & parent )
     {
-        if ((count < 1) || (row < 0) || ((row + count) > rowCount(parent)))
+        if ( ( count < 1 ) || ( row < 0 ) || ( ( row + count ) > rowCount( parent ) ) )
             return false;
 
-        beginRemoveRows(parent, row, row + count - 1);
-        for (int ii = 0; ii < count; ++ii)
+        beginRemoveRows( parent, row, row + count - 1 );
+        for ( int ii = 0; ii < count; ++ii )
         {
-            fData.removeAt(row);
+            fData.removeAt( row );
         }
         endRemoveRows();
         return true;
     }
 
-    bool CStringTupleModel::removeRow(int row, const QModelIndex & parent)
+    bool CStringTupleModel::removeRow( int row, const QModelIndex & parent )
     {
-        return removeRows(row, 1, parent);
+        return removeRows( row, 1, parent );
     }
 
     void CStringTupleModel::clear()
@@ -581,19 +581,19 @@ namespace NSABUtils
         endResetModel();
     }
 
-    void CStringTupleModel::setValues(const QList< QStringList > & values)
+    void CStringTupleModel::setValues( const QList< QStringList > & values )
     {
         beginResetModel();
         fData = values;
         endResetModel();
     }
 
-    bool CStringTupleModel::operator==(const CStringTupleModel & rhs) const
+    bool CStringTupleModel::operator==( const CStringTupleModel & rhs ) const
     {
         return fData == rhs.fData;
     }
 
-    void CStringTupleModel::copy(const CStringTupleModel * rhs)
+    void CStringTupleModel::copy( const CStringTupleModel * rhs )
     {
         beginResetModel();
         fColumnNames = rhs->fColumnNames;
@@ -605,86 +605,86 @@ namespace NSABUtils
     void CStringTupleModel::addRow()
     {
         QStringList tmp;
-        for (int ii = 0; ii < fColumnNames.count(); ++ii)
+        for ( int ii = 0; ii < fColumnNames.count(); ++ii )
             tmp << QString();
-        addRow(tmp);
+        addRow( tmp );
     }
 
-    void CStringTupleModel::addRow(const QStringList & data)
+    void CStringTupleModel::addRow( const QStringList & data )
     {
-        beginInsertRows(QModelIndex(), fData.count(), fData.count());
+        beginInsertRows( QModelIndex(), fData.count(), fData.count() );
         fData << data;
         endInsertRows();
     }
 
-    void CStringTupleModel::setRow(const QString & key, const QStringList & values)
+    void CStringTupleModel::setRow( const QString & key, const QStringList & values )
     {
-        for (int ii = 0; ii < fData.count(); ++ii)
+        for ( int ii = 0; ii < fData.count(); ++ii )
         {
-            if (key == fData[ii][0])
+            if ( key == fData[ ii ][ 0 ] )
             {
-                fData[ii] = QStringList() << key << values;
-                emit dataChanged(index(ii, 1), index(ii, columnCount()));
+                fData[ ii ] = QStringList() << key << values;
+                emit dataChanged( index( ii, 1 ), index( ii, columnCount() ) );
                 return;
             }
         }
-        addRow(QStringList() << key << values);
+        addRow( QStringList() << key << values );
     }
 
-    Qt::ItemFlags CStringTupleModel::flags(const QModelIndex & index) const
+    Qt::ItemFlags CStringTupleModel::flags( const QModelIndex & index ) const
     {
-        auto retVal = QAbstractTableModel::flags(index);
-        if (!fIsKeyEditable && (index.column() == 0))
+        auto retVal = QAbstractTableModel::flags( index );
+        if ( !fIsKeyEditable && ( index.column() == 0 ) )
             retVal &= ~Qt::ItemIsEditable;
         else
             retVal |= Qt::ItemIsEditable;
         return retVal;
     }
 
-    bool CStringTupleModel::loadXML(QXmlQuery & query, const std::list< std::pair< QString, bool > > & queries, const QDir & relToDir, QString & msg, bool clear)
+    bool CStringTupleModel::loadXML( QXmlQuery & query, const std::list< std::pair< QString, bool > > & queries, const QDir & relToDir, QString & msg, bool clear )
     {
 #ifdef QT_XMLPATTERNS_LIB
         beginResetModel();
-        if (clear)
+        if ( clear )
             fData.clear();
 
         QStringList queryStrings;
-        for (auto && ii : queries)
+        for ( auto && ii : queries )
             queryStrings << ii.first;
-        if (queryStrings.count() != fColumnNames.count())
+        if ( queryStrings.count() != fColumnNames.count() )
         {
             msg = "Invalid Query Setup";
             return false;
         }
-        auto data = NSABUtils::getStrings(query, queryStrings);
-        for (auto && ii : data)
+        auto data = NSABUtils::getStrings( query, queryStrings );
+        for ( auto && ii : data )
         {
             auto jj = ii.begin();
             auto kk = queries.begin();
             QStringList currRow;
-            for (; jj != ii.end() && kk != queries.end(); ++jj, ++kk)
+            for ( ; jj != ii.end() && kk != queries.end(); ++jj, ++kk )
             {
-                if ((*kk).second)
-                    (*jj) = NSABUtils::getFile(relToDir, *jj);
-                currRow.push_back(*jj);
+                if ( ( *kk ).second )
+                    ( *jj ) = NSABUtils::getFile( relToDir, *jj );
+                currRow.push_back( *jj );
             }
-            if (clear)
+            if ( clear )
                 fData << currRow;
             else
             {
                 int idx = -1;
-                for (int ii = 0; ii < fData.count(); ++ii)
+                for ( int ii = 0; ii < fData.count(); ++ii )
                 {
-                    if (fData[ii][0] == currRow[0])
+                    if ( fData[ ii ][ 0 ] == currRow[ 0 ] )
                     {
                         idx = ii;
                         break;
                     }
                 }
-                if (idx == -1)
+                if ( idx == -1 )
                     fData << currRow;
                 else
-                    fData[idx] = currRow;
+                    fData[ idx ] = currRow;
             }
         }
         endResetModel();
@@ -698,77 +698,77 @@ namespace NSABUtils
         return true;
     }
 
-    CKeyValuePairModel::CKeyValuePairModel(const QString & keyName, const QString & valueName, QObject * parent) :
-        CStringTupleModel(QStringList() << keyName << valueName, parent)
+    CKeyValuePairModel::CKeyValuePairModel( const QString & keyName, const QString & valueName, QObject * parent ) :
+        CStringTupleModel( QStringList() << keyName << valueName, parent )
     {
     }
 
-    CKeyValuePairModel::CKeyValuePairModel(QObject * parent) :
-        CKeyValuePairModel("Key", "Value", parent)
+    CKeyValuePairModel::CKeyValuePairModel( QObject * parent ) :
+        CKeyValuePairModel( "Key", "Value", parent )
     {
     }
 
-    void CKeyValuePairModel::setValues(const QList< QPair< QString, QString > > & values)
+    void CKeyValuePairModel::setValues( const QList< QPair< QString, QString > > & values )
     {
         QList< QStringList > newValues;
-        for (auto && ii : values)
-            newValues << (QStringList() << ii.first << ii.second);
-        CStringTupleModel::setValues(newValues);
+        for ( auto && ii : values )
+            newValues << ( QStringList() << ii.first << ii.second );
+        CStringTupleModel::setValues( newValues );
     }
 
-    void CKeyValuePairModel::setValues(const QVariantMap & values)
+    void CKeyValuePairModel::setValues( const QVariantMap & values )
     {
         QList< QStringList > newValues;
-        for (auto && ii = values.cbegin(); ii != values.cend(); ++ii)
-            newValues << (QStringList() << ii.key() << ii.value().toString());
-        CStringTupleModel::setValues(newValues);
+        for ( auto && ii = values.cbegin(); ii != values.cend(); ++ii )
+            newValues << ( QStringList() << ii.key() << ii.value().toString() );
+        CStringTupleModel::setValues( newValues );
     }
 
 
-    void CKeyValuePairModel::addRow(const QString & key, const QString & value)
+    void CKeyValuePairModel::addRow( const QString & key, const QString & value )
     {
-        CStringTupleModel::addRow(QStringList() << key << value);
+        CStringTupleModel::addRow( QStringList() << key << value );
     }
 
-    void CKeyValuePairModel::addRow(const QString & string)
+    void CKeyValuePairModel::addRow( const QString & string )
     {
-        int pos = string.indexOf("=");
+        int pos = string.indexOf( "=" );
         QString key = string;
         QString value;
-        if (pos >= 0)
+        if ( pos >= 0 )
         {
-            key = string.left(pos);
-            value = string.mid(pos + 1);
+            key = string.left( pos );
+            value = string.mid( pos + 1 );
         }
-        addRow(key, value);
+        addRow( key, value );
     }
 
-    void CKeyValuePairModel::setRow(const QString & key, const QString & value)
+    void CKeyValuePairModel::setRow( const QString & key, const QString & value )
     {
-        CStringTupleModel::setRow(key, QStringList() << value);
+        CStringTupleModel::setRow( key, QStringList() << value );
     }
 
-    QString CKeyValuePairModel::getPair(int pos) const
+    QString CKeyValuePairModel::getPair( int pos ) const
     {
-        if (pos < 0 || pos >= rowCount())
+        if ( pos < 0 || pos >= rowCount() )
             return QString();
-        QString retVal = fData[pos][0];
-        if (!fData[pos][1].isEmpty())
-            retVal += "=" + fData[pos][1];
+        QString retVal = fData[ pos ][ 0 ];
+        if ( !fData[ pos ][ 1 ].isEmpty() )
+            retVal += "=" + fData[ pos ][ 1 ];
         return retVal;
     }
 
-    QPair< QString, QString > CKeyValuePairModel::at(int ii) const
+    QPair< QString, QString > CKeyValuePairModel::at( int ii ) const
     {
-        return qMakePair(fData.at(ii)[0], fData.at(ii)[1]);
+        return qMakePair( fData.at( ii )[ 0 ], fData.at( ii )[ 1 ] );
     }
 
     QList< QPair< QString, QString > > CKeyValuePairModel::data() const
     {
         QList< QPair< QString, QString > > retVal;
         auto tmp = CStringTupleModel::data();
-        for (auto && curr : tmp)
-            retVal << qMakePair(curr[0], curr[1]);
+        for ( auto && curr : tmp )
+            retVal << qMakePair( curr[ 0 ], curr[ 1 ] );
         return retVal;
     }
 

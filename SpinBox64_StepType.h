@@ -26,14 +26,14 @@
 
 #include <cinttypes>
 #if (QT_VERSION < QT_VERSION_CHECK( 5, 12, 0 ))
-    enum StepTypeDef
-    {
-        DefaultStepType,
-        AdaptiveDecimalStepType
-    };
-    using StepType = StepTypeDef;
+enum StepTypeDef
+{
+    DefaultStepType,
+    AdaptiveDecimalStepType
+};
+using StepType = StepTypeDef;
 #else
-    using StepType = QAbstractSpinBox::StepType;
+using StepType = QAbstractSpinBox::StepType;
 #endif
 
 #endif

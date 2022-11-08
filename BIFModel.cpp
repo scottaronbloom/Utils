@@ -30,30 +30,30 @@ namespace NSABUtils
 {
     namespace NBIF
     {
-        CModel::CModel(QObject *parent /*= nullptr */) :
-            QAbstractListModel(parent)
+        CModel::CModel( QObject * parent /*= nullptr */ ) :
+            QAbstractListModel( parent )
         {
 
         }
 
-        void CModel::setBIFFile(std::shared_ptr< CFile > bifFile)
+        void CModel::setBIFFile( std::shared_ptr< CFile > bifFile )
         {
             beginResetModel();
             fBIFFile = bifFile;
             endResetModel();
         }
 
-        int CModel::rowCount(const QModelIndex &parent) const
+        int CModel::rowCount( const QModelIndex & parent ) const
         {
-            return (parent.isValid() || !fBIFFile) ? 0 : fBIFFile->lastImageLoaded();
+            return ( parent.isValid() || !fBIFFile ) ? 0 : fBIFFile->lastImageLoaded();
         }
 
-        QVariant CModel::data(const QModelIndex &index, int role /*= Qt::DisplayRole */) const
+        QVariant CModel::data( const QModelIndex & index, int role /*= Qt::DisplayRole */ ) const
         {
-            if (!index.isValid())
+            if ( !index.isValid() )
                 return QVariant();
 
-            if (index.row() > fBIFFile->imageCount() || index.row() < 0)
+            if ( index.row() > fBIFFile->imageCount() || index.row() < 0 )
                 return QVariant();
 
             if ( role == Qt::DisplayRole )
@@ -65,38 +65,38 @@ namespace NSABUtils
             return QVariant();
         }
 
-        QImage CModel::image(size_t imageNum)
+        QImage CModel::image( size_t imageNum )
         {
-            if (!fBIFFile)
+            if ( !fBIFFile )
                 return QImage();
             int insertStart = -1;
             int insertNum = -1;
-            auto retVal = fBIFFile->imageToFrame(imageNum, &insertStart, &insertNum);
-            if ((insertStart != -1) && (insertNum != -1))
+            auto retVal = fBIFFile->imageToFrame( imageNum, &insertStart, &insertNum );
+            if ( ( insertStart != -1 ) && ( insertNum != -1 ) )
             {
-                beginInsertRows(QModelIndex(), insertStart, insertStart + insertNum - 1);
+                beginInsertRows( QModelIndex(), insertStart, insertStart + insertNum - 1 );
                 endInsertRows();
             }
             return retVal;
         }
 
-        bool CModel::canFetchMore(const QModelIndex &parent) const
+        bool CModel::canFetchMore( const QModelIndex & parent ) const
         {
-            if (parent.isValid())
+            if ( parent.isValid() )
                 return false; // its a list
-            if (!fBIFFile)
+            if ( !fBIFFile )
                 return false;
             return fBIFFile->canLoadMoreImages();
         }
 
-        void CModel::fetchMore(const QModelIndex &parent)
+        void CModel::fetchMore( const QModelIndex & parent )
         {
-            if (parent.isValid())
+            if ( parent.isValid() )
                 return; // its a list
-            if (!fBIFFile)
+            if ( !fBIFFile )
                 return;
 
-            beginInsertRows(QModelIndex(), fBIFFile->lastImageLoaded(), fBIFFile->lastImageLoaded() + fBIFFile->fetchSize() - 1);
+            beginInsertRows( QModelIndex(), fBIFFile->lastImageLoaded(), fBIFFile->lastImageLoaded() + fBIFFile->fetchSize() - 1 );
             fBIFFile->fetchMore();
             endInsertRows();
         }

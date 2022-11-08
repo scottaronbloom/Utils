@@ -32,7 +32,7 @@ namespace NSABUtils
     namespace NBIF
     {
         CIOHandler::CIOHandler()
-            : fBIFFile(new NBIF::CFile)
+            : fBIFFile( new NBIF::CFile )
         {
         }
 
@@ -43,46 +43,47 @@ namespace NSABUtils
 
         bool CIOHandler::canRead() const
         {
-            if (!canRead(device()))
+            if ( !canRead( device() ) )
                 return false;
 
-            if ((fCurrentFrame >= 0) && (fCurrentFrame >= fBIFFile->imageCount()))
+            if ( ( fCurrentFrame >= 0 ) && ( fCurrentFrame >= fBIFFile->imageCount() ) )
                 return false;
 
-            if (fBIFFile->state() != NBIF::CFile::EState::eError)
+            if ( fBIFFile->state() != NBIF::CFile::EState::eError )
             {
-                setFormat("bif");
+                setFormat( "bif" );
                 return true;
             }
             return false;
         }
 
-        bool CIOHandler::canRead(QIODevice *device)
+        bool CIOHandler::canRead( QIODevice * device )
         {
-            if (!device) {
-                qWarning("CBIFIOHandler::canRead() called with no device");
+            if ( !device )
+            {
+                qWarning( "CBIFIOHandler::canRead() called with no device" );
                 return false;
             }
 
-            if (!device->seek(0))
+            if ( !device->seek( 0 ) )
                 return false;
 
-            QByteArray magicNumber = device->peek(8);
-            bool isBIF = NBIF::CFile::validateMagicNumber(magicNumber);
+            QByteArray magicNumber = device->peek( 8 );
+            bool isBIF = NBIF::CFile::validateMagicNumber( magicNumber );
             return isBIF;
         }
 
-        bool CIOHandler::read(QImage *image)
+        bool CIOHandler::read( QImage * image )
         {
-            if (!fBIFFile)
+            if ( !fBIFFile )
                 return false;
 
-            if (!canRead())
+            if ( !canRead() )
                 return false;
 
             // read the next image;
-            auto retVal = fBIFFile->read(device(), (fCurrentFrame < 0) ? 0 : fCurrentFrame);
-            if (retVal.first)
+            auto retVal = fBIFFile->read( device(), ( fCurrentFrame < 0 ) ? 0 : fCurrentFrame );
+            if ( retVal.first )
             {
                 fCurrentFrame++;
                 *image = retVal.second;
@@ -90,13 +91,13 @@ namespace NSABUtils
             return retVal.first;
         }
 
-        bool CIOHandler::jumpToImage(int imageNumber)
+        bool CIOHandler::jumpToImage( int imageNumber )
         {
-            if (!fBIFFile)
+            if ( !fBIFFile )
                 return false;
-            if (imageNumber < 0)
+            if ( imageNumber < 0 )
                 return false;
-            if (imageNumber >= fBIFFile->imageCount())
+            if ( imageNumber >= fBIFFile->imageCount() )
                 return false;
 
             fCurrentFrame = imageNumber;
@@ -113,13 +114,13 @@ namespace NSABUtils
             return QImageIOHandler::currentImageRect();
         }
 
-        bool CIOHandler::write(const QImage & image)
+        bool CIOHandler::write( const QImage & image )
         {
             (void)image;
             return false;
         }
 
-        bool CIOHandler::supportsOption(ImageOption option) const
+        bool CIOHandler::supportsOption( ImageOption option ) const
         {
             return
                 option == Size
@@ -127,23 +128,23 @@ namespace NSABUtils
             ;
         }
 
-        QVariant CIOHandler::option(ImageOption option) const
+        QVariant CIOHandler::option( ImageOption option ) const
         {
-            switch (option)
+            switch ( option )
             {
-            case Size:
-                fBIFFile->readHeader(device());
-                return fBIFFile->imageSize();
-            case Animation:
-                return true;
-            default:
-                break;
+                case Size:
+                    fBIFFile->readHeader( device() );
+                    return fBIFFile->imageSize();
+                case Animation:
+                    return true;
+                default:
+                    break;
             }
 
             return QVariant();
         }
 
-        void CIOHandler::setOption(ImageOption option, const QVariant &value)
+        void CIOHandler::setOption( ImageOption option, const QVariant & value )
         {
             (void)option;
             (void)value;
@@ -151,24 +152,24 @@ namespace NSABUtils
 
         int CIOHandler::nextImageDelay() const
         {
-            if (!fBIFFile)
+            if ( !fBIFFile )
                 return 0;
             return fBIFFile->imageDelay();
         }
 
         int CIOHandler::imageCount() const
         {
-            if (!fBIFFile || !fBIFFile->isValid())
+            if ( !fBIFFile || !fBIFFile->isValid() )
                 return 0;
 
-            fBIFFile->readHeader(device());
-            return static_cast<int>(fBIFFile->imageCount());
+            fBIFFile->readHeader( device() );
+            return static_cast<int>( fBIFFile->imageCount() );
         }
 
-        void CIOHandler::setLoopCount(int loopCount)
+        void CIOHandler::setLoopCount( int loopCount )
         {
-            if (fBIFFile)
-                fBIFFile->setLoopCount(loopCount);
+            if ( fBIFFile )
+                fBIFFile->setLoopCount( loopCount );
         }
 
         int CIOHandler::loopCount() const

@@ -34,9 +34,9 @@
 namespace NSABUtils
 {
     template< typename T >
-    void ToJson(const T& value, QJsonValue& obj)
+    void ToJson( const T & value, QJsonValue & obj )
     {
-        obj = QJsonValue(value);
+        obj = QJsonValue( value );
     }
 
     template< typename T >
@@ -45,18 +45,18 @@ namespace NSABUtils
         obj = QJsonValue( value );
     }
 
-    SABUTILS_EXPORT void ToJson(const QStringList& value, QJsonValue& obj);
+    SABUTILS_EXPORT void ToJson( const QStringList & value, QJsonValue & obj );
     SABUTILS_EXPORT void ToJson( const QStringList & value, QJsonValueRef & obj );
 
     template< typename T >
-    void ToJson(const std::list< T > & value, QJsonValue& obj)
+    void ToJson( const std::list< T > & value, QJsonValue & obj )
     {
         QJsonArray retVal;
-        for (auto && ii : value)
+        for ( auto && ii : value )
         {
             QJsonValue curr;
-            ToJson(ii, curr);
-            retVal.append(curr);
+            ToJson( ii, curr );
+            retVal.append( curr );
         }
         obj = retVal;
     }
@@ -75,14 +75,14 @@ namespace NSABUtils
     }
 
     template< typename T >
-    void ToJson(const std::set< T >& value, QJsonValue& obj)
+    void ToJson( const std::set< T > & value, QJsonValue & obj )
     {
         QJsonArray retVal;
-        for (auto&& ii : value)
+        for ( auto && ii : value )
         {
             QJsonValue curr;
-            ToJson(ii, curr);
-            retVal.append(curr);
+            ToJson( ii, curr );
+            retVal.append( curr );
         }
         obj = retVal;
     }
@@ -102,17 +102,17 @@ namespace NSABUtils
     }
 
     template< typename T1, typename T2 >
-    void ToJson(const std::pair< T1, T2 >& value, QJsonValue& obj)
+    void ToJson( const std::pair< T1, T2 > & value, QJsonValue & obj )
     {
         QJsonArray retVal;
 
         QJsonValue first;
-        ToJson(value.first, first);
-        retVal.append(first);
+        ToJson( value.first, first );
+        retVal.append( first );
 
         QJsonValue second;
-        ToJson(value.second, second);
-        retVal.append(second);
+        ToJson( value.second, second );
+        retVal.append( second );
 
         obj = retVal;
     }
@@ -134,14 +134,14 @@ namespace NSABUtils
     }
 
     template< typename T2 >
-    void ToJson(const std::unordered_map< QString, T2 >& value, QJsonValue& obj)
+    void ToJson( const std::unordered_map< QString, T2 > & value, QJsonValue & obj )
     {
         QJsonObject retVal;
-        for (auto&& ii : value)
+        for ( auto && ii : value )
         {
             QJsonValue curr;
-            ToJson(ii.second, curr);
-            retVal[ii.first] = curr;
+            ToJson( ii.second, curr );
+            retVal[ ii.first ] = curr;
         }
         obj = retVal;
     }
@@ -159,74 +159,74 @@ namespace NSABUtils
         obj = retVal;
     }
 
-    SABUTILS_EXPORT void FromJson(QStringList& value, const QJsonValue& obj);
-    SABUTILS_EXPORT void FromJson(bool& value, const QJsonValue& obj);
-    SABUTILS_EXPORT void FromJson(double& value, const QJsonValue& obj);
-    SABUTILS_EXPORT void FromJson(QString& value, const QJsonValue& obj);
-    SABUTILS_EXPORT void FromJson(int& value, const QJsonValue& obj);
+    SABUTILS_EXPORT void FromJson( QStringList & value, const QJsonValue & obj );
+    SABUTILS_EXPORT void FromJson( bool & value, const QJsonValue & obj );
+    SABUTILS_EXPORT void FromJson( double & value, const QJsonValue & obj );
+    SABUTILS_EXPORT void FromJson( QString & value, const QJsonValue & obj );
+    SABUTILS_EXPORT void FromJson( int & value, const QJsonValue & obj );
 
     template< typename T >
-    void FromJson(std::list< T >& value, const QJsonValue& obj)
+    void FromJson( std::list< T > & value, const QJsonValue & obj )
     {
         value.clear();
-        if (!obj.isArray())
+        if ( !obj.isArray() )
             return;
         auto array = obj.toArray();
-        for (int ii = 0; ii < array.count(); ++ii)
+        for ( int ii = 0; ii < array.count(); ++ii )
         {
-            QJsonValue currValue = array.at(ii);
+            QJsonValue currValue = array.at( ii );
             T currObj;
-            FromJson(currObj, currValue);
-            value.push_back(currObj);
+            FromJson( currObj, currValue );
+            value.push_back( currObj );
         }
     }
 
     template< typename T >
-    void FromJson(std::set< T >& value, const QJsonValue& obj)
+    void FromJson( std::set< T > & value, const QJsonValue & obj )
     {
         value.clear();
-        if (!obj.isArray())
+        if ( !obj.isArray() )
             return;
         auto array = obj.toArray();
-        for (int ii = 0; ii < array.count(); ++ii)
+        for ( int ii = 0; ii < array.count(); ++ii )
         {
-            QJsonValue currValue = array.at(ii);
+            QJsonValue currValue = array.at( ii );
             T currObj;
-            FromJson(currObj, currValue);
-            value.insert(currObj);
+            FromJson( currObj, currValue );
+            value.insert( currObj );
         }
     }
 
     template< typename T1, typename T2 >
-    void FromJson(std::pair< T1, T2 >& value, const QJsonValue& obj)
+    void FromJson( std::pair< T1, T2 > & value, const QJsonValue & obj )
     {
-        value = std::make_pair(T1(), T2());
-        if (!obj.isArray())
+        value = std::make_pair( T1(), T2() );
+        if ( !obj.isArray() )
             return;
         auto array = obj.toArray();
-        if (array.count() != 2)
+        if ( array.count() != 2 )
             return;
-        auto first = array.at(0);
-        FromJson(value.first, first);
+        auto first = array.at( 0 );
+        FromJson( value.first, first );
 
-        auto second = array.at(1);
-        FromJson(value.second, second);
+        auto second = array.at( 1 );
+        FromJson( value.second, second );
     }
 
     template< typename T2 >
-    void FromJson(std::unordered_map< QString, T2 >& value, const QJsonValue& obj)
+    void FromJson( std::unordered_map< QString, T2 > & value, const QJsonValue & obj )
     {
         value.clear();
-        if (!obj.isObject())
+        if ( !obj.isObject() )
             return;
         auto map = obj.toObject();
-        for (auto && ii = map.constBegin(); ii != map.constEnd(); ++ii)
+        for ( auto && ii = map.constBegin(); ii != map.constEnd(); ++ii )
         {
             auto key = ii.key();
             auto currValue = ii.value();
             T2 currObj;
-            FromJson(currObj, currValue);
-            value[key] = currObj;
+            FromJson( currObj, currValue );
+            value[ key ] = currObj;
         }
     }
 }

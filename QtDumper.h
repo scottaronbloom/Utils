@@ -7,6 +7,6 @@ class QWidget;
 class QStandardItemModel;
 namespace NSABUtils
 {
-    SABUTILS_EXPORT void dumpWidgetAndChildren(const QWidget* widget, QStandardItemModel* model);
+    SABUTILS_EXPORT void dumpWidgetAndChildren( const QWidget * widget, QStandardItemModel * model );
 }
 #endif

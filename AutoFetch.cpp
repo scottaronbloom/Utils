@@ -147,13 +147,13 @@ namespace NSABUtils
         auto viewCount = 1 + ( remainingHeight / itemHeight );
 
         bool retVal = false;
-        while( ( model->rowCount( expandingIndex ) < viewCount ) && model->canFetchMore( expandingIndex ) )
+        while ( ( model->rowCount( expandingIndex ) < viewCount ) && model->canFetchMore( expandingIndex ) )
         {
             model->fetchMore( expandingIndex );
             retVal = true;
         }
 
-        if ( (model->rowCount( expandingIndex ) < viewCount) && !model->canFetchMore( expandingIndex ) )
+        if ( ( model->rowCount( expandingIndex ) < viewCount ) && !model->canFetchMore( expandingIndex ) )
         {
             for ( int ii = 0; ii < view->model()->rowCount( expandingIndex ); ++ii )
             {
