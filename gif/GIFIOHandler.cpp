@@ -49,7 +49,7 @@ bool CGIFIOHandler::canWrite(QIODevice * device)
 
     if ( device->isWritable() )
     {
-        qWarning( "CBIFIOHandler::canWrite() called on a non-writable device" );
+        //qWarning( "CBIFIOHandler::canWrite() called on a non-writable device" );
         return false;
     }
 
