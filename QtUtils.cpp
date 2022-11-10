@@ -41,6 +41,7 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QTreeWidget>
+#include <QApplication>
 
 #ifdef QT_XMLPATTERNS_LIB
 #include <QXmlQuery>
@@ -1145,15 +1146,30 @@ namespace NSABUtils
         return -1;
     }
 
-    int autoSize( QComboBox * comboBox, int minCharWidth /*= -1*/ )
+    int autoSize( QComboBox * comboBox, int minNumChars /*= -1*/ )
     {
         if ( !comboBox )
             return -1;
 
         comboBox->view()->setTextElideMode( Qt::ElideNone );
+        auto prevPolicy = comboBox->sizeAdjustPolicy();
+        if ( prevPolicy == QComboBox::AdjustToContents )
+            comboBox->setSizeAdjustPolicy( QComboBox::AdjustToContentsOnFirstShow );
         comboBox->setSizeAdjustPolicy( QComboBox::AdjustToContents );
-        if ( minCharWidth != -1 )
-            comboBox->setMinimumContentsLength( minCharWidth );
+        qApp->processEvents( QEventLoop::ExcludeUserInputEvents );
+
+        if ( ( minNumChars == -1 )
+             && !comboBox->placeholderText().isEmpty()
+             && ( comboBox->count() == 0 ) )
+        {
+            bool hasIcon = comboBox->sizeAdjustPolicy() == QComboBox::AdjustToMinimumContentsLengthWithIcon;
+            const QFontMetrics & fm = comboBox->fontMetrics();
+            minNumChars = comboBox->placeholderText().length();
+        }
+
+        if ( minNumChars != -1 )
+            comboBox->setMinimumContentsLength( minNumChars );
+
         return comboBox->width();
     }
 
