@@ -32,23 +32,29 @@ namespace NSABUtils
     {
         Q_OBJECT;
     Q_SIGNALS:
-        void sigEditTextChangedAfterDelay(const QString &text);
+        void sigEditTextChangedAfterDelay( const QString & text );
     public:
-        CDelayComboBox(QWidget * parent = nullptr);
+        CDelayComboBox( QWidget * parent = nullptr );
 
         CDelayLineEdit * lineEdit() const;
-        void setDelay(int delayMS);
-        void setIsOKFunction(std::function< bool(const QString &text) > func, const QString &errorMsg = {});
+        void setDelay( int delayMS );
+        void setIsOKFunction( std::function< bool( const QString & text ) > func, const QString & errorMsg = {} );
         bool isOK() const;
 
         void setDelayLineEdit( CDelayLineEdit * le );
         QStringList getAllText() const;
-        inline void addItems(const QStringList &texts, bool selectFirstItem = false)
+        inline void addItems( const QStringList & texts, bool selectFirstItem = false )
         {
-            insertItems(count(), texts);
-            if (selectFirstItem)
-                setCurrentIndex(0);
+            insertItems( count(), texts );
+            if ( selectFirstItem )
+                setCurrentIndex( 0 );
         }
+
+#if QT_VERSION < QT_VERSION_CHECK( 5,15, 0 )
+        QString placeholderText() const { return QString(); }
+        void setPlaceholderText( const QString & /*placeholderText*/ ) {}
+#endif
+
 
         void addCurrentItem();
     };

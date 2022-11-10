@@ -55,7 +55,7 @@ namespace NSABUtils
         }
         else
         {
-            for( int ii = md5Str.length() - 4; ii > 0; ii -= 4 )
+            for ( int ii = md5Str.length() - 4; ii > 0; ii -= 4 )
             {
                 md5Str.insert( ii, '-' );
             }
@@ -65,7 +65,7 @@ namespace NSABUtils
 
     QByteArray getMd5( const QByteArray & data )
     {
-        auto digest = QCryptographicHash::hash(data, QCryptographicHash::Md5);
+        auto digest = QCryptographicHash::hash( data, QCryptographicHash::Md5 );
         return formatMd5( digest, false );
     }
 
@@ -148,7 +148,7 @@ namespace NSABUtils
         if ( !file.isReadable() )
             emitFinished();
 
-        char buffer[4096];
+        char buffer[ 4096 ];
         int length;
 
         qint64 pos = 0;
@@ -179,7 +179,7 @@ namespace NSABUtils
                 emitFinished();
                 return;
             }
-            
+
             fMD5 = QString::fromLatin1( formatMd5( tmp, false ) );
         }
         emitFinished();

@@ -24,18 +24,18 @@
 #include "GIFPlugin.h"
 #include "GIFIOHandler.h"
 
-QImageIOPlugin::Capabilities CGIFPlugin::capabilities(QIODevice *device, const QByteArray &format) const
+QImageIOPlugin::Capabilities CGIFPlugin::capabilities( QIODevice * device, const QByteArray & format ) const
 {
-    if (format == "gif" || ( device && device->isWritable() && CGIFIOHandler::canWrite(device) ) )
-        return Capabilities(CanWrite);
+    if ( format == "gif" || ( device && device->isWritable() && CGIFIOHandler::canWrite( device ) ) )
+        return Capabilities( CanWrite );
     return {};
 }
 
-QImageIOHandler *CGIFPlugin::create(QIODevice *device, const QByteArray &format) const
+QImageIOHandler * CGIFPlugin::create( QIODevice * device, const QByteArray & format ) const
 {
     auto handler = new CGIFIOHandler;
-    handler->setDevice(device);
-    handler->setFormat(format);
+    handler->setDevice( device );
+    handler->setFormat( format );
     return handler;
 }
 

@@ -24,17 +24,17 @@
 #define SABUTILSEXPORT_H
 
 #if defined(WINDOWS) || defined(WIN32) || defined (Q_OS_WINDOWS)
-    #ifdef SABUTILS_DLL
-        #ifdef SABUTILS_INTERNAL
-            #define SABUTILS_EXPORT __declspec(dllexport)
-        #else
-            #define SABUTILS_EXPORT __declspec(dllimport)
-        #endif
-    #else
-        #define SABUTILS_EXPORT
-    #endif  
+#ifdef SABUTILS_DLL
+#ifdef SABUTILS_INTERNAL
+#define SABUTILS_EXPORT __declspec(dllexport)
 #else
-    #define SABUTILS_EXPORT
+#define SABUTILS_EXPORT __declspec(dllimport)
+#endif
+#else
+#define SABUTILS_EXPORT
+#endif  
+#else
+#define SABUTILS_EXPORT
 #endif
 
 #endif

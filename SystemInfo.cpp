@@ -100,7 +100,7 @@ namespace NSABUtils
         return oss.str();
     }
 
-    std::string CSystemInfo::dumpTable( const std::list< std::pair< std::string, std::string > > &table, const std::string & title, const std::pair < std::string, std::string > &subTitle, EFormat format, QJsonArray & jsonParentArray ) const
+    std::string CSystemInfo::dumpTable( const std::list< std::pair< std::string, std::string > > & table, const std::string & title, const std::pair < std::string, std::string > & subTitle, EFormat format, QJsonArray & jsonParentArray ) const
     {
         std::ostringstream oss;
         if ( !table.empty() )
@@ -147,7 +147,7 @@ namespace NSABUtils
             if ( format == EFormat::eHtml )
                 oss << "</table>\n";
             jsonParentArray.push_back( jsonObj );
-        }        
+        }
         return oss.str();
     }
 
@@ -188,7 +188,7 @@ namespace NSABUtils
                 }
                 else if ( format == EFormat::eHtml )
                 {
-                    
+
                     oss << R"(<tr><th align="center"colspan="2">)" << title << ": " << std::to_string( ii ) << "</th></tr>\n"
                         << R"(<tr><th>Name:</th><td>)" << currNic.fName << "</td></tr>\n"
                         << R"(<tr><th>MAC:</th><td>)" << currNic.fMacAddr << "</td></tr>\n"
@@ -199,7 +199,7 @@ namespace NSABUtils
                 jsonNic.insert( QString::fromStdString( title ), QString::number( ii++ ) );
                 jsonNic.insert( "Name", QString::fromStdString( currNic.fName ) );
                 jsonNic.insert( "MAC", QString::fromStdString( currNic.fMacAddr ) );
-                jsonNic.insert( "IP", QString::fromStdString( currNic.fIPAddr) );
+                jsonNic.insert( "IP", QString::fromStdString( currNic.fIPAddr ) );
 
                 jsonNics.push_back( jsonNic );
             }

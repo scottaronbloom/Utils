@@ -28,30 +28,34 @@ namespace NSABUtils
 {
     CWidgetEnabler::CWidgetEnabler( QCheckBox * btn, QWidget * widget, QObject * parent ) :
         CWidgetEnabler( btn, { widget }, parent )
-    {}
+    {
+    }
 
     CWidgetEnabler::CWidgetEnabler( QCheckBox * checkBox, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
         CWidgetEnabler( { checkBox, nullptr }, widgets, parent )
-    {}
+    {
+    }
 
     CWidgetEnabler::CWidgetEnabler( QGroupBox * gb, QWidget * widget, QObject * parent ) :
         CWidgetEnabler( gb, { widget }, parent )
-    {}
+    {
+    }
 
     CWidgetEnabler::CWidgetEnabler( QGroupBox * gb, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
         CWidgetEnabler( { nullptr, gb }, widgets, parent )
-    {}
-    
+    {
+    }
+
     CWidgetEnabler::CWidgetEnabler( const std::pair< QCheckBox *, QGroupBox * > & checker, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
         QObject( parent ),
         fChecker( checker ),
         fWidgets( widgets )
     {
-        Q_ASSERT( (fChecker.first != nullptr) || (fChecker.second != nullptr) );
+        Q_ASSERT( ( fChecker.first != nullptr ) || ( fChecker.second != nullptr ) );
         Q_ASSERT( !fWidgets.empty() );
         if ( parent == nullptr )
         {
-            setParent( fChecker.first ? static_cast< QWidget * >( fChecker.first ) : fChecker.second );
+            setParent( fChecker.first ? static_cast<QWidget *>( fChecker.first ) : fChecker.second );
         }
 
         fInitState = checkState();
@@ -95,7 +99,7 @@ namespace NSABUtils
     /// <param name="state"></param>
     void CWidgetEnabler::slotCheckStateChanged( int state )
     {
-        bool enabled = (state == Qt::CheckState::Checked) || ((state == Qt::CheckState::PartiallyChecked) && fEnableOnPartial);
+        bool enabled = ( state == Qt::CheckState::Checked ) || ( ( state == Qt::CheckState::PartiallyChecked ) && fEnableOnPartial );
         slotSetWidgetsEnabled( enabled );
     }
 

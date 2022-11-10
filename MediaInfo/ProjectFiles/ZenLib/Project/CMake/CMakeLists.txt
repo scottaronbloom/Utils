@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-cmake_policy(SET CMP0026 OLD)
-
 project(ZenLib)
 
 set(ZenLib_MAJOR_VERSION 0)

@@ -56,64 +56,64 @@ namespace NSABUtils
         {
             Q_OBJECT
         public:
-            CWidget(QWidget *parent = nullptr);
+            CWidget( QWidget * parent = nullptr );
             ~CWidget();
 
             void clear();
-            std::shared_ptr< CFile > setFileName(const QString & fileName);
+            std::shared_ptr< CFile > setFileName( const QString & fileName );
             QString fileName() const;
             bool isValid() const;
 
             QSize sizeHint() const override;
 
-            void validatePlayerActions(bool enable = true); // enables/disables the enabled actions, however if true, only when valid, if false all false
+            void validatePlayerActions( bool enable = true ); // enables/disables the enabled actions, however if true, only when valid, if false all false
             bool isPlaying() const;
-            void setActive(bool isActive);
+            void setActive( bool isActive );
 
-            void setButtonsLayout(EButtonsLayout style);
+            void setButtonsLayout( EButtonsLayout style );
             EButtonsLayout buttonsLayout()const { return fButtonLayout; }
 
             int numFramesToSkip() const { return fNumFramesToSkip; } // frames to skip when stepping
-            void setNumFramesToSkip(int value);
+            void setNumFramesToSkip( int value );
 
             int playerSpeedMultiplier() const;
-            void setSpeedMultiplier(int ms);
+            void setSpeedMultiplier( int ms );
 
             int playCount() const;
-            void setPlayCount(int playCount);
+            void setPlayCount( int playCount );
 
-            void setGIFFlipImage(bool flipImage) { fGIFFlipImage = flipImage; }
+            void setGIFFlipImage( bool flipImage ) { fGIFFlipImage = flipImage; }
             bool gifFlipImage() const { return fGIFFlipImage; }
 
-            void setGIFDitherImage(bool ditherImage) { fGIFDitherImage = ditherImage; }
+            void setGIFDitherImage( bool ditherImage ) { fGIFDitherImage = ditherImage; }
             bool gifDitherImage() const { return fGIFDitherImage; }
 
-            void setGIFLoopCount(int loopCount) { fGIFLoopCount = loopCount; }
+            void setGIFLoopCount( int loopCount ) { fGIFLoopCount = loopCount; }
             int gifLoopCount() const { return fGIFLoopCount; }
 
-            void setGIFStartFrame(int startFrame) { fGIFStartFrame = startFrame; }
+            void setGIFStartFrame( int startFrame ) { fGIFStartFrame = startFrame; }
             int gifStartFrame() const { return fGIFStartFrame; }
 
-            void setGIFEndFrame(int endFrame) { fGIFEndFrame = endFrame; }
+            void setGIFEndFrame( int endFrame ) { fGIFEndFrame = endFrame; }
             int gifEndFrame() const { return fGIFEndFrame; }
 
-            void setGIFDelay(int Delay) { fGIFDelay = Delay; }
+            void setGIFDelay( int Delay ) { fGIFDelay = Delay; }
             int gifDelay() const { return fGIFDelay; }
 
-            QMenu *menu();
-            QToolBar *toolBar();
+            QMenu * menu();
+            QToolBar * toolBar();
 
-            QAction *actionSkipBackward();
-            QAction *actionPrev();
-            QAction *actionTogglePlayPause(std::optional< bool > asPlayButton = {}); // if not set no change, if set its changed to pay or not
-            QAction *actionPause();
-            QAction *actionPlay();
-            QAction *actionNext();
-            QAction *actionSkipForward();
+            QAction * actionSkipBackward();
+            QAction * actionPrev();
+            QAction * actionTogglePlayPause( std::optional< bool > asPlayButton = {} ); // if not set no change, if set its changed to pay or not
+            QAction * actionPause();
+            QAction * actionPlay();
+            QAction * actionNext();
+            QAction * actionSkipForward();
 
-            QAction *actionDiscreteLayout();
-            QAction *actionToggleLayout();
-            QAction *actionNoLayout();
+            QAction * actionDiscreteLayout();
+            QAction * actionToggleLayout();
+            QAction * actionNoLayout();
 
             QAction * actionSaveAsGIF();
         Q_SIGNALS:
@@ -133,27 +133,27 @@ namespace NSABUtils
 
             void slotSaveAsGIF();
         private Q_SLOTS:
-            void slotSetNumFramesToSkip(int numFrames);
-            void slotSetPlayerSpeed(int playerSpeed);
-            void slotSetPlayCount(int playCount);
+            void slotSetNumFramesToSkip( int numFrames );
+            void slotSetPlayerSpeed( int playerSpeed );
+            void slotSetPlayCount( int playCount );
             void slotMovieStateChanged();
             void slotFrameChanged();
         private:
-            void setBIFPluginPlayCount(int playCount);
+            void setBIFPluginPlayCount( int playCount );
             double computeFPS() const;
 
-            void offsetFrameBy(int offset);
-            void setCurrentFrame(int frame);
+            void offsetFrameBy( int offset );
+            void setCurrentFrame( int frame );
             template< typename T >
-            void setPlayPause(T * item, bool playPause);
+            void setPlayPause( T * item, bool playPause );
             template< typename T >
-            void enableItem(T * item, bool enable);
+            void enableItem( T * item, bool enable );
             template< typename T >
-            void checkItem(T *item, bool checked);
+            void checkItem( T * item, bool checked );
             template< typename T >
-            void setItemVisible(T *item, bool visible);
+            void setItemVisible( T * item, bool visible );
             template< typename T >
-            void updateItemForLayout(T *item);
+            void updateItemForLayout( T * item );
 
             void updateMovieSpeed();
 
@@ -162,30 +162,30 @@ namespace NSABUtils
             void updateMenu();
             void layoutButtons();
 
-            void setInfo(QAction *item, const QString &iconPath, const QString &text, void (CWidget::*slot)());
-            void setInfo(QToolButton *btn, const QString &iconPath, const QString &text, void (CWidget::*slot)());
+            void setInfo( QAction * item, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) );
+            void setInfo( QToolButton * btn, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) );
 
-            QAction * createAction(const QString & name, const QString &iconPath, const QString &text, void (CWidget:: *slot)());
+            QAction * createAction( const QString & name, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) );
 
             std::shared_ptr< NBIF::CFile > fBIF;
 
-            QAction *fActionSkipBackward{ nullptr };
-            QAction *fActionPrev{ nullptr };
-            QAction *fActionTogglePlayPause{ nullptr };
-            QAction *fActionPlay{ nullptr };
-            QAction *fActionPause{ nullptr };
-            QAction *fActionNext{ nullptr };
-            QAction *fActionSkipForward{ nullptr };
+            QAction * fActionSkipBackward{ nullptr };
+            QAction * fActionPrev{ nullptr };
+            QAction * fActionTogglePlayPause{ nullptr };
+            QAction * fActionPlay{ nullptr };
+            QAction * fActionPause{ nullptr };
+            QAction * fActionNext{ nullptr };
+            QAction * fActionSkipForward{ nullptr };
 
-            QAction *fActionDiscreteLayout{ nullptr };
-            QAction *fActionToggleLayout{ nullptr };
-            QAction *fActionNoLayout{ nullptr };
+            QAction * fActionDiscreteLayout{ nullptr };
+            QAction * fActionToggleLayout{ nullptr };
+            QAction * fActionNoLayout{ nullptr };
             QAction * fActionSaveAsGIF{ nullptr };
 
             EButtonsLayout fButtonLayout{ EButtonsLayout::eTogglePlayPause };
 
-            QMenu *fMenu{ nullptr };
-            QToolBar *fToolBar{ nullptr };
+            QMenu * fMenu{ nullptr };
+            QToolBar * fToolBar{ nullptr };
 
             QSpinBox * fPlayerSpeedMultiplerSB{ nullptr };
             QSpinBox * fNumFramesToSkipSB{ nullptr };

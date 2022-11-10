@@ -193,9 +193,9 @@ namespace NSABUtils
         {
             auto pathName = getPathNameForItem( psiItem );
             return returnFinishedStatus( hrRename,
-                QString( "Renamed <SOURCE> to '%1'.  Final path name: '%2'." )
-                .arg( pszNewName )
-                .arg( getPathNameForItem( psiNewlyCreated ) )
+                                         QString( "Renamed <SOURCE> to '%1'.  Final path name: '%2'." )
+                                         .arg( pszNewName )
+                                         .arg( getPathNameForItem( psiNewlyCreated ) )
             );
         }
 
@@ -207,13 +207,13 @@ namespace NSABUtils
         IFACEMETHODIMP CFileOpProgSinkApp::PostMoveItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pszNewName, HRESULT hrNewName, IShellItem * psiNewlyCreated )
         {
             return returnFinishedStatus( hrNewName
-                , QString( "Moved <SOURCE> to directory '%1' as '%3'. Final path name '%4'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ).arg( getPathNameForItem( psiNewlyCreated ) )
-                , psiItem );
+                                         , QString( "Moved <SOURCE> to directory '%1' as '%3'. Final path name '%4'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ).arg( getPathNameForItem( psiNewlyCreated ) )
+                                         , psiItem );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::PreCopyItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pszNewName )
         {
-            return startStatus( QString( "Copying <SOURCE> to directory '%1' as '%2'.").arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ), psiItem );
+            return startStatus( QString( "Copying <SOURCE> to directory '%1' as '%2'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ), psiItem );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::PostCopyItem( DWORD /*dwFlags*/, IShellItem * psiItem, IShellItem * psiDestinationFolder, PCWSTR pszNewName, HRESULT hrCopy, IShellItem * psiNewlyCreated )
@@ -239,10 +239,10 @@ namespace NSABUtils
         IFACEMETHODIMP CFileOpProgSinkApp::PostNewItem( DWORD /*dwFlags*/, IShellItem * psiDestinationFolder, PCWSTR pszNewName, PCWSTR pszTemplateName, DWORD /*dwFileAttributes*/, HRESULT hrNew, IShellItem * psiNewItem )
         {
             return returnFinishedStatus( hrNew, QString( "Created '%1' in directory '%2'. Template Name: %3.  Final Path '%4'." )
-                .arg( pszNewName )
-                .arg( getPathNameForItem( psiDestinationFolder ) )
-                .arg( pszTemplateName )
-                .arg( getPathNameForItem( psiNewItem ) )
+                                         .arg( pszNewName )
+                                         .arg( getPathNameForItem( psiDestinationFolder ) )
+                                         .arg( pszTemplateName )
+                                         .arg( getPathNameForItem( psiNewItem ) )
             );
         }
 
@@ -368,12 +368,12 @@ namespace NSABUtils
             //        } );
             //}
 
-            hr = fileOperation->DeleteItem( fileOrFolderItem, pSync ); 
+            hr = fileOperation->DeleteItem( fileOrFolderItem, pSync );
             fileOrFolderItem->Release();
             if ( FAILED( hr ) )
             {
                 return showError( "Failed to mark file/folder item for deletion", hr,
-                                  [fileOrFolderItem, fileOperation, pSync ]()
+                                  [fileOrFolderItem, fileOperation, pSync]()
                                   {
                                       fileOperation->Release();
                                       if ( pSync )

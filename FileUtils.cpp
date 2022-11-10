@@ -57,12 +57,12 @@ namespace NSABUtils
 {
     namespace NFileUtils
     {
-        std::string getFileName(const std::string & path)
+        std::string getFileName( const std::string & path )
         {
-            std::string::size_type pos = path.find_last_of("/\\");
-            if (pos == std::string::npos)
+            std::string::size_type pos = path.find_last_of( "/\\" );
+            if ( pos == std::string::npos )
                 return path;
-            return path.substr(pos + 1);
+            return path.substr( pos + 1 );
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -73,88 +73,88 @@ namespace NSABUtils
         // directory path, fileName will be the filename, 
         // and ext will be the file extension. 
         //////////////////////////////////////////////////////////////////////////
-        void extractFilePath(const std::string & pathName, std::string * dirPath, std::string * outFileName, std::string * ext)
+        void extractFilePath( const std::string & pathName, std::string * dirPath, std::string * outFileName, std::string * ext )
         {
-            if (dirPath)
+            if ( dirPath )
                 *dirPath = std::string();
-            if (ext)
+            if ( ext )
                 *ext = std::string();
-            if (outFileName)
+            if ( outFileName )
                 *outFileName = std::string();
 
             std::string fileName = pathName;
 
             // Get last directory specifier
-            auto idx = pathName.find_last_of("/\\");
-            if (idx != std::string::npos)
+            auto idx = pathName.find_last_of( "/\\" );
+            if ( idx != std::string::npos )
             {
-                if (dirPath)
-                    *dirPath = pathName.substr(0, idx);
-                if (outFileName)
-                    *outFileName = fileName = pathName.substr(idx + 1);
+                if ( dirPath )
+                    *dirPath = pathName.substr( 0, idx );
+                if ( outFileName )
+                    *outFileName = fileName = pathName.substr( idx + 1 );
             }
 
-            idx = fileName.rfind(".");
-            if (idx != std::string::npos)
+            idx = fileName.rfind( "." );
+            if ( idx != std::string::npos )
             {
-                if (ext)
-                    *ext = fileName.substr(idx + 1);
-                if (outFileName)
-                    *outFileName = fileName = fileName.substr(0, idx);
+                if ( ext )
+                    *ext = fileName.substr( idx + 1 );
+                if ( outFileName )
+                    *outFileName = fileName = fileName.substr( 0, idx );
             }
         }
 
-        bool extCompare(const std::string & pattern, const std::string & extension, bool wildcards)
+        bool extCompare( const std::string & pattern, const std::string & extension, bool wildcards )
         {
-            if (pattern.empty() || extension.empty())
+            if ( pattern.empty() || extension.empty() )
                 return false;
             size_t patternStartPos = 0;
-            if (pattern[0] == '.')
+            if ( pattern[ 0 ] == '.' )
                 patternStartPos = 1;
 
             size_t extStartPos = 0;
-            if (extension[0] == '.')
+            if ( extension[ 0 ] == '.' )
                 extStartPos = 1;
 
-            QString qPattern = QString::fromStdString(pattern.substr(patternStartPos, pattern.length()));
-            QString qExt = QString::fromStdString(extension.substr(extStartPos, extension.length()));
+            QString qPattern = QString::fromStdString( pattern.substr( patternStartPos, pattern.length() ) );
+            QString qExt = QString::fromStdString( extension.substr( extStartPos, extension.length() ) );
 
-            if (wildcards)
+            if ( wildcards )
             {
-                QRegExp regExp(qPattern, Qt::CaseSensitivity::CaseInsensitive, QRegExp::PatternSyntax::WildcardUnix);
-                return regExp.exactMatch(qExt);
+                QRegExp regExp( qPattern, Qt::CaseSensitivity::CaseInsensitive, QRegExp::PatternSyntax::WildcardUnix );
+                return regExp.exactMatch( qExt );
             }
             else
                 return qPattern == qExt;
         }
 
-        bool fileCompare(const std::string & pattern, const std::string & filename, bool wildcards)
+        bool fileCompare( const std::string & pattern, const std::string & filename, bool wildcards )
         {
-            if (pattern.empty() || filename.empty())
+            if ( pattern.empty() || filename.empty() )
                 return false;
 
-            QString qPattern = QString::fromStdString(pattern);
-            auto patternList = qPattern.split(QRegularExpression("[\\\\/]"), TSkipEmptyParts);
-            if (patternList.isEmpty())
+            QString qPattern = QString::fromStdString( pattern );
+            auto patternList = qPattern.split( QRegularExpression( "[\\\\/]" ), NStringUtils::TSkipEmptyParts );
+            if ( patternList.isEmpty() )
                 return false;
 
-            QString qFileName = QString::fromStdString(filename);
-            auto fileNameList = qFileName.split(QRegularExpression("[\\\\/]"), TSkipEmptyParts);
-            if (fileNameList.isEmpty())
+            QString qFileName = QString::fromStdString( filename );
+            auto fileNameList = qFileName.split( QRegularExpression( "[\\\\/]" ), NStringUtils::TSkipEmptyParts );
+            if ( fileNameList.isEmpty() )
                 return false;
 
             auto currPattern = patternList.size() - 1;
             auto currFileName = fileNameList.size() - 1;
 
             bool matches = true;
-            for (; matches && ((currPattern >= 0) && (currFileName >= 0)); currPattern--, currFileName--)
+            for ( ; matches && ( ( currPattern >= 0 ) && ( currFileName >= 0 ) ); currPattern--, currFileName-- )
             {
-                QString pattern = patternList[currPattern];
-                QString fileName = fileNameList[currFileName];
-                if (wildcards)
+                QString pattern = patternList[ currPattern ];
+                QString fileName = fileNameList[ currFileName ];
+                if ( wildcards )
                 {
-                    QRegExp regExp(pattern, Qt::CaseSensitivity::CaseInsensitive, QRegExp::PatternSyntax::WildcardUnix);
-                    matches = regExp.exactMatch(fileName);
+                    QRegExp regExp( pattern, Qt::CaseSensitivity::CaseInsensitive, QRegExp::PatternSyntax::WildcardUnix );
+                    matches = regExp.exactMatch( fileName );
                 }
                 else
                     matches = pattern == fileName;
@@ -163,23 +163,23 @@ namespace NSABUtils
             return matches;
         }
 
-        bool isRelativePath(const std::string & relPath)
+        bool isRelativePath( const std::string & relPath )
         {
-            if (relPath.empty())
+            if ( relPath.empty() )
                 return false;
-            return !isAbsPath(relPath);
+            return !isAbsPath( relPath );
         }
 
-        bool isAbsPath(const std::string & relPath)
+        bool isAbsPath( const std::string & relPath )
         {
-            if (relPath.empty())
+            if ( relPath.empty() )
                 return false;
             size_t lhs = 0;
-            if (*relPath.begin() == '"' && *relPath.rbegin() == '"')
+            if ( *relPath.begin() == '"' && *relPath.rbegin() == '"' )
                 lhs++;
-            char firstChar = ::toupper(relPath[lhs]);
+            char firstChar = ::toupper( relPath[ lhs ] );
             bool isAbs = firstChar == '/' || firstChar == '\\' ||
-                ((relPath.length() >= (lhs + 3)) && (firstChar >= 'A' && firstChar <= 'Z') && relPath[lhs + 1] == ':' && (relPath[lhs + 2] == '/' || relPath[lhs + 2] == '\\'));
+                ( ( relPath.length() >= ( lhs + 3 ) ) && ( firstChar >= 'A' && firstChar <= 'Z' ) && relPath[ lhs + 1 ] == ':' && ( relPath[ lhs + 2 ] == '/' || relPath[ lhs + 2 ] == '\\' ) );
             return isAbs;
         }
 
@@ -212,80 +212,80 @@ namespace NSABUtils
         //        In the above two cases, we treat the relativeFilePath as the absolute path.
         // -------------------------------------------------------------------------------
 
-        std::string getAbsoluteFilePath(const std::string & relFilePath)
+        std::string getAbsoluteFilePath( const std::string & relFilePath )
         {
-            return getAbsoluteFilePath(getWd(), relFilePath);
+            return getAbsoluteFilePath( getWd(), relFilePath );
         }
 
-        std::string getRelativePath(const std::string & absPath, const std::string & dir)
+        std::string getRelativePath( const std::string & absPath, const std::string & dir )
         {
             std::string retVal;
-            if (!absPath.empty())
+            if ( !absPath.empty() )
             {
-                QDir absDir = dir.empty() ? QDir::currentPath() : QString::fromStdString(dir);
-                retVal = getRelativePath(absDir, QString::fromStdString(absPath)).toStdString();
+                QDir absDir = dir.empty() ? QDir::currentPath() : QString::fromStdString( dir );
+                retVal = getRelativePath( absDir, QString::fromStdString( absPath ) ).toStdString();
             }
-            if (retVal.empty())
+            if ( retVal.empty() )
                 retVal = absPath;
             return retVal;
         }
 
-        QString driveSpec(const QString &path)
+        QString driveSpec( const QString & path )
         {
 #if defined(Q_OS_WIN)
-            if (path.size() < 2)
+            if ( path.size() < 2 )
                 return QString();
-            char c = path.at(0).toLatin1();
-            if (c < 'a' && c > 'z' && c < 'A' && c > 'Z')
+            char c = path.at( 0 ).toLatin1();
+            if ( c < 'a' && c > 'z' && c < 'A' && c > 'Z' )
                 return QString();
-            if (path.at(1).toLatin1() != ':')
+            if ( path.at( 1 ).toLatin1() != ':' )
                 return QString();
-            return path.mid(0, 2);
+            return path.mid( 0, 2 );
 #else
             (void)path;
             return QString();
 #endif
         }
 
-        bool isBinaryFile(const std::string & fileName) // if any char in the first 100 characters is non std::isprint return true
+        bool isBinaryFile( const std::string & fileName ) // if any char in the first 100 characters is non std::isprint return true
         {
-            return isBinaryFile(fileName, std::string());
+            return isBinaryFile( fileName, std::string() );
         }
 
-        bool isBinaryFile(const std::string & fileName, const std::string & relToDir) // if any char in the first 100 characters is non std::isprint return true
+        bool isBinaryFile( const std::string & fileName, const std::string & relToDir ) // if any char in the first 100 characters is non std::isprint return true
         {
             auto fullPath = fileName;
-            if (isRelativePath(fileName) && !relToDir.empty())
+            if ( isRelativePath( fileName ) && !relToDir.empty() )
             {
                 fullPath = relToDir + "/" + fullPath;
             }
 
-            std::ifstream ifs(fullPath, std::ios::binary | std::ios::in);
-            if (!ifs.is_open())
+            std::ifstream ifs( fullPath, std::ios::binary | std::ios::in );
+            if ( !ifs.is_open() )
                 return false;
 
             size_t chNum = 0;
             char ch;
-            while (ifs.get(ch) && !ifs.eof() && ifs.good())
+            while ( ifs.get( ch ) && !ifs.eof() && ifs.good() )
             {
-                auto uch = static_cast<unsigned char>(ch);
-                bool isAsciiChar = ((uch >= 9) && (uch <= 13));
-                isAsciiChar = isAsciiChar || ((uch >= 32) && (uch <= 126));
-                isAsciiChar = isAsciiChar || ((uch >= 128) /*&& ( ch <= 255 )*/);
+                auto uch = static_cast<unsigned char>( ch );
+                bool isAsciiChar = ( ( uch >= 9 ) && ( uch <= 13 ) );
+                isAsciiChar = isAsciiChar || ( ( uch >= 32 ) && ( uch <= 126 ) );
+                isAsciiChar = isAsciiChar || ( ( uch >= 128 ) /*&& ( ch <= 255 )*/ );
 
-                if (!isAsciiChar)
+                if ( !isAsciiChar )
                 {
                     ifs.close();
                     return true;
                 }
-                if (chNum++ > 500)
+                if ( chNum++ > 500 )
                     break;
             }
             ifs.close();
             return false;
         }
 
-        QString expandEnvVars(const QString & fileName, std::set< QString > * envVars)
+        QString expandEnvVars( const QString & fileName, std::set< QString > * envVars )
         {
             static QStringList regExStrings =
             {
@@ -297,88 +297,88 @@ namespace NSABUtils
                 ,"\\\\?\\%(?<regex>\\w*)\\\\?\\%"           //handles %foo% and \%foo\%
             };
 
-            if (envVars)
+            if ( envVars )
                 envVars->clear();
 
-            for (int ii = 0; ii < regExStrings.count(); ++ii)
+            for ( int ii = 0; ii < regExStrings.count(); ++ii )
             {
-                auto regExString = regExStrings[ii];
-                QRegularExpression regExp(regExString);
-                assert(regExp.isValid());
+                auto regExString = regExStrings[ ii ];
+                QRegularExpression regExp( regExString );
+                assert( regExp.isValid() );
                 QRegularExpressionMatch match;
-                auto lPos = fileName.indexOf(regExp, 0, &match);
-                if (lPos != -1)
+                auto lPos = fileName.indexOf( regExp, 0, &match );
+                if ( lPos != -1 )
                 {
                     // found a match
-                    auto prefix = fileName.left(lPos);
-                    auto envVar = match.captured("regex");
-                    if (envVars && (envVars->find(envVar) == envVars->end()))
-                        envVars->insert(envVar);
-                    auto envVarValue = qgetenv(qPrintable(envVar));
-                    auto remaining = fileName.mid(lPos + match.capturedLength());
-                    return prefix + envVarValue + expandEnvVars(remaining);
+                    auto prefix = fileName.left( lPos );
+                    auto envVar = match.captured( "regex" );
+                    if ( envVars && ( envVars->find( envVar ) == envVars->end() ) )
+                        envVars->insert( envVar );
+                    auto envVarValue = qgetenv( qPrintable( envVar ) );
+                    auto remaining = fileName.mid( lPos + match.capturedLength() );
+                    return prefix + envVarValue + expandEnvVars( remaining );
                 }
             }
 
             return fileName;
         }
 
-        QString gSoftenPath(const QString & xFileName, const std::set< QString > & xEnvVars, bool forceUnix)
+        QString gSoftenPath( const QString & xFileName, const std::set< QString > & xEnvVars, bool forceUnix )
         {
             auto lRetVal = xFileName;
-            for (auto && ii : xEnvVars)
+            for ( auto && ii : xEnvVars )
             {
-                auto lValue = qgetenv(qPrintable(ii));
+                auto lValue = qgetenv( qPrintable( ii ) );
 
-                auto pos = lRetVal.indexOf(lValue);
-                if (pos != -1)
+                auto pos = lRetVal.indexOf( lValue );
+                if ( pos != -1 )
                 {
-                    auto lVarName = QString("${%1}");
+                    auto lVarName = QString( "${%1}" );
 #ifdef Q_OS_WIN
-                    if (!forceUnix)
-                        lVarName = QString("%%1%");
+                    if ( !forceUnix )
+                        lVarName = QString( "%%1%" );
 #else  
                     (void)forceUnix;
 #endif
-                    lVarName = lVarName.arg(ii);
-                    lRetVal.replace(pos, lValue.length(), lVarName);
+                    lVarName = lVarName.arg( ii );
+                    lRetVal.replace( pos, lValue.length(), lVarName );
                 }
             }
 
             return lRetVal;
         }
 
-        QString byteSizeString(const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision)
+        QString byteSizeString( const QFileInfo & fi, bool prettyPrint, bool byteSize, uint8_t precision )
         {
-            return byteSizeString(fi.size(), prettyPrint, byteSize, precision);
+            return byteSizeString( fi.size(), prettyPrint, byteSize, precision );
         }
 
-        bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck)
+        bool compareTimeStamp( const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck )
         {
-            return compareTimeStamp(lhs, rhs, toleranceInSecs, std::list< QFileDevice::FileTime >{ timeToCheck });
+            return compareTimeStamp( lhs, rhs, toleranceInSecs, std::list< QFileDevice::FileTime >{ timeToCheck } );
         }
 
-        bool compareTimeStamp(const QDateTime & lhs, const QDateTime & rhs, int toleranceInSecs)
+        bool compareTimeStamp( const QDateTime & lhs, const QDateTime & rhs, int toleranceInSecs )
         {
-            if (lhs == rhs)
+            if ( lhs == rhs )
                 return true;
 
-            return std::abs(lhs.secsTo(rhs)) <= toleranceInSecs;
+            return std::abs( lhs.secsTo( rhs ) ) <= toleranceInSecs;
         }
 
-        bool compareTimeStamp(const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck)
+        bool compareTimeStamp( const QFileInfo & lhs, const QFileInfo & rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck )
         {
-            auto lhsTimeStamps = timeStamps(lhs.absoluteFilePath(), timeStampsToCheck);
-            auto rhsTimeStamps = timeStamps(rhs.absoluteFilePath(), timeStampsToCheck);
-            if (lhsTimeStamps.size() != rhsTimeStamps.size())
+            auto lhsTimeStamps = timeStamps( lhs.absoluteFilePath(), timeStampsToCheck );
+            auto rhsTimeStamps = timeStamps( rhs.absoluteFilePath(), timeStampsToCheck );
+            if ( lhsTimeStamps.size() != rhsTimeStamps.size() )
                 return false;
-            for (auto && ii : lhsTimeStamps)
+            for ( auto && ii : lhsTimeStamps )
             {
-                auto jj = rhsTimeStamps.find(ii.first);
-                if (jj == rhsTimeStamps.end())
+                auto jj = rhsTimeStamps.find( ii.first );
+                if ( jj == rhsTimeStamps.end() )
                     return false;
 
-                if (!compareTimeStamp(ii.second, (*jj).second, toleranceInSecs))
+                if ( !compareTimeStamp( ii.second, ( *jj ).second, toleranceInSecs ) )
                     return false;
             }
             return true;
@@ -402,7 +402,7 @@ namespace NSABUtils
 
         SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo & info )
         {
-            auto path = info.canonicalFilePath();
+            auto path = info.absoluteFilePath();
             if ( !path.startsWith( "//" ) && !path.startsWith( R"(\\)" ) )
                 return false;
 
@@ -415,30 +415,30 @@ namespace NSABUtils
         }
 
         template< typename T >
-        std::pair< T, T > correctFixedPointRemainder(T inValue, uint8_t precisionIn, uint8_t precisionOut)
+        std::pair< T, T > correctFixedPointRemainder( T inValue, uint8_t precisionIn, uint8_t precisionOut )
         {
             //if ( precisionIn == precisionOut )
             //    return std::make_pair( inValue, 0 );
-            if (precisionOut > precisionIn)
-                return std::make_pair(inValue, 0);
+            if ( precisionOut > precisionIn )
+                return std::make_pair( inValue, 0 );
 
-            auto maxOut = NSABUtils::power(10, precisionOut);
-            auto divBy = NSABUtils::power(10, precisionIn - precisionOut);
+            auto maxOut = NSABUtils::power( 10, precisionOut );
+            auto divBy = NSABUtils::power( 10, precisionIn - precisionOut );
             auto half = divBy / 2;
 
             auto value = inValue;
             T overflow{ 0 };
-            if (divBy != 0)
+            if ( divBy != 0 )
             {
                 auto remainder = value % divBy;
                 auto integral = value / divBy;
-                if (half && (remainder >= half))
+                if ( half && ( remainder >= half ) )
                 {
-                    if (integral)
+                    if ( integral )
                         integral++;
                     else
                         overflow++;
-                    if (integral >= maxOut)
+                    if ( integral >= maxOut )
                     {
                         overflow++;
                         integral = 0;
@@ -446,22 +446,22 @@ namespace NSABUtils
                 }
                 value = integral;
             }
-            return std::make_pair(value, overflow);
+            return std::make_pair( value, overflow );
         }
 
-        QString byteSizeString(uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision)
+        QString byteSizeString( uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision )
         {
-            if (!prettyPrint)
+            if ( !prettyPrint )
             {
                 QLocale locale;
-                return locale.toString( static_cast< qulonglong >( size ) );
+                return locale.toString( static_cast<qulonglong>( size ) );
             }
 
-            auto suffixes = std::vector< QString >({ "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" });
+            auto suffixes = std::vector< QString >( { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" } );
 
-            auto base = static_cast<uint64_t>(byteSize ? 1024 : 1000);
+            auto base = static_cast<uint64_t>( byteSize ? 1024 : 1000 );
             auto suffixPos = 0U;
-            while ((size >= (base * base)) && (suffixPos < suffixes.size()))
+            while ( ( size >= ( base * base ) ) && ( suffixPos < suffixes.size() ) )
             {
                 auto remainder = size % base;
                 size -= remainder;
@@ -469,7 +469,7 @@ namespace NSABUtils
                 suffixPos++;
             }
             uint64_t remainder = 0;
-            if (size >= base)
+            if ( size >= base )
             {
                 remainder = size % base;
                 size /= base;
@@ -479,89 +479,89 @@ namespace NSABUtils
             // remainder will be from 0 to 999(1023)
             // we only want 
             uint64_t overflow = 0;
-            std::tie(remainder, overflow) = correctFixedPointRemainder(remainder, 3, precision);
+            std::tie( remainder, overflow ) = correctFixedPointRemainder( remainder, 3, precision );
             size += overflow;
 
-            auto suffix = suffixes[suffixPos];
-            if (!byteSize && suffix.length() > 1)
-                suffix = suffix.left(1);
+            auto suffix = suffixes[ suffixPos ];
+            if ( !byteSize && suffix.length() > 1 )
+                suffix = suffix.left( 1 );
 
             QLocale locale;
-            auto retVal = QString("%1%2%3B").arg( locale.toString( static_cast< qulonglong >( size ) ) ).arg(remainder != 0 ? QString(".%1").arg(remainder) : QString()).arg(suffix);
+            auto retVal = QString( "%1%2%3B" ).arg( locale.toString( static_cast<qulonglong>( size ) ) ).arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() ).arg( suffix );
             return retVal;
         }
 
-        QString getRelativePath(const QDir & absDir, const QString & path)
+        QString getRelativePath( const QDir & absDir, const QString & path )
         {
-            QString dir = QDir::cleanPath(absDir.absolutePath());
-            QString file = QDir::cleanPath(path);
+            QString dir = QDir::cleanPath( absDir.absolutePath() );
+            QString file = QDir::cleanPath( path );
 
-            if (QDir::isRelativePath(file) || QDir::isRelativePath(dir))
+            if ( QDir::isRelativePath( file ) || QDir::isRelativePath( dir ) )
                 return file;
 
             bool fileDriveMissing = false;
 #ifdef Q_OS_WIN
-            QString dirDrive = driveSpec(dir);
-            QString fileDrive = driveSpec(file);
+            QString dirDrive = driveSpec( dir );
+            QString fileDrive = driveSpec( file );
 
-            if (fileDrive.isEmpty())
+            if ( fileDrive.isEmpty() )
             {
                 fileDrive = dirDrive;
                 fileDriveMissing = true;
             }
 
-            if (fileDrive.toLower() != dirDrive.toLower()
-                || (file.startsWith(QLatin1String("//"))
-                    && !dir.startsWith(QLatin1String("//"))))
+            if ( fileDrive.toLower() != dirDrive.toLower()
+                 || ( file.startsWith( QLatin1String( "//" ) )
+                 && !dir.startsWith( QLatin1String( "//" ) ) ) )
                 return file;
 
-            dir.remove(0, dirDrive.size());
-            if (!fileDriveMissing)
-                file.remove(0, fileDrive.size());
+            dir.remove( 0, dirDrive.size() );
+            if ( !fileDriveMissing )
+                file.remove( 0, fileDrive.size() );
 #endif
 
             QString result;
 #if defined(Q_OS_WIN)
-            QStringList dirElts = dir.split(QLatin1Char('/'), TSkipEmptyParts);
-            QStringList fileElts = file.split(QLatin1Char('/'), TSkipEmptyParts);
+            QStringList dirElts = dir.split( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
+            QStringList fileElts = file.split( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
 #else
-            QVector<QStringRef> dirElts = dir.splitRef(QLatin1Char('/'), TSkipEmptyParts);
-            QVector<QStringRef> fileElts = file.splitRef(QLatin1Char('/'), TSkipEmptyParts);
+            QVector<QStringRef> dirElts = dir.splitRef( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
+            QVector<QStringRef> fileElts = file.splitRef( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
 #endif
             int ii = 0;
-            while (ii < dirElts.size() && ii < fileElts.size() &&
+            while ( ii < dirElts.size() && ii < fileElts.size() &&
 #if defined(Q_OS_WIN)
-                dirElts.at(ii).toLower() == fileElts.at(ii).toLower())
+                    dirElts.at( ii ).toLower() == fileElts.at( ii ).toLower() )
 #else
-                dirElts.at(ii) == fileElts.at(ii))
+                dirElts.at( ii ) == fileElts.at( ii ))
 #endif
                 ++ii;
 
-            if (!fileDriveMissing && (ii == 0) && !dirElts.isEmpty()) // has a drive AND goes all the way to the root level AND the drive is not at root
+            if ( !fileDriveMissing && ( ii == 0 ) && !dirElts.isEmpty() ) // has a drive AND goes all the way to the root level AND the drive is not at root
                 return path;
 
-            for (int jj = 0; jj < dirElts.size() - ii; ++jj)
-                result += QLatin1String("../");
+            for ( int jj = 0; jj < dirElts.size() - ii; ++jj )
+                result += QLatin1String( "../" );
 
-            for (int jj = ii; jj < fileElts.size(); ++jj)
+            for ( int jj = ii; jj < fileElts.size(); ++jj )
             {
-                result += fileElts.at(jj);
-                if (jj < fileElts.size() - 1)
-                    result += QLatin1Char('/');
+                result += fileElts.at( jj );
+                if ( jj < fileElts.size() - 1 )
+                    result += QLatin1Char( '/' );
             }
 
-            if (result.isEmpty())
-                return QLatin1String(".");
+            if ( result.isEmpty() )
+                return QLatin1String( "." );
             return result;
         }
 
-        std::string getAbsoluteFilePath(const std::string & dir, const std::string & relFilePath)
+        std::string getAbsoluteFilePath( const std::string & dir, const std::string & relFilePath )
         {
-            if (isAbsPath(relFilePath))
-                return normalizePath(relFilePath);
+            if ( isAbsPath( relFilePath ) )
+                return normalizePath( relFilePath );
 
-            std::string retVal = JoinPaths(dir, relFilePath);
-            return normalizePath(retVal);
+            std::string retVal = JoinPaths( dir, relFilePath );
+            return normalizePath( retVal );
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -577,7 +577,7 @@ namespace NSABUtils
 
         bool exists( const QString & name )
         {
-            if (name.isEmpty())
+            if ( name.isEmpty() )
                 return false;
             return QFileInfo( name ).exists();
         }
@@ -587,9 +587,9 @@ namespace NSABUtils
             return isReadable( QString::fromStdString( name ) );
         }
 
-        bool isReadable(const QString & name)
+        bool isReadable( const QString & name )
         {
-            if (name.isEmpty())
+            if ( name.isEmpty() )
                 return false;
             return QFileInfo( name ).isReadable();
         }
@@ -598,9 +598,9 @@ namespace NSABUtils
             return isRegularFile( QString::fromStdString( name ) );
         }
 
-        bool isRegularFile(const QString & name)
+        bool isRegularFile( const QString & name )
         {
-            if (name.isEmpty())
+            if ( name.isEmpty() )
                 return false;
             return QFileInfo( name ).isFile();
         }
@@ -610,46 +610,46 @@ namespace NSABUtils
             return isDirectory( QString::fromStdString( name ) );
         }
 
-        bool isDirectory(const QString & name)
+        bool isDirectory( const QString & name )
         {
-            if (name.isEmpty())
+            if ( name.isEmpty() )
                 return false;
             return QFileInfo( name ).isDir();
         }
 
-        bool renameFile(const std::string & from, const std::string & to, bool force)
+        bool renameFile( const std::string & from, const std::string & to, bool force )
         {
-            if (force && exists(to))
+            if ( force && exists( to ) )
             {
-                if (!removePath(to))
+                if ( !removePath( to ) )
                 {
-                    fprintf(stderr, "Error deleting file '%s' to rename '%s' to '%s'\n", to.c_str(), from.c_str(), to.c_str());
+                    fprintf( stderr, "Error deleting file '%s' to rename '%s' to '%s'\n", to.c_str(), from.c_str(), to.c_str() );
                     return false;
                 }
             }
 
-            if (rename(from.c_str(), to.c_str()) == -1)
+            if ( rename( from.c_str(), to.c_str() ) == -1 )
             {
-                fprintf(stderr, "Error renaming file '%s' to '%s'\n", from.c_str(), to.c_str());
+                fprintf( stderr, "Error renaming file '%s' to '%s'\n", from.c_str(), to.c_str() );
                 return false;
             }
             return true;
         }
 
-        bool copyFile(const std::string & from, const std::string & to, bool force)
+        bool copyFile( const std::string & from, const std::string & to, bool force )
         {
-            if (force && exists(to))
+            if ( force && exists( to ) )
             {
-                if (!removePath(to))
+                if ( !removePath( to ) )
                 {
-                    fprintf(stderr, "Error deleting file '%s' to rename '%s' to '%s'\n", to.c_str(), from.c_str(), to.c_str());
+                    fprintf( stderr, "Error deleting file '%s' to rename '%s' to '%s'\n", to.c_str(), from.c_str(), to.c_str() );
                     return false;
                 }
             }
 
-            if (!QFile::copy(QString::fromStdString(from), QString::fromStdString(to)))
+            if ( !QFile::copy( QString::fromStdString( from ), QString::fromStdString( to ) ) )
             {
-                fprintf(stderr, "Error copying file '%s' to '%s'\n", from.c_str(), to.c_str());
+                fprintf( stderr, "Error copying file '%s' to '%s'\n", from.c_str(), to.c_str() );
                 return false;
             }
             return true;
@@ -676,16 +676,16 @@ namespace NSABUtils
         Revision History:
 
         *******************************************************************/
-        std::string tilda2Home(const std::string & fileName)
+        std::string tilda2Home( const std::string & fileName )
         {
             std::string retVal = fileName;
 #ifndef _WINDOWS
             wordexp_t result;
-            if (wordexp(fileName.c_str(), &result, 0) != 0)
+            if ( wordexp( fileName.c_str(), &result, 0 ) != 0 )
                 return fileName;
-            if (result.we_wordv[0])
-                retVal = result.we_wordv[0];
-            wordfree(&result);
+            if ( result.we_wordv[ 0 ] )
+                retVal = result.we_wordv[ 0 ];
+            wordfree( &result );
 #endif
             return retVal;
         }
@@ -695,15 +695,15 @@ namespace NSABUtils
             return removePath( QString::fromStdString( path ) );
         }
 
-        bool removePath(const QString & path)
+        bool removePath( const QString & path )
         {
-            QFileInfo fi(path);
+            QFileInfo fi( path );
             bool success = false;
-            if (fi.isFile())
+            if ( fi.isFile() )
             {
-                success = QFile::remove(fi.absoluteFilePath());
+                success = QFile::remove( fi.absoluteFilePath() );
             }
-            else if (fi.isDir())
+            else if ( fi.isDir() )
             {
                 QDir dir( path );
                 success = dir.removeRecursively();
@@ -711,349 +711,349 @@ namespace NSABUtils
             return success;
         }
 
-        bool removeInsideOfDir(const QString & dirStr)
+        bool removeInsideOfDir( const QString & dirStr )
         {
-            QDir dir(dirStr);
+            QDir dir( dirStr );
             return dir.removeRecursively();
         }
 
-        bool removeInsideOfDir(const std::string & dir)
+        bool removeInsideOfDir( const std::string & dir )
         {
-            return removeInsideOfDir(QString::fromStdString(dir));
+            return removeInsideOfDir( QString::fromStdString( dir ) );
         }
 
-        std::string canonicalFilePath(const std::string & fileName)
+        std::string canonicalFilePath( const std::string & fileName )
         {
-            return canonicalFilePath(QString::fromStdString(fileName)).toStdString();
+            return canonicalFilePath( QString::fromStdString( fileName ) ).toStdString();
         }
 
-        QString canonicalFilePath(const QString & fileName)
+        QString canonicalFilePath( const QString & fileName )
         {
-            QFileInfo fi(QFileInfo(fileName).absoluteFilePath());
+            QFileInfo fi( QFileInfo( fileName ).absoluteFilePath() );
             QString retVal;
-            if (!fi.exists())
+            if ( !fi.exists() )
                 retVal = fi.absoluteFilePath();
             else
             {
                 retVal = fi.canonicalFilePath();
 #ifdef Q_OS_WIN
-                if (!retVal.isEmpty() && (retVal.length() < 2 || retVal[1] != ':'))
+                if ( !retVal.isEmpty() && ( retVal.length() < 2 || retVal[ 1 ] != ':' ) )
                 {
-                    if (retVal.mid(0, 3).toLower() == "unc")
-                        retVal.remove(0, 3);
-                    if (retVal[0] == '\\' || retVal[0] == '/')
-                        retVal.remove(0, 1);
-                    retVal = fi.absoluteFilePath().mid(0, 3) + retVal;
+                    if ( retVal.mid( 0, 3 ).toLower() == "unc" )
+                        retVal.remove( 0, 3 );
+                    if ( retVal[ 0 ] == '\\' || retVal[ 0 ] == '/' )
+                        retVal.remove( 0, 1 );
+                    retVal = fi.absoluteFilePath().mid( 0, 3 ) + retVal;
                 }
 #endif
             }
             return retVal;
         }
 
-        bool backup(const QString & fileName, const std::string & msg, bool useTrash, const std::string & format, bool moveFile)
+        bool backup( const QString & fileName, const std::string & msg, bool useTrash, const std::string & format, bool moveFile )
         {
-            return backup(fileName.toStdString(), msg, useTrash, format, moveFile);
+            return backup( fileName.toStdString(), msg, useTrash, format, moveFile );
         }
 
         // format 
         // %FN for filename, %TS for timestamp
         // empty -> %f.bak
-        bool backup(const std::string & fileName, const std::string & /*msg*/, bool useTrash, const std::string & format, bool moveFile)
+        bool backup( const std::string & fileName, const std::string & /*msg*/, bool useTrash, const std::string & format, bool moveFile )
         {
-            if (NFileUtils::exists(fileName))
+            if ( NFileUtils::exists( fileName ) )
             {
                 std::ostringstream oss;
                 std::string backupFile = format;
-                if (backupFile.empty())
+                if ( backupFile.empty() )
                     backupFile = "%FN.bak";
 
-                auto pos = backupFile.find("%FN");
-                if (pos != std::string::npos)
+                auto pos = backupFile.find( "%FN" );
+                if ( pos != std::string::npos )
                 {
-                    backupFile = backupFile.replace(pos, 3, fileName);
+                    backupFile = backupFile.replace( pos, 3, fileName );
                 }
 
-                pos = backupFile.find("%TS");
-                if (pos != std::string::npos)
+                pos = backupFile.find( "%TS" );
+                if ( pos != std::string::npos )
                 {
-                    backupFile = backupFile.replace(pos, 3, QDateTime::currentDateTime().toString("ddMMyyyy_hhmmss.zzz").toStdString());
+                    backupFile = backupFile.replace( pos, 3, QDateTime::currentDateTime().toString( "ddMMyyyy_hhmmss.zzz" ).toStdString() );
                 }
 
-                if (backupFile == fileName)
+                if ( backupFile == fileName )
                     backupFile = fileName + ".bak";
 
-                if (useTrash && NFileUtils::exists(backupFile))
-                    NFileUtils::moveToTrash(backupFile);
+                if ( useTrash && NFileUtils::exists( backupFile ) )
+                    NFileUtils::moveToTrash( backupFile );
                 else
-                    NFileUtils::removePath(backupFile);
+                    NFileUtils::removePath( backupFile );
 
-                if (moveFile)
-                    return NFileUtils::renameFile(fileName, fileName + ".bak", true);
+                if ( moveFile )
+                    return NFileUtils::renameFile( fileName, fileName + ".bak", true );
                 else
-                    return NFileUtils::copyFile(fileName, fileName + ".bak", true);
+                    return NFileUtils::copyFile( fileName, fileName + ".bak", true );
             }
             else
                 return true;
         }
 
-        bool mkdir(const std::string & relDir, bool makeParents)
+        bool mkdir( const std::string & relDir, bool makeParents )
         {
             std::string tmpDir = relDir;
-            return mkdir(tmpDir, makeParents);
+            return mkdir( tmpDir, makeParents );
         }
 
-        bool mkdir(std::string & dirName, bool makeParents)
+        bool mkdir( std::string & dirName, bool makeParents )
         {
-            QDir dir(QString::fromStdString(dirName));
+            QDir dir( QString::fromStdString( dirName ) );
             dirName = dir.absolutePath().toStdString();
-            if (makeParents)
-                return dir.mkpath(".");
+            if ( makeParents )
+                return dir.mkpath( "." );
             else
-                return dir.mkdir(".");
+                return dir.mkdir( "." );
         }
 
         // lhs can be a pattern
-        bool pathCompare(const std::string & lhs, const std::string & rhs)
+        bool pathCompare( const std::string & lhs, const std::string & rhs )
         {
-            std::string lhsNormal = getAbsoluteFilePath(lhs);
-            std::string rhsNormal = getAbsoluteFilePath(rhs);
-            if ((*lhsNormal.rbegin() == '/') || (*lhsNormal.rbegin() == '\\'))
-                lhsNormal.erase(lhsNormal.begin() + lhsNormal.length() - 1);
-            if ((*rhsNormal.rbegin() == '/') || (*rhsNormal.rbegin() == '\\'))
-                rhsNormal.erase(rhsNormal.begin() + rhsNormal.length() - 1);
+            std::string lhsNormal = getAbsoluteFilePath( lhs );
+            std::string rhsNormal = getAbsoluteFilePath( rhs );
+            if ( ( *lhsNormal.rbegin() == '/' ) || ( *lhsNormal.rbegin() == '\\' ) )
+                lhsNormal.erase( lhsNormal.begin() + lhsNormal.length() - 1 );
+            if ( ( *rhsNormal.rbegin() == '/' ) || ( *rhsNormal.rbegin() == '\\' ) )
+                rhsNormal.erase( rhsNormal.begin() + rhsNormal.length() - 1 );
             return lhsNormal == rhsNormal;
         }
 
-        std::string normalizePath(const std::string & path, const std::string & relToDir)
+        std::string normalizePath( const std::string & path, const std::string & relToDir )
         {
-            if (path.empty())
+            if ( path.empty() )
                 return std::string();
 
             static std::map< std::string, std::string > sNormalizedPaths;
 
-            std::map< std::string, std::string >::iterator ii = sNormalizedPaths.find(path);
-            if (ii != sNormalizedPaths.end())
+            std::map< std::string, std::string >::iterator ii = sNormalizedPaths.find( path );
+            if ( ii != sNormalizedPaths.end() )
             {
-                return (*ii).second;
+                return ( *ii ).second;
             }
 
-            std::string retVal = NStringUtils::stripQuotes(path);
+            std::string retVal = NStringUtils::stripQuotes( path );
 
             bool hasTilda = false;
             bool hasDot = false;
-            for (std::string::iterator ii = retVal.begin(); ii != retVal.end(); ++ii)
+            for ( std::string::iterator ii = retVal.begin(); ii != retVal.end(); ++ii )
             {
-                if (*ii == '\\')
+                if ( *ii == '\\' )
                     *ii = '/';
-                hasTilda = hasTilda || (*ii == '~');
-                hasDot = hasDot || (*ii == '.');
+                hasTilda = hasTilda || ( *ii == '~' );
+                hasDot = hasDot || ( *ii == '.' );
             }
 
-            if (hasTilda)
-                retVal = tilda2Home(retVal);
+            if ( hasTilda )
+                retVal = tilda2Home( retVal );
 
-            if (isRelativePath(retVal) && !relToDir.empty())
-                retVal = JoinPaths(relToDir, retVal);
+            if ( isRelativePath( retVal ) && !relToDir.empty() )
+                retVal = JoinPaths( relToDir, retVal );
 
             bool hasNonDotDot = false;
-            if (hasDot)
+            if ( hasDot )
             {
                 bool leadingSlash = *retVal.begin() == '/';
                 bool trailingSlash = *retVal.rbegin() == '/';
 
-                std::list< std::string > split = NStringUtils::splitString(retVal, '/', false);
+                std::list< std::string > split = NStringUtils::splitString( retVal, '/', false );
 
                 std::list< std::string > tmp;
-                for (std::list< std::string >::iterator ii = split.begin(); ii != split.end(); ++ii)
+                for ( std::list< std::string >::iterator ii = split.begin(); ii != split.end(); ++ii )
                 {
-                    if ((*ii).empty())
+                    if ( ( *ii ).empty() )
                         continue;
-                    if (*ii == ".")
+                    if ( *ii == "." )
                     {
-                        if (leadingSlash || !tmp.empty())
+                        if ( leadingSlash || !tmp.empty() )
                         {
                             continue;
                         }
                     }
-                    else if (*ii == "..")
+                    else if ( *ii == ".." )
                     {
-                        if (!tmp.empty() && hasNonDotDot)
+                        if ( !tmp.empty() && hasNonDotDot )
                         {
                             tmp.pop_back();
                             continue;
                         }
                     }
 
-                    if (*ii != ".." && *ii != ".")
+                    if ( *ii != ".." && *ii != "." )
                         hasNonDotDot = true;
-                    tmp.push_back(*ii);
+                    tmp.push_back( *ii );
                 }
-                if (tmp.empty())
+                if ( tmp.empty() )
                 {
-                    std::string currDir = normalizePath(relToDir.empty() ? getWd() : relToDir);
-                    tmp = NStringUtils::splitString(currDir, '/', false);
+                    std::string currDir = normalizePath( relToDir.empty() ? getWd() : relToDir );
+                    tmp = NStringUtils::splitString( currDir, '/', false );
                 }
-                retVal = NStringUtils::joinString(tmp, '/', true);
-                if (leadingSlash)
+                retVal = NStringUtils::joinString( tmp, '/', true );
+                if ( leadingSlash )
                 {
-                    retVal = NFileUtils::JoinPaths("/", retVal);
+                    retVal = NFileUtils::JoinPaths( "/", retVal );
                 }
-                if (trailingSlash)
+                if ( trailingSlash )
                 {
-                    retVal = NFileUtils::JoinPaths(retVal, "/");
+                    retVal = NFileUtils::JoinPaths( retVal, "/" );
                 }
             }
-            sNormalizedPaths[path] = retVal;
+            sNormalizedPaths[ path ] = retVal;
             return retVal;
         }
 
-        std::string JoinPaths(const std::string & dir, const std::string & inFile)
+        std::string JoinPaths( const std::string & dir, const std::string & inFile )
         {
-            std::string retVal = NStringUtils::stripQuotes(dir);
-            std::string file = NStringUtils::stripQuotes(inFile);
-            if ((!retVal.empty() && ((*retVal.rbegin()) != '/') && ((*retVal.rbegin()) != '\\')) &&
-                (!file.empty() && ((*file.begin()) != '/') && ((*file.begin()) != '\\'))
-                )
+            std::string retVal = NStringUtils::stripQuotes( dir );
+            std::string file = NStringUtils::stripQuotes( inFile );
+            if ( ( !retVal.empty() && ( ( *retVal.rbegin() ) != '/' ) && ( ( *retVal.rbegin() ) != '\\' ) ) &&
+                 ( !file.empty() && ( ( *file.begin() ) != '/' ) && ( ( *file.begin() ) != '\\' ) )
+                 )
                 retVal += '/';
             retVal += file;
             return retVal;
         }
 
-        std::string changeExtension(const std::string & path, const std::string & newExt)
+        std::string changeExtension( const std::string & path, const std::string & newExt )
         {
             std::string dir;
             std::string fileName;
             std::string ext;
-            extractFilePath(path, &dir, &fileName, &ext);
+            extractFilePath( path, &dir, &fileName, &ext );
 
             return dir + "/" + fileName + "." + newExt;
         }
 
-        bool copy(const std::string & fileName, const std::string & newFileName)
+        bool copy( const std::string & fileName, const std::string & newFileName )
         {
-            return QFile::copy(QString::fromStdString(fileName), QString::fromStdString(newFileName));
+            return QFile::copy( QString::fromStdString( fileName ), QString::fromStdString( newFileName ) );
         }
 
-        std::list< std::string > getSubDirs(const std::string & dirString, bool recursive, bool includeTopDir)
+        std::list< std::string > getSubDirs( const std::string & dirString, bool recursive, bool includeTopDir )
         {
-            QDir dir(QString::fromStdString(dirString));
-            if (!dir.exists())
+            QDir dir( QString::fromStdString( dirString ) );
+            if ( !dir.exists() )
                 return std::list< std::string >();
 
             QDirIterator::IteratorFlags flags = QDirIterator::FollowSymlinks | QDirIterator::Subdirectories;
 
             std::list< std::string > retVal;
-            if (includeTopDir)
+            if ( includeTopDir )
                 retVal = { dirString };
-            QDirIterator di(dir.absolutePath(), QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Readable, flags);
-            while (di.hasNext())
+            QDirIterator di( dir.absolutePath(), QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Readable, flags );
+            while ( di.hasNext() )
             {
                 QString str = di.next();
-                retVal.push_back(str.toStdString());
-                if (recursive)
+                retVal.push_back( str.toStdString() );
+                if ( recursive )
                 {
-                    auto subs = getSubDirs(str.toStdString(), true, false);
-                    retVal.insert(retVal.end(), subs.begin(), subs.end());
+                    auto subs = getSubDirs( str.toStdString(), true, false );
+                    retVal.insert( retVal.end(), subs.begin(), subs.end() );
                 }
             }
             return retVal;
         }
 
 
-        std::list< std::string > getDirsFromPath(const std::string & searchPath)
+        std::list< std::string > getDirsFromPath( const std::string & searchPath )
         {
-            if (searchPath.empty())
+            if ( searchPath.empty() )
                 return std::list< std::string >();
 
             char splitChar = ':';
 #ifdef Q_OS_WIN
             splitChar = ';';
 #endif
-            auto paths = NStringUtils::splitString(searchPath, splitChar, true);
+            auto paths = NStringUtils::splitString( searchPath, splitChar, true );
             return paths;
         }
 
-        std::string getPathFromDirs(const std::list< std::string > & dirs)
+        std::string getPathFromDirs( const std::list< std::string > & dirs )
         {
             char joinChar = ':';
 #ifdef Q_OS_WIN
             joinChar = ';';
 #endif
-            auto retVal = NStringUtils::joinString(dirs, joinChar, true);
+            auto retVal = NStringUtils::joinString( dirs, joinChar, true );
             return retVal;
         }
 
         static std::unordered_set< std::string, NStringUtils::noCaseStringHash, NStringUtils::noCaseStringEq > sSystemLibDirs;
         static std::unordered_map< std::string, std::string > sSystemFileMap;
 
-        std::string getSystemFileName(const std::string & fileName, const std::string & relToDir)
+        std::string getSystemFileName( const std::string & fileName, const std::string & relToDir )
         {
             static std::map< std::string, std::string > sFileNameMap;
-            std::map< std::string, std::string >::iterator ii = sFileNameMap.find(fileName);
-            if (ii == sFileNameMap.end())
+            std::map< std::string, std::string >::iterator ii = sFileNameMap.find( fileName );
+            if ( ii == sFileNameMap.end() )
             {
                 QDir cwd;
-                if (relToDir.empty())
-                    cwd.setPath(QDir::currentPath());
+                if ( relToDir.empty() )
+                    cwd.setPath( QDir::currentPath() );
                 else
-                    cwd = QDir(QString::fromStdString(relToDir));
+                    cwd = QDir( QString::fromStdString( relToDir ) );
 
-                QString fn = QString::fromStdString(NFileUtils::canonicalFilePath(fileName));
+                QString fn = QString::fromStdString( NFileUtils::canonicalFilePath( fileName ) );
                 std::string relPath;
-                if (!fn.isEmpty())
-                    relPath = NFileUtils::getRelativePath(cwd, fn).toStdString();
+                if ( !fn.isEmpty() )
+                    relPath = NFileUtils::getRelativePath( cwd, fn ).toStdString();
 
-                if (relPath.empty())
+                if ( relPath.empty() )
                     relPath = fileName;
 
-                sFileNameMap[fileName] = relPath;
+                sFileNameMap[ fileName ] = relPath;
                 return relPath;
             }
             else
-                return (*ii).second;
+                return ( *ii ).second;
             return fileName;
         }
 
-        void addSystemFileDirectories(const std::list< std::string > & dirs)
+        void addSystemFileDirectories( const std::list< std::string > & dirs )
         {
-            if (sSystemLibDirs.empty())
+            if ( sSystemLibDirs.empty() )
             {
-                sSystemLibDirs = std::unordered_set< std::string, NStringUtils::noCaseStringHash, NStringUtils::noCaseStringEq >({ "vhdl_packages", "verilog_packages", "ISE", "vivado", "vivado_2014_4", "vivado_2015_2", "15_0", "ProASIC3", "altera_packages" });
+                sSystemLibDirs = std::unordered_set< std::string, NStringUtils::noCaseStringHash, NStringUtils::noCaseStringEq >( { "vhdl_packages", "verilog_packages", "ISE", "vivado", "vivado_2014_4", "vivado_2015_2", "15_0", "ProASIC3", "altera_packages" } );
             }
-            for (auto ii : dirs)
+            for ( auto ii : dirs )
             {
-                sSystemLibDirs.insert(ii);
-                std::replace(ii.begin(), ii.end(), '.', '_');
-                sSystemLibDirs.insert(ii);
+                sSystemLibDirs.insert( ii );
+                std::replace( ii.begin(), ii.end(), '.', '_' );
+                sSystemLibDirs.insert( ii );
             }
         }
 
-        QStringList dumpResources(const QDir & resourceDir, bool ignoreInternal)
+        QStringList dumpResources( const QDir & resourceDir, bool ignoreInternal )
         {
             QStringList retVal;
 
             auto tmp = resourceDir.absolutePath();
-            QDirIterator it(resourceDir.absolutePath(), QStringList() << "*" << "*.*", QDir::NoDotAndDotDot | QDir::AllEntries);
-            while (it.hasNext())
+            QDirIterator it( resourceDir.absolutePath(), QStringList() << "*" << "*.*", QDir::NoDotAndDotDot | QDir::AllEntries );
+            while ( it.hasNext() )
             {
                 QString path = it.next();
                 QString realPath = path;
-                if (realPath.isEmpty())
+                if ( realPath.isEmpty() )
                     continue;
-                if (ignoreInternal &&
-                    (realPath.startsWith(":/trolltech")
-                        || realPath.startsWith(":/webkit")
-                        || realPath.startsWith(":/http:")
-                        || realPath.startsWith(":/qt-project.org")
-                        || realPath.startsWith(":/qpdf")
-                        )
-                    )
+                if ( ignoreInternal &&
+                     ( realPath.startsWith( ":/trolltech" )
+                     || realPath.startsWith( ":/webkit" )
+                     || realPath.startsWith( ":/http:" )
+                     || realPath.startsWith( ":/qt-project.org" )
+                     || realPath.startsWith( ":/qpdf" )
+                     )
+                     )
                     continue;
 
-                QFileInfo fi(path);
-                if (fi.isDir())
+                QFileInfo fi( path );
+                if ( fi.isDir() )
                 {
-                    retVal << dumpResources(QDir(path), ignoreInternal);
+                    retVal << dumpResources( QDir( path ), ignoreInternal );
                 }
                 else
                 {
@@ -1064,80 +1064,80 @@ namespace NSABUtils
         }
 
 
-        QStringList dumpResources(bool ignoreInternal)
+        QStringList dumpResources( bool ignoreInternal )
         {
-            return dumpResources(QDir(":/"), ignoreInternal);
+            return dumpResources( QDir( ":/" ), ignoreInternal );
         }
 
-        bool setTimeStamp(const QString& path, bool allTimeStamps, QString * msg)
+        bool setTimeStamp( const QString & path, bool allTimeStamps, QString * msg )
         {
-            return setTimeStamp(path, QDateTime::currentDateTime(), allTimeStamps, msg);
+            return setTimeStamp( path, QDateTime::currentDateTime(), allTimeStamps, msg );
         }
 
-        bool setTimeStamp(const QString & path, QFileDevice::FileTime ft, QString* msg)
+        bool setTimeStamp( const QString & path, QFileDevice::FileTime ft, QString * msg )
         {
-            return setTimeStamp(path, QDateTime::currentDateTime(), ft, msg);
+            return setTimeStamp( path, QDateTime::currentDateTime(), ft, msg );
         }
 
-        bool setTimeStamp(const QString& path, const QDateTime& dt, bool allTimeStamps, QString* msg)
+        bool setTimeStamp( const QString & path, const QDateTime & dt, bool allTimeStamps, QString * msg )
         {
-            if (!allTimeStamps)
-                return setTimeStamp(path, dt, msg);
+            if ( !allTimeStamps )
+                return setTimeStamp( path, dt, msg );
 
-            bool retVal = setTimeStamp(path, dt, QFileDevice::FileAccessTime, msg);
+            bool retVal = setTimeStamp( path, dt, QFileDevice::FileAccessTime, msg );
 #ifdef Q_OS_WIN
-            retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileBirthTime, msg);
+            retVal = retVal && setTimeStamp( path, dt, QFileDevice::FileBirthTime, msg );
 #endif
 
 #ifndef Q_OS_WIN
-            retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileMetadataChangeTime, msg);
+            retVal = retVal && setTimeStamp( path, dt, QFileDevice::FileMetadataChangeTime, msg );
 #endif
-            retVal = retVal && setTimeStamp(path, dt, QFileDevice::FileModificationTime, msg);
+            retVal = retVal && setTimeStamp( path, dt, QFileDevice::FileModificationTime, msg );
             return retVal;
         }
 
 #ifdef Q_OS_WINDOWS
-        QString getWindowsError(int errorCode)
+        QString getWindowsError( int errorCode )
         {
             QString ret;
 #ifndef Q_OS_WINRT
-            wchar_t *string = 0;
-            FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                errorCode,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPWSTR)&string,
-                0,
-                NULL);
-            ret = QString::fromWCharArray(string);
-            LocalFree((HLOCAL)string);
+            wchar_t * string = 0;
+            FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                            NULL,
+                            errorCode,
+                            MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                            (LPWSTR)&string,
+                            0,
+                            NULL );
+            ret = QString::fromWCharArray( string );
+            LocalFree( (HLOCAL)string );
 #else
-            wchar_t errorString[1024];
-            FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                errorCode,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPWSTR)&errorString,
-                sizeof(errorString) / sizeof(wchar_t),
-                NULL);
-            ret = QString::fromWCharArray(errorString);
+            wchar_t errorString[ 1024 ];
+            FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM,
+                           NULL,
+                           errorCode,
+                           MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                           (LPWSTR)&errorString,
+                           sizeof( errorString ) / sizeof( wchar_t ),
+                           NULL );
+            ret = QString::fromWCharArray( errorString );
 #endif  // Q_OS_WINRT
 
-            if (ret.isEmpty() && errorCode == ERROR_MOD_NOT_FOUND)
-                ret = QString::fromLatin1("The specified module could not be found.");
-            if (ret.endsWith(QLatin1String("\r\n")))
-                ret.chop(2);
-            if (ret.isEmpty())
-                ret = QString::fromLatin1("Unknown error 0x%1.")
-                .arg(unsigned(errorCode), 8, 16, QLatin1Char('0'));
+            if ( ret.isEmpty() && errorCode == ERROR_MOD_NOT_FOUND )
+                ret = QString::fromLatin1( "The specified module could not be found." );
+            if ( ret.endsWith( QLatin1String( "\r\n" ) ) )
+                ret.chop( 2 );
+            if ( ret.isEmpty() )
+                ret = QString::fromLatin1( "Unknown error 0x%1." )
+                .arg( unsigned( errorCode ), 8, 16, QLatin1Char( '0' ) );
             return ret;
         }
 
 
-        static inline bool toFileTime(const QDateTime &date, FILETIME *fileTime)
+        static inline bool toFileTime( const QDateTime & date, FILETIME * fileTime )
         {
             SYSTEMTIME sTime;
-            if (date.timeSpec() == Qt::LocalTime)
+            if ( date.timeSpec() == Qt::LocalTime )
             {
                 SYSTEMTIME lTime;
                 const QDate d = date.date();
@@ -1152,7 +1152,7 @@ namespace NSABUtils
                 lTime.wMilliseconds = t.msec();
                 lTime.wDayOfWeek = d.dayOfWeek() % 7;
 
-                if (!::TzSpecificLocalTimeToSystemTime(0, &lTime, &sTime))
+                if ( !::TzSpecificLocalTimeToSystemTime( 0, &lTime, &sTime ) )
                     return false;
             }
             else
@@ -1171,64 +1171,64 @@ namespace NSABUtils
                 sTime.wDayOfWeek = d.dayOfWeek() % 7;
             }
 
-            return ::SystemTimeToFileTime(&sTime, fileTime);
+            return ::SystemTimeToFileTime( &sTime, fileTime );
         }
 
-        bool setDirTimeStamp(HANDLE fHandle, const QDateTime &newDate, QFileDevice::FileTime time, QString * msg)
+        bool setDirTimeStamp( HANDLE fHandle, const QDateTime & newDate, QFileDevice::FileTime time, QString * msg )
         {
             FILETIME sysTime;
-            FILETIME *pLastWrite = NULL;
-            FILETIME *pLastAccess = NULL;
-            FILETIME *pCreationTime = NULL;
+            FILETIME * pLastWrite = NULL;
+            FILETIME * pLastAccess = NULL;
+            FILETIME * pCreationTime = NULL;
 
-            switch (time)
+            switch ( time )
             {
-            case QFileDevice::FileTime::FileModificationTime:
-                pLastWrite = &sysTime;
-                break;
+                case QFileDevice::FileTime::FileModificationTime:
+                    pLastWrite = &sysTime;
+                    break;
 
-            case QFileDevice::FileTime::FileAccessTime:
-                pLastAccess = &sysTime;
-                break;
+                case QFileDevice::FileTime::FileAccessTime:
+                    pLastAccess = &sysTime;
+                    break;
 
-            case QFileDevice::FileTime::FileBirthTime:
-                pCreationTime = &sysTime;
-                break;
+                case QFileDevice::FileTime::FileBirthTime:
+                    pCreationTime = &sysTime;
+                    break;
 
-            default:
-                if (msg)
-                    *msg = getWindowsError(ERROR_INVALID_PARAMETER);
-                return false;
+                default:
+                    if ( msg )
+                        *msg = getWindowsError( ERROR_INVALID_PARAMETER );
+                    return false;
             }
 
-            if (!toFileTime(newDate, &sysTime))
+            if ( !toFileTime( newDate, &sysTime ) )
                 return false;
 
-            if (!::SetFileTime(fHandle, pCreationTime, pLastAccess, pLastWrite))
+            if ( !::SetFileTime( fHandle, pCreationTime, pLastAccess, pLastWrite ) )
             {
-                if (msg)
-                    *msg = getWindowsError(::GetLastError());
+                if ( msg )
+                    *msg = getWindowsError( ::GetLastError() );
                 return false;
             }
             return true;
         }
 #endif
 
-        bool setDirTimeStamp(const QString &path, const QDateTime &dt, QFileDevice::FileTime ft, QString *msg)
+        bool setDirTimeStamp( const QString & path, const QDateTime & dt, QFileDevice::FileTime ft, QString * msg )
         {
             bool retVal = false;
 #ifdef Q_OS_WINDOWS
-            auto handle = CreateFileW((wchar_t *)path.utf16(), GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
-                FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL);
+            auto handle = CreateFileW( (wchar_t *)path.utf16(), GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+                                       FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL );
 
-            if (handle == INVALID_HANDLE_VALUE)
+            if ( handle == INVALID_HANDLE_VALUE )
             {
-                if (msg)
+                if ( msg )
                     *msg = "Could not open directory";
                 return false;
             }
-            retVal = setDirTimeStamp(handle, dt, ft, msg);
-            CloseHandle(handle);
+            retVal = setDirTimeStamp( handle, dt, ft, msg );
+            CloseHandle( handle );
 #else
             (void)path;
             (void)dt;
@@ -1239,201 +1239,201 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool setTimeStamp(const QString & path, const QDateTime & dt, QFileDevice::FileTime ft, QString* msg)
+        bool setTimeStamp( const QString & path, const QDateTime & dt, QFileDevice::FileTime ft, QString * msg )
         {
-            if (dt.isNull() || !dt.isValid())
+            if ( dt.isNull() || !dt.isValid() )
             {
-                return setTimeStamp(path, ft, msg);
+                return setTimeStamp( path, ft, msg );
             }
 
-            if (QFileInfo(path).isDir())
+            if ( QFileInfo( path ).isDir() )
             {
-                return setDirTimeStamp(path, dt, ft, msg);
+                return setDirTimeStamp( path, dt, ft, msg );
             }
-            QFile file(path);
-            if (!file.exists())
+            QFile file( path );
+            if ( !file.exists() )
             {
-                if (msg)
+                if ( msg )
                     *msg = "File does not exist";
                 return false;
             }
-            auto aOK = file.open(QFile::ReadWrite | QFile::ExistingOnly);
-            if (!aOK)
+            auto aOK = file.open( QFile::ReadWrite | QFile::ExistingOnly );
+            if ( !aOK )
             {
-                if (msg)
+                if ( msg )
                     *msg = "Could not open file to read information. Please check permissions.";
                 return false;
             }
-            aOK = file.setFileTime(dt, ft);
-            if (!aOK)
+            aOK = file.setFileTime( dt, ft );
+            if ( !aOK )
             {
-                if (msg)
+                if ( msg )
                     *msg = file.errorString();
             }
             return aOK;
         }
 
-        bool setTimeStamp(const QString& path, const QFileInfo & reference, QString* msg)
+        bool setTimeStamp( const QString & path, const QFileInfo & reference, QString * msg )
         {
-            if (!reference.exists() || !reference.isReadable())
+            if ( !reference.exists() || !reference.isReadable() )
                 return false;
 
-            QFileInfo tgt(path);
-            if (!tgt.exists() || !tgt.isWritable())
+            QFileInfo tgt( path );
+            if ( !tgt.exists() || !tgt.isWritable() )
                 return false;
 
-            QFile refFile(reference.absoluteFilePath());
+            QFile refFile( reference.absoluteFilePath() );
             bool aOK = true;
 
-            auto ts = refFile.fileTime(QFileDevice::FileAccessTime);
-            if (ts.isValid())
-                aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileAccessTime, msg);
+            auto ts = refFile.fileTime( QFileDevice::FileAccessTime );
+            if ( ts.isValid() )
+                aOK = aOK && setTimeStamp( path, ts, QFileDevice::FileAccessTime, msg );
 
 #ifdef Q_OS_WIN
-            ts = refFile.fileTime(QFileDevice::FileBirthTime);
-            if (ts.isValid())
-                aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileBirthTime, msg);
+            ts = refFile.fileTime( QFileDevice::FileBirthTime );
+            if ( ts.isValid() )
+                aOK = aOK && setTimeStamp( path, ts, QFileDevice::FileBirthTime, msg );
 #endif
 
 #ifndef Q_OS_WIN
-            ts = refFile.fileTime(QFileDevice::FileMetadataChangeTime);
-            if (ts.isValid())
-                aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileMetadataChangeTime, msg);
+            ts = refFile.fileTime( QFileDevice::FileMetadataChangeTime );
+            if ( ts.isValid() )
+                aOK = aOK && setTimeStamp( path, ts, QFileDevice::FileMetadataChangeTime, msg );
 #endif
 
-            ts = refFile.fileTime(QFileDevice::FileModificationTime);
-            if (ts.isValid())
-                aOK = aOK && setTimeStamp(path, ts, QFileDevice::FileModificationTime, msg);
+            ts = refFile.fileTime( QFileDevice::FileModificationTime );
+            if ( ts.isValid() )
+                aOK = aOK && setTimeStamp( path, ts, QFileDevice::FileModificationTime, msg );
 
             return aOK;
         }
 
-        bool setTimeStamps(const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > &timeStamps, QString *msg)
+        bool setTimeStamps( const QString & path, const std::unordered_map< QFileDevice::FileTime, QDateTime > & timeStamps, QString * msg )
         {
             bool aOK = true;
-            for (auto && ii : timeStamps)
+            for ( auto && ii : timeStamps )
             {
-                aOK = aOK && setTimeStamp(path, ii.second, ii.first, msg);
-                if (!aOK)
+                aOK = aOK && setTimeStamp( path, ii.second, ii.first, msg );
+                if ( !aOK )
                     return false;
             }
             return aOK;
         }
 
-        QDateTime timeStamp(const QString & path, QFileDevice::FileTime whichTimeStamp)
+        QDateTime timeStamp( const QString & path, QFileDevice::FileTime whichTimeStamp )
         {
-            auto fi = QFileInfo(path);
-            if (!fi.exists())
+            auto fi = QFileInfo( path );
+            if ( !fi.exists() )
                 return {};
-            return fi.fileTime(whichTimeStamp);
+            return fi.fileTime( whichTimeStamp );
         }
 
-        std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet)
+        std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps( const QString & path, const std::list< QFileDevice::FileTime > & timeStampsToGet )
         {
-            auto fi = QFileInfo(path);
-            if (!fi.exists())
+            auto fi = QFileInfo( path );
+            if ( !fi.exists() )
                 return {};
             std::unordered_map< QFileDevice::FileTime, QDateTime > retVal;
 
-            for (auto && ii : timeStampsToGet)
+            for ( auto && ii : timeStampsToGet )
             {
-                auto currTime = fi.fileTime(ii);
+                auto currTime = fi.fileTime( ii );
                 //qDebug() << "AccessTime: " << currTime;
-                retVal[ii] = currTime;
+                retVal[ ii ] = currTime;
             }
 
             return retVal;
         }
 
-        std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps(const QString & path)
+        std::unordered_map< QFileDevice::FileTime, QDateTime > timeStamps( const QString & path )
         {
             std::list< QFileDevice::FileTime > timeStampsToGet;
 
-            timeStampsToGet.push_back(QFile::FileAccessTime);
+            timeStampsToGet.push_back( QFile::FileAccessTime );
 #ifdef Q_OS_WIN
-            timeStampsToGet.push_back(QFile::FileBirthTime);
+            timeStampsToGet.push_back( QFile::FileBirthTime );
 #else
-            timeStampsToGet.push_back(QFile::FileMetadataChangeTime);
+            timeStampsToGet.push_back( QFile::FileMetadataChangeTime );
 #endif
-            timeStampsToGet.push_back(QFile::FileModificationTime);
-            return timeStamps(path, timeStampsToGet);
+            timeStampsToGet.push_back( QFile::FileModificationTime );
+            return timeStamps( path, timeStampsToGet );
         }
 
-        QDateTime oldestTimeStamp(const QString & path)
+        QDateTime oldestTimeStamp( const QString & path )
         {
-            auto allTimes = timeStamps(path);
+            auto allTimes = timeStamps( path );
 
             QDateTime retVal;
-            for (auto && ii : allTimes)
+            for ( auto && ii : allTimes )
             {
-                if (!retVal.isValid() || (retVal < ii.second))
+                if ( !retVal.isValid() || ( retVal < ii.second ) )
                     retVal = ii.second;
             }
             return retVal;
         }
 
-        bool fileHasAttribute(const QFileInfo & file, EAttribute attribute)
+        bool fileHasAttribute( const QFileInfo & file, EAttribute attribute )
         {
             bool retVal = false;
 #ifdef Q_OS_WIN
             DWORD winAttribute = 0;
-            switch (attribute)
+            switch ( attribute )
             {
-            case EAttribute::eArchive:
-                winAttribute = FILE_ATTRIBUTE_ARCHIVE;
-                break;
-            case EAttribute::eReadOnly:
-                winAttribute = FILE_ATTRIBUTE_READONLY;
-                break;
-            case EAttribute::eSystem:
-                winAttribute = FILE_ATTRIBUTE_SYSTEM;
-                break;
-            case EAttribute::eHidden:
-                winAttribute = FILE_ATTRIBUTE_HIDDEN;
-                break;
-            default:
-                retVal = false;
-                break;
+                case EAttribute::eArchive:
+                    winAttribute = FILE_ATTRIBUTE_ARCHIVE;
+                    break;
+                case EAttribute::eReadOnly:
+                    winAttribute = FILE_ATTRIBUTE_READONLY;
+                    break;
+                case EAttribute::eSystem:
+                    winAttribute = FILE_ATTRIBUTE_SYSTEM;
+                    break;
+                case EAttribute::eHidden:
+                    winAttribute = FILE_ATTRIBUTE_HIDDEN;
+                    break;
+                default:
+                    retVal = false;
+                    break;
             }
             auto fileName = file.absoluteFilePath();
-            DWORD attr = GetFileAttributesW((WCHAR *)fileName.utf16());
-            if (attr != INVALID_FILE_ATTRIBUTES)
-                retVal = (attr & winAttribute) != 0;
+            DWORD attr = GetFileAttributesW( (WCHAR *)fileName.utf16() );
+            if ( attr != INVALID_FILE_ATTRIBUTES )
+                retVal = ( attr & winAttribute ) != 0;
 #else
-            switch (attribute)
+            switch ( attribute )
             {
-            case EAttribute::eReadOnly:
-                retVal = !file.isReadable();
-                break;
-            case EAttribute::eHidden:
-                retVal = file.fileName().startsWith(".");
-                break;
-            default:
-                retVal = false;
-                break;
+                case EAttribute::eReadOnly:
+                    retVal = !file.isReadable();
+                    break;
+                case EAttribute::eHidden:
+                    retVal = file.fileName().startsWith( "." );
+                    break;
+                default:
+                    retVal = false;
+                    break;
             }
 #endif
             return retVal;
         }
 
-        bool isArchiveFile(const QFileInfo & file)
+        bool isArchiveFile( const QFileInfo & file )
         {
-            return fileHasAttribute(file, EAttribute::eArchive);
+            return fileHasAttribute( file, EAttribute::eArchive );
         }
 
-        bool isSystemFile(const QFileInfo & file)
+        bool isSystemFile( const QFileInfo & file )
         {
-            return fileHasAttribute(file, EAttribute::eSystem);
+            return fileHasAttribute( file, EAttribute::eSystem );
         }
 
-        bool isHiddenFile(const QFileInfo & file)
+        bool isHiddenFile( const QFileInfo & file )
         {
-            return fileHasAttribute(file, EAttribute::eHidden);
+            return fileHasAttribute( file, EAttribute::eHidden );
         }
 
-        bool isReadOnlyFile(const QFileInfo & file)
+        bool isReadOnlyFile( const QFileInfo & file )
         {
-            return fileHasAttribute(file, EAttribute::eReadOnly);
+            return fileHasAttribute( file, EAttribute::eReadOnly );
         }
 
         QString getCorrectPathCase( const QDir & dir, const QStringList & childPaths ) // note, on linux returns path, windows does the actual analysis

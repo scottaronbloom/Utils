@@ -35,7 +35,7 @@ namespace std
     template <>
     struct hash<QString>
     {
-        std::size_t operator()( const QString& k ) const
+        std::size_t operator()( const QString & k ) const
         {
             return qHash( k );
         }
@@ -52,7 +52,7 @@ namespace NSABUtils
         for ( auto ii = values.begin(); ii != values.end(); ++ii )
         {
             auto currValue = needsHash ? hasher( *ii ) : *ii;
-            retVal ^= currValue + 0x9e489236 + (retVal << 6) + (retVal >> 2);
+            retVal ^= currValue + 0x9e489236 + ( retVal << 6 ) + ( retVal >> 2 );
         }
         return retVal;
     }

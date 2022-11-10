@@ -38,10 +38,10 @@ namespace NSABUtils
         friend class CDoubleProgressDlgImpl;
         Q_OBJECT
     public:
-        CDoubleProgressDlg(const QString & text, const QString & subTitle, const QString & cancelText, int min, int max, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-        CDoubleProgressDlg(const QString & labelText, const QString & cancelText, int min, int max, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()); // subtitle = QString()
-        CDoubleProgressDlg(const QString & text, const QString & cancelText, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()); // subtitle = QString(), min max = 0, 100; 
-        CDoubleProgressDlg(QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()); // all defaults
+        CDoubleProgressDlg( const QString & text, const QString & subTitle, const QString & cancelText, int min, int max, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags() );
+        CDoubleProgressDlg( const QString & labelText, const QString & cancelText, int min, int max, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags() ); // subtitle = QString()
+        CDoubleProgressDlg( const QString & text, const QString & cancelText, QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags() ); // subtitle = QString(), min max = 0, 100; 
+        CDoubleProgressDlg( QWidget * parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags() ); // all defaults
         virtual ~CDoubleProgressDlg() override;
 
         int primaryValue() const;
@@ -57,7 +57,7 @@ namespace NSABUtils
         QString title() const;
         QString subTitle() const;
 
-        void setCancelButton(QPushButton * button);
+        void setCancelButton( QPushButton * button );
         QPushButton * cancelButton() const;
         QString cancelText() const;
 
@@ -66,10 +66,10 @@ namespace NSABUtils
         bool singleProgressBarMode() const; // default false
 
         int minumumDuration() const;
-        void setAutoClose(bool autoClose); // tied to primary value
+        void setAutoClose( bool autoClose ); // tied to primary value
         bool autoClose() const;
 
-        void setAutoReset(bool autoReset); // primary value
+        void setAutoReset( bool autoReset ); // primary value
         bool autoReset() const;
 
         int value() const;
@@ -88,45 +88,45 @@ namespace NSABUtils
 
     protected:
         virtual QSize sizeHint() const override;
-        virtual void closeEvent(QCloseEvent * e) override;
-        virtual void resizeEvent(QResizeEvent *) override;
-        virtual void changeEvent(QEvent * ev) override;
-        virtual void showEvent(QShowEvent * e) override;
+        virtual void closeEvent( QCloseEvent * e ) override;
+        virtual void resizeEvent( QResizeEvent * ) override;
+        virtual void changeEvent( QEvent * ev ) override;
+        virtual void showEvent( QShowEvent * e ) override;
     Q_SIGNALS:
         void canceled(); // 
     public Q_SLOTS:
         virtual void slotCanceled();
         virtual void cancel();
 
-        void setTitle(const QString & text);
-        void setSubTitle(const QString & text);
-        void setCancelButtonText(const QString & cancelText);
+        void setTitle( const QString & text );
+        void setSubTitle( const QString & text );
+        void setCancelButtonText( const QString & cancelText );
 
-        void setPrimaryProgressLabel(const QString & text);
+        void setPrimaryProgressLabel( const QString & text );
 
-        void setPrimaryValue(int value);
-        void setPrimaryRange(int min, int max);
-        void setPrimaryMinimum(int min) { setPrimaryRange(min, primaryMax()); }
-        void setPrimaryMaximum(int max) { setPrimaryRange(primaryMin(), max); }
-        void setPrimaryFormat(const QString & format);
+        void setPrimaryValue( int value );
+        void setPrimaryRange( int min, int max );
+        void setPrimaryMinimum( int min ) { setPrimaryRange( min, primaryMax() ); }
+        void setPrimaryMaximum( int max ) { setPrimaryRange( primaryMin(), max ); }
+        void setPrimaryFormat( const QString & format );
         void setPrimaryVisible( bool visible );
 
-        void setSecondaryProgressLabel(const QString & text);
-        void setSecondaryValue(int value);
-        void setSecondaryMinimum(int min) { setSecondaryRange(min, primaryMax()); }
-        void setSecondaryMaximum(int max) { setSecondaryRange(primaryMin(), max); }
-        void setSecondaryRange(int min, int max);
-        void setSecondaryFormat(const QString & format);
+        void setSecondaryProgressLabel( const QString & text );
+        void setSecondaryValue( int value );
+        void setSecondaryMinimum( int min ) { setSecondaryRange( min, primaryMax() ); }
+        void setSecondaryMaximum( int max ) { setSecondaryRange( primaryMin(), max ); }
+        void setSecondaryRange( int min, int max );
+        void setSecondaryFormat( const QString & format );
         void setSecondaryVisible( bool visible );
 
-        void setSingleProgressBarMode(bool value);
+        void setSingleProgressBarMode( bool value );
 
-        void setMinimumDuration(int msec);
-        void setValue(int value) { setPrimaryValue(value); }
-        void setRange(int min, int max) { setPrimaryRange(min, max); }
-        void setMinimum(int min) { setPrimaryMinimum(min); }
-        void setMaximum(int max) { setPrimaryMaximum(max); }
-        void setLabelText(const QString & text) { setTitle(text); }
+        void setMinimumDuration( int msec );
+        void setValue( int value ) { setPrimaryValue( value ); }
+        void setRange( int min, int max ) { setPrimaryRange( min, max ); }
+        void setMinimum( int min ) { setPrimaryMinimum( min ); }
+        void setMaximum( int max ) { setPrimaryMaximum( max ); }
+        void setLabelText( const QString & text ) { setTitle( text ); }
 
         void reset( bool canceled );
     protected Q_SLOTS:

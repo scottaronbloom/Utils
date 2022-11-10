@@ -459,8 +459,8 @@ namespace NSABUtils
             if ( query.first )
                 PdhCloseQuery( query.first );
         }
-        
-        std::unordered_map< size_t, double > getCPUCoreUtilizations( const std::pair< void *, void * >& query )
+
+        std::unordered_map< size_t, double > getCPUCoreUtilizations( const std::pair< void *, void * > & query )
         {
             auto status = PdhCollectQueryData( query.first );
             if ( status != ERROR_SUCCESS )
@@ -563,7 +563,7 @@ namespace NSABUtils
                 fUtilization[ ii - fProcNum ] = utilizationPercentage;
             }
         }
-        
+
         void dump() const
         {
             std::cout << "Processor ID: 0x" << std::setfill( '0' ) << std::hex << std::setw( 16 ) << fProcID << std::dec << "\n";
@@ -579,7 +579,7 @@ namespace NSABUtils
         }
         uint64_t fProcID{ 0 };
         size_t fNumLogicalCores{ 0 };
-        DWORD fNumaNodeNumber{ static_cast< DWORD >( -1 ) };
+        DWORD fNumaNodeNumber{ static_cast<DWORD>( -1 ) };
         bool fHasL1Cache{ false };
         bool fHasL2Cache{ false };
         bool fHasL3Cache{ false };
@@ -681,7 +681,7 @@ namespace NSABUtils
                 return {};
         }
 
-        auto buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)new uint8_t[ size ];
+        auto buffer = ( PSYSTEM_LOGICAL_PROCESSOR_INFORMATION )new uint8_t[ size ];
         if ( nullptr == buffer )
             return {};
 
@@ -698,15 +698,15 @@ namespace NSABUtils
             auto && ptr = buffer[ ii ];
 
             std::shared_ptr< SCPUInfo > currCPU;
-                auto pos = cpus.find( ptr.ProcessorMask );
-                if ( pos == cpus.end() )
-                {
-                    currCPU = std::make_shared< SCPUInfo >();
-                    currCPU->fProcID = ptr.ProcessorMask;
-                    cpus[ ptr.ProcessorMask ] = currCPU;
-                }
-                else
-                    currCPU = ( *pos ).second;
+            auto pos = cpus.find( ptr.ProcessorMask );
+            if ( pos == cpus.end() )
+            {
+                currCPU = std::make_shared< SCPUInfo >();
+                currCPU->fProcID = ptr.ProcessorMask;
+                cpus[ ptr.ProcessorMask ] = currCPU;
+            }
+            else
+                currCPU = ( *pos ).second;
 
             switch ( ptr.Relationship )
             {
@@ -898,7 +898,7 @@ namespace NSABUtils
             fSystemInformation.push_back( { "Boot Time", data[ "OS" ].front()[ "LastBootUpTime" ] } );
             fSystemInformation.push_back( { "Time Zone", data[ "OS" ].front()[ "CurrentTimeZone" ] } );
         }
-        
+
         pos = data.find( "CPU" );
         if ( ( pos != data.end() ) && !( *pos ).second.empty() )
         {
@@ -906,7 +906,7 @@ namespace NSABUtils
             for ( auto && ii : ( *pos ).second )
             {
                 std::ostringstream oss;
-                oss << ii[ "NumberOfCores" ] << " Core(s) - " << ii[ "Frequency" ] << " Frequency (Mhz) - " << ii["%Utilization"] << "% Utilization";
+                oss << ii[ "NumberOfCores" ] << " Core(s) - " << ii[ "Frequency" ] << " Frequency (Mhz) - " << ii[ "%Utilization" ] << "% Utilization";
                 fSystemInformation.push_back( { "CPU" + std::to_string( cpuNum++ ), oss.str() } );
             }
         }

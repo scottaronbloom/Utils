@@ -37,10 +37,10 @@ namespace NSABUtils
         {
         }
 
-        QImageIOPlugin::Capabilities CPlugin::capabilities(QIODevice *device, const QByteArray &format) const
+        QImageIOPlugin::Capabilities CPlugin::capabilities( QIODevice * device, const QByteArray & format ) const
         {
-            if (format == "bif" || (device && device->isReadable() && CIOHandler::canRead(device)))
-                return Capabilities(CanRead);
+            if ( format == "bif" || ( device && device->isReadable() && CIOHandler::canRead( device ) ) )
+                return Capabilities( CanRead );
             return {};
         }
 
@@ -48,21 +48,21 @@ namespace NSABUtils
         {
             static std::list<CIOHandler * > sHandlers;
             static int sLoopCount{ -1 };
-            void setLoopCount(int loopCount)
+            void setLoopCount( int loopCount )
             {
                 sLoopCount = loopCount;
-                for (auto && ii : sHandlers)
-                    ii->setLoopCount(loopCount);
+                for ( auto && ii : sHandlers )
+                    ii->setLoopCount( loopCount );
             }
         }
 
-        QImageIOHandler *CPlugin::create(QIODevice *device, const QByteArray &format) const
+        QImageIOHandler * CPlugin::create( QIODevice * device, const QByteArray & format ) const
         {
             auto handler = new CIOHandler;
-            handler->setDevice(device);
-            handler->setFormat(format);
-            handler->setLoopCount(NBIFPlugin::sLoopCount);
-            NBIFPlugin::sHandlers.push_back(handler);
+            handler->setDevice( device );
+            handler->setFormat( format );
+            handler->setLoopCount( NBIFPlugin::sLoopCount );
+            NBIFPlugin::sHandlers.push_back( handler );
             return handler;
         }
     }

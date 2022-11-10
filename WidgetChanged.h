@@ -32,7 +32,7 @@ namespace NSABUtils
 {
     // for a given model, when it changes at all call/connect to the given member on the reciever object
     // if excluded then it only disconnects, and doesnt connect to the model and reciever
-    SABUTILS_EXPORT void setupModelChanged( const QAbstractItemModel * model, const QObject * reciever, const char * member, bool isExcluded=false );
+    SABUTILS_EXPORT void setupModelChanged( const QAbstractItemModel * model, const QObject * reciever, const char * member, bool isExcluded = false );
     SABUTILS_EXPORT void setupModelChanged( const QAbstractItemModel * model, const QObject * reciever, const QMetaMethod & member, bool isExcluded = false );
 
     // for a given parent widget call/connect to the given member on the parent widget for all the child widgets of the parent

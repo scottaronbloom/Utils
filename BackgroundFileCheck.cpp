@@ -80,12 +80,12 @@ namespace NSABUtils
         void initThread()
         {
             fThread = new CBackgroundFileCheckThread( this );
-            QObject::connect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
+            QObject::connect( fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished );
         }
 
         void reinitThread()
         {
-            QObject::disconnect(fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished);
+            QObject::disconnect( fThread, &CBackgroundFileCheckThread::finished, fParent, &CBackgroundFileCheck::slotFinished );
             fThread->terminate();
             fThread->deleteLater();
             fThread = nullptr;
@@ -253,7 +253,7 @@ namespace NSABUtils
         }
 
         fImpl->dumpDebug( "checkPathInternal checkPerms: " );
-        if ( fImpl->canContinue() && (fImpl->fCheckPermissions != 0) && !fi.permission( fImpl->fCheckPermissions ) )
+        if ( fImpl->canContinue() && ( fImpl->fCheckPermissions != 0 ) && !fi.permission( fImpl->fCheckPermissions ) )
         {
             fImpl->fRetVal = std::make_pair( false, tr( "Pathname does not have the proper permissions" ) );
             return;
@@ -278,8 +278,8 @@ namespace NSABUtils
     {
 #ifdef DEBUG_BACKGROUND_FILE_CHECK
         static std::unordered_map< const CBackgroundFileCheckImpl *, int > hitCounts;
-        hitCounts[this]++;
-        qDebug() << this << hitCounts[this] << msg << fPathName << fStopped << fTimedOut << fThread->isRunning();
+        hitCounts[ this ]++;
+        qDebug() << this << hitCounts[ this ] << msg << fPathName << fStopped << fTimedOut << fThread->isRunning();
 #else
         (void)msg;
 #endif
@@ -316,7 +316,7 @@ namespace NSABUtils
 
     int CBackgroundFileCheck::timeOut() const
     {
-        return fImpl ->fTimeOut;
+        return fImpl->fTimeOut;
     }
 
     void CBackgroundFileCheck::setTimeOut( int val )

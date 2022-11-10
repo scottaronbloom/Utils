@@ -59,16 +59,16 @@ namespace NSABUtils
         void dumpIt();
         QString dumpText() const;
 
-        uint8_t fRed[256]{ 0 };
-        uint8_t fGreen[256]{ 0 };
-        uint8_t fBlue[256]{ 0 };
+        uint8_t fRed[ 256 ]{ 0 };
+        uint8_t fGreen[ 256 ]{ 0 };
+        uint8_t fBlue[ 256 ]{ 0 };
 
         // from online
         // use a kd tree over the RGB space in a heap fashion
         // left of child node is nodeNum * 2, right is NodeNum*2+1
         // nodes 256-2511 are the leaves containing a color
-        uint8_t fTreeSplitELT[256]{ 0 };
-        uint8_t fTreeSplit[256]{ 0 };
+        uint8_t fTreeSplitELT[ 256 ]{ 0 };
+        uint8_t fTreeSplit[ 256 ]{ 0 };
         bool fDither{ false };
         uint8_t * fTmpImage{ nullptr };
         int fImageWidth{ 0 };
@@ -79,7 +79,7 @@ namespace NSABUtils
     CGIFWriter::CGIFWriter()
     {
     }
-    
+
     CGIFWriter::CGIFWriter( const QString & filename ) :
         CGIFWriter( new QFile( filename ) )
     {
@@ -92,20 +92,20 @@ namespace NSABUtils
         fDataStream( device )
     {
     }
-    
+
     CGIFWriter::~CGIFWriter()
     {
         setDevice( nullptr );
         if ( fPrevFrameData )
-            delete [] fPrevFrameData;
+            delete[] fPrevFrameData;
     }
-    
+
     void CGIFWriter::setFileName( const QString & fileName )
     {
         setDevice( new QFile( fileName ) );
         fDeleteDevice = true;
     }
-    
+
     void CGIFWriter::setDevice( QIODevice * device )
     {
         if ( fDeleteDevice )
@@ -153,8 +153,8 @@ namespace NSABUtils
     {
         if ( !status( ds ) )
             return false;
-        ds << (uint8_t)(val & 0xff);
-        ds << (uint8_t)((val >> 8) & 0xff);
+        ds << (uint8_t)( val & 0xff );
+        ds << (uint8_t)( ( val >> 8 ) & 0xff );
         return status( ds );
     }
 
@@ -181,7 +181,7 @@ namespace NSABUtils
         ds.writeRawData( str, len );
         return status( ds );
     }
-    
+
     bool CGIFWriter::writeHeader()
     {
         if ( fHeaderWritten )
@@ -198,7 +198,7 @@ namespace NSABUtils
 
         fFirstFrame = true;
         auto numBytes = numPixels() * (uint8_t)4;
-        fPrevFrameData = new uint8_t[numBytes];
+        fPrevFrameData = new uint8_t[ numBytes ];
         std::memset( fPrevFrameData, 0, numBytes );
 
         writeString( "GIF" ); // signature
@@ -240,7 +240,7 @@ namespace NSABUtils
             return false;
 
         writeChar( 0x3b );
-        
+
         return status();
     }
 
@@ -257,7 +257,7 @@ namespace NSABUtils
             return false;
 
         writeCurrImage();
-        
+
         if ( lastFrame )
             writeEnd();
 
@@ -266,9 +266,9 @@ namespace NSABUtils
 
     bool CGIFWriter::pixelCompare( const uint8_t * lhs, const uint8_t * rhs, int pixelNum )
     {
-        return (lhs[pixelNum] == rhs[pixelNum])
-            && (lhs[pixelNum + 1] == rhs[pixelNum + 1])
-            && (lhs[pixelNum + 2] == rhs[pixelNum + 2]);
+        return ( lhs[ pixelNum ] == rhs[ pixelNum ] )
+            && ( lhs[ pixelNum + 1 ] == rhs[ pixelNum + 1 ] )
+            && ( lhs[ pixelNum + 2 ] == rhs[ pixelNum + 2 ] );
     }
 
     bool CGIFWriter::pixelCompare( const uint8_t * lhs, const uint8_t * rhs )
@@ -297,37 +297,37 @@ namespace NSABUtils
             return;
 
         auto numPixels = this->numPixels();
-       
-        auto quantPixels = new int32_t[sizeof( int32_t ) * numPixels * 4 ]; // has to support more than 8 bits
+
+        auto quantPixels = new int32_t[ sizeof( int32_t ) * numPixels * 4 ]; // has to support more than 8 bits
         auto imagePixels = NSABUtils::imageToPixels( fCurrImage );
 
-        for ( int ii = 0; ii < 4*numPixels; ++ii )
+        for ( int ii = 0; ii < 4 * numPixels; ++ii )
         {
-            auto pix = imagePixels[ii];
-            auto pix256 = static_cast<uint32_t>(pix) * 256;
-            quantPixels[ii] = pix256;
+            auto pix = imagePixels[ ii ];
+            auto pix256 = static_cast<uint32_t>( pix ) * 256;
+            quantPixels[ ii ] = pix256;
         }
 
-        for( int currRow = 0; currRow < fCurrImage.height(); ++currRow )
+        for ( int currRow = 0; currRow < fCurrImage.height(); ++currRow )
         {
             for ( int currCol = 0; currCol < fCurrImage.width(); ++currCol )
             {
-                auto pixelNumber = (currRow * fCurrImage.width()) + currCol;
+                auto pixelNumber = ( currRow * fCurrImage.width() ) + currCol;
                 auto byteNumber = 4 * pixelNumber;
                 int32_t * nextPixel = quantPixels + byteNumber;
                 const auto lastPix = prevImage ? ( prevImage + byteNumber ) : nullptr;
 
-                uint32_t rr = (nextPixel[0] + 127) / 256;
-                uint32_t gg = (nextPixel[1] + 127) / 256;
-                uint32_t bb = (nextPixel[2] + 127) / 256;
+                uint32_t rr = ( nextPixel[ 0 ] + 127 ) / 256;
+                uint32_t gg = ( nextPixel[ 1 ] + 127 ) / 256;
+                uint32_t bb = ( nextPixel[ 2 ] + 127 ) / 256;
 
-                if ( prevImage && 
-                     (pixelCompare( prevImage, { rr, gg, bb } ) ) )
+                if ( prevImage &&
+                     ( pixelCompare( prevImage, { rr, gg, bb } ) ) )
                 {
-                    nextPixel[0] = rr;
-                    nextPixel[1] = gg;
-                    nextPixel[2] = bb;
-                    nextPixel[3] = kTransparentIndex;
+                    nextPixel[ 0 ] = rr;
+                    nextPixel[ 1 ] = gg;
+                    nextPixel[ 2 ] = bb;
+                    nextPixel[ 3 ] = kTransparentIndex;
                     continue;
                 }
 
@@ -335,14 +335,14 @@ namespace NSABUtils
                 uint32_t bestDifference = 1000000;
                 fPalette->closestColor( rr, gg, bb, 1, bestIndex, bestDifference );
 
-                int32_t rErr = nextPixel[0] - (int32_t)fPalette->fRed[bestIndex] * 256;
-                int32_t gErr = nextPixel[1] - (int32_t)fPalette->fGreen[bestIndex] * 256;
-                int32_t bErr = nextPixel[2] - (int32_t)fPalette->fBlue[bestIndex] * 256;
+                int32_t rErr = nextPixel[ 0 ] - (int32_t)fPalette->fRed[ bestIndex ] * 256;
+                int32_t gErr = nextPixel[ 1 ] - (int32_t)fPalette->fGreen[ bestIndex ] * 256;
+                int32_t bErr = nextPixel[ 2 ] - (int32_t)fPalette->fBlue[ bestIndex ] * 256;
 
-                nextPixel[0] = fPalette->fRed[bestIndex];
-                nextPixel[1] = fPalette->fGreen[bestIndex];
-                nextPixel[2] = fPalette->fBlue[bestIndex];
-                nextPixel[3] = bestIndex;
+                nextPixel[ 0 ] = fPalette->fRed[ bestIndex ];
+                nextPixel[ 1 ] = fPalette->fGreen[ bestIndex ];
+                nextPixel[ 2 ] = fPalette->fBlue[ bestIndex ];
+                nextPixel[ 3 ] = bestIndex;
 
                 // propagate the error to the adjacent locations
                 auto quantLoc7 = pixelNumber + 1;  // to the right
@@ -360,7 +360,7 @@ namespace NSABUtils
         int numBytes = 0;
         for ( int ii = 0; ii < numPixels * 4; ++ii )
         {
-            fPrevFrameData[ii] = static_cast<uint8_t>(quantPixels[ii]);
+            fPrevFrameData[ ii ] = static_cast<uint8_t>( quantPixels[ ii ] );
             numBytes++;
         }
 
@@ -372,14 +372,14 @@ namespace NSABUtils
     {
         if ( loc < numPixels() )
         {
-            auto pixel = quantPixels + 4*loc;
+            auto pixel = quantPixels + 4 * loc;
             rErr = rErr * quantMultiplier / 16;
             gErr = gErr * quantMultiplier / 16;
             bErr = bErr * quantMultiplier / 16;
 
-            pixel[0] += std::max( -pixel[0], rErr );
-            pixel[1] += std::max( -pixel[1], gErr );
-            pixel[2] += std::max( -pixel[2], bErr );
+            pixel[ 0 ] += std::max( -pixel[ 0 ], rErr );
+            pixel[ 1 ] += std::max( -pixel[ 1 ], gErr );
+            pixel[ 2 ] += std::max( -pixel[ 2 ], bErr );
         }
     }
 
@@ -397,20 +397,20 @@ namespace NSABUtils
         {
             if ( lastLoc && pixelCompare( imageLoc, lastLoc ) )
             {
-                outLoc[0] = imageLoc[0];
-                outLoc[1] = imageLoc[1];
-                outLoc[2] = imageLoc[2];
-                outLoc[3] = kTransparentIndex;
+                outLoc[ 0 ] = imageLoc[ 0 ];
+                outLoc[ 1 ] = imageLoc[ 1 ];
+                outLoc[ 2 ] = imageLoc[ 2 ];
+                outLoc[ 3 ] = kTransparentIndex;
             }
             else
             {
                 uint32_t bestIndex = 1;
                 uint32_t bestDifference = 1000000;
-                fPalette->closestColor( imageLoc[0], imageLoc[1], imageLoc[2], 1, bestIndex, bestDifference );
-                outLoc[0] = fPalette->fRed[bestIndex];
-                outLoc[1] = fPalette->fGreen[bestIndex];
-                outLoc[2] = fPalette->fBlue[bestIndex];
-                outLoc[3] = bestIndex;
+                fPalette->closestColor( imageLoc[ 0 ], imageLoc[ 1 ], imageLoc[ 2 ], 1, bestIndex, bestDifference );
+                outLoc[ 0 ] = fPalette->fRed[ bestIndex ];
+                outLoc[ 1 ] = fPalette->fGreen[ bestIndex ];
+                outLoc[ 2 ] = fPalette->fBlue[ bestIndex ];
+                outLoc[ 3 ] = bestIndex;
             }
 
             if ( lastLoc )
@@ -422,14 +422,15 @@ namespace NSABUtils
 
     struct SLZWNode
     {
-        uint16_t fNext[256];
+        uint16_t fNext[ 256 ];
     };
 
     struct SBitStatus
     {
         SBitStatus( QDataStream & ds ) :
             fDataStream( ds )
-        {}
+        {
+        }
 
         void write( uint32_t bit )
         {
@@ -441,7 +442,7 @@ namespace NSABUtils
             ++fBitIndex;
             if ( fBitIndex > 7 )
             {
-                fChunk[fChunkIndex++] = fByte;
+                fChunk[ fChunkIndex++ ] = fByte;
                 fBitIndex = 0;
                 fByte = 0;
             }
@@ -488,14 +489,14 @@ namespace NSABUtils
         void dump() const
         {
             qDebug().noquote().nospace() << "dump: " << fBitIndex << " " << fByte << " " << fChunkIndex;
-            qDebug().noquote().nospace() << NSABUtils::dumpArray( "Palette Status", fChunk, fChunk, 256, true, 32  );
+            qDebug().noquote().nospace() << NSABUtils::dumpArray( "Palette Status", fChunk, fChunk, 256, true, 32 );
         }
 
         QDataStream & fDataStream;
         uint8_t fBitIndex{ 0 };
         uint8_t fByte{ 0 };
         uint32_t fChunkIndex{ 0 };
-        uint8_t fChunk[256] = { 0 };
+        uint8_t fChunk[ 256 ] = { 0 };
     };
 
     bool CGIFWriter::writeLZW( uint32_t left, uint32_t top, const uint8_t * imagePixels )
@@ -529,7 +530,7 @@ namespace NSABUtils
         std::vector< SLZWNode > codeTree( 4096 );
         int currCode = -1;
         uint32_t codeSize = minCodeSize + 1;
-        uint32_t maxCode = clearCode+1;
+        uint32_t maxCode = clearCode + 1;
 
         SBitStatus bitStatus( fDataStream );
         bitStatus.write( clearCode, codeSize );
@@ -540,10 +541,10 @@ namespace NSABUtils
         {
             for ( int currCol = 0; currCol < width; ++currCol )
             {
-                auto pixelNumber = (currRow * width) + currCol;
+                auto pixelNumber = ( currRow * width ) + currCol;
                 auto byteNumber = 4 * pixelNumber;
 
-                auto nextValue = fFlipImage ? imagePixels[((height - 1 - currRow) * width + currCol) * 4 + 3] : imagePixels[byteNumber + 3];
+                auto nextValue = fFlipImage ? imagePixels[ ( ( height - 1 - currRow ) * width + currCol ) * 4 + 3 ] : imagePixels[ byteNumber + 3 ];
 
                 if ( currCode < 0 )
                 {
@@ -551,14 +552,14 @@ namespace NSABUtils
                 }
                 else if ( codeTree[ currCode ].fNext[ nextValue ] )
                 {
-                    currCode = codeTree[currCode].fNext[nextValue];
+                    currCode = codeTree[ currCode ].fNext[ nextValue ];
                 }
                 else
                 {
                     bitStatus.write( currCode, codeSize );
-                    codeTree[currCode].fNext[nextValue] = ++maxCode;
+                    codeTree[ currCode ].fNext[ nextValue ] = ++maxCode;
 
-                    if ( maxCode >= (1ul << codeSize) )
+                    if ( maxCode >= ( 1ul << codeSize ) )
                         codeSize++;
                     if ( maxCode == 4095 )
                     {
@@ -580,7 +581,7 @@ namespace NSABUtils
     {
         if ( !status() )
             return false;
-        
+
         auto prevImage = fFirstFrame ? nullptr : fPrevFrameData;
         fFirstFrame = false;
 
@@ -609,9 +610,9 @@ namespace NSABUtils
         const auto splitDist = splitELT / 2;
 
         splitPalette( fTmpImage, numPixels, 1, lastELT, splitELT, splitDist, 1 );
-        uint32_t pos = (uint32_t)1 << (bitDepth - 1);
-        fTreeSplit[pos] = 0;
-        fTreeSplitELT[pos] = 0;
+        uint32_t pos = (uint32_t)1 << ( bitDepth - 1 );
+        fTreeSplit[ pos ] = 0;
+        fTreeSplitELT[ pos ] = 0;
         setRed( 0, 0 );
         setGreen( 0, 0 );
         setBlue( 0, 0 );
@@ -625,9 +626,9 @@ namespace NSABUtils
 
     void SGIFPalette::splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum )
     {
-        if ( (lastELT <= firstELT) || (numPixels == 0) )
+        if ( ( lastELT <= firstELT ) || ( numPixels == 0 ) )
             return;
-        if ( lastELT == (firstELT + 1) )
+        if ( lastELT == ( firstELT + 1 ) )
         {
             if ( fDither )
             {
@@ -637,7 +638,7 @@ namespace NSABUtils
                     return;
                 }
 
-                if ( firstELT == (1 << fBitDepth) - 1 )
+                if ( firstELT == ( 1 << fBitDepth ) - 1 )
                 {
                     setRGBToMinMax( image, numPixels, firstELT, false );
                     return;
@@ -652,16 +653,16 @@ namespace NSABUtils
         int subPixelsB = -1;
         std::tie( splitOffset, subPixelsA, subPixelsB ) = compuiteRGBRanges( numPixels, image, splitELT, firstELT, lastELT );
 
-    
+
         partitionByMedian( image, 0, numPixels, splitOffset, subPixelsA );
 
-        fTreeSplitELT[treeNodeNum] = splitOffset;
-        fTreeSplit[treeNodeNum] = image[subPixelsA * 4 + splitOffset];
+        fTreeSplitELT[ treeNodeNum ] = splitOffset;
+        fTreeSplit[ treeNodeNum ] = image[ subPixelsA * 4 + splitOffset ];
 
         splitPalette( image, subPixelsA, firstELT, splitELT, splitELT - splitDIST, splitDIST / 2, treeNodeNum * 2 );
-        splitPalette( image + subPixelsA * 4, subPixelsB, splitELT, lastELT, splitELT + splitDIST, splitDIST / 2, (treeNodeNum * 2) + 1 );
+        splitPalette( image + subPixelsA * 4, subPixelsB, splitELT, lastELT, splitELT + splitDIST, splitDIST / 2, ( treeNodeNum * 2 ) + 1 );
     }
-    
+
     std::tuple< uint8_t, int, int > SGIFPalette::compuiteRGBRanges( int numPixels, const uint8_t * image, int splitELT, int firstELT, int lastELT )
     {
         uint8_t minR = 255;
@@ -674,9 +675,9 @@ namespace NSABUtils
 
         for ( int ii = 0; ii < numPixels; ++ii )
         {
-            auto r = image[ii * 4 + 0];
-            auto g = image[ii * 4 + 1];
-            auto b = image[ii * 4 + 2];
+            auto r = image[ ii * 4 + 0 ];
+            auto g = image[ ii * 4 + 1 ];
+            auto b = image[ ii * 4 + 2 ];
 
             maxR = std::max( r, maxR );
             minR = std::min( r, minR );
@@ -695,29 +696,29 @@ namespace NSABUtils
         uint8_t splitOffset = 1;
         if ( bRange > gRange )
             splitOffset = 2;
-        if ( (rRange > bRange) && (rRange > gRange) )
+        if ( ( rRange > bRange ) && ( rRange > gRange ) )
             splitOffset = 0;
 
-        auto subPixelsA = numPixels * (splitELT - firstELT) / (lastELT - firstELT);
+        auto subPixelsA = numPixels * ( splitELT - firstELT ) / ( lastELT - firstELT );
         auto subPixelsB = numPixels - subPixelsA;
         return std::make_tuple( splitOffset, subPixelsA, subPixelsB );
     }
 
     void SGIFPalette::swap( uint8_t * image, int lhs, int rhs )
     {
-        for( int ii = 0; ii <= 3; ++ii )
-            std::swap( image[(lhs * 4)+ii], image[(rhs * 4) + ii] );
+        for ( int ii = 0; ii <= 3; ++ii )
+            std::swap( image[ ( lhs * 4 ) + ii ], image[ ( rhs * 4 ) + ii ] );
     }
 
     int SGIFPalette::partition( uint8_t * image, int left, int right, const int elt, int pivot )
     {
-        auto pivotValue = image[(pivot * 4) + elt];
+        auto pivotValue = image[ ( pivot * 4 ) + elt ];
         swap( image, pivot, right - 1 );
         auto storedIndex = left;
         bool split = false;
         for ( int ii = left; ii < right - 1; ++ii )
         {
-            auto val = image[(ii * 4) + elt];
+            auto val = image[ ( ii * 4 ) + elt ];
             if ( val < pivotValue )
             {
                 swap( image, ii, storedIndex );
@@ -739,14 +740,14 @@ namespace NSABUtils
 
     void SGIFPalette::partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter )
     {
-        if ( left < right-1 )
+        if ( left < right - 1 )
         {
-            auto pivot = left + (right - left) / 2;
+            auto pivot = left + ( right - left ) / 2;
             pivot = partition( image, left, right, com, pivot );
             if ( pivot > neededCenter )
                 partitionByMedian( image, left, pivot, com, neededCenter );
 
-            if (pivot < neededCenter )
+            if ( pivot < neededCenter )
                 partitionByMedian( image, pivot + 1, right, com, neededCenter );
         }
     }
@@ -760,14 +761,14 @@ namespace NSABUtils
 
         for ( int ii = 0; ii < numPixels; ++ii )
         {
-            r += image[ii * 4 + 0];
-            g += image[ii * 4 + 1];
-            b += image[ii * 4 + 2];
+            r += image[ ii * 4 + 0 ];
+            g += image[ ii * 4 + 1 ];
+            b += image[ ii * 4 + 2 ];
         }
 
-        r += ((uint64_t)numPixels) / 2;
-        g += ((uint64_t)numPixels) / 2;
-        b += ((uint64_t)numPixels) / 2;
+        r += ( (uint64_t)numPixels ) / 2;
+        g += ( (uint64_t)numPixels ) / 2;
+        b += ( (uint64_t)numPixels ) / 2;
 
         r /= (uint64_t)numPixels;
         g /= (uint64_t)numPixels;
@@ -780,16 +781,16 @@ namespace NSABUtils
 
     void SGIFPalette::closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const
     {
-        if ( treeNodeNumber > (1 << fBitDepth) - 1 )
+        if ( treeNodeNumber > ( 1 << fBitDepth ) - 1 )
         {
-            int index = treeNodeNumber - (1 << fBitDepth);
+            int index = treeNodeNumber - ( 1 << fBitDepth );
             if ( index != CGIFWriter::kTransparentIndex )
             {
-                auto rError = rr - (int32_t)fRed[index];
-                auto gError = gg - (int32_t)fGreen[index];
-                auto bError = bb - (int32_t)fBlue[index];
+                auto rError = rr - (int32_t)fRed[ index ];
+                auto gError = gg - (int32_t)fGreen[ index ];
+                auto bError = bb - (int32_t)fBlue[ index ];
 
-                auto diff = static_cast<uint32_t>(std::abs( rError ) + std::abs( gError ) + std::abs( bError ));
+                auto diff = static_cast<uint32_t>( std::abs( rError ) + std::abs( gError ) + std::abs( bError ) );
                 if ( diff < bestDifference )
                 {
                     bestIndex = index;
@@ -799,21 +800,21 @@ namespace NSABUtils
         }
         else
         {
-            int32_t comps[3] = { rr, gg, bb };
-            uint32_t splitCompare = comps[fTreeSplitELT[treeNodeNumber]];
-            auto splitPos = fTreeSplit[treeNodeNumber];
+            int32_t comps[ 3 ] = { rr, gg, bb };
+            uint32_t splitCompare = comps[ fTreeSplitELT[ treeNodeNumber ] ];
+            auto splitPos = fTreeSplit[ treeNodeNumber ];
             if ( splitPos > splitCompare )
             {
                 closestColor( rr, gg, bb, treeNodeNumber * 2, bestIndex, bestDifference );
-                if ( bestDifference > (splitPos - splitCompare) )
+                if ( bestDifference > ( splitPos - splitCompare ) )
                 {
-                    closestColor( rr, gg, bb, (treeNodeNumber * 2) + 1, bestIndex, bestDifference );
+                    closestColor( rr, gg, bb, ( treeNodeNumber * 2 ) + 1, bestIndex, bestDifference );
                 }
             }
             else
             {
-                closestColor( rr, gg, bb, (treeNodeNumber * 2) + 1, bestIndex, bestDifference );
-                if ( bestDifference > (splitCompare - splitPos ) )
+                closestColor( rr, gg, bb, ( treeNodeNumber * 2 ) + 1, bestIndex, bestDifference );
+                if ( bestDifference > ( splitCompare - splitPos ) )
                 {
                     closestColor( rr, gg, bb, treeNodeNumber * 2, bestIndex, bestDifference );
                 }
@@ -829,15 +830,15 @@ namespace NSABUtils
 
         for ( int ii = 0; ii < numPixels; ++ii )
         {
-            auto currR = image[ii * 4 + 0];
-            auto currG = image[ii * 4 + 1];
-            auto currB = image[ii * 4 + 2];
+            auto currR = image[ ii * 4 + 0 ];
+            auto currG = image[ ii * 4 + 1 ];
+            auto currB = image[ ii * 4 + 2 ];
             r = min ? std::min( r, currR ) : std::max( r, currR );
             g = min ? std::min( g, currG ) : std::max( g, currG );
             b = min ? std::min( b, currB ) : std::max( b, currB );
         }
 
-        setRed(location, r );
+        setRed( location, r );
         setGreen( location, g );
         setBlue( location, b );
     }
@@ -855,9 +856,9 @@ namespace NSABUtils
         {
             if ( !CGIFWriter::pixelCompare( prevImage, currImage, ii ) )
             {
-                writePos[0] = currImage[ii];
-                writePos[1] = currImage[ii + 1];
-                writePos[2] = currImage[ii + 2];
+                writePos[ 0 ] = currImage[ ii ];
+                writePos[ 1 ] = currImage[ ii + 1 ];
+                writePos[ 2 ] = currImage[ ii + 2 ];
 
                 ++retVal;
                 writePos += 4;
@@ -876,11 +877,11 @@ namespace NSABUtils
         CGIFWriter::writeChar( 0, ds );
         CGIFWriter::writeChar( 0, ds );
 
-        for ( int ii = 1; CGIFWriter::status( ds ) && ( ii < (1 << fBitDepth) ); ++ii )
+        for ( int ii = 1; CGIFWriter::status( ds ) && ( ii < ( 1 << fBitDepth ) ); ++ii )
         {
-            auto rr = fRed[ii];
-            auto gg = fGreen[ii];
-            auto bb = fBlue[ii];
+            auto rr = fRed[ ii ];
+            auto gg = fGreen[ ii ];
+            auto bb = fBlue[ ii ];
 
             CGIFWriter::writeChar( rr, ds );
             CGIFWriter::writeChar( gg, ds );
@@ -893,19 +894,19 @@ namespace NSABUtils
 
     void SGIFPalette::setRed( int location, uint8_t val )
     {
-        fRed[location] = val;
+        fRed[ location ] = val;
     }
 
     void SGIFPalette::setBlue( int location, uint8_t val )
     {
-        fBlue[location] = val;
+        fBlue[ location ] = val;
     }
 
     void SGIFPalette::setGreen( int location, uint8_t val )
     {
-        fGreen[location] = val;
+        fGreen[ location ] = val;
     }
-    
+
     void SGIFPalette::dumpIt()
     {
         qDebug().noquote().nospace() << dumpText();
@@ -914,9 +915,9 @@ namespace NSABUtils
     QString SGIFPalette::dumpText() const
     {
         QString retVal;
-        retVal = "Red:\n"   + NSABUtils::dumpArray( "Palette Red",   fRed,   fRed,   256, true ) + "\n"
-              +  "Blue:\n"  + NSABUtils::dumpArray( "Palette Blue",  fBlue,  fBlue,  256, true ) + "\n"
-              +  "Green:\n" + NSABUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
+        retVal = "Red:\n" + NSABUtils::dumpArray( "Palette Red", fRed, fRed, 256, true ) + "\n"
+            + "Blue:\n" + NSABUtils::dumpArray( "Palette Blue", fBlue, fBlue, 256, true ) + "\n"
+            + "Green:\n" + NSABUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
             ;
         return retVal;
     }

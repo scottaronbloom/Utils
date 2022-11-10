@@ -22,6 +22,7 @@
 
 #include "MKVUtils.h"
 #include "utils.h"
+#include "HashUtils.h"
 #include "MKVReader/MKVReader.h"
 
 #include <QFileInfo>
@@ -67,7 +68,7 @@ namespace NSABUtils
 
         MI.Open( fileName.toStdWString() );
 
-        for ( MediaInfoDLL::stream_t ii = MediaInfoDLL::Stream_General; ii < MediaInfoDLL::Stream_Max; ii = static_cast<MediaInfoDLL::stream_t>(static_cast<int>(ii) + 1) )
+        for ( MediaInfoDLL::stream_t ii = MediaInfoDLL::Stream_General; ii < MediaInfoDLL::Stream_Max; ii = static_cast<MediaInfoDLL::stream_t>( static_cast<int>( ii ) + 1 ) )
         {
             auto streamCount = MI.Count_Get( ii );
             for ( int jj = 0; jj < streamCount; ++jj )
@@ -80,7 +81,7 @@ namespace NSABUtils
                     auto name = QString::fromStdWString( MI.Get( ii, jj, kk, MediaInfoDLL::Info_Name ) );
                     auto value = QString::fromStdWString( MI.Get( ii, jj, kk ) );
                     data.fStreamData.emplace_back( std::make_pair( name, value ) );
-                    data.fStreamDataMap[name] = value;
+                    data.fStreamDataMap[ name ] = value;
                 }
                 retVal.fData.emplace_back( data );
             }
@@ -257,7 +258,7 @@ namespace NSABUtils
             Q_ASSERT( resList.count() == generalParams.count() );
             for ( int i = 0; i < resList.count(); ++i )
             {
-                retVal[generalParams[i].toUpper()] = resList[i];
+                retVal[ generalParams[ i ].toUpper() ] = resList[ i ];
             }
         }
 
@@ -265,12 +266,12 @@ namespace NSABUtils
         if ( pos != retVal.end() )
         {
             bool aOK;
-            uint64_t numMSecs = (*pos).second.toInt( &aOK );
+            uint64_t numMSecs = ( *pos ).second.toInt( &aOK );
             if ( !aOK )
                 numMSecs = 0;
 
             NSABUtils::CTimeString ts( numMSecs );
-            retVal["LENGTH"] = ts.toString( "hh:mm:ss" );
+            retVal[ "LENGTH" ] = ts.toString( "hh:mm:ss" );
         }
         return retVal;
     }
@@ -281,22 +282,22 @@ namespace NSABUtils
         if ( pos != retVal.end() )
         {
             bool aOK;
-            uint64_t numMSecs = (*pos).second.toInt( &aOK );
+            uint64_t numMSecs = ( *pos ).second.toInt( &aOK );
             if ( !aOK )
                 numMSecs = 0;
             auto numSecs = numMSecs / 1000;
-            (*pos).second = QString::number( numSecs );
+            ( *pos ).second = QString::number( numSecs );
         }
         pos = retVal.find( EMediaTags::eLength );
         if ( pos != retVal.end() )
         {
             bool aOK;
-            uint64_t numMSecs = (*pos).second.toInt( &aOK );
+            uint64_t numMSecs = ( *pos ).second.toInt( &aOK );
             if ( !aOK )
                 numMSecs = 0;
 
             NSABUtils::CTimeString ts( numMSecs );
-            (*pos).second = ts.toString( "hh:mm:ss" );
+            ( *pos ).second = ts.toString( "hh:mm:ss" );
         }
     }
 
@@ -306,7 +307,7 @@ namespace NSABUtils
         auto pos = tmp.find( tag );
         if ( pos == tmp.end() )
             return {};
-        return (*pos).second;
+        return ( *pos ).second;
     }
 
     bool isSettableTag( EMediaTags tag )
@@ -395,7 +396,7 @@ namespace NSABUtils
             for ( int jj = 0; jj < streamCount; ++jj )
             {
                 auto value = QString::fromStdWString( MI.Get( MediaInfoDLL::Stream_General, jj, mediaInfoName( ii ).toStdWString() ) );
-                retVal[ii] = value;
+                retVal[ ii ] = value;
                 if ( !value.isEmpty() )
                     break;
             }
@@ -534,7 +535,7 @@ namespace NSABUtils
 
         auto currentValues = getSettableMediaTags( fileName );
         for ( auto && ii : newTagValues )
-            currentValues[ii.first] = ii.second;
+            currentValues[ ii.first ] = ii.second;
 
         std::unordered_map< QString, QString > stringBasedTags;
         for ( auto && ii : currentValues )
@@ -546,13 +547,13 @@ namespace NSABUtils
                     *msg = QObject::tr( "Tag %1 is invalid" ).arg( displayName( ii.first ) );
                 return false;
             }
-            stringBasedTags[name] = ii.second;
+            stringBasedTags[ name ] = ii.second;
         }
 
         auto newTitle = QString();
         auto pos = currentValues.find( EMediaTags::eTitle );
         if ( pos != currentValues.end() )
-            newTitle = (*pos).second;
+            newTitle = ( *pos ).second;
 
         if ( newTitle.isEmpty() )
             newTitle = QFileInfo( fileName ).baseName();
@@ -560,7 +561,7 @@ namespace NSABUtils
         auto xml = file.readAll();
         for ( auto && ii : stringBasedTags )
         {
-            xml.replace( ("%" + ii.first + "%").toUtf8(), ii.second.toUtf8() );
+            xml.replace( ( "%" + ii.first + "%" ).toUtf8(), ii.second.toUtf8() );
         }
 
         auto templateName = QDir( QDir::tempPath() ).absoluteFilePath( "XXXXXX.xml" );

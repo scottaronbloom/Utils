@@ -122,7 +122,7 @@ QSize CHyperLinkLineEdit::sizeHint() const
     ensurePolished();
     QFontMetrics fm( font() );
     const int iconSize = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, this );
-    
+
     //const QMargins tm = d->effectiveTextMargins();
 
     int h = qMax( fm.height(), qMax( 14, iconSize - 2 ) ) + 2 * 1 /*QLineEditPrivate::verticalMargin*/
@@ -181,7 +181,7 @@ void CHyperLinkLineEdit::setText( const QString & text )
     {
         actualString += addText( text.mid( prevPos, pos - prevPos ), urlFound );
         prevPos = pos;
-        pos = text.indexOf( QRegularExpression( R"(\s)" ), prevPos+1 );
+        pos = text.indexOf( QRegularExpression( R"(\s)" ), prevPos + 1 );
     }
 
     actualString += addText( text.mid( prevPos ), urlFound );

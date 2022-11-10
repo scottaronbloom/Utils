@@ -30,25 +30,25 @@
 
 namespace NSABUtils
 {
-    CTableWidgetWithSelectCommand::CTableWidgetWithSelectCommand(QWidget * parent) :
-        QTableWidget(parent)
+    CTableWidgetWithSelectCommand::CTableWidgetWithSelectCommand( QWidget * parent ) :
+        QTableWidget( parent )
     {
     }
 
-    QItemSelectionModel::SelectionFlags CTableWidgetWithSelectCommand::selectionCommand(const QModelIndex &index, const QEvent *event /*= 0*/) const
+    QItemSelectionModel::SelectionFlags CTableWidgetWithSelectCommand::selectionCommand( const QModelIndex & index, const QEvent * event /*= 0*/ ) const
     {
-        return QTableWidget::selectionCommand(index, event);
+        return QTableWidget::selectionCommand( index, event );
     }
 
 
-    CTableViewWithSelectCommand::CTableViewWithSelectCommand(QWidget * parent) :
-        QTableView(parent)
+    CTableViewWithSelectCommand::CTableViewWithSelectCommand( QWidget * parent ) :
+        QTableView( parent )
     {
     }
 
-    QItemSelectionModel::SelectionFlags CTableViewWithSelectCommand::selectionCommand(const QModelIndex &index, const QEvent *event /*= 0*/) const
+    QItemSelectionModel::SelectionFlags CTableViewWithSelectCommand::selectionCommand( const QModelIndex & index, const QEvent * event /*= 0*/ ) const
     {
-        return QTableView::selectionCommand(index, event);
+        return QTableView::selectionCommand( index, event );
     }
 
     CNoEditDelegate::CNoEditDelegate( QObject * parent ) :

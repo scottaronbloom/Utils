@@ -35,172 +35,172 @@
 namespace NSABUtils
 {
 
-    QString toString(const QSizePolicy::Policy& policy)
+    QString toString( const QSizePolicy::Policy & policy )
     {
-        switch (policy)
+        switch ( policy )
         {
-        case QSizePolicy::Fixed: return "Fixed";
-        case QSizePolicy::Minimum: return "Minimum";
-        case QSizePolicy::Maximum: return "Maximum";
-        case QSizePolicy::Preferred: return "Preferred";
-        case QSizePolicy::MinimumExpanding: return "MinimumExpanding";
-        case QSizePolicy::Expanding: return "Expanding";
-        case QSizePolicy::Ignored: return "Ignored";
+            case QSizePolicy::Fixed: return "Fixed";
+            case QSizePolicy::Minimum: return "Minimum";
+            case QSizePolicy::Maximum: return "Maximum";
+            case QSizePolicy::Preferred: return "Preferred";
+            case QSizePolicy::MinimumExpanding: return "MinimumExpanding";
+            case QSizePolicy::Expanding: return "Expanding";
+            case QSizePolicy::Ignored: return "Ignored";
         }
         return "unknown";
     }
 
-    QString toString(const QSizePolicy& policy)
+    QString toString( const QSizePolicy & policy )
     {
-        return "(" + toString(policy.horizontalPolicy()) + ", " + toString(policy.verticalPolicy()) + ")";
+        return "(" + toString( policy.horizontalPolicy() ) + ", " + toString( policy.verticalPolicy() ) + ")";
     }
 
-    QString toString(const QStackedLayout::StackingMode & mode)
+    QString toString( const QStackedLayout::StackingMode & mode )
     {
-        switch (mode)
+        switch ( mode )
         {
-        case QStackedLayout::StackingMode::StackOne: return "StackOne";
-        case QStackedLayout::StackingMode::StackAll: return "StackAll";
+            case QStackedLayout::StackingMode::StackOne: return "StackOne";
+            case QStackedLayout::StackingMode::StackAll: return "StackAll";
         }
         return "unknown";
     }
 
-    QString toString(QLayout::SizeConstraint constraint)
+    QString toString( QLayout::SizeConstraint constraint )
     {
-        switch (constraint)
+        switch ( constraint )
         {
-        case QLayout::SetDefaultConstraint: return "SetDefaultConstraint";
-        case QLayout::SetNoConstraint: return "SetNoConstraint";
-        case QLayout::SetMinimumSize: return "SetMinimumSize";
-        case QLayout::SetFixedSize: return "SetFixedSize";
-        case QLayout::SetMaximumSize: return "SetMaximumSize";
-        case QLayout::SetMinAndMaxSize: return "SetMinAndMaxSize";
+            case QLayout::SetDefaultConstraint: return "SetDefaultConstraint";
+            case QLayout::SetNoConstraint: return "SetNoConstraint";
+            case QLayout::SetMinimumSize: return "SetMinimumSize";
+            case QLayout::SetFixedSize: return "SetFixedSize";
+            case QLayout::SetMaximumSize: return "SetMaximumSize";
+            case QLayout::SetMinAndMaxSize: return "SetMinAndMaxSize";
         }
         return "unknown";
     }
 
-    void dumpClassName(const QMetaObject* metaObject, QStandardItem * parent)
+    void dumpClassName( const QMetaObject * metaObject, QStandardItem * parent )
     {
-        if (!metaObject)
+        if ( !metaObject )
             return;
 
-        auto item = new QStandardItem(metaObject->className());
-        parent->appendRow(item);
-        if (metaObject->superClass())
-            dumpClassName(metaObject->superClass(), item);
+        auto item = new QStandardItem( metaObject->className() );
+        parent->appendRow( item );
+        if ( metaObject->superClass() )
+            dumpClassName( metaObject->superClass(), item );
     }
 
-    QStandardItem * getWidgetInfo(const QWidget& w, QStandardItem * parent, bool skipScrollBar)
+    QStandardItem * getWidgetInfo( const QWidget & w, QStandardItem * parent, bool skipScrollBar )
     {
-        if (!parent)
+        if ( !parent )
             return nullptr;
-        if (skipScrollBar && dynamic_cast<const QScrollBar *>(&w))
+        if ( skipScrollBar && dynamic_cast<const QScrollBar *>( &w ) )
             return nullptr;
 
-        auto widgetItem = new QStandardItem("Widget");
+        auto widgetItem = new QStandardItem( "Widget" );
         QString widgetClassName = w.metaObject()->className();
-        parent->appendRow(QList< QStandardItem* >() << widgetItem << new QStandardItem(widgetClassName));
-        dumpClassName(w.metaObject(), widgetItem);
+        parent->appendRow( QList< QStandardItem * >() << widgetItem << new QStandardItem( widgetClassName ) );
+        dumpClassName( w.metaObject(), widgetItem );
 
-        const QRect& geom = w.geometry();
+        const QRect & geom = w.geometry();
         QSize hint = w.sizeHint();
 
-        widgetItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Object Name") << new QStandardItem(w.objectName().isEmpty() ? "***UNNAMED***" : w.objectName()));
-        widgetItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Address") << new QStandardItem(QString("0x%1").arg((uintptr_t)&w, QT_POINTER_SIZE * 2, 16, QChar('0'))));
-        widgetItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Position") << new QStandardItem(QString::number(geom.x())) << new QStandardItem(QString::number(geom.y())));
-        widgetItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Size") << new QStandardItem(QString::number(geom.width())) << new QStandardItem(QString::number(geom.height())));
-        widgetItem->appendRow(QList< QStandardItem* >() << new QStandardItem("SizeHint") << new QStandardItem(QString::number(hint.width())) << new QStandardItem(QString::number(hint.height())));
-        widgetItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Policy") << new QStandardItem(toString(w.sizePolicy())));
-        widgetItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Visible") << new QStandardItem((w.isVisible() ? "" : "**HIDDEN**")));
+        widgetItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Object Name" ) << new QStandardItem( w.objectName().isEmpty() ? "***UNNAMED***" : w.objectName() ) );
+        widgetItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Address" ) << new QStandardItem( QString( "0x%1" ).arg( (uintptr_t)&w, QT_POINTER_SIZE * 2, 16, QChar( '0' ) ) ) );
+        widgetItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Position" ) << new QStandardItem( QString::number( geom.x() ) ) << new QStandardItem( QString::number( geom.y() ) ) );
+        widgetItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Size" ) << new QStandardItem( QString::number( geom.width() ) ) << new QStandardItem( QString::number( geom.height() ) ) );
+        widgetItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "SizeHint" ) << new QStandardItem( QString::number( hint.width() ) ) << new QStandardItem( QString::number( hint.height() ) ) );
+        widgetItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Policy" ) << new QStandardItem( toString( w.sizePolicy() ) ) );
+        widgetItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Visible" ) << new QStandardItem( ( w.isVisible() ? "" : "**HIDDEN**" ) ) );
         return widgetItem;
     }
 
-    QStandardItem * getLayoutItemInfo(QLayoutItem * layoutItem, QStandardItem * parent, bool skipScrollBar)
+    QStandardItem * getLayoutItemInfo( QLayoutItem * layoutItem, QStandardItem * parent, bool skipScrollBar )
     {
-        if (dynamic_cast<QWidgetItem*>(layoutItem))
+        if ( dynamic_cast<QWidgetItem *>( layoutItem ) )
         {
-            QWidgetItem* wi = dynamic_cast<QWidgetItem*>(layoutItem);
-            if (wi->widget())
+            QWidgetItem * wi = dynamic_cast<QWidgetItem *>( layoutItem );
+            if ( wi->widget() )
             {
-                return getWidgetInfo(*wi->widget(), parent, skipScrollBar);
+                return getWidgetInfo( *wi->widget(), parent, skipScrollBar );
             }
         }
-        else if (dynamic_cast<QSpacerItem*>(layoutItem))
+        else if ( dynamic_cast<QSpacerItem *>( layoutItem ) )
         {
-            QSpacerItem* si = dynamic_cast<QSpacerItem*>(layoutItem);
+            QSpacerItem * si = dynamic_cast<QSpacerItem *>( layoutItem );
             QSize hint = si->sizeHint();
 
-            parent->appendRow(QList< QStandardItem* >() << new QStandardItem("SpacerItem Hint") << new QStandardItem(QString::number(hint.width())) << new QStandardItem(QString::number(hint.height())));
-            parent->appendRow(QList< QStandardItem* >() << new QStandardItem("Size Policy") << new QStandardItem(toString(si->sizePolicy())));
-            parent->appendRow(QList< QStandardItem* >() << new QStandardItem("Size Constraint") << new QStandardItem(toString(si->layout()->sizeConstraint())));
+            parent->appendRow( QList< QStandardItem * >() << new QStandardItem( "SpacerItem Hint" ) << new QStandardItem( QString::number( hint.width() ) ) << new QStandardItem( QString::number( hint.height() ) ) );
+            parent->appendRow( QList< QStandardItem * >() << new QStandardItem( "Size Policy" ) << new QStandardItem( toString( si->sizePolicy() ) ) );
+            parent->appendRow( QList< QStandardItem * >() << new QStandardItem( "Size Constraint" ) << new QStandardItem( toString( si->layout()->sizeConstraint() ) ) );
 
             return nullptr;
         }
         return nullptr;
     }
 
-    void addItem(QStandardItemModel* model, QStandardItem* parent, QStandardItem* item)
+    void addItem( QStandardItemModel * model, QStandardItem * parent, QStandardItem * item )
     {
-        if (parent)
-            parent->appendRow(item);
+        if ( parent )
+            parent->appendRow( item );
         else
-            model->appendRow(item);
+            model->appendRow( item );
     }
 
-    QStandardItem * dumpLayoutInfo(QStandardItemModel* model, QStandardItem* parent, QLayout* layout)
+    QStandardItem * dumpLayoutInfo( QStandardItemModel * model, QStandardItem * parent, QLayout * layout )
     {
-        if (!layout || (!parent && !model))
+        if ( !layout || ( !parent && !model ) )
             return nullptr;
 
-        auto layoutItem = new QStandardItem("Layout");
-        if (parent)
-            parent->appendRow(QList< QStandardItem* >() << layoutItem << new QStandardItem(layout->metaObject()->className()));
+        auto layoutItem = new QStandardItem( "Layout" );
+        if ( parent )
+            parent->appendRow( QList< QStandardItem * >() << layoutItem << new QStandardItem( layout->metaObject()->className() ) );
         else
-            model->appendRow(QList< QStandardItem* >() << layoutItem << new QStandardItem(layout->metaObject()->className()));
+            model->appendRow( QList< QStandardItem * >() << layoutItem << new QStandardItem( layout->metaObject()->className() ) );
 
 
-        auto marginItem = new QStandardItem("Margin");
-        layoutItem->appendRow(marginItem);
+        auto marginItem = new QStandardItem( "Margin" );
+        layoutItem->appendRow( marginItem );
 
         QMargins margins = layout->contentsMargins();
-        marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Left") << new QStandardItem(QString::number(margins.left())));
-        marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Top") << new QStandardItem(QString::number(margins.top())));
-        marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Right") << new QStandardItem(QString::number(margins.right())));
-        marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Bottom") << new QStandardItem(QString::number(margins.bottom())));
-        marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Size Constraint") << new QStandardItem(toString(layout->sizeConstraint())));
+        marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Left" ) << new QStandardItem( QString::number( margins.left() ) ) );
+        marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Top" ) << new QStandardItem( QString::number( margins.top() ) ) );
+        marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Right" ) << new QStandardItem( QString::number( margins.right() ) ) );
+        marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Bottom" ) << new QStandardItem( QString::number( margins.bottom() ) ) );
+        marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Size Constraint" ) << new QStandardItem( toString( layout->sizeConstraint() ) ) );
 
-        if (dynamic_cast<QBoxLayout*>(layout))
+        if ( dynamic_cast<QBoxLayout *>( layout ) )
         {
-            marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Spacing") << new QStandardItem(QString::number(dynamic_cast<QBoxLayout*>(layout)->spacing())));
+            marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Spacing" ) << new QStandardItem( QString::number( dynamic_cast<QBoxLayout *>( layout )->spacing() ) ) );
         }
-        else if (dynamic_cast<QFormLayout *>(layout))
+        else if ( dynamic_cast<QFormLayout *>( layout ) )
         {
-            marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("HSpacing") << new QStandardItem(QString::number(dynamic_cast<QFormLayout*>(layout)->horizontalSpacing())));
-            marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("VSpacing") << new QStandardItem(QString::number(dynamic_cast<QFormLayout*>(layout)->verticalSpacing())));
+            marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "HSpacing" ) << new QStandardItem( QString::number( dynamic_cast<QFormLayout *>( layout )->horizontalSpacing() ) ) );
+            marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "VSpacing" ) << new QStandardItem( QString::number( dynamic_cast<QFormLayout *>( layout )->verticalSpacing() ) ) );
         }
-        else if (dynamic_cast<QGridLayout*>(layout))
+        else if ( dynamic_cast<QGridLayout *>( layout ) )
         {
-            marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("HSpacing") << new QStandardItem(QString::number(dynamic_cast<QGridLayout*>(layout)->horizontalSpacing())));
-            marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("VSpacing") << new QStandardItem(QString::number(dynamic_cast<QGridLayout*>(layout)->verticalSpacing())));
+            marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "HSpacing" ) << new QStandardItem( QString::number( dynamic_cast<QGridLayout *>( layout )->horizontalSpacing() ) ) );
+            marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "VSpacing" ) << new QStandardItem( QString::number( dynamic_cast<QGridLayout *>( layout )->verticalSpacing() ) ) );
         }
-        else if (dynamic_cast<QStackedLayout*>(layout))
+        else if ( dynamic_cast<QStackedLayout *>( layout ) )
         {
-            marginItem->appendRow(QList< QStandardItem* >() << new QStandardItem("Stacking Mode") << new QStandardItem(toString(dynamic_cast<QStackedLayout*>(layout)->stackingMode())));
+            marginItem->appendRow( QList< QStandardItem * >() << new QStandardItem( "Stacking Mode" ) << new QStandardItem( toString( dynamic_cast<QStackedLayout *>( layout )->stackingMode() ) ) );
         }
         return layoutItem;
     }
 
-    void dumpWidgetAndChildren(const QWidget* widget, QStandardItemModel* model, QStandardItem* parent, bool skipScrollBar)
+    void dumpWidgetAndChildren( const QWidget * widget, QStandardItemModel * model, QStandardItem * parent, bool skipScrollBar )
     {
-        Q_ASSERT(parent || (!parent && model));
+        Q_ASSERT( parent || ( !parent && model ) );
 
-        QList<QWidget*> allWidgets = widget->findChildren<QWidget*>();
+        QList<QWidget *> allWidgets = widget->findChildren<QWidget *>();
         bool foundNonScrollBar = false;
-        if (skipScrollBar)
+        if ( skipScrollBar )
         {
-            for (auto ii : allWidgets)
+            for ( auto ii : allWidgets )
             {
-                if (dynamic_cast<QScrollBar*>(ii))
+                if ( dynamic_cast<QScrollBar *>( ii ) )
                     continue;
                 foundNonScrollBar = true;
                 break;
@@ -208,66 +208,66 @@ namespace NSABUtils
         }
         else
             foundNonScrollBar = true;
-        if (!foundNonScrollBar)
+        if ( !foundNonScrollBar )
             return;
 
-        QLayout* layout = widget->layout();
-        QList<QWidget*> dumpedChildren;
+        QLayout * layout = widget->layout();
+        QList<QWidget *> dumpedChildren;
 
-        auto widgets = widget->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
+        auto widgets = widget->findChildren<QWidget *>( QString(), Qt::FindDirectChildrenOnly );
 
-        if (layout && !layout->isEmpty())
+        if ( layout && !layout->isEmpty() )
         {
-            auto layoutInfoItem = dumpLayoutInfo(model, parent, layout);
+            auto layoutInfoItem = dumpLayoutInfo( model, parent, layout );
 
             int numItems = layout->count();
-            if (numItems)
+            if ( numItems )
             {
-                for (int ii = 0; ii < numItems; ++ii)
+                for ( int ii = 0; ii < numItems; ++ii )
                 {
-                    QLayoutItem* layoutItem = layout->itemAt(ii);
-                    auto layoutWidgetItem = getLayoutItemInfo(layoutItem, layoutInfoItem, skipScrollBar);
+                    QLayoutItem * layoutItem = layout->itemAt( ii );
+                    auto layoutWidgetItem = getLayoutItemInfo( layoutItem, layoutInfoItem, skipScrollBar );
 
-                    QWidgetItem* wi = dynamic_cast<QWidgetItem*>(layoutItem);
-                    if (wi && wi->widget())
+                    QWidgetItem * wi = dynamic_cast<QWidgetItem *>( layoutItem );
+                    if ( wi && wi->widget() )
                     {
-                        dumpedChildren.push_back(wi->widget());
+                        dumpedChildren.push_back( wi->widget() );
                         auto subParent = layoutWidgetItem ? layoutWidgetItem : parent;
-                        if (dynamic_cast<const QScrollArea*>(wi->widget())) // is a container and needs to be treated AS a layed out item
+                        if ( dynamic_cast<const QScrollArea *>( wi->widget() ) ) // is a container and needs to be treated AS a layed out item
                         {
-                            auto scrollAreaItem = new QStandardItem("QScrollArea");
-                            if (subParent)
-                                subParent->appendRow(QList< QStandardItem* >() << scrollAreaItem << new QStandardItem(widget->objectName()));
+                            auto scrollAreaItem = new QStandardItem( "QScrollArea" );
+                            if ( subParent )
+                                subParent->appendRow( QList< QStandardItem * >() << scrollAreaItem << new QStandardItem( widget->objectName() ) );
                             else
-                                model->appendRow(QList< QStandardItem* >() << scrollAreaItem << new QStandardItem(widget->objectName()));
+                                model->appendRow( QList< QStandardItem * >() << scrollAreaItem << new QStandardItem( widget->objectName() ) );
 
-                            auto scrollArea = dynamic_cast<const QScrollArea*>(wi->widget());
-                            dumpedChildren.push_back(wi->widget());
-                            dumpWidgetAndChildren(scrollArea->widget(), model, subParent, skipScrollBar);
+                            auto scrollArea = dynamic_cast<const QScrollArea *>( wi->widget() );
+                            dumpedChildren.push_back( wi->widget() );
+                            dumpWidgetAndChildren( scrollArea->widget(), model, subParent, skipScrollBar );
                         }
                         else
                         {
-                            dumpWidgetAndChildren(wi->widget(), model, subParent, skipScrollBar);
+                            dumpWidgetAndChildren( wi->widget(), model, subParent, skipScrollBar );
                         }
                     }
                 }
             }
         }
-        else if (!widgets.isEmpty())
+        else if ( !widgets.isEmpty() )
         {
-            QStandardItem* childItems = new QStandardItem("Children");
-            addItem(model, parent, childItems);
-            getWidgetInfo(*widget, childItems, skipScrollBar);
+            QStandardItem * childItems = new QStandardItem( "Children" );
+            addItem( model, parent, childItems );
+            getWidgetInfo( *widget, childItems, skipScrollBar );
         }
     }
 
-    void dumpWidgetAndChildren(const QWidget* widget, QStandardItemModel* model)
+    void dumpWidgetAndChildren( const QWidget * widget, QStandardItemModel * model )
     {
         model->clear();
-        model->setColumnCount(2);
-        model->setHeaderData(0, Qt::Horizontal, "Item Name");
-        model->setHeaderData(1, Qt::Horizontal, "Value");
-        dumpWidgetAndChildren(widget, model, nullptr, false);
+        model->setColumnCount( 2 );
+        model->setHeaderData( 0, Qt::Horizontal, "Item Name" );
+        model->setHeaderData( 1, Qt::Horizontal, "Value" );
+        dumpWidgetAndChildren( widget, model, nullptr, false );
     }
 
 }

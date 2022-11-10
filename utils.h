@@ -51,12 +51,12 @@ class QPoint;
 #endif
 
 template< typename T >
-std::ostream& operator<<( std::ostream& oss, const std::vector< T >& values )
+std::ostream & operator<<( std::ostream & oss, const std::vector< T > & values )
 {
     oss << "{ ";
     bool first = true;
 
-    for ( auto&& ii : values )
+    for ( auto && ii : values )
     {
         if ( !first )
             oss << ", ";
@@ -68,12 +68,12 @@ std::ostream& operator<<( std::ostream& oss, const std::vector< T >& values )
 }
 
 template< typename T >
-std::ostream& operator<<( std::ostream& oss, const std::vector< std::vector< T > >& values )
+std::ostream & operator<<( std::ostream & oss, const std::vector< std::vector< T > > & values )
 {
     oss << "{ ";
     bool first = true;
 
-    for ( auto&& ii : values )
+    for ( auto && ii : values )
     {
         if ( !first )
             oss << ", ";
@@ -85,12 +85,12 @@ std::ostream& operator<<( std::ostream& oss, const std::vector< std::vector< T >
 }
 
 template< typename T >
-std::ostream& operator<<( std::ostream& oss, const std::list< std::vector< T > >& values )
+std::ostream & operator<<( std::ostream & oss, const std::list< std::vector< T > > & values )
 {
     oss << "{ ";
     bool first = true;
 
-    for ( auto&& ii : values )
+    for ( auto && ii : values )
     {
         if ( !first )
             oss << ", ";
@@ -101,7 +101,7 @@ std::ostream& operator<<( std::ostream& oss, const std::list< std::vector< T > >
     return oss;
 }
 
-SABUTILS_EXPORT inline std::ostream & sabsabDebugStreamInternal(){ return std::cout; }
+SABUTILS_EXPORT inline std::ostream & sabsabDebugStreamInternal() { return std::cout; }
 #  undef sabDebugStream
 #if defined(SAB_DEBUG_TRACE)
 #  define sabDebugStream sabsabDebugStreamInternal
@@ -531,7 +531,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    SABUTILS_EXPORT std::list< int > intsFromString( const QString & string, const QString & prefixRegEx = {}, bool sort = true, bool * aOK=nullptr );
+    SABUTILS_EXPORT std::list< int > intsFromString( const QString & string, const QString & prefixRegEx = {}, bool sort = true, bool * aOK = nullptr );
 
 
 }

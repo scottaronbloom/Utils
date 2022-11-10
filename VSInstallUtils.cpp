@@ -36,33 +36,33 @@ namespace NSABUtils
 {
     namespace NVSInstallUtils
     {
-        std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios(QProcess * process, bool * retry)
+        std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios( QProcess * process, bool * retry )
         {
-            if (retry)
+            if ( retry )
                 *retry = false;
             QString errorMsg;
             std::map< QString, QString > retVal;
-            if (!process || (process->state() != QProcess::ProcessState::NotRunning))
+            if ( !process || ( process->state() != QProcess::ProcessState::NotRunning ) )
             {
-                if (retry)
+                if ( retry )
                     *retry = true;
                 return { false, QString(), { retVal, QStringList() } };
             }
 
-            auto programFiles = qgetenv("PROGRAMFILES(x86)");
-            if (programFiles.isEmpty())
-                programFiles = qgetenv("PROGRAMFILES");
+            auto programFiles = qgetenv( "PROGRAMFILES(x86)" );
+            if ( programFiles.isEmpty() )
+                programFiles = qgetenv( "PROGRAMFILES" );
 
-            if (programFiles.isEmpty())
+            if ( programFiles.isEmpty() )
                 return { false, QString(), { retVal, QStringList() } };
-            if (!QFileInfo(programFiles).exists())
-                return { false, QString(), { retVal, QStringList() } };
-
-            auto vsWhere = QDir(programFiles).absoluteFilePath("Microsoft Visual Studio/Installer/vswhere.exe");
-            if (!QFileInfo(programFiles).exists())
+            if ( !QFileInfo( programFiles ).exists() )
                 return { false, QString(), { retVal, QStringList() } };
 
-            if (!process)
+            auto vsWhere = QDir( programFiles ).absoluteFilePath( "Microsoft Visual Studio/Installer/vswhere.exe" );
+            if ( !QFileInfo( programFiles ).exists() )
+                return { false, QString(), { retVal, QStringList() } };
+
+            if ( !process )
                 return { false, QString(), { retVal, QStringList() } };
 
             CAutoWaitCursor awc;
@@ -73,35 +73,35 @@ namespace NSABUtils
                 << "json";
 
             //process.setProcessChannelMode(QProcess::MergedChannels);
-            process->start(vsWhere, args);
-            if (!process->waitForFinished(-1) || (process->exitStatus() != QProcess::NormalExit) || (process->exitCode() != 0))
+            process->start( vsWhere, args );
+            if ( !process->waitForFinished( -1 ) || ( process->exitStatus() != QProcess::NormalExit ) || ( process->exitCode() != 0 ) )
             {
-                return { false, QString("Error: '%1' Could not run vswhere and determine VS installations").arg(QString(process->readAllStandardError())), { retVal, QStringList() } };
+                return { false, QString( "Error: '%1' Could not run vswhere and determine VS installations" ).arg( QString( process->readAllStandardError() ) ), { retVal, QStringList() } };
             }
             auto data = process->readAll();
 
-            auto vsInstallsDoc = QJsonDocument::fromJson(data);
+            auto vsInstallsDoc = QJsonDocument::fromJson( data );
 
-            if (!vsInstallsDoc.isArray())
-                return { false, QString("Error: Invalid format from vswhere"), { retVal, QStringList() } };
+            if ( !vsInstallsDoc.isArray() )
+                return { false, QString( "Error: Invalid format from vswhere" ), { retVal, QStringList() } };
 
             std::map< QString, QString > installedVS;
             QStringList displayNames;
 
             QJsonArray vsInstalls = vsInstallsDoc.array();
-            for (int ii = 0; ii < vsInstalls.size(); ++ii)
+            for ( int ii = 0; ii < vsInstalls.size(); ++ii )
             {
-                auto vsInstall = vsInstalls[ii].toObject();
-                if (!vsInstall.contains("displayName") || !vsInstall["displayName"].isString())
+                auto vsInstall = vsInstalls[ ii ].toObject();
+                if ( !vsInstall.contains( "displayName" ) || !vsInstall[ "displayName" ].isString() )
                     continue;
 
-                if (!vsInstall.contains("installationPath") || !vsInstall["installationPath"].isString())
+                if ( !vsInstall.contains( "installationPath" ) || !vsInstall[ "installationPath" ].isString() )
                     continue;
 
-                auto dispName = vsInstall["displayName"].toString();
-                auto path = vsInstall["installationPath"].toString();
+                auto dispName = vsInstall[ "displayName" ].toString();
+                auto path = vsInstall[ "installationPath" ].toString();
 
-                installedVS[dispName] = path;
+                installedVS[ dispName ] = path;
                 displayNames << dispName;
             }
 

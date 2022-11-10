@@ -38,24 +38,24 @@ namespace NSABUtils
             ~CIOHandler();
 
             bool canRead() const override;
-            bool read(QImage *image) override;
-            bool write(const QImage &image) override;
+            bool read( QImage * image ) override;
+            bool write( const QImage & image ) override;
 
-            static bool canRead(QIODevice *device);
+            static bool canRead( QIODevice * device );
 
-            QVariant option(ImageOption option) const override;
-            void setOption(ImageOption option, const QVariant &value) override;
-            bool supportsOption(ImageOption option) const override;
+            QVariant option( ImageOption option ) const override;
+            void setOption( ImageOption option, const QVariant & value ) override;
+            bool supportsOption( ImageOption option ) const override;
 
             int imageCount() const override;
             int loopCount() const override;
             int nextImageDelay() const override; // returns ms
             int currentImageNumber() const override;
-            bool jumpToImage(int imageNumber) override;
+            bool jumpToImage( int imageNumber ) override;
             bool jumpToNextImage() override;
             QRect currentImageRect() const override;
 
-            void setLoopCount(int loopCount);
+            void setLoopCount( int loopCount );
         private:
             NBIF::CFile * fBIFFile;
             int fCurrentFrame{ -1 };

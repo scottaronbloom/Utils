@@ -32,22 +32,22 @@ namespace NSABUtils
     class SABUTILS_EXPORT CCollapsableGroupBox : public QGroupBox
     {
         Q_OBJECT;
-        Q_PROPERTY(bool collapsive READ isCollapsible WRITE setCollapsible)
+        Q_PROPERTY( bool collapsive READ isCollapsible WRITE setCollapsible )
 
     public:
-        explicit CCollapsableGroupBox(QWidget* parent = nullptr );
-        explicit CCollapsableGroupBox(const QString& title, QWidget* parent = nullptr );
+        explicit CCollapsableGroupBox( QWidget * parent = nullptr );
+        explicit CCollapsableGroupBox( const QString & title, QWidget * parent = nullptr );
         virtual ~CCollapsableGroupBox();
 
         bool isCollapsible() const;
-        void setCollapsible(bool enabled);
+        void setCollapsible( bool enabled );
 
     public Q_SLOTS:
-        void setCollapsed(bool collapsed = true);
-        void setExpanded(bool expanded = true);
+        void setCollapsed( bool collapsed = true );
+        void setExpanded( bool expanded = true );
 
     protected:
-        virtual void childEvent(QChildEvent* event);
+        virtual void childEvent( QChildEvent * event );
     private:
         CCollapsableGroupBoxImpl * fImpl;
     };
