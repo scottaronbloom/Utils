@@ -3067,7 +3067,26 @@ namespace NSABUtils
         QString transformTitle( const QString & title, bool ignoreAllCase )
         {
             auto retVal = title;
-            retVal = retVal.replace( '.', ' ' ).trimmed();
+            bool isNumber = false;
+            for ( int ii = 0; ii < retVal.length(); ++ii )
+            {
+                if ( retVal[ ii ] != '.' )
+                    continue;
+
+                if ( ( ii > 0 ) && ( ii < ( retVal.length() + 1 ) ) )
+                {
+                    if ( retVal[ ii - 1 ].isDigit() && retVal[ ii + 1 ].isDigit() )
+                        continue;
+                    if ( retVal[ ii + 1 ].isSpace() )
+                        continue;
+                }
+
+                if ( ( ii < ( retVal.length() - 2 ) ) && ( retVal.mid( ii, 3 ) == "..." ) )
+                    continue;
+
+                retVal[ ii ] = ' ';
+            }
+            retVal = retVal.trimmed();
             auto tmp = retVal.split( ' ' );
             bool prevEndSentence = true;
             for ( auto && ii = tmp.begin(); ii != tmp.end(); ++ii )
