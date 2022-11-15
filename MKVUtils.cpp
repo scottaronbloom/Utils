@@ -24,6 +24,9 @@
 #include "utils.h"
 #include "HashUtils.h"
 #include "MKVReader/MKVReader.h"
+#include "MediaInfoDLL/MediaInfoDLL_Static.h"
+#include "MediaInfo/MediaInfoList.h"
+#include "SABUtilsResources.h"
 
 #include <QFileInfo>
 #include <QString>
@@ -32,10 +35,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDir>
+#include <QDebug>
 #include <QTemporaryFile>
-#include "MediaInfoDLL/MediaInfoDLL_Static.h"
-#include "MediaInfo/MediaInfoList.h"
-#include "SABUtilsResources.h"
 #include <iosfwd>
 #include <iomanip>
 
@@ -613,6 +614,51 @@ namespace NSABUtils
         fStreamName( streamName ),
         fStreamNum( num )
     {
+    }
+
+    std::vector< double > getChapterStarts( const QString & fileName, const QString & ffprobeExe, QString & msg )
+    {
+        auto args = QStringList()
+            << "-i" << QString( "file:\"%1\"" ).arg( fileName )
+            << "-threads" << "0"
+            << "-v" << "info"
+            << "-print_format" << "json"
+            << "-show_chapters"
+            ;
+
+        QProcess process;
+        process.setNativeArguments( args.join( " " ) );
+        //process.setProcessChannelMode( QProcess::MergedChannels );
+        process.start( ffprobeExe );
+        if ( !process.waitForFinished( -1 ) || ( process.exitStatus() != QProcess::NormalExit ) || ( process.exitCode() != 0 ) )
+        {
+            auto out = process.readAllStandardOutput();
+            auto err = process.readAllStandardError();
+            msg = QString( "Error running ffprobe '%1' - " ).arg( ffprobeExe ).arg( QString( err ) );
+            return {};
+        }
+        auto data = process.readAll();
+
+        auto doc = QJsonDocument::fromJson( data );
+        if ( !doc.object().contains( "chapters" ) )
+            return {};
+
+        auto chapters = doc[ "chapters" ].toArray();
+        std::vector< double > retVal;
+        for ( auto && chapter : chapters )
+        {
+            auto curr = chapter.toObject();
+            qDebug().noquote().noquote() << QJsonDocument( curr ).toJson( QJsonDocument::Indented );
+            if ( retVal.empty() )
+            {
+                auto startTime = curr[ "start_time" ].toVariant().toDouble();
+                retVal.push_back( startTime );
+            }
+            auto endTime = curr[ "end_time" ].toVariant().toDouble();
+            retVal.push_back( endTime );
+        }
+
+        return retVal;
     }
 
 }

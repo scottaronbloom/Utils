@@ -29,6 +29,7 @@
 #include <map>
 #include <vector>
 #include <QString>
+#include <cstdint>
 
 namespace MediaInfoDLL
 {
@@ -89,6 +90,7 @@ namespace NSABUtils
     SABUTILS_EXPORT std::unordered_map< EMediaTags, QString > getSettableMediaTags( const QString & fileName );
     SABUTILS_EXPORT SAllMediaInfo getAllMediaInfo( const QString & fileName );
     SABUTILS_EXPORT bool setMediaTags( const QString & fileName, const std::unordered_map< EMediaTags, QString > & tags, const QString & mkvPropEdit, QString * msg = nullptr );
+    SABUTILS_EXPORT std::vector< double > getChapterStarts( const QString & fileName, const QString & ffprobeExe, QString & msg );
 }
 
 namespace std
