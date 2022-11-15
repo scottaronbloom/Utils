@@ -21,17 +21,17 @@
 // SOFTWARE.
 
 #include "WidgetEnabler.h"
-#include <QCheckBox>
+#include <QAbstractButton>
 #include <QGroupBox>
 
 namespace NSABUtils
 {
-    CWidgetEnabler::CWidgetEnabler( QCheckBox * btn, QWidget * widget, QObject * parent ) :
+    CWidgetEnabler::CWidgetEnabler( QAbstractButton * btn, QWidget * widget, QObject * parent ) :
         CWidgetEnabler( btn, { widget }, parent )
     {
     }
 
-    CWidgetEnabler::CWidgetEnabler( QCheckBox * checkBox, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
+    CWidgetEnabler::CWidgetEnabler( QAbstractButton * checkBox, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
         CWidgetEnabler( { checkBox, nullptr }, widgets, parent )
     {
     }
@@ -46,7 +46,7 @@ namespace NSABUtils
     {
     }
 
-    CWidgetEnabler::CWidgetEnabler( const std::pair< QCheckBox *, QGroupBox * > & checker, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
+    CWidgetEnabler::CWidgetEnabler( const std::pair< QAbstractButton *, QGroupBox * > & checker, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
         QObject( parent ),
         fChecker( checker ),
         fWidgets( widgets )
@@ -61,46 +61,36 @@ namespace NSABUtils
         fInitState = checkState();
         if ( fChecker.first )
         {
-            connect( fChecker.first, &QCheckBox::stateChanged, this, &CWidgetEnabler::slotCheckStateChanged );
-            slotCheckStateChanged( fInitState );
+            connect( fChecker.first, &QAbstractButton::toggled, this, &CWidgetEnabler::slotButtonToggled );
+            slotButtonToggled( fInitState );
         }
         else if ( fChecker.second )
         {
             Q_ASSERT( fChecker.second->isCheckable() );
             connect( fChecker.second, &QGroupBox::clicked, this, &CWidgetEnabler::slotSetWidgetsEnabled );
-            slotSetWidgetsEnabled( fChecker.second->isChecked() );
+            slotSetWidgetsEnabled( fInitState );
         }
     }
 
-    Qt::CheckState CWidgetEnabler::checkState() const
+    bool CWidgetEnabler::checkState() const
     {
         if ( fChecker.first )
-            return fChecker.first->checkState();
+            return fChecker.first->isChecked();
         else
-            return fChecker.second->isChecked() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
+            return fChecker.second->isChecked();
     }
 
     void CWidgetEnabler::slotReset()
     {
         if ( fChecker.first )
-            fChecker.first->setCheckState( fInitState );
+            fChecker.first->setChecked( fInitState );
         else
-            fChecker.second->setChecked( fInitState == Qt::CheckState::Checked );
+            fChecker.second->setChecked( fInitState );
     }
 
-    /// checked | unchecked | partial | enableOnPartial || enabled
-    ///    0    |     0     |    1    |       0         ||    0
-    ///    0    |     0     |    1    |       1         ||    0
-    ///    0    |     1     |    0    |       0         ||    0
-    ///    0    |     1     |    0    |       1         ||    0
-    ///    1    |     0     |    0    |       0         ||    0
-    ///    1    |     0     |    0    |       1         ||    0
-    /// </summary>
-    /// <param name="state"></param>
-    void CWidgetEnabler::slotCheckStateChanged( int state )
+    void CWidgetEnabler::slotButtonToggled( bool checked )
     {
-        bool enabled = ( state == Qt::CheckState::Checked ) || ( ( state == Qt::CheckState::PartiallyChecked ) && fEnableOnPartial );
-        slotSetWidgetsEnabled( enabled );
+        slotSetWidgetsEnabled( checked );
     }
 
     void CWidgetEnabler::slotSetWidgetsEnabled( bool enabled )

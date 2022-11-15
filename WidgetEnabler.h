@@ -27,17 +27,17 @@
 
 #include <QObject>
 #include <initializer_list>
-class QCheckBox;
+class QAbstractButton;
 class QGroupBox;
 namespace NSABUtils
 {
     class SABUTILS_EXPORT CWidgetEnabler : public QObject
     {
         Q_OBJECT;
-        CWidgetEnabler( const std::pair< QCheckBox *, QGroupBox * > & checker, const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );
+        CWidgetEnabler( const std::pair< QAbstractButton *, QGroupBox * > & checker, const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );
     public:
-        CWidgetEnabler( QCheckBox * btn, QWidget * widget, QObject * parent = nullptr );
-        CWidgetEnabler( QCheckBox * btn, const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );
+        CWidgetEnabler( QAbstractButton * btn, QWidget * widget, QObject * parent = nullptr );
+        CWidgetEnabler( QAbstractButton * btn, const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );
 
         CWidgetEnabler( QGroupBox * gb, QWidget * widget, QObject * parent = nullptr );
         CWidgetEnabler( QGroupBox * gb, const std::initializer_list< QWidget * > & widgets, QObject * parent = nullptr );
@@ -48,13 +48,13 @@ namespace NSABUtils
         void slotReset();
 
     private Q_SLOTS:
-        void slotCheckStateChanged( int newState );
+        void slotButtonToggled( bool checked );
         void slotSetWidgetsEnabled( bool clicked );
     private:
-        Qt::CheckState checkState() const;
-        Qt::CheckState fInitState{ Qt::CheckState::Unchecked };
+        bool checkState() const;
+        bool fInitState{ false };
         bool fEnableOnPartial{ false };
-        std::pair< QCheckBox *, QGroupBox * > fChecker{ nullptr, nullptr };
+        std::pair< QAbstractButton *, QGroupBox * > fChecker{ nullptr, nullptr };
         std::list< QWidget * > fWidgets;
     };
 }
