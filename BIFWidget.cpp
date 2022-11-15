@@ -499,8 +499,8 @@ namespace NSABUtils
             if ( !fToolBar )
             {
                 fToolBar = new QToolBar;
-                fToolBar->setObjectName( "BIF Viewer Toolbar" );
-                fToolBar->setWindowTitle( tr( "BIF Viewer Toolbar" ) );
+                fToolBar->setObjectName( "Thumbnail Viewer Toolbar" );
+                fToolBar->setWindowTitle( tr( "Thumbnail Viewer Toolbar" ) );
 
                 updateToolBar();
                 validatePlayerActions();
@@ -513,8 +513,8 @@ namespace NSABUtils
             if ( !fMenu )
             {
                 fMenu = new QMenu( this );
-                fMenu->setObjectName( "BIF Viewer Menu" );
-                fMenu->setTitle( tr( "BIF Viewer" ) );
+                fMenu->setObjectName( "Thumbnail Viewer Menu" );
+                fMenu->setTitle( tr( "Thumbnail Viewer" ) );
 
                 updateMenu();
                 validatePlayerActions();
