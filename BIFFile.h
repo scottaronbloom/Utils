@@ -75,6 +75,9 @@ namespace NSABUtils
             SBIFImage( S32BitValue bifNum, S32BitValue offset, SBIFImage * prev );
             SBIFImage( const QString & fileName, uint32_t bifNum );
 
+            bool operator==( const SBIFImage & rhs ) const;
+            bool operator!=( const SBIFImage & rhs ) const;
+
             QByteArray indexData() const;
             bool imageValid() const;
             bool isLastFrame() const;
@@ -120,10 +123,10 @@ namespace NSABUtils
             const S32BitValue & numImages() const { return fNumImages; }
             QString reserved() const { return S32BitValue::prettyPrint( fReserved ); }
 
-            uint32_t imageDelay() const { return tsMultiplier().fValue; } // number of ms to delay per image
+            uint32_t imageDelay() const { return timePerFrame().fValue; } // number of ms to delay per image
             QSize imageSize() const;
 
-            const S32BitValue & tsMultiplier() const { return fTSMultiplier; }
+            const S32BitValue & timePerFrame() const { return fTimePerFrame; }
 
             bool canLoadMoreImages()
             {
@@ -173,7 +176,7 @@ namespace NSABUtils
             QByteArray fMagicNumber;
             S32BitValue fVersion;
             S32BitValue fNumImages;
-            S32BitValue fTSMultiplier;
+            S32BitValue fTimePerFrame;
             S32BitValue fFinalIndex;
             TBIFIndex fBIFFrames;
             QByteArray fReserved;
