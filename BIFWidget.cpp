@@ -145,7 +145,7 @@ namespace NSABUtils
             slotMovieStateChanged();
             if ( isValid() )
             {
-                auto labelText = tr( "Frame #: %1 Time: %2" ).arg( fMovie->currentFrameNumber() ).arg( NSABUtils::CTimeString( fMovie->currentFrameNumber() * fBIF->tsMultiplier().fValue ).toString( "hh:mm:ss.zzz" ) );
+                auto labelText = tr( "Frame #: %1 Time: %2" ).arg( fMovie->currentFrameNumber() ).arg( NSABUtils::CTimeString( fMovie->currentFrameNumber() * fBIF->timePerFrame().fValue ).toString( "hh:mm:ss.zzz" ) );
                 if ( isPlaying() )
                     labelText += tr( "\nPlaying at %3 fps" ).arg( computeFPS(), 5, 'f', 3 );
 
