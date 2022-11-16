@@ -23,93 +23,81 @@
 #ifndef __VERSION_H
 #define __VERSION_H
 
-#include <string>
 #ifdef QT_VERSION
 #include <QString>
 #include <QDateTime>
+using TStringType = QString;
+#else
+#include <string>
+using TStringType = std::string;
 #endif
+
+#include <cstdint>
 
 namespace NVersion
 {
     inline const int         MAJOR_VERSION      =  @VERSION_FILE_MAJOR_VERSION@;
     inline const int         MINOR_VERSION      =  @VERSION_FILE_MINOR_VERSION@;
-    inline const std::string PATCH_VERSION      = "@VERSION_FILE_PATCH_VERSION@"; // string from git
-    inline const uint16_t    PATCH_VERSION_LOW  = @VERSION_FILE_PATCH_VERSION_HIGH@; // string from git
-    inline const uint16_t    PATCH_VERSION_HIGH = @VERSION_FILE_PATCH_VERSION_LOW@; // string from git
+    inline const TStringType PATCH_VERSION      = "@VERSION_FILE_PATCH_VERSION@"; // string from git
+    inline const uint16_t    PATCH_VERSION_LOW  =  @VERSION_FILE_PATCH_VERSION_HIGH@; // string from git
+    inline const uint16_t    PATCH_VERSION_HIGH =  @VERSION_FILE_PATCH_VERSION_LOW@; // string from git
 
-#cmakedefine VERSION_FILE_DIFF
-#ifdef VERSION_FILE_DIFF
     inline const bool        MODIFIED         =  @VERSION_FILE_DIFF@;
-#else
-    inline const bool        MODIFIED         =  false;
-#endif
+    inline const TStringType APP_NAME         = "@VERSION_FILE_APP_NAME@";
+    inline const TStringType VENDOR           = "@VERSION_FILE_VENDOR@";
+    inline const TStringType HOMEPAGE         = "@VERSION_FILE_HOMEPAGE@";
+    inline const TStringType PRODUCT_HOMEPAGE = "@VERSION_FILE_PRODUCT_HOMEPAGE@";
+    inline const TStringType EMAIL            = "@VERSION_FILE_EMAIL@";
+    inline const TStringType COPYRIGHT        = "@VERSION_FILE_COPYRIGHT@";
+    inline const TStringType BUILD_DATE       =  TStringType( "@VERSION_FILE_BUILD_DATE@" ) + "Z"; // IN UTC
+    inline const TStringType BUILD_TIME       =  TStringType( "@VERSION_FILE_BUILD_TIME@" ) + "Z"; // IN UTC
 
-    inline const std::string APP_NAME         = "@VERSION_FILE_APP_NAME@";
-#cmakedefine VERSION_FILE_VENDOR
-#ifdef VERSION_FILE_VENDOR
-    inline const std::string VENDOR           = "@VERSION_FILE_VENDOR@";
-#endif
-
-#cmakedefine VERSION_FILE_HOMEPAGE
-#ifdef VERSION_FILE_HOMEPAGE
-    inline const std::string HOMEPAGE         = "@VERSION_FILE_HOMEPAGE@";
-#endif
-
-#cmakedefine VERSION_FILE_PRODUCT_HOMEPAGE
-#ifdef VERSION_FILE_PRODUCT_HOMEPAGE
-    inline const std::string PRODUCT_HOMEPAGE = "@VERSION_FILE_PRODUCT_HOMEPAGE@";
-#endif
-
-#cmakedefine VERSION_FILE_EMAIL
-#ifdef VERSION_FILE_EMAIL
-    inline const std::string EMAIL            = "@VERSION_FILE_EMAIL@";
-#endif
-
-#cmakedefine VERSION_FILE_COPYRIGHT
-#ifdef VERSION_FILE_COPYRIGHT
-    inline const std::string COPYRIGHT            = "@VERSION_FILE_COPYRIGHT@";
-#endif
-
-#cmakedefine VERSION_FILE_BUILD_DATE
-#ifdef VERSION_FILE_BUILD_DATE
-    inline const std::string BUILD_DATE       = std::string( "@VERSION_FILE_BUILD_DATE@" ) + "Z"; // IN UTC
-#endif
-
-#cmakedefine VERSION_FILE_BUILD_TIME
-#ifdef VERSION_FILE_BUILD_TIME
-    inline const std::string BUILD_TIME       = std::string( "@VERSION_FILE_BUILD_TIME@" ) + "Z"; // IN UTC
-#endif
-
-#if defined( VERSION_FILE_BUILD_DATE ) && defined( VERSION_FILE_BUILD_TIME )
 #ifdef QT_VERSION
     inline QDateTime buildDateTime()
     { 
-        auto retVal = QDateTime::fromString( QString::fromStdString( NVersion::BUILD_DATE + " " + NVersion::BUILD_TIME ), "MM/dd/yyyyZ HH:mm:ssZ" );
+        auto retVal = QDateTime::fromString( NVersion::BUILD_DATE + " " + NVersion::BUILD_TIME, "MM/dd/yyyyZ HH:mm:ssZ" );
         retVal.setTimeSpec( Qt::TimeSpec::UTC );
         return retVal;
     }
 #endif
-#endif
 
-    inline std::string getVersionString(bool full) 
+    template< typename T >
+    TStringType toString( T value )
+    {
+#ifdef QT_VERSION
+        return QString::number( value );
+#else
+        return std::to_string( value );
+#endif
+    }
+
+    bool isEmpty( const TStringType & value )
+    {
+#ifdef QT_VERSION
+        return value.isEmpty();
+#else
+        return value.empty();
+#endif
+    }
+
+    inline TStringType getVersionString(bool full) 
     { 
-        auto retVal = std::to_string( MAJOR_VERSION ) + ".";
-#cmakedefine VERSION_FILE_FORCE_TWODIGITS_MINOR
+        auto retVal = toString( MAJOR_VERSION ) + ".";
 #ifdef VERSION_FILE_FORCE_TWODIGITS_MINOR
         if ( MINOR_VERSION < 10 )
             retVal += '0';
 #endif
-        retVal += std::to_string( MINOR_VERSION );
+        retVal += toString( MINOR_VERSION );
         if ( full )
             retVal += "." + PATCH_VERSION;
         if ( MODIFIED )
             retVal += "*";
-        if ( !BUILD_DATE.empty() )
+        if ( !isEmpty( BUILD_DATE ) )
             retVal += " Build Date: " + BUILD_DATE;
         return retVal;
     }
 
-    inline std::string getWindowTitle() 
+    inline TStringType getWindowTitle() 
     { 
         auto retVal = APP_NAME + " v" + getVersionString( true ) + " - http://" + HOMEPAGE;
         return retVal;
