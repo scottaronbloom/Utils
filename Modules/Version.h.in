@@ -26,6 +26,7 @@
 #ifdef QT_VERSION
 #include <QString>
 #include <QDateTime>
+#include <QApplication>
 using TStringType = QString;
 #else
 #include <string>
@@ -71,7 +72,7 @@ namespace NVersion
 #endif
     }
 
-    bool isEmpty( const TStringType & value )
+    inline bool isEmpty( const TStringType & value )
     {
 #ifdef QT_VERSION
         return value.isEmpty();
@@ -102,6 +103,16 @@ namespace NVersion
         auto retVal = APP_NAME + " v" + getVersionString( true ) + " - http://" + HOMEPAGE;
         return retVal;
     }
+
+#ifdef QT_VERSION
+    inline void setupApplication( QCoreApplication & appl, bool useProductHomepage )
+    {
+        appl.setApplicationName( APP_NAME );
+        appl.setApplicationVersion( getVersionString( true ) );
+        appl.setOrganizationName( VENDOR );
+        appl.setOrganizationDomain( useProductHomepage ? PRODUCT_HOMEPAGE : HOMEPAGE ); 
+    }
+#endif
 }
 
 #endif
