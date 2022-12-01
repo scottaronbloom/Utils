@@ -40,6 +40,7 @@
 #include <cctype>
 #include <QString>
 #include <cctype>
+#include <optional>
 
 #include "EnumUtils.h"
 #include "StringComparisonClasses.h"
@@ -392,9 +393,9 @@ namespace NSABUtils
             }
 
             T retVal = 0;
-            for ( size_t ii = 0; ii < string.length(); ++ii )
+            for ( auto && ii : string )
             {
-                unsigned val = ( string[ ii ] - '0' );
+                unsigned val = ( ii - '0' );
                 val = negate ? ( val == 0 ? 1 : 0 ) : val;
                 retVal = ( retVal << 1 ) | val;
             }
@@ -499,8 +500,17 @@ namespace NSABUtils
         SABUTILS_EXPORT bool isSpecialRegExChar( char ch, bool includeDotSlash = true );
         SABUTILS_EXPORT bool isSpecialRegExChar( const QChar & ch, bool includeDotSlash = true );
 
-        SABUTILS_EXPORT QString regExReplace( const QString & input, const QString & pattern, const QString & replacement );
-        SABUTILS_EXPORT QString regExReplace( const QString & input, const QRegularExpression & pattern, const QString & replacement );
+        // used in the regExReplace and regExReplaceAll
+        // $$ - is replaced with the literal $
+        // $& - is replaced with with captured text
+        // $N - is replaced with the Nth captured text
+        // ${name} - is replaced with the named capture
+        SABUTILS_EXPORT std::optional< QString > replaceMatch( const QString & replacement, QRegularExpressionMatch & match );
+
+        SABUTILS_EXPORT std::optional< QString >  regExReplace( const QString & input, const QString & pattern, const QString & replacement );
+        SABUTILS_EXPORT std::optional< QString >  regExReplace( const QString & input, const QRegularExpression & pattern, const QString & replacement );
+        SABUTILS_EXPORT QStringList regExReplaceAll( const QString & input, const QString & pattern, const QString & replacement );
+        SABUTILS_EXPORT QStringList regExReplaceAll( const QString & input, const QRegularExpression & pattern, const QString & replacement );
 
     }
 }
