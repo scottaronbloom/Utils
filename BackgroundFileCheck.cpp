@@ -24,7 +24,7 @@
 #include "BackgroundFileCheck.h"
 #include "RevertValue.h"
 
-#include "SABUtils/FileUtils.h"
+#include "FileUtils.h"
 
 #include <QThread>
 #include <QFileInfo>
