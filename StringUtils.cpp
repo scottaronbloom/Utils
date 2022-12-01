@@ -3097,6 +3097,21 @@ namespace NSABUtils
 
             return tmp.join( " " );
         }
-    }
 
+        QString regExReplace( const QString & input, const QString & pattern, const QString & replacement )
+        {
+            return regExReplace( input, QRegularExpression( pattern ), replacement );
+        }
+
+        QString regExReplace( const QString & input, const QRegularExpression & pattern, const QString & replacement )
+        {
+            if ( !pattern.isValid() )
+                return {};
+
+            (void)input;
+            (void)replacement;
+
+            return {};
+        }
+    }
 }

@@ -24,7 +24,6 @@ get_filename_component( QTDIR ${DEPLOYQT_EXECUTABLE} DIRECTORY )
 
 set ( DEBUG_PATH 
     "%PATH%"
-    "$<TARGET_FILE_DIR:SABUtils>"
     "${QTDIR}"
     )
 if ( MKVUTILS )
@@ -37,8 +36,9 @@ endif()
 set( testProjectName "" )
 SAB_UNIT_TEST(Utils
     Test.cpp
-    "SABUtils;gmock;Qt5::Core"
+    "gmock;Qt5::Core"
     testProjectName
+    ../StringUtils.cpp;../StringUtils.h;../utils.cpp;../utils.h;../FileUtils.cpp;../FileUtils.h;../MoveToTrash.cpp;../MoveToTrash_win.cpp;../MoveToTrash.h;../StringComparisonClasses.cpp;../StringComparisonClasses.h;../FromString.cpp;../FromString.h;../WordExp.cpp;../WordExp.h
     )
 
 set_target_properties( ${testProjectName} PROPERTIES 

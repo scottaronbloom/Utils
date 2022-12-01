@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#ifndef QT_NO_SSL
 #include "ValidateOpenSSL.h"
 #include <QApplication>
 #include <QSslSocket>
@@ -66,3 +67,4 @@ namespace NSABUtils
         return { true, QString() };
     }
 }
+#endif

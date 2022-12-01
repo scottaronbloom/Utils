@@ -24,6 +24,7 @@
 #include "../WordExp.h"
 #include "../QtUtils.h"
 #include "../FileUtils.h"
+#include "../StringUtils.h"
 
 #include <QCoreApplication>
 #include <string>
@@ -964,6 +965,15 @@ namespace
         EXPECT_EQ( 1, *ii++ );
         EXPECT_EQ( 3, *ii++ );
         EXPECT_EQ( ints.end(), ii );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace )
+    {
+        auto pattern = R"(\p{Sc}*(\s?\d+[.,]?\d*)\p{Sc}*)";
+        auto replacement = "$1";
+        auto input = R"($16.32 12.19 £16.29 €18.29  €18,29)";
+        auto result = NSABUtils::NStringUtils::regExReplace( input, pattern, replacement );
+        EXPECT_EQ( "16.32 12.19 16.29 18.29  18,29", result );
     }
 }
 

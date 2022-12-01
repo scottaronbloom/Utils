@@ -30,9 +30,6 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QRegularExpression>
-#include <QFontMetrics>
-#include <QDesktopServices>
-#include <QUrl>
 
 #ifdef Q_OS_WINDOWS
 #include <qt_windows.h>
@@ -349,39 +346,6 @@ namespace NSABUtils
         if ( length )
             *length = match.capturedLength();
         return true;
-    }
-
-
-    bool launchIfURLClicked( const QString & title, const QPoint & pt, const QFont & font )
-    {
-        int urlStart;
-        int urlLength;
-        auto hasUrl = NSABUtils::isValidURL( title, &urlStart, &urlLength );
-        if ( hasUrl )
-        {
-            auto xLoc = pt.x();
-            if ( xLoc >= 30 )
-            {
-                xLoc -= 30;
-                QFontMetrics fm( font );
-
-                auto preURL = title.left( urlStart );
-                auto url = title.mid( urlStart, urlLength );
-
-                auto preRect = fm.boundingRect( preURL );
-                if ( xLoc >= preRect.width() )
-                {
-                    xLoc -= preRect.width();
-                    auto urlRect = fm.boundingRect( url );
-                    if ( xLoc <= urlRect.width() )
-                    {
-                        QDesktopServices::openUrl( url );
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     QTime msecsToTime( uint64_t msecs )
