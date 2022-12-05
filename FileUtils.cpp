@@ -1506,15 +1506,22 @@ namespace NSABUtils
             else
                 parts = retVal.split( QDir::separator() );
 
+            parts.removeAll( QString() );
+
             if ( parts.isEmpty() )
             {
                 sMap[ path ] = QString();
                 return {};
             }
 
-            if ( ( parts[ 0 ].length() == 2 ) && ( parts[ 0 ][ 1 ] == ":" ) ) // its a drive
+            if ( ( parts[ 0 ].length() == 2 ) && ( parts[ 0 ][ 1 ] == ":" ) )
             {
                 parts[ 0 ] = parts[ 0 ].toUpper() + QDir::separator();
+                if ( parts.length() == 1 )
+                {
+                    sMap[ path ] = retVal;
+                    return retVal;
+                }
             }
             QDir currDir;
             int startPart = 0;

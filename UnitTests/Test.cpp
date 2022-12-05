@@ -24,6 +24,7 @@
 #include "../WordExp.h"
 #include "../QtUtils.h"
 #include "../FileUtils.h"
+#include "../StringUtils.h"
 
 #include <QCoreApplication>
 #include <string>
@@ -964,6 +965,121 @@ namespace
         EXPECT_EQ( 1, *ii++ );
         EXPECT_EQ( 3, *ii++ );
         EXPECT_EQ( ints.end(), ii );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace_NumberedGroup )
+    {
+        auto pattern = R"(\p{Sc}*\s?(\d+[.,]?\d*)\p{Sc}*)";
+        auto replacement = "$1";
+        auto input = R"($16.32 12.19 £16.29 €18.29  €18,29)";
+        auto result = NSABUtils::NStringUtils::regExReplace( input, pattern, replacement );
+        ASSERT_TRUE( result.has_value() );
+        EXPECT_EQ( "16.32", result.value() );
+
+        auto resultAll = NSABUtils::NStringUtils::regExReplaceAll( input, pattern, replacement );
+        ASSERT_EQ( 5, resultAll.length() );
+        EXPECT_EQ( "16.32", resultAll[ 0 ] );
+        EXPECT_EQ( "12.19", resultAll[ 1 ] );
+        EXPECT_EQ( "16.29", resultAll[ 2 ] );
+        EXPECT_EQ( "18.29", resultAll[ 3 ] );
+        EXPECT_EQ( "18,29", resultAll[ 4 ] );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace_NamedGroup )
+    {
+        auto pattern = R"(\p{Sc}*\s?(?<amount>\d+[.,]?\d*)\p{Sc}*)";
+        auto replacement = "${amount}";
+        auto input = R"($16.32 12.19 £16.29 €18.29  €18,29)";
+        auto result = NSABUtils::NStringUtils::regExReplace( input, pattern, replacement );
+        ASSERT_TRUE( result.has_value() );
+        EXPECT_EQ( "16.32", result.value() );
+
+        auto resultAll = NSABUtils::NStringUtils::regExReplaceAll( input, pattern, replacement );
+        ASSERT_EQ( 5, resultAll.length() );
+        EXPECT_EQ( "16.32", resultAll[ 0 ] );
+        EXPECT_EQ( "12.19", resultAll[ 1 ] );
+        EXPECT_EQ( "16.29", resultAll[ 2 ] );
+        EXPECT_EQ( "18.29", resultAll[ 3 ] );
+        EXPECT_EQ( "18,29", resultAll[ 4 ] );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace_DollarSign_Precedes )
+    {
+        auto precedes = true;
+        auto cSeparator = R"(\.)";
+        auto symbol = QString( "$" );
+        if ( symbol == "$" )
+            symbol = QString( "$$" );
+
+        auto pattern = QString( R"(\b(\d+)(%1(\d+))?)" ).arg( cSeparator );
+        auto replacement = QString( "$1$2" );
+        replacement = precedes ? ( symbol + " " + replacement ) : ( replacement + " " + symbol );
+        EXPECT_EQ( "$ 16.35", NSABUtils::NStringUtils::regExReplace( "16.35", pattern, replacement ) );
+        EXPECT_EQ( "$ 19.72", NSABUtils::NStringUtils::regExReplace( "19.72", pattern, replacement ) );
+        EXPECT_EQ( "$ 1234", NSABUtils::NStringUtils::regExReplace( "1234", pattern, replacement ) );
+        EXPECT_EQ( "$ 0.99", NSABUtils::NStringUtils::regExReplace( "0.99", pattern, replacement ) );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace_DollarSign_Follows )
+    {
+        auto precedes = false;
+        auto cSeparator = R"(\.)";
+        auto symbol = QString( "$" );
+        if ( symbol == "$" )
+            symbol = QString( "$$" );
+
+        auto pattern = QString( R"(\b(\d+)(%1(\d+))?)" ).arg( cSeparator );
+        auto replacement = QString( "$1$2" );
+        replacement = precedes ? ( symbol + " " + replacement ) : ( replacement + " " + symbol );
+        EXPECT_EQ( "16.35 $", NSABUtils::NStringUtils::regExReplace( "16.35", pattern, replacement ) );
+        EXPECT_EQ( "19.72 $", NSABUtils::NStringUtils::regExReplace( "19.72", pattern, replacement ) );
+        EXPECT_EQ( "1234 $", NSABUtils::NStringUtils::regExReplace( "1234", pattern, replacement ) );
+        EXPECT_EQ( "0.99 $", NSABUtils::NStringUtils::regExReplace( "0.99", pattern, replacement ) );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace_PoundSign_Precedes )
+    {
+        auto precedes = true;
+        auto cSeparator = R"(\.)";
+        auto symbol = QString( "€" );
+        if ( symbol == "$" )
+            symbol = QString( "$$" );
+
+        auto pattern = QString( R"(\b(\d+)(%1(\d+))?)" ).arg( cSeparator );
+        auto replacement = QString( "$1$2" );
+        replacement = precedes ? ( symbol + " " + replacement ) : ( replacement + " " + symbol );
+        EXPECT_EQ( "€ 16.35", NSABUtils::NStringUtils::regExReplace( "16.35", pattern, replacement ) );
+        EXPECT_EQ( "€ 19.72", NSABUtils::NStringUtils::regExReplace( "19.72", pattern, replacement ) );
+        EXPECT_EQ( "€ 1234", NSABUtils::NStringUtils::regExReplace( "1234", pattern, replacement ) );
+        EXPECT_EQ( "€ 0.99", NSABUtils::NStringUtils::regExReplace( "0.99", pattern, replacement ) );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace_PoundSign_Follows )
+    {
+        auto precedes = false;
+        auto cSeparator = R"(\.)";
+        auto symbol = QString( "€" );
+        if ( symbol == "$" )
+            symbol = QString( "$$" );
+
+        auto pattern = QString( R"(\b(\d+)(%1(\d+))?)" ).arg( cSeparator );
+        auto replacement = QString( "$1$2" );
+        replacement = precedes ? ( symbol + " " + replacement ) : ( replacement + " " + symbol );
+        EXPECT_EQ( "16.35 €", NSABUtils::NStringUtils::regExReplace( "16.35", pattern, replacement ) );
+        EXPECT_EQ( "19.72 €", NSABUtils::NStringUtils::regExReplace( "19.72", pattern, replacement ) );
+        EXPECT_EQ( "1234 €", NSABUtils::NStringUtils::regExReplace( "1234", pattern, replacement ) );
+        EXPECT_EQ( "0.99 €", NSABUtils::NStringUtils::regExReplace( "0.99", pattern, replacement ) );
+    }
+
+    TEST( TestRegExReplace, TestRegExReplace_EntireMatch )
+    {
+        auto pattern = R"(^(\w+\s?)+$)";
+        auto replacement = R"("$&")";
+
+        EXPECT_EQ( R"("A Tale of Two Cities")", NSABUtils::NStringUtils::regExReplace( "A Tale of Two Cities", pattern, replacement ) );
+        EXPECT_EQ( R"("The Hound of the Baskervilles")", NSABUtils::NStringUtils::regExReplace( "The Hound of the Baskervilles", pattern, replacement ) );
+        EXPECT_EQ( R"("The Protestant Ethic and the Spirit of Capitalism")", NSABUtils::NStringUtils::regExReplace( "The Protestant Ethic and the Spirit of Capitalism", pattern, replacement ) );
+        EXPECT_EQ( R"("The Origin of Species")", NSABUtils::NStringUtils::regExReplace( "The Origin of Species", pattern, replacement ) );
     }
 }
 

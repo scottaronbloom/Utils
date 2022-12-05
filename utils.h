@@ -500,7 +500,6 @@ namespace NSABUtils
     SABUTILS_EXPORT QString getLastError( int errorCode ); // windows only
 
     SABUTILS_EXPORT bool isValidURL( const QString & url, int * start = nullptr, int * length = nullptr );
-    SABUTILS_EXPORT bool launchIfURLClicked( const QString & title, const QPoint & pt, const QFont & font );
 
     template< typename T, typename = std::enable_if< std::is_integral< T >::value > >
     std::list< std::list< T > > group( const std::list< T > & inList )

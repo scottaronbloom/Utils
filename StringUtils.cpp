@@ -3097,6 +3097,103 @@ namespace NSABUtils
 
             return tmp.join( " " );
         }
-    }
 
+        std::optional< QString > regExReplace( const QString & input, const QString & pattern, const QString & replacement )
+        {
+            return regExReplace( input, QRegularExpression( pattern ), replacement );
+        }
+
+        QStringList regExReplaceAll( const QString & input, const QString & pattern, const QString & replacement )
+        {
+            return regExReplaceAll( input, QRegularExpression( pattern ), replacement );
+        }
+
+        std::optional< QString > replaceMatch( const QString & replacement, QRegularExpressionMatch & match )
+        {
+            QString retVal;
+            auto len = replacement.length();
+            int ii = 0;
+            for ( ; ii < ( len - 1 ); ++ii )
+            {
+                auto curr = replacement[ ii ];
+                auto next = replacement[ ii + 1 ];
+                if ( curr != QChar( '$' ) )
+                {
+                    for ( ; ii < len && ( replacement[ ii ] != QChar( '$' ) ); ++ii )
+                        retVal += replacement[ ii ];
+                    ii--;
+                }
+                else if ( next == QChar( '$' ) )
+                {
+                    retVal += curr;
+                    ++ii;
+                }
+                else if ( next == QChar( '&' ) )
+                {
+                    retVal += match.captured();
+                    ++ii;
+                }
+                else if ( next.isNumber() )
+                {
+                    QString number;
+                    for ( ; ( ii + 1 ) < len && replacement[ ii + 1 ].isNumber(); ++ii )
+                    {
+                        number += replacement[ ii + 1 ];
+                    }
+
+                    bool aOK;
+                    auto num = number.toInt( &aOK );
+                    if ( !aOK )
+                        return {};
+                    retVal += match.captured( num );
+                }
+                else if ( next == QChar( '{' ) )
+                {
+                    QString name;
+                    ++ii;
+                    for( ; ( ii + 1 ) < len && ( replacement[ ii + 1 ] != QChar( '}' ) ); ++ii )
+                    {
+                        name += replacement[ ii + 1 ];
+                    }
+                    retVal += match.captured( name );
+                    ii++; // trailing }
+                }
+            }
+            if ( ii == ( len - 1 ) )
+                retVal += replacement[ len - 1 ];
+            return retVal;
+        }
+
+        std::optional< QString > regExReplace( const QString & input, const QRegularExpression & regEx, const QString & replacement )
+        {
+            if ( !regEx.isValid() )
+                return {};
+
+            auto match = regEx.match( input );
+            if ( !match.hasMatch() )
+                return {};
+
+            return replaceMatch( replacement, match );
+        }
+
+        QStringList regExReplaceAll( const QString & input, const QRegularExpression & regEx, const QString & replacement )
+        {
+            if ( !regEx.isValid() )
+                return {};
+
+            auto ii = regEx.globalMatch( input );
+            QStringList retVal;
+            while ( ii.hasNext() )
+            {
+                auto match = ii.next();
+                auto curr = replaceMatch( replacement, match );
+                if ( curr.has_value() )
+                    retVal << curr.value();
+                else
+                    return {};
+            }
+
+            return retVal;
+        }
+    }
 }
