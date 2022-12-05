@@ -38,7 +38,7 @@ SAB_UNIT_TEST(Utils
     Test.cpp
     "gmock;Qt5::Core"
     testProjectName
-    ../StringUtils.cpp;../StringUtils.h;../utils.cpp;../utils.h;../FileUtils.cpp;../FileUtils.h;../MoveToTrash.cpp;../MoveToTrash_win.cpp;../MoveToTrash.h;../StringComparisonClasses.cpp;../StringComparisonClasses.h;../FromString.cpp;../FromString.h;../WordExp.cpp;../WordExp.h
+    ../RegExUtils.cpp;../RegExUtils.h;../StringUtils.cpp;../StringUtils.h;../utils.cpp;../utils.h;../FileUtils.cpp;../FileUtils.h;../MoveToTrash.cpp;../MoveToTrash_win.cpp;../MoveToTrash.h;../StringComparisonClasses.cpp;../StringComparisonClasses.h;../FromString.cpp;../FromString.h;../WordExp.cpp;../WordExp.h
     )
 
 set_target_properties( ${testProjectName} PROPERTIES 

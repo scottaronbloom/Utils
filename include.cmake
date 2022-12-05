@@ -49,6 +49,7 @@ set(qtproject_SRCS
     MenuBarEx.cpp
     QtDumper.cpp
     QtUtils.cpp
+    RegExUtils.cpp
     SABUtilsResources.cpp
     ScrollMessageBox.cpp
     SelectFileUrl.cpp
@@ -111,6 +112,7 @@ set(project_H
     QtDumper.h
     QtUtils.h
     RevertValue.h
+    RegExUtils.h
     SABUtilsExport.h
     SABUtilsResources.h
     SpinBox64_StepType.h

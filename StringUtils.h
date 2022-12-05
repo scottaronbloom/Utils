@@ -193,6 +193,8 @@ namespace NSABUtils
         SABUTILS_EXPORT std::list< std::string >      splitString( const std::string & string, char delim, bool skipEmpty = false, bool keepQuoted = false, bool stripQuotes = false ); // split based on char
         SABUTILS_EXPORT std::list< std::string >      splitString( const std::string & string, const std::string & oneOfdelim, bool skipEmpty = false, bool keepQuoted = false, bool stripQuotes = false ); // split based on one char of
 
+        SABUTILS_EXPORT std::list< std::string > stripParen( const std::list< std::string > & list );
+
         SABUTILS_EXPORT std::string joinString( const std::set< std::string, noCaseStringCmp > & list, const std::string & delim, bool condenseBlanks = false );
         SABUTILS_EXPORT std::string joinString( const std::set< std::string, noCaseStringCmp > & list, char delim, bool condenseBlanks = false );
         SABUTILS_EXPORT std::string joinString( const std::set< std::string > & list, const std::string & delim, bool condenseBlanks = false );
@@ -483,35 +485,6 @@ namespace NSABUtils
         SABUTILS_EXPORT bool startsOrEndsWithNumber( const QString & string, QString * number = nullptr, QString * extra = nullptr, bool * numIsPrefix = nullptr ); // number_extra or extra_number, prefix = true means the number is a prefix
 
         SABUTILS_EXPORT bool isValidEmailAddress( const QString & email );
-
-
-        SABUTILS_EXPORT bool regExEqual( const std::string & lhs, const std::string & rhs );
-
-        SABUTILS_EXPORT bool isExactMatchRegEx( const std::string & data, const std::string & pattern, bool nocase );
-        SABUTILS_EXPORT std::list< std::string > splitStringRegEx( const std::string & string, const std::string & regex, bool nocase = false, bool skipEmpty = false ); // split based on regex
-
-        SABUTILS_EXPORT bool  matchRegExpr( const char * s1, const char * s2 );
-
-        SABUTILS_EXPORT QString encodeRegEx( const char * inString );
-        SABUTILS_EXPORT QString encodeRegEx( QString inString );
-        SABUTILS_EXPORT std::string encodeRegEx( const std::string & inString );
-        SABUTILS_EXPORT std::string addToRegEx( std::string oldRegEx, const std::string & regEx );
-
-        SABUTILS_EXPORT bool isSpecialRegExChar( char ch, bool includeDotSlash = true );
-        SABUTILS_EXPORT bool isSpecialRegExChar( const QChar & ch, bool includeDotSlash = true );
-
-        // used in the regExReplace and regExReplaceAll
-        // $$ - is replaced with the literal $
-        // $& - is replaced with with captured text
-        // $N - is replaced with the Nth captured text
-        // ${name} - is replaced with the named capture
-        SABUTILS_EXPORT std::optional< QString > replaceMatch( const QString & replacement, QRegularExpressionMatch & match );
-
-        SABUTILS_EXPORT std::optional< QString >  regExReplace( const QString & input, const QString & pattern, const QString & replacement );
-        SABUTILS_EXPORT std::optional< QString >  regExReplace( const QString & input, const QRegularExpression & pattern, const QString & replacement );
-        SABUTILS_EXPORT QStringList regExReplaceAll( const QString & input, const QString & pattern, const QString & replacement );
-        SABUTILS_EXPORT QStringList regExReplaceAll( const QString & input, const QRegularExpression & pattern, const QString & replacement );
-
     }
 }
 #endif 
