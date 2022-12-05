@@ -8,6 +8,7 @@
         <file>ok.png</file>
         <file>open.png</file>
         <file>run.png</file>
+        <file>search.png</file>
         <file>unknownStatus.png</file>
         <file>BlankMKVTags.xml</file>
     </qresource>
