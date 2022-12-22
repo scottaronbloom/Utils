@@ -443,6 +443,7 @@ namespace NSABUtils
         SABUTILS_EXPORT QString titleCase( const QString & string, bool ignoreAllCase = true );
         SABUTILS_EXPORT const std::unordered_set< QString > & unimportantWords();
 
+        SABUTILS_EXPORT std::vector< QString > getImportantWordsInOrder( const QString & string, bool stripPunctuation );
         SABUTILS_EXPORT std::unordered_set< QString > getImportantWords( const QString & string, bool stripPunctuation );
         SABUTILS_EXPORT bool isSimilar( const QString & lhs, const QString & rhs, bool inorder ); // is every important word in the rhs in the left
 
