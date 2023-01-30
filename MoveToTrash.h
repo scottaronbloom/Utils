@@ -28,6 +28,7 @@
 #include <string>
 #include <list>
 #include <set>
+#include <memory>
 #include <unordered_map>
 #include <QStringList>
 #include <QFileDevice>
