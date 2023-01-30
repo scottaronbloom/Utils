@@ -29,6 +29,7 @@
 #include <QUrl>
 #include <QDateTime>
 #include <optional>
+#include <memory>
 
 class QEventLoop;
 class QNetworkAccessManager;
