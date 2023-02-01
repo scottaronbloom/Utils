@@ -23,14 +23,13 @@
 #include <QDir>
 #include <QDebug>
 #include <iostream>
-#ifdef WIN32 
+#ifdef Q_OS_WINDOWS 
 #include <QProcessEnvironment>
 #include <userenv.h>
 #include <lmcons.h>
 #pragma comment(lib, "userenv.lib")
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "Advapi32.lib")
-
 #else
 #include <pwd.h>
 #include <unistd.h>
@@ -97,7 +96,7 @@ namespace NSABUtils
     QString CWordExp::getUserName()
     {
         QString retVal = "unknown";
-#ifdef _WIN32
+#ifdef Q_OS_WINDOWS
         DWORD sz = UNLEN + 1;
         wchar_t * wcharUserName = new wchar_t[ sz + 1 ];
         *wcharUserName = 0;
@@ -121,7 +120,7 @@ namespace NSABUtils
     QString CWordExp::getHostName()
     {
         QString retVal = "unknown";
-#ifdef _WIN32
+#ifdef Q_OS_WINDOWS
         WSADATA WSAData;
 
         // Initialize winsock dll

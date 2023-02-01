@@ -43,8 +43,8 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
-#ifdef _WINDOWS
-#include <Windows.h>
+#ifdef Q_OS_WINDOWS
+#include <qt_windows.h>
 #else
 #include <wordexp.h>
 #include <sys/stat.h>
@@ -679,7 +679,7 @@ namespace NSABUtils
         std::string tilda2Home( const std::string & fileName )
         {
             std::string retVal = fileName;
-#ifndef _WINDOWS
+#ifndef Q_OS_WINDOWS
             wordexp_t result;
             if ( wordexp( fileName.c_str(), &result, 0 ) != 0 )
                 return fileName;
@@ -1473,7 +1473,7 @@ namespace NSABUtils
 
         QString getCorrectPathCase( QString path ) // note, on linux returns path, windows does the actual analysis
         {
-#ifndef _WINDOWS
+#ifndef Q_OS_WINDOWS
             return path;
 #else
             path = QDir::toNativeSeparators( QFileInfo( path.toLower() ).absoluteFilePath() );

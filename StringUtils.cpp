@@ -41,7 +41,7 @@
 
 #include <QDebug>
 
-#ifdef _WIN32
+#ifdef Q_OS_WINDOWS
 #define vscprintf _vscprintf
 #define vsnprintf _vsnprintf
 #if _MSC_VER == 1500
@@ -1199,7 +1199,7 @@ namespace NSABUtils
 
         int strNCaseCmp( const char * s1, const char * s2, size_t n )
         {
-#ifdef _WINDOWS
+#ifdef Q_OS_WINDOWS
             return( _strnicmp( s1, s2, n ) );
 #else
             return( strncasecmp( s1, s2, n ) );
@@ -1223,7 +1223,7 @@ namespace NSABUtils
 
         int strCaseCmp( const char * s1, const char * s2 )
         {
-#ifdef _WINDOWS
+#ifdef Q_OS_WINDOWS
             return( _stricmp( s1, s2 ) );
 #else
             return( strcasecmp( s1, s2 ) );
