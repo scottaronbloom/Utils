@@ -40,6 +40,7 @@ set(qtproject_SRCS
     DoubleProgressDlg.cpp
     FileCompare.cpp
     FileUtils.cpp
+	FileSIDInfo.cpp
     FromString.cpp
     HyperLinkLineEdit.cpp
     ImageScrollBar.cpp
@@ -105,6 +106,7 @@ set(project_H
     EnumUtils.h
     FileCompare.h
     FileUtils.h
+	FileSIDInfo.h
     FromString.h
     HashUtils.h
     JsonUtils.h

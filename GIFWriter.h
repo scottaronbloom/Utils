@@ -29,6 +29,7 @@
 #include <QDataStream>
 #include <initializer_list>
 #include <optional>
+#include <memory>
 
 class QString;
 class QIODevice;
