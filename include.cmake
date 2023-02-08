@@ -28,7 +28,7 @@ ENDIF()
 
 set(qtproject_SRCS
     GitHubGetVersions.cpp
-	DownloadFile.cpp
+    DownloadFile.cpp
     AutoFetch.cpp
     AutoWaitCursor.cpp
     BackgroundFileCheck.cpp
@@ -40,7 +40,7 @@ set(qtproject_SRCS
     DoubleProgressDlg.cpp
     FileCompare.cpp
     FileUtils.cpp
-	FileSIDInfo.cpp
+    FileSIDInfo.cpp
     FromString.cpp
     HyperLinkLineEdit.cpp
     ImageScrollBar.cpp
@@ -86,7 +86,7 @@ set(qtproject_H
     DelaySpinBox.h
     DoubleProgressDlg.h
     GitHubGetVersions.h
-	DownloadFile.h
+    DownloadFile.h
     HyperLinkLineEdit.h
     ImageScrollBar.h
     MD5.h
@@ -106,7 +106,7 @@ set(project_H
     EnumUtils.h
     FileCompare.h
     FileUtils.h
-	FileSIDInfo.h
+    FileSIDInfo.h
     FromString.h
     HashUtils.h
     JsonUtils.h
@@ -137,7 +137,7 @@ endif()
 
 set(qtproject_UIS
     ScrollMessageBox.ui
-	DownloadFile.ui
+    DownloadFile.ui
 )
 
 
@@ -227,6 +227,7 @@ endif()
 SET( project_pub_DEPS
      Qt5::Concurrent
      Qt5::Network
+     Qt5::Multimedia
      ${MKVREADERLIB}
      ${MEDIAINFOLIB}
 )

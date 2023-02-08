@@ -57,7 +57,10 @@ namespace NSABUtils
         eTrack,
         eAlbum,
         eAlbumArtist,
-        eDiscnumber
+        eDiscnumber,
+        eAspectRatio,
+        eWidth,
+        eHeight
     };
     QString toString( MediaInfoDLL::stream_t );
     struct SABUTILS_EXPORT SStreamData

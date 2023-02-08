@@ -37,6 +37,9 @@
 #include <QDir>
 #include <QDebug>
 #include <QTemporaryFile>
+#include <QMediaResource>
+#include <QSize>
+
 #include <iosfwd>
 #include <iomanip>
 
@@ -386,20 +389,41 @@ namespace NSABUtils
                 EMediaTags::eTrack,
                 EMediaTags::eAlbum,
                 EMediaTags::eAlbumArtist,
-                EMediaTags::eDiscnumber
+                EMediaTags::eDiscnumber,
+                EMediaTags::eAspectRatio,
+                EMediaTags::eWidth,
+                EMediaTags::eHeight
             };
         }
 
         std::unordered_map< NSABUtils::EMediaTags, QString > retVal;
+        std::unique_ptr< QMediaResource > mediaResource;
         for ( auto && ii : realTags )
         {
-            auto streamCount = MI.Count_Get( MediaInfoDLL::Stream_General );
-            for ( int jj = 0; jj < streamCount; ++jj )
+            if   ( ( ii == NSABUtils::EMediaTags::eWidth )
+                || ( ii == NSABUtils::EMediaTags::eHeight ) 
+                || ( ii == NSABUtils::EMediaTags::eAspectRatio )
+                   )
             {
-                auto value = QString::fromStdWString( MI.Get( MediaInfoDLL::Stream_General, jj, mediaInfoName( ii ).toStdWString() ) );
-                retVal[ ii ] = value;
-                if ( !value.isEmpty() )
-                    break;
+                auto streamCount = MI.Count_Get( MediaInfoDLL::Stream_Video );
+                for ( int jj = 0; jj < streamCount; ++jj )
+                {
+                    auto value = QString::fromStdWString( MI.Get( MediaInfoDLL::Stream_Video, jj, mediaInfoName( ii ).toStdWString() ) );
+                    retVal[ ii ] = value;
+                    if ( !value.isEmpty() )
+                        break;
+                }
+            }
+            else
+            {
+                auto streamCount = MI.Count_Get( MediaInfoDLL::Stream_General );
+                for ( int jj = 0; jj < streamCount; ++jj )
+                {
+                    auto value = QString::fromStdWString( MI.Get( MediaInfoDLL::Stream_General, jj, mediaInfoName( ii ).toStdWString() ) );
+                    retVal[ ii ] = value;
+                    if ( !value.isEmpty() )
+                        break;
+                }
             }
         }
 
@@ -507,6 +531,9 @@ namespace NSABUtils
             case EMediaTags::eAlbum: return "Album";
             case EMediaTags::eAlbumArtist: return "Album Artist";
             case EMediaTags::eDiscnumber: return "Disc Number";
+            case EMediaTags::eAspectRatio: return "AspectRatio";
+            case EMediaTags::eWidth: return "Width";
+            case EMediaTags::eHeight: return "Height";
             default:
                 return QObject::tr( "" );
         }
