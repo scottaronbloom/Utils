@@ -29,6 +29,7 @@
 #include <list>
 #include <set>
 #include <unordered_map>
+#include <optional>
 #include <QStringList>
 #include <QFileDevice>
 #include <QList>
@@ -143,7 +144,7 @@ namespace NSABUtils
 
         SABUTILS_EXPORT QString getCorrectPathCase( QString path ); // note, on linux returns path, windows does the actual analysis, and returns the absolute path
 
-        SABUTILS_EXPORT QList< QFileInfo > findFilesInDir( const QDir & dir, const QStringList & nameFilters, bool recursive );
+        SABUTILS_EXPORT std::optional< QList< QFileInfo > > findAllFiles( const QDir & dir, const QStringList & nameFilters, bool recursive, bool sortByName = false, QString * errorMsg = nullptr );
 
         SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo & info );
     }

@@ -21,6 +21,8 @@
 // SOFTWARE.
 
 #include "BIFFile.h"
+#include "FileUtils.h"
+
 #include <QFile>
 #include <QDir>
 #include <QRegularExpression>
@@ -122,32 +124,37 @@ namespace NSABUtils
         {
         }
 
+        CFile::CFile( const QList< QFileInfo > & allFiles, uint32_t timespan, QString & msg )
+        {
+            init( allFiles, timespan, msg );
+        }
+
         CFile::CFile( const QDir & dir, const QString & filter, uint32_t timespan, QString & msg )
         {
             fState = EState::eError;
-            if ( !dir.exists() || !dir.isReadable() )
-            {
-                msg = QString( "Directory '%1' does not exist." ).arg( dir.absolutePath() );
-                return;
-            }
 
-            auto files = dir.entryList( { filter }, QDir::Files, QDir::SortFlag::Name );
-            if ( files.empty() )
+            auto allFiles = NFileUtils::findAllFiles( dir, { filter }, false, true, &msg );
+            if ( !allFiles.has_value() || allFiles.value().isEmpty() )
             {
                 msg = QString( "No images exists in dir '%1' of the format 'img_*.jpg'." ).arg( dir.absolutePath() );
                 return;
             }
 
+            init( allFiles.value(), timespan, msg );
+        }
+
+        void CFile::init( const QList< QFileInfo > & images, uint32_t timespan, QString & msg )
+        {
             fTimePerFrame = S32BitValue( timespan );
 
-            fBIFFrames.reserve( files.count() );
+            fBIFFrames.reserve( images.count() );
             uint32_t imageNum = 0;
-            for ( auto && ii : files )
+            for ( auto && ii : images )
             {
-                auto currFrame = SBIFImage( dir.absoluteFilePath( ii ), imageNum );
+                auto currFrame = SBIFImage( ii.absoluteFilePath(), imageNum );
                 if ( !currFrame.imageValid() )
                 {
-                    msg = QString( "Could not read JPG file '%1'" ).arg( ii );
+                    msg = QString( "Could not read JPG file '%1'" ).arg( ii.absoluteFilePath() );
                     return;
                 }
 
@@ -156,7 +163,7 @@ namespace NSABUtils
             }
             fMagicNumber = sMagicNumber;
             fVersion = S32BitValue( 0 );
-            fNumImages = S32BitValue( static_cast< uint32_t >( fBIFFrames.size() ) );
+            fNumImages = S32BitValue( static_cast<uint32_t>( fBIFFrames.size() ) );
             fReserved = QByteArray( 44, '\0' );
             fState = EState::eReady;
             uint32_t offset = static_cast<uint32_t>( 8 * ( fBIFFrames.size() + 1 ) ) + fMagicNumber.size() + fVersion.size() + fNumImages.size() + fTimePerFrame.size() + fReserved.size();
@@ -624,6 +631,14 @@ namespace NSABUtils
             return fBIFFrames[ imageNum ].fImage.value().second;
         }
 
+        QList< QImage > CFile::images( size_t startFrame, size_t endFrame )
+        {
+            QList< QImage > retVal;
+            for ( auto ii = startFrame; ii <= endFrame; ++ii )
+                retVal.push_back( image( ii ) );
+            return retVal;
+        }
+
         void CFile::fetchMore()
         {
             size_t remainder = imageCount() - fLastImageLoaded;
@@ -688,10 +703,6 @@ namespace NSABUtils
         SBIFImage::SBIFImage( const QString & fileName, uint32_t bifNum ) :
             fBIFNum( bifNum )
         {
-            //auto image = QImage( fileName );
-            //if ( image.isNull() )
-            //    return;
-
             auto fi = QFile( fileName );
             if ( !fi.open( QFile::ReadOnly ) )
                 return;

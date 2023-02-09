@@ -27,6 +27,14 @@
 #include <QFile>
 #include <QDataStream>
 #include <QDebug>
+#include <QProgressDialog>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QApplication>
+
+#ifdef _ALLOW_OPENSOURCEGIFWRITER_H
+#include "gif/gif-h/gif.h"
+#endif
 
 namespace NSABUtils
 {
@@ -920,6 +928,110 @@ namespace NSABUtils
             + "Green:\n" + NSABUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
             ;
         return retVal;
+    }
+
+    bool CGIFWriter::saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > & images, bool useNew, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelledFunc )
+    {
+        if ( fileName.isEmpty() )
+            return true;
+
+        if ( QFileInfo( fileName ).exists() )
+        {
+            if ( QMessageBox::warning( parent, QObject::tr( "File already exists" ), QObject::tr( "'%1' already exists, are you sure?" ).arg( QFileInfo( fileName ).fileName() ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
+            {
+                return false;
+            }
+        }
+
+        setRange( 0, images.size() );
+
+        std::unique_ptr< CGIFWriter > newWriter;
+#ifdef gif_h
+        std::unique_ptr< GifWriter > oldWriter;
+#endif
+        if ( useNew )
+        {
+            newWriter = std::make_unique< CGIFWriter >( fileName );
+            newWriter->setDither( dither );
+            newWriter->setFlipImage( flipImage );
+            newWriter->setBitDepth( 8 );
+            newWriter->setLoopCount( loopCount );
+            newWriter->setDelay( delay );
+        }
+#ifdef gif_h
+        else
+        {
+            oldWriter = std::make_unique< GifWriter >();
+            oldWriter->firstFrame = false;
+            oldWriter->f = nullptr;
+            oldWriter->oldImage = nullptr;
+            GifBegin( oldWriter.get(), qPrintable( fn ), fBIF->imageSize().width(), fBIF->imageSize().height(), delay(), 8, dither(), loopCount() );
+        }
+#endif
+
+        bool wasCancelled = false;
+        int frame = 0;
+        bool aOK = true;
+        for ( auto && image : images )
+        {
+            setCurr( frame++ );
+            wasCancelled = wasCancelledFunc();
+
+            if ( image.isNull() )
+            {
+                if ( QMessageBox::warning( parent, QObject::tr( "BIF File has empty image" ), QObject::tr( "Image #%1 is null, skipped.  Continue?" ).arg( frame ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
+                {
+                    aOK = false;
+                    break;
+                }
+            }
+
+            if ( wasCancelledFunc() )
+            {
+                wasCancelled = true;
+                break;
+            }
+
+            if ( newWriter )
+            {
+                if ( !newWriter->writeImage( image, false ) )
+                {
+                    if ( QMessageBox::warning( parent, QObject::tr( "Problem writing frame" ), QObject::tr( "Image #%1 was not written.  Continue?" ).arg( frame ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
+                    {
+                        aOK = false;
+                        break;
+                    }
+                }
+            }
+#ifdef gif_h
+            else
+            {
+                auto imageData = NQtUtils::imageToPixels( image );
+                GifWriteFrame( oldWriter.get(), imageData, image.width(), image.height(), delay(), flipImage(), 8, dither() );
+                delete[] imageData;
+            }
+#endif
+            if ( wasCancelledFunc() )
+            {
+                wasCancelled = true;
+                break;
+            }
+        }
+
+        if ( aOK && !wasCancelled )
+        {
+            if ( newWriter )
+                newWriter->writeEnd();
+#ifdef gif_h
+            else
+                GifEnd( oldWriter.get() );
+#endif
+        }
+        else
+        {
+            QFile::remove( fileName );
+        }
+        return !wasCancelled && aOK;
     }
 }
 

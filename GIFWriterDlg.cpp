@@ -23,9 +23,6 @@
 #include "GIFWriterDlg.h"
 #include "BIFFile.h"
 #include "GIFWriter.h"
-#ifdef _ALLOW_OPENSOURCEGIFWRITER_H
-#include "gif/gif-h/gif.h"
-#endif
 #include "QtUtils.h"
 
 #include <QMessageBox>
@@ -231,98 +228,83 @@ namespace NSABUtils
         slotUpdateFileName();
     }
 
-    bool CGIFWriterDlg::saveToGIF()
+    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > imageFiles, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
     {
-        auto fn = fImpl->fileName->text();
-        if ( fn.isEmpty() )
-            return true;
-
-        if ( !fBIF )
+        if ( imageFiles.empty() )
             return false;
 
-        if ( QFileInfo( fn ).exists() )
+        QList< QImage > images;
+
+        auto max = imageFiles.count();
+        endFrame = std::max( max - 1, endFrame );
+        for ( int ii = startFrame; ii <= endFrame; ++ii )
         {
-            if ( QMessageBox::warning( this, tr( "File already exists" ), tr( "'%1' already exists, are you sure?" ).arg( QFileInfo( fn ).fileName() ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
-            {
+            auto image = imageFiles[ ii ];
+            if ( image.isNull() )
                 return false;
-            }
+            images.push_back( image );
         }
 
-        std::unique_ptr< CGIFWriter > newWriter;
-#ifdef gif_h
-        std::unique_ptr< GifWriter > oldWriter;
-#endif
-        if ( fImpl->useNew->isChecked() )
+        return CGIFWriter::saveToGIF( parent, fileName, images, true, dither, flipImage, loopCount, delay, setRange, setCurr, wasCancelled );
+    }
+
+    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
+    {
+        return saveToGIF( parent, fileName, images, 0, images.count() - 1, dither, flipImage, loopCount, delay, setRange, setCurr, wasCancelled );
+    }
+
+    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > imageFiles, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
+    {
+        return saveToGIF( parent, fileName, imageFiles, 0, imageFiles.count() - 1, dither, flipImage, loopCount, delay, setRange, setCurr, wasCancelled );
+    }
+
+    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > imageFiles, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
+    {
+        if ( imageFiles.empty() )
+            return false;
+
+        QList< QImage > images;
+
+        auto max = imageFiles.count();
+        endFrame = std::max( max - 1, endFrame );
+        for ( int ii = startFrame; ii <= endFrame; ++ii )
         {
-            newWriter = std::make_unique< CGIFWriter >( fn );
-            newWriter->setDither( dither() );
-            newWriter->setFlipImage( flipImage() );
-            newWriter->setBitDepth( 8 );
-            newWriter->setLoopCount( loopCount() );
-            newWriter->setDelay( delay() );
+            auto fi = imageFiles[ ii ];
+            auto file = QFile( fi.absoluteFilePath() );
+            if ( !file.open( QFile::ReadOnly ) )
+                return false;
+
+            auto ba = file.readAll();
+            auto image = QImage::fromData( ba );
+
+            images.push_back( image );
         }
-#ifdef gif_h
-        else
-        {
-            oldWriter = std::make_unique< GifWriter >();
-            oldWriter->firstFrame = false;
-            oldWriter->f = nullptr;
-            oldWriter->oldImage = nullptr;
-            GifBegin( oldWriter.get(), qPrintable( fn ), fBIF->imageSize().width(), fBIF->imageSize().height(), delay(), 8, dither(), loopCount() );
-        }
-#endif
+
+        return saveToGIF( parent, fileName, images, 0, images.count() - 1, dither, flipImage, loopCount, delay, setRange, setCurr, wasCancelled );
+    }
+
+    bool CGIFWriterDlg::saveToGIF()
+    {
         bool wasCancelled = false;
         QProgressDialog dlg( this );
         dlg.setLabelText( tr( "Generating GIF" ) );
-        dlg.setMinimum( startFrame() );
-        dlg.setMaximum( endFrame() );
         dlg.setWindowModality( Qt::WindowModal );
         dlg.show();
 
-        for ( int ii = startFrame() - 1; !wasCancelled && ii <= endFrame() - 1; ++ii )
-        {
-            dlg.setValue( ii );
-            QApplication::processEvents();
-
-            wasCancelled = dlg.wasCanceled();
-
-            auto image = fBIF->image( ii );
-            if ( image.isNull() )
-            {
-                if ( QMessageBox::warning( this, tr( "BIF File has empty image" ), tr( "Image #%1 is null, skipped.  Continue?" ).arg( ii ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
-                    return false;
-            }
-
-            wasCancelled = dlg.wasCanceled();
-            if ( newWriter )
-            {
-                if ( !newWriter->writeImage( image, false ) )
-                {
-                    if ( QMessageBox::warning( this, tr( "Problem writing frame" ), tr( "Image #%1 was not written.  Continue?" ).arg( ii ), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No ) == QMessageBox::StandardButton::No )
-                        return false;
-                }
-            }
-#ifdef gif_h
-            else
-            {
-                auto imageData = NQtUtils::imageToPixels( image );
-                GifWriteFrame( oldWriter.get(), imageData, image.width(), image.height(), delay(), flipImage(), 8, dither() );
-                delete[] imageData;
-            }
-#endif
-        }
-
-        if ( newWriter )
-            newWriter->writeEnd();
-#ifdef gif_h
-        else
-            GifEnd( oldWriter.get() );
-#endif
-        if ( wasCancelled )
-        {
-            QFile::remove( fn );
-        }
-        return !wasCancelled;
+        return saveToGIF( this, fImpl->fileName->text(), fBIF->images( startFrame() - 1, endFrame() - 1 ), dither(), flipImage(), loopCount(), delay(),
+                          [ &dlg ]( size_t min, size_t max )
+                          {
+                              dlg.setRange( static_cast<int>( min ), static_cast<int>( max ) );
+                          },
+                          [ &dlg ]( size_t curr )
+                          {
+                              dlg.setValue( static_cast<int>( curr ) );
+                          QApplication::processEvents();
+                          },
+                          [ &dlg ]()
+                          {
+                              return dlg.wasCanceled();
+                          } );
     }
 }
 

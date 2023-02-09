@@ -35,6 +35,7 @@
 
 #include "SABUtilsExport.h"
 
+class QFileInfo;
 class QFile;
 class QDir;
 namespace NSABUtils
@@ -107,7 +108,9 @@ namespace NSABUtils
 
             CFile( const QString & bifFile, bool loadImages ); // load the file and go
             CFile( const QDir & dir, const QString & filter, uint32_t timespan, QString & msg ); // load the file and go
+            CFile( const QList< QFileInfo > & images, uint32_t timespan, QString & msg ); // load the images and go
             CFile(); // used for IOHandlerStream
+
             virtual ~CFile();
 
             static bool validateMagicNumber( const QByteArray & magicNumber );
@@ -137,6 +140,7 @@ namespace NSABUtils
             std::size_t imageCount() const { return fBIFFrames.size(); }
 
             QImage image( size_t imageNum );
+            QList< QImage > images( size_t startFrame, size_t endFrame );
             QImage imageToFrame( size_t imageNum, int * insertStart = nullptr, int * numInserted = nullptr );
 
             int fetchSize() const { return 8; }
@@ -149,6 +153,7 @@ namespace NSABUtils
             void setLoopCount( int loopCount ) { fLoopCount = loopCount; } // default is-1 which is infinite
             int loopCount() { return fLoopCount; }
         private:
+            void init( const QList< QFileInfo > & images, uint32_t timespan, QString & msg );
             static int extractImageNum( const QString & fileName );
 
             std::pair< bool, QString > loadImage( size_t imageNum, bool loadUntilFrame, int * insertStart = nullptr, int * numInserted = nullptr );

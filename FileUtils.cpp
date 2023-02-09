@@ -384,22 +384,6 @@ namespace NSABUtils
             return true;
         }
 
-        QList< QFileInfo > findFilesInDir( const QDir & dir, const QStringList & nameFilters, bool recursive )
-        {
-
-            //qDebug() << dir.absolutePath();
-            auto retVal = dir.entryInfoList( nameFilters );
-            if ( recursive )
-            {
-                auto subDirs = dir.entryInfoList( QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot );
-                for ( auto && ii : subDirs )
-                {
-                    retVal << findFilesInDir( QDir( ii.absoluteFilePath() ), nameFilters, recursive );
-                }
-            }
-            return retVal;
-        }
-
         SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo & info )
         {
             auto path = info.absoluteFilePath();

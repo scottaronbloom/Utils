@@ -25,6 +25,9 @@
 
 #include "SABUtilsExport.h"
 
+class QProgressDialog;
+class QFileInfo;
+
 #include <QDialog>
 #include <memory>
 
@@ -45,6 +48,11 @@ namespace NSABUtils
         CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget * parent = nullptr );
 
         ~CGIFWriterDlg();
+
+        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > images, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > images, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
 
         void setBIF( std::shared_ptr< NBIF::CFile > bifFile );
         std::shared_ptr< NBIF::CFile > bifFile() const { return fBIF; }
