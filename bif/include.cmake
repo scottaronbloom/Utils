@@ -23,6 +23,7 @@
 set(qtproject_SRCS
     BIFPlugin.cpp
     ../BIFFile.cpp
+    ../FindAllFiles.cpp
     BIFIOHandler.cpp
 )
 
@@ -35,6 +36,7 @@ set(qtproject_H
 
 set(project_H
     BIFIOHandler.h
+    ../FileUtils.h
     ../BIFFile.h
 )
 

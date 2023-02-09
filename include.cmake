@@ -40,6 +40,7 @@ set(qtproject_SRCS
     DoubleProgressDlg.cpp
     FileCompare.cpp
     FileUtils.cpp
+    FindAllFiles.cpp
     FileSIDInfo.cpp
     FromString.cpp
     HyperLinkLineEdit.cpp
