@@ -110,6 +110,7 @@ set(project_H
     FileSIDInfo.h
     FromString.h
     HashUtils.h
+    QtHashUtils.h
     JsonUtils.h
     MoveToTrash.h
     QtDumper.h
