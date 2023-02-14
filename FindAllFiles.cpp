@@ -21,37 +21,7 @@
 // SOFTWARE.
 
 #include "FileUtils.h"
-//#include "MoveToTrash.h"
-//#include "StringUtils.h"
-//#include "HashUtils.h"
-//#include "utils.h"
-//
-//#include <Qt>
-//#include <QDebug>
-//#include <QFile>
-//#include <QFileInfo>
 #include <QDir>
-//#include <QDateTime>
-//#include <QDirIterator>
-//#include <QRegExp>
-//#include <QStringRef>
-//#include <QVector>
-//#include <QRegularExpression>
-//
-//#include <unordered_set>
-//#include <unordered_map>
-//#include <fstream>
-//#include <iostream>
-//#include <algorithm>
-//#ifdef Q_OS_WINDOWS
-//#include <qt_windows.h>
-//#else
-//#include <wordexp.h>
-//#include <sys/stat.h>
-//#endif
-//
-//#include <map>
-//#include <cctype>
 
 namespace NSABUtils
 {

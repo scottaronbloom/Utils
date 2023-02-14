@@ -23,7 +23,6 @@
 #include "FileUtils.h"
 #include "MoveToTrash.h"
 #include "StringUtils.h"
-#include "HashUtils.h"
 #include "utils.h"
 
 #include <Qt>

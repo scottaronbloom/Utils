@@ -22,7 +22,6 @@
 
 #include "StringUtils.h"
 #include "RegExUtils.h"
-#include "HashUtils.h"
 #include "FromString.h"
 
 #include <QString>

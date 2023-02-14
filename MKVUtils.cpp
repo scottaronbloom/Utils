@@ -22,7 +22,6 @@
 
 #include "MKVUtils.h"
 #include "utils.h"
-#include "HashUtils.h"
 #include "MKVReader/MKVReader.h"
 #include "MediaInfoDLL/MediaInfoDLL_Static.h"
 #include "MediaInfo/MediaInfoList.h"
