@@ -62,22 +62,31 @@ function( CheckOpenSSL )
 				MESSAGE( STATUS
 					  " Neither OPENSSL_FOUND and OPENSSL_ROOT_DIR are set, checking default locations." )
 
-				if( EXISTS "C:/OpenSSL/openssl-1.1" )  # Only valid version
-					if(CMAKE_SIZEOF_VOID_P EQUAL 4) #32 bit
-						set( _SUFFIX x86 )
-					elseif(CMAKE_SIZEOF_VOID_P EQUAL 8) #64 bit
-						set( _SUFFIX x64 )
-					endif()
-					SET(OPENSSL_ROOT_DIR C:/OpenSSL/openssl-1.1/${_SUFFIX})
-				elseif( (CMAKE_SIZEOF_VOID_P EQUAL 4 ) AND ( EXISTS "C:/Program Files (x86)/OpenSSL-Win32" ) )
-					SET(OPENSSL_ROOT_DIR "C:/Program Files (x86)/OpenSSL-Win32")
-				elseif( (CMAKE_SIZEOF_VOID_P EQUAL 8 ) AND ( EXISTS "C:/Program Files/OpenSSL-Win64/bin" ) )
-					SET(OPENSSL_ROOT_DIR "C:/Program Files/OpenSSL-Win64/bin")
-				endif()
-				if ( DEFINED OPENSSL_ROOT_DIR )
-					MESSAGE( STATUS " Trying ${OPENSSL_ROOT_DIR}" )
+				if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+                    SET( _PROGRAM_FILES $ENV{PROGRAMFILES}/OpenSSL-Win64 )
+                    SET( _SUFFIX x64 )
+                    SET( _OPENSSL_DLL libssl-1_1-x64.dll )
+                elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+                    SET( _PROGRAM_FILES $ENV{PROGRAMFILES\(X86\)}/OpenSSL-Win32 )
+                    SET( _SUFFIX x86 )
+                    SET( _OPENSSL_DLL libssl-1_1.dll )
+                endif()
+                
+ #               set(CMAKE_FIND_DEBUG_MODE TRUE)
+                find_path( 
+                    OPENSSL_ROOT_DIR 
+                    bin/${_OPENSSL_DLL} 
+                    PATHS C:/OpenSSL/openssl-1.1/${_SUFFIX} D:/OpenSSL/openssl-1.1/${_SUFFIX} ${_PROGRAM_FILES} 
+                    NO_CACHE 
+                    REQUIRED 
+                    NO_DEFAULT_PATH )
+                set(CMAKE_FIND_DEBUG_MODE FALSE)
+
+                if ( DEFINED OPENSSL_ROOT_DIR )
+					MESSAGE( STATUS "Trying ${OPENSSL_ROOT_DIR}" )
 					find_package( OpenSSL REQUIRED )
 				endif()
+#                set(CMAKE_FIND_DEBUG_MODE FALSE)
 			endif()
 		endif()
 		
