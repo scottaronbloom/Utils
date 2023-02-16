@@ -25,14 +25,16 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-project(bif)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../Modules ${CMAKE_MODULE_PATH})
 
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 find_package(Deploy REQUIRED)
 
+find_package(IncludeProjectSettings REQUIRED)
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
-include( ${CMAKE_CURRENT_LIST_DIR}/../Project.cmake )
+project( ${_PROJECT_NAME} ) 
+IncludeProjectSettings(QT ${USE_QT})
+
 add_definitions( -DBUILD_BIF_PLUGIN=1 )
 add_definitions( -DSABUTILS_INTERNAL )
 
@@ -52,9 +54,9 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
                                 ARCHIVE_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
                                 LIBRARY_OUTPUT_DIRECTORY "$<CONFIG>/imageformats"
                                 DEBUG_POSTFIX d
-                                FOLDER SharedLibs 
+                                FOLDER ${FOLDER_NAME} 
 )
 
-INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.dll DESTINATION imageformats )
-INSTALL( FILES $<TARGET_FILE_DIR:bif>/$<TARGET_FILE_BASE_NAME:bif>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
+INSTALL( FILES $<TARGET_FILE_DIR:${PROJECT_NAME}>/$<TARGET_FILE_BASE_NAME:${PROJECT_NAME}>.dll DESTINATION imageformats )
+INSTALL( FILES $<TARGET_FILE_DIR:${PROJECT_NAME}>/$<TARGET_FILE_BASE_NAME:${PROJECT_NAME}>.pdb DESTINATION imageformats CONFIGURATIONS Debug RelWithDebInfo )
 

@@ -25,15 +25,13 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-project(SABUtils)
-
 SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
 if( SABUTILS_DLL )
-    message( STATUS "SAB Utils exists" )
+#    message( STATUS "SAB Utils exists" )
     SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" PARENT_SCOPE )
 else()
-    message( STATUS "SAB Utils does not exist" )
+#    message( STATUS "SAB Utils does not exist" )
     SET( SABUTILS_DLL ON CACHE BOOL "Build SAB Utils as a Shared Library" )
 endif()
 
@@ -73,7 +71,6 @@ find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)
 find_package(Qt5SrcMoc REQUIRED)
 
-project( SABUtils )
 
 set(SAB_MOC_OPTIONS "-DNON_VIS_BUILD=1")
 
@@ -81,8 +78,10 @@ if ( MKVUTILS )
     set( MEDIAINFOLIB mediainfo )
 endif()
 
+find_package(IncludeProjectSettings REQUIRED)
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
-include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
+project( ${_PROJECT_NAME} ) 
+IncludeProjectSettings(QT ${USE_QT})
 
 if ( MKVUTILS )
     include_directories(MediaInfo/MediaInfoLib/Source)
@@ -95,7 +94,7 @@ else()
     SET( LIBTYPE STATIC )
 endif()
 
-add_library(SABUtils ${LIBTYPE}
+add_library(${PROJECT_NAME} ${LIBTYPE}
     ${_PROJECT_DEPENDENCIES}
 )
 
@@ -112,18 +111,18 @@ if ( BIFSUPPORT )
 endif()
 
 if ( SABUTILS_DLL )
-    set_target_properties( SABUtils PROPERTIES 
-                                FOLDER SharedLibs 
+    set_target_properties( ${PROJECT_NAME} PROPERTIES 
+                                FOLDER ${FOLDER_NAME} 
                                 DEBUG_POSTFIX d
    ) 
     if ( WIN32 )
-        INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.dll DESTINATION . )
-        INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/$<TARGET_FILE_BASE_NAME:SABUtils>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
+        INSTALL( FILES $<TARGET_FILE_DIR:${PROJECT_NAME}>/$<TARGET_FILE_BASE_NAME:${PROJECT_NAME}>.dll DESTINATION . )
+        INSTALL( FILES $<TARGET_FILE_DIR:${PROJECT_NAME}>/$<TARGET_FILE_BASE_NAME:${PROJECT_NAME}>.pdb DESTINATION . CONFIGURATIONS Debug RelWithDebInfo )
     else()
-        INSTALL( FILES $<TARGET_FILE_DIR:SABUtils>/lib$<TARGET_FILE_BASE_NAME:SABUtils>.so DESTINATION . )
+        INSTALL( FILES $<TARGET_FILE_DIR:${PROJECT_NAME}>/lib$<TARGET_FILE_BASE_NAME:${PROJECT_NAME}>.so DESTINATION . )
     endif()
 else()
-    set_target_properties( SABUtils PROPERTIES FOLDER Libs )
+    set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER ${FOLDER_NAME} )
 endif()
 
 if( SAB_ENABLE_TESTING )
@@ -131,6 +130,6 @@ if( SAB_ENABLE_TESTING )
 endif()
 
 if ( SABUTILS_DLL )
-    DeployQt( SABUtils . )
-    DeploySystem( SABUtils . )
+    DeployQt( ${PROJECT_NAME} . )
+    DeploySystem( ${PROJECT_NAME} . )
 endif()

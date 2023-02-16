@@ -20,6 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+set(_PROJECT_NAME SABUtils)
+set(USE_QT TRUE)
+if ( SABUTILS_DLL )
+    set(FOLDER_NAME SharedLibs)
+else()
+    set(FOLDER_NAME Libs)
+endif()
+
 IF(WIN32)
         set( OS_SRCS SystemInfo_win.cpp MoveToTrash_win.cpp)
 ELSE()

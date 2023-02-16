@@ -20,7 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set(qtproject_SRCS
+set(_PROJECT_NAME MKVReader)
+set(USE_QT TRUE)
+set(FOLDER_NAME Libs)
+
+set(project_SRCS
     MKVReader.cpp
     EBML.cpp
 )
