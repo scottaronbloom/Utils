@@ -33,6 +33,7 @@
 #include <QStringList>
 #include <QFileDevice>
 #include <QList>
+#include <memory>
 
 class QFileInfo;
 class QDateTime;
