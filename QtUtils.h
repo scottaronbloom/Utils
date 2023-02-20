@@ -58,6 +58,7 @@ class QXmlQuery;
 #include <QList>
 #include <set>
 #include <QDebug>
+ #include <QFileInfo>
 #include <QTextStream>
 #include <unordered_set>
 
@@ -190,6 +191,30 @@ namespace NSABUtils
     SABUTILS_EXPORT size_t SizeOf( const QString & str );
     SABUTILS_EXPORT size_t SizeOf( const QDateTime & str );
     SABUTILS_EXPORT QString fromHtmlEscaped( const QString & str );
+
+    struct CFileInfoCaseInsensitiveHash
+    {
+        size_t operator()( const QString & str ) const
+        {
+            return qHash( QFileInfo( str ).absoluteFilePath().toLower() );
+        }
+    };
+
+    struct CFileInfoCaseInsensitiveLessThan
+    {
+        bool operator()( const QString & lhs, const QString & rhs ) const
+        {
+            return QFileInfo( lhs ).absoluteFilePath().compare( QFileInfo( rhs ).absoluteFilePath(), Qt::CaseInsensitive ) < 0;
+        }
+    };
+
+    struct CFileInfoCaseInsensitiveEqual
+    {
+        size_t operator()( const QString & lhs, const QString & rhs ) const
+        {
+            return QFileInfo( lhs ).absoluteFilePath().compare( QFileInfo( rhs ).absoluteFilePath(), Qt::CaseInsensitive ) == 0;
+        }
+    };
 
     SABUTILS_EXPORT void move( QSettings & settings, const QString & subGroup, const QString & key, bool overwrite );
     SABUTILS_EXPORT void copy( QSettings & from, QSettings & to, bool overwrite );
