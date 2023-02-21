@@ -106,7 +106,6 @@ if( WIN32 )
     nuget_add_dependencies(
         PACKAGE ${packageID} VERSION 3.4.2244 CMAKE_PREFIX_PATHS .
     )
-    message( STATUS "NUGET_LAST_DEPENDENCY_CMAKE_PREFIX_PATHS_${packageID}=NUGET_LAST_DEPENDENCY_CMAKE_PREFIX_PATHS_${packageID}" )
     include_directories( ${NUGET_LAST_DEPENDENCY_CMAKE_PREFIX_PATHS_${packageID}}/lib/native/include )
     set( project_pub_DEPS
         ${project_pub_DEPS}
