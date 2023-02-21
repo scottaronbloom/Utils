@@ -11,3 +11,6 @@
 	path = MediaInfo/zlib
 	url = https://github.com/MediaArea/zlib
     ignore = all
+[submodule "CMakeNuGetTools"]
+	path = CMakeNuGetTools
+	url = https://github.com/katusk/CMakeNuGetTools

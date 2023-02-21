@@ -145,8 +145,10 @@ namespace NSABUtils
         SABUTILS_EXPORT QString getCorrectPathCase( QString path ); // note, on linux returns path, windows does the actual analysis, and returns the absolute path
 
         SABUTILS_EXPORT std::optional< QList< QFileInfo > > findAllFiles( const QDir & dir, const QStringList & nameFilters, bool recursive, bool sortByName = false, QString * errorMsg = nullptr );
-
         SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo & info );
+
+        SABUTILS_EXPORT std::tuple< uint16_t, uint16_t, uint16_t, uint16_t > getVersionInfoFromFile(const QString& fileName, bool& aOK );  
+        SABUTILS_EXPORT std::pair< uint32_t, uint32_t > getVersionInfoFromFile32(const QString& fileName, bool& aOK); // the 32 bit version returns 2 32 bit values, the hiword of the first is the major version, loword is the minor, hi and low of the second value is the patch
     }
 }
 #endif

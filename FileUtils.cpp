@@ -51,6 +51,7 @@
 
 #include <map>
 #include <cctype>
+#pragma comment(lib, "version.lib")
 
 namespace NSABUtils
 {
@@ -1560,6 +1561,64 @@ namespace NSABUtils
             sMap[ path ] = retVal;
             return retVal;
 #endif
+        }
+
+        std::pair< uint32_t, uint32_t > getVersionInfoFromFile32(const QString& fileName, bool& aOK)
+        {
+            uint32_t hi{ 0 };
+            uint32_t low{ 0 };
+            aOK = false;
+
+            QVarLengthArray<wchar_t> fnName(fileName.size() + 1);
+            fnName[fileName.toWCharArray(fnName.data())] = 0;
+
+            //allocate a block of memory for the version info
+            DWORD versionInfoSize = GetFileVersionInfoSizeW(fnName.data(), nullptr);
+            if (versionInfoSize == 0)
+            {
+                qDebug() << QString("GetFileVersionInfoSize failed with error %1").arg(getWindowsError(::GetLastError()));
+                return { hi, low };
+            }
+
+            QVarLengthArray<BYTE> info(static_cast<int>(versionInfoSize));
+            // load the version info
+            if (!GetFileVersionInfoW(fnName.data(), NULL, versionInfoSize, info.data()))
+            {
+                qDebug() << QString("GetFileVersionInfo failed with error %1\n").arg(getWindowsError(::GetLastError()));
+                return { hi, low };
+            }
+
+            UINT size;
+            DWORD* fi;
+            if (!VerQueryValueW(info.data(), L"\\", reinterpret_cast<void**>(&fi), &size) || !size)
+            {
+                qDebug() << QString("Can't obtain ProductVersion from resources");
+                return { hi, low };
+            }
+
+            const VS_FIXEDFILEINFO* verInfo = reinterpret_cast<const VS_FIXEDFILEINFO*>(fi);
+            hi = verInfo->dwProductVersionMS;
+            low = verInfo->dwProductVersionLS;
+            aOK = true;
+            return { hi, low };
+        }
+
+        std::tuple< uint16_t, uint16_t, uint16_t, uint16_t > getVersionInfoFromFile(const QString& fileName, bool& aOK)
+        {
+            uint16_t major{ 0 };
+            uint16_t minor{ 0 };
+            uint16_t patchHi{ 0 };
+            uint16_t patchLow{ 0 };
+
+            auto value = getVersionInfoFromFile32( fileName, aOK );
+            if (aOK)
+            {
+                major = HIWORD(value.first);
+                minor = LOWORD(value.first);
+                patchHi = HIWORD(value.second);
+                patchLow = LOWORD(value.second);
+            }
+            return { major, minor, patchHi, patchLow };
         }
     }
 }
