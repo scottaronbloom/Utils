@@ -80,6 +80,7 @@ set(qtproject_SRCS
     WidgetChanged.cpp
     WordExp.cpp
     ${OS_SRCS}
+    SystemInfo.cpp
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -237,7 +238,7 @@ endif()
 SET( project_pub_DEPS
      Qt5::Concurrent
      Qt5::Network
-     Qt5::Multimedia
+     Qt5::AxContainer
      ${MKVREADERLIB}
      ${MEDIAINFOLIB}
 )
