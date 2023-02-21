@@ -22,6 +22,16 @@
 
 cmake_minimum_required(VERSION 3.22)
 
+if(WIN32)
+    include( "${CMAKE_CURRENT_LIST_DIR}/CMakeNuGetTools/cmake/NuGetTools.cmake" )
+    UNSET( NUGET_COMMAND CACHE )
+    find_program( 
+        NUGET_COMMAND 
+        nuget.exe 
+        PATHS ${HOME_BIN_DIR}
+        REQUIRED )
+endif()
+
 SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
 if( SABUTILS_DLL )
@@ -63,6 +73,10 @@ endif()
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
 find_package(Qt5 COMPONENTS Core Widgets Xml Concurrent Network REQUIRED)
+IF(WIN32)
+    find_package(Qt5 COMPONENTS AxContainer REQUIRED)
+ENDIF()
+
 find_package(Qt5 COMPONENTS XmlPatterns QUIET)
 find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)
@@ -83,6 +97,21 @@ IncludeProjectSettings(QT ${USE_QT})
 if ( MKVUTILS )
     include_directories(MediaInfo/MediaInfoLib/Source)
     include_directories(MediaInfo/ZenLib/Source)
+endif()
+
+if( WIN32 )
+    nuget_initialize()
+
+    SET( packageID Microsoft.VisualStudio.Setup.Configuration.Native )
+    nuget_add_dependencies(
+        PACKAGE ${packageID} VERSION 3.4.2244 CMAKE_PREFIX_PATHS .
+    )
+    message( STATUS "NUGET_LAST_DEPENDENCY_CMAKE_PREFIX_PATHS_${packageID}=NUGET_LAST_DEPENDENCY_CMAKE_PREFIX_PATHS_${packageID}" )
+    include_directories( ${NUGET_LAST_DEPENDENCY_CMAKE_PREFIX_PATHS_${packageID}}/lib/native/include )
+    set( project_pub_DEPS
+        ${project_pub_DEPS}
+        ${NUGET_LAST_DEPENDENCY_CMAKE_PREFIX_PATHS_${packageID}}/lib/native/v141/x64/Microsoft.VisualStudio.Setup.Configuration.Native.lib
+    )
 endif()
 
 if ( SABUTILS_DLL )

@@ -34,6 +34,22 @@ MACRO(IncludeProjectSettings)
         
         get_filename_component(CURR_DIR ${CURR_DIR} DIRECTORY)
     endwhile()
+
+    if ( NOT PROJECT_FOUND )
+        if ( _INCLUDE_PROJECT_SETTINGS_QT )
+            #MESSAGE( STATUS "Checking ${CURR_DIR} for QtProject.cmake" )
+            SET( currProjectFile "${CMAKE_SOURCE_DIR}/SABUtils/QtProject.cmake" )
+        else()
+            #MESSAGE( STATUS "Checking ${CURR_DIR} for Project.cmake" )
+            SET( currProjectFile "${CMAKE_SOURCE_DIR}/SABUtils/Project.cmake" )
+        endif()
+        
+        if ( EXISTS "${currProjectFile}" )
+            #MESSAGE( STATUS "Found ${currProjectFile}" )
+            include( ${currProjectFile} )
+            SET( PROJECT_FOUND 1 )
+        endif()
+    endif()
     
     if ( NOT PROJECT_FOUND )
         if ( _INCLUDE_PROJECT_SETTINGS_QT )
