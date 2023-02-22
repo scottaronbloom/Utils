@@ -27,14 +27,14 @@ FUNCTION(VerifyVisualStudio PREFIX)
     
     find_program( CL cl.exe NO_CACHE REQUIRED)
     find_program( LINK link.exe NO_CACHE REQUIRED)
-    #find_program( DEVENV devenv.exe NO_CACHE REQUIRED)
+    find_program( DEVENV devenv.exe NO_CACHE REQUIRED)
     find_program( VSWHERE vswhere.exe 
             PATHS "$ENV{PROGRAMFILES\(X86\)}/Microsoft Visual Studio/Installer"
             NO_CACHE 
             REQUIRED )
     file(TO_CMAKE_PATH ${CL} CL)
     file(TO_CMAKE_PATH ${LINK} LINK)
-    #file(TO_CMAKE_PATH ${DEVENV} DEVENV)
+    file(TO_CMAKE_PATH ${DEVENV} DEVENV)
     file(TO_CMAKE_PATH ${VSWHERE} VSWHERE)
 
     #message( STATUS "CL=${CL}" )
@@ -51,11 +51,6 @@ FUNCTION(VerifyVisualStudio PREFIX)
 
     get_filename_component( VSARCH ${VSDIR} NAME )
     #message( STATUS "VSARCH=${VSARCH}" )
-    if ( ${VSARCH} STREQUAL "x64" )
-        SET( VS_OTHER_ARCH "x86" )
-    else()
-        SET( VS_OTHER_ARCH "x64" )
-    endif()
     
     execute_process( 
         COMMAND ${VSWHERE} -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
@@ -64,7 +59,14 @@ FUNCTION(VerifyVisualStudio PREFIX)
     )
     string( STRIP ${installPaths} installPaths )
     STRING( REPLACE "\n" ";" installPaths ${installPaths} )
-    #message( STATUS " installPaths=${installPaths}" )
+
+    execute_process( 
+        COMMAND ${VSWHERE} -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property productPath
+        OUTPUT_VARIABLE devEnvPaths
+        ERROR_QUIET
+    )
+    string( STRIP ${devEnvPaths} devEnvPaths )
+    STRING( REPLACE "\n" ";" devEnvPaths ${devEnvPaths} )
 
     execute_process( 
         COMMAND ${VSWHERE} -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property catalog_productLineVersion
@@ -73,7 +75,6 @@ FUNCTION(VerifyVisualStudio PREFIX)
     )
     string( STRIP ${installProductLineVersions} installProductLineVersions )
     STRING( REPLACE "\n" ";" installProductLineVersions ${installProductLineVersions} )
-    #message( STATUS " installProductLineVersions=${installProductLineVersions}" )
 
     execute_process( 
         COMMAND ${VSWHERE} -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
@@ -92,52 +93,42 @@ FUNCTION(VerifyVisualStudio PREFIX)
         
         LIST( APPEND installVersions ${CMAKE_MATCH_1} )
     endforeach()
+
+    #message( STATUS " installPaths=${installPaths}" )
+    #message( STATUS " devEnvPaths=${devEnvPaths}" )
+    #message( STATUS " installProductLineVersions=${installProductLineVersions}" )
     #message( STATUS " installVersions=${installVersions}" )
    
     
-    foreach( num IN ZIP_LISTS installPaths installProductLineVersions installVersions )
-        file(TO_CMAKE_PATH ${num_0} installPath)
-        set(productLineVersion ${num_1})
-        set(installVersion ${num_2})
+    foreach( installPath devEnvPath productLineVersion installVersion IN ZIP_LISTS installPaths devEnvPaths installProductLineVersions installVersions )
+        file(TO_CMAKE_PATH ${installPath} installPath)
+        file(TO_CMAKE_PATH ${devEnvPath} devEnvPath)
 
         #message( STATUS "installPath=${installPath}" )
+        #message( STATUS "devEnvPath=${installPath}" )
         #message( STATUS "productLineVersion=${productLineVersion}" )
         #message( STATUS "installVersion=${installVersion}" )
-        set(vcVerFile ${installPath}/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt)
-        if ( EXISTS ${vcVerFile} )
-            #message( STATUS "vcVerFile=${vcVerFile}" )
-            file( READ ${vcVerFile} vcVer )
-            string( STRIP ${vcVer} vcVer )
-            #message( STATUS "vcVer='${vcVer}'" )
-            SET( vcPath1 ${installPath}/VC/Tools/MSVC/${vcVer}/bin/Host${VSARCH}/${VSARCH}/cl.exe )
-            SET( vcPath2 ${installPath}/VC/Tools/MSVC/${vcVer}/bin/Host${VS_OTHER_ARCH}/${VSARCH}/cl.exe )
-            if ( EXISTS ${vcPath1} )
-                file(TO_CMAKE_PATH ${vcPath1} vcPath)
-            elseif( EXISTS ${vcPath2} )
-                file(TO_CMAKE_PATH ${vcPath2} vcPath)
-            else()
-                continue()
+
+        if ( ${devEnvPath} STREQUAL ${DEVENV} )
+            SET( ${PREFIX}VISUAL_STUDIO_FOUND TRUE PARENT_SCOPE )
+            SET( ${PREFIX}VISUAL_STUDIO_INSTALLPATH ${installPath} PARENT_SCOPE )
+            SET( ${PREFIX}VISUAL_STUDIO_PRODUCTLINEVERSION ${productLineVersion} PARENT_SCOPE )
+            SET( ${PREFIX}VISUAL_STUDIO_INSTALLVERSION ${installVersion} PARENT_SCOPE )
+            
+            SET( generator "Visual Studio ${installVersion} ${productLineVersion}" )
+            if ( ( ${productLineVersion} LESS 2019 ) AND ( ${VSARCH} STREQUAL "x64" ) )
+                SET( generator "${generator} Win64" )
             ENDIF()
-            
-            
-            if ( ${vcPath} STREQUAL ${CL} )
-                SET( ${PREFIX}VISUAL_STUDIO_FOUND TRUE PARENT_SCOPE )
-                SET( ${PREFIX}VISUAL_STUDIO_INSTALLPATH ${installPath} PARENT_SCOPE )
-                SET( ${PREFIX}VISUAL_STUDIO_PRODUCTLINEVERSION ${productLineVersion} PARENT_SCOPE )
-                SET( ${PREFIX}VISUAL_STUDIO_INSTALLVERSION ${installVersion} PARENT_SCOPE )
-                SET( generator "Visual Studio ${installVersion} ${productLineVersion}" )
-                if ( ( ${productLineVersion} LESS 2019 ) AND ( ${VSARCH} STREQUAL "x64" ) )
-                    SET( generator "${generator} Win64" )
-                ENDIF()
-                        
-                SET( ${PREFIX}VISUAL_STUDIO_GENERATOR ${generator} PARENT_SCOPE )
-                if ( NOT "${generator}" STREQUAL "${CMAKE_GENERATOR}" )
-                    MESSAGE( FATAL_ERROR "    Path for Visual Studio should use generator '${generator}' is not the same as the current CMAKE_GENERATOR '${CMAKE_GENERATOR}'\n    Please use -G \"${generator}\" or set the environment variable CMAKE_GENERATOR=\"${generator}\"" )
-                endif()
-                #MESSAGE( STATUS "${PREFIX}VISUAL_STUDIO_INSTALLPATH=${installPath}" )
-                #MESSAGE( STATUS "${PREFIX}VISUAL_STUDIO_GENERATOR=${generator}" )
-                break()
+                    
+            SET( ${PREFIX}VISUAL_STUDIO_GENERATOR ${generator} PARENT_SCOPE )
+            if ( NOT "${generator}" STREQUAL "${CMAKE_GENERATOR}" )
+                MESSAGE( FATAL_ERROR "    Visual Studio should use generator '${generator}' is not the same as the current CMAKE_GENERATOR '${CMAKE_GENERATOR}'\n    Please use -G \"${generator}\" or set the environment variable CMAKE_GENERATOR=\"${generator}\"" )
+            else()
+                MESSAGE( STATUS "Search path to Visual Studio verified" )
             endif()
+            #MESSAGE( STATUS "${PREFIX}VISUAL_STUDIO_INSTALLPATH=${installPath}" )
+            #MESSAGE( STATUS "${PREFIX}VISUAL_STUDIO_GENERATOR=${generator}" )
+            break()
         endif()
     endforeach()
 ENDFUNCTION()
