@@ -60,22 +60,22 @@ namespace NSABUtils
 {
     namespace NStringUtils
     {
-        double round( double value, int numDecimalPlaces )
+        double round(double value, int numDecimalPlaces)
         {
-            if ( numDecimalPlaces < 0 )
+            if (numDecimalPlaces < 0)
                 numDecimalPlaces = 0;
-            auto mult = std::pow( 10, numDecimalPlaces );
-            return std::round( mult * value ) / mult;
+            auto mult = std::pow(10, numDecimalPlaces);
+            return std::round(mult * value) / mult;
         }
 
 
-        bool is_number( const std::string & str )
+        bool is_number(const std::string& str)
         {
-            if ( str.empty() )
+            if (str.empty())
                 return false;
-            for ( auto ch : str )
+            for (auto ch : str)
             {
-                if ( !isdigit( ch ) )
+                if (!isdigit(ch))
                 {
                     return false;
                 }
@@ -83,56 +83,56 @@ namespace NSABUtils
             return true;
         }
 
-        std::string left( std::string inString, size_t len )
+        std::string left(std::string inString, size_t len)
         {
-            if ( len >= inString.size() )
+            if (len >= inString.size())
                 return inString;
-            return inString.substr( 0, len );
+            return inString.substr(0, len);
         }
 
-        std::string right( std::string inString, size_t len )
+        std::string right(std::string inString, size_t len)
         {
-            if ( len >= inString.size() )
+            if (len >= inString.size())
                 return inString;
-            return inString.substr( inString.size() - len );
+            return inString.substr(inString.size() - len);
         }
 
-        std::string stripHierName( std::string objectName, const std::string & hierSep, bool stripArrayInfo )
+        std::string stripHierName(std::string objectName, const std::string& hierSep, bool stripArrayInfo)
         {
-            size_t pos = objectName.find_last_of( "./" + hierSep ); // for flat nets
-            if ( pos != std::string::npos )
-                objectName = objectName.erase( 0, pos + 1 );
+            size_t pos = objectName.find_last_of("./" + hierSep); // for flat nets
+            if (pos != std::string::npos)
+                objectName = objectName.erase(0, pos + 1);
 
-            if ( stripArrayInfo )
+            if (stripArrayInfo)
             {
-                pos = objectName.find_last_of( "[" );
-                if ( pos != std::string::npos )
-                    objectName = objectName.erase( pos, objectName.length() );
+                pos = objectName.find_last_of("[");
+                if (pos != std::string::npos)
+                    objectName = objectName.erase(pos, objectName.length());
             }
             return objectName;
         }
 
-        void replaceAll( char * str, char from, char to )
+        void replaceAll(char* str, char from, char to)
         {
-            while ( *str )
+            while (*str)
             {
-                if ( *str == from )
+                if (*str == from)
                     *str = to;
                 str++;
             }
         }
 
-        std::string replaceAll( const std::string & str, char from, char to )
+        std::string replaceAll(const std::string& str, char from, char to)
         {
             std::string retVal = str;
-            return replaceAll( retVal, from, to );
+            return replaceAll(retVal, from, to);
         }
 
-        std::string replaceAll( std::string & str, char from, char to )
+        std::string replaceAll(std::string& str, char from, char to)
         {
-            for ( std::string::iterator ii = str.begin(); ii != str.end(); ++ii )
+            for (std::string::iterator ii = str.begin(); ii != str.end(); ++ii)
             {
-                if ( *ii == from )
+                if (*ii == from)
                 {
                     *ii = to;
                 }
@@ -140,119 +140,119 @@ namespace NSABUtils
             return str;
         }
 
-        std::string replaceAll( const std::string & str, const std::string & from, const std::string & to )
+        std::string replaceAll(const std::string& str, const std::string& from, const std::string& to)
         {
             std::string retVal = str;
-            return replaceAll( retVal, from, to );
+            return replaceAll(retVal, from, to);
         }
 
-        std::string replaceAll( std::string & str, const std::string & from, const std::string & to )
+        std::string replaceAll(std::string& str, const std::string& from, const std::string& to)
         {
-            size_t pos = str.find( from );
-            while ( pos != std::string::npos )
+            size_t pos = str.find(from);
+            while (pos != std::string::npos)
             {
-                str.replace( pos, from.length(), to );
-                pos = str.find( from, pos + to.length() );
+                str.replace(pos, from.length(), to);
+                pos = str.find(from, pos + to.length());
             }
             return str;
         }
 
-        std::string replaceAll( const std::string & str, const std::string & from, char to )
+        std::string replaceAll(const std::string& str, const std::string& from, char to)
         {
             std::string retVal = str;
-            return replaceAll( retVal, from, to );
+            return replaceAll(retVal, from, to);
         }
 
-        std::string replaceAll( std::string & str, const std::string & from, char to )
+        std::string replaceAll(std::string& str, const std::string& from, char to)
         {
-            size_t pos = str.find( from );
-            while ( pos != std::string::npos )
+            size_t pos = str.find(from);
+            while (pos != std::string::npos)
             {
-                str.replace( pos, from.length(), 1, to );
-                pos = str.find( from, pos + 1 );
+                str.replace(pos, from.length(), 1, to);
+                pos = str.find(from, pos + 1);
             }
             return str;
         }
 
-        std::string replaceAll( const std::string & str, char from, const std::string & to )
+        std::string replaceAll(const std::string& str, char from, const std::string& to)
         {
             std::string retVal = str;
-            return replaceAll( retVal, from, to );
+            return replaceAll(retVal, from, to);
         }
 
-        std::string replaceAll( std::string & str, char from, const std::string & to )
+        std::string replaceAll(std::string& str, char from, const std::string& to)
         {
-            size_t pos = str.find( from );
-            while ( pos != std::string::npos )
+            size_t pos = str.find(from);
+            while (pos != std::string::npos)
             {
-                str.replace( pos, 1, to );
-                pos = str.find( from, pos + to.length() );
+                str.replace(pos, 1, to);
+                pos = str.find(from, pos + to.length());
             }
             return str;
         }
 
-        std::string stripBlanksHead( const std::string & inStr )
+        std::string stripBlanksHead(const std::string& inStr)
         {
-            static std::string whitespaces( " \t\f\v\n\r" );
+            static std::string whitespaces(" \t\f\v\n\r");
 
-            std::string::size_type startIdx = inStr.find_first_not_of( whitespaces );
-            if ( startIdx == std::string::npos )
+            std::string::size_type startIdx = inStr.find_first_not_of(whitespaces);
+            if (startIdx == std::string::npos)
                 return std::string();
             std::string retVal = inStr;
-            retVal.erase( 0, startIdx );
+            retVal.erase(0, startIdx);
             return retVal;
         }
 
-        std::string stripBlanksTail( const std::string & inStr )
+        std::string stripBlanksTail(const std::string& inStr)
         {
-            static std::string whitespaces( " \t\f\v\n\r" );
+            static std::string whitespaces(" \t\f\v\n\r");
 
-            std::string::size_type endIdx = inStr.find_last_not_of( whitespaces );
+            std::string::size_type endIdx = inStr.find_last_not_of(whitespaces);
 
             std::string retVal = inStr;
-            retVal.erase( endIdx + 1 );
+            retVal.erase(endIdx + 1);
 
             return retVal;
         }
 
-        void getBlankIndexes( const std::string & str, size_t & startIdx, size_t & endIdx )
+        void getBlankIndexes(const std::string& str, size_t& startIdx, size_t& endIdx)
         {
-            static std::string whitespaces( " \t\f\v\n\r" );
+            static std::string whitespaces(" \t\f\v\n\r");
 
             startIdx = endIdx = std::string::npos;
-            startIdx = str.find_first_not_of( whitespaces );
-            if ( startIdx == std::string::npos )
+            startIdx = str.find_first_not_of(whitespaces);
+            if (startIdx == std::string::npos)
                 return;
 
-            endIdx = str.find_last_not_of( whitespaces );
+            endIdx = str.find_last_not_of(whitespaces);
         }
 
-        void stripBlanksInline( std::string & str )
+        void stripBlanksInline(std::string& str)
         {
             std::string::size_type startIdx;
             std::string::size_type endIdx;
-            getBlankIndexes( str, startIdx, endIdx );
+            getBlankIndexes(str, startIdx, endIdx);
 
-            if ( startIdx == std::string::npos )
+            if (startIdx == std::string::npos)
             {
                 str.clear();
                 return;
             }
-            str.erase( endIdx + 1 );
-            str.erase( 0, startIdx );
+            str.erase(endIdx + 1);
+            str.erase(0, startIdx);
         }
 
 
-        std::string stripBlanks( const std::string & inStr )
+        std::string stripBlanks(const std::string& inStr)
         {
             std::string::size_type startIdx;
             std::string::size_type endIdx;
-            getBlankIndexes( inStr, startIdx, endIdx );
+            getBlankIndexes(inStr, startIdx, endIdx);
 
-            if ( startIdx == std::string::npos )
+            if (startIdx == std::string::npos)
                 return std::string();
 
-            std::string retVal = inStr.substr( startIdx, endIdx - startIdx + 1 );
+            std::string retVal = inStr.substr(startIdx, endIdx - startIdx + 1);
             return retVal;
         }
 
@@ -264,131 +264,131 @@ namespace NSABUtils
         // Returns new string
         //////////////////////////////////////////////////////////////////////////
 
-        std::string stripQuotes( const char * text, char quote )
+        std::string stripQuotes(const char* text, char quote)
         {
-            char tmp[ 2 ] = { 0, 0 };
-            tmp[ 0 ] = quote;
-            return stripQuotes( text, tmp );
+            char tmp[2] = { 0, 0 };
+            tmp[0] = quote;
+            return stripQuotes(text, tmp);
         }
 
-        std::string stripQuotes( const std::string & text, char quote )
+        std::string stripQuotes(const std::string& text, char quote)
         {
-            char tmp[ 2 ] = { 0, 0 };
-            tmp[ 0 ] = quote;
-            return stripQuotes( text, tmp );
+            char tmp[2] = { 0, 0 };
+            tmp[0] = quote;
+            return stripQuotes(text, tmp);
         }
 
-        QString stripQuotes( const QString & text, char quote )
+        QString stripQuotes(const QString& text, char quote)
         {
-            char tmp[ 2 ] = { 0, 0 };
-            tmp[ 0 ] = quote;
-            return stripQuotes( text, tmp );
+            char tmp[2] = { 0, 0 };
+            tmp[0] = quote;
+            return stripQuotes(text, tmp);
         }
 
-        std::string stripQuotes( const char * text, const char * quotes )
+        std::string stripQuotes(const char* text, const char* quotes)
         {
-            if ( !text )
+            if (!text)
                 return std::string();
-            return stripQuotes( std::string( text ), quotes );
+            return stripQuotes(std::string(text), quotes);
         }
 
-        std::string stripQuotes( const std::string & text, const char * quotes )
+        std::string stripQuotes(const std::string& text, const char* quotes)
         {
-            std::string retVal = stripBlanks( text ); // Get rid of leading/trailing spaces
-            for ( auto currQuote = quotes; *currQuote; ++currQuote )
+            std::string retVal = stripBlanks(text); // Get rid of leading/trailing spaces
+            for (auto currQuote = quotes; *currQuote; ++currQuote)
             {
-                if ( ( retVal.length() >= 2 ) && *retVal.begin() == *currQuote && *retVal.rbegin() == *currQuote )
-                    retVal = retVal.substr( 1, retVal.length() - 2 );
-                if ( ( retVal.length() >= 3 ) && *retVal.begin() == *currQuote && ( ( *( retVal.rbegin() ) == '\\' ) || ( *( retVal.rbegin() ) == '/' ) ) && *( retVal.rbegin() + 1 ) == *currQuote )
-                    retVal = retVal.substr( 1, retVal.length() - 3 ) + *( retVal.rbegin() );
+                if ((retVal.length() >= 2) && *retVal.begin() == *currQuote && *retVal.rbegin() == *currQuote)
+                    retVal = retVal.substr(1, retVal.length() - 2);
+                if ((retVal.length() >= 3) && *retVal.begin() == *currQuote && ((*(retVal.rbegin()) == '\\') || (*(retVal.rbegin()) == '/')) && *(retVal.rbegin() + 1) == *currQuote)
+                    retVal = retVal.substr(1, retVal.length() - 3) + *(retVal.rbegin());
             }
 
             return retVal;
         }
 
-        QString stripQuotes( const QString & text, const char * quotes )
+        QString stripQuotes(const QString& text, const char* quotes)
         {
             QString retVal = text.trimmed();
-            for ( auto currQuote = quotes; *currQuote; ++currQuote )
+            for (auto currQuote = quotes; *currQuote; ++currQuote)
             {
-                if ( ( retVal.length() >= 2 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && retVal.rightRef( 1 ).at( 0 ) == *currQuote )
-                    retVal = retVal.mid( 1, retVal.length() - 2 );
-                if ( ( retVal.length() >= 3 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && ( ( retVal.rightRef( 1 ) == "\\" ) || ( retVal.rightRef( 1 ) == "/" ) ) && retVal.midRef( retVal.length() - 2, 1 ).at( 0 ) == *currQuote )
-                    retVal = retVal.mid( 1, retVal.length() - 3 ) + retVal.rightRef( 1 ).toString();
+                if ((retVal.length() >= 2) && retVal.leftRef(1).at(0) == *currQuote && retVal.rightRef(1).at(0) == *currQuote)
+                    retVal = retVal.mid(1, retVal.length() - 2);
+                if ((retVal.length() >= 3) && retVal.leftRef(1).at(0) == *currQuote && ((retVal.rightRef(1) == "\\") || (retVal.rightRef(1) == "/")) && retVal.midRef(retVal.length() - 2, 1).at(0) == *currQuote)
+                    retVal = retVal.mid(1, retVal.length() - 3) + retVal.rightRef(1).toString();
             }
             return retVal;
         }
 
-        bool isQuoted( const char * text, char quote )
+        bool isQuoted(const char* text, char quote)
         {
-            char tmp[ 2 ] = { 0,0 };
-            tmp[ 0 ] = quote;
-            return isQuoted( text, tmp );
+            char tmp[2] = { 0,0 };
+            tmp[0] = quote;
+            return isQuoted(text, tmp);
         }
 
-        bool isQuoted( const std::string & text, char quote )
+        bool isQuoted(const std::string& text, char quote)
         {
-            char tmp[ 2 ] = { 0, 0 };
-            tmp[ 0 ] = quote;
-            return isQuoted( text, tmp );
+            char tmp[2] = { 0, 0 };
+            tmp[0] = quote;
+            return isQuoted(text, tmp);
         }
 
-        bool isQuoted( const QString & text, char quote )
+        bool isQuoted(const QString& text, char quote)
         {
-            char tmp[ 2 ] = { 0, 0 };
-            tmp[ 0 ] = quote;
-            return isQuoted( text, tmp );
+            char tmp[2] = { 0, 0 };
+            tmp[0] = quote;
+            return isQuoted(text, tmp);
         }
 
-        bool isQuoted( const char * text, const char * quotes )
+        bool isQuoted(const char* text, const char* quotes)
         {
-            if ( !text )
+            if (!text)
                 return false;
-            return isQuoted( std::string( text ), quotes );
+            return isQuoted(std::string(text), quotes);
         }
 
-        bool isQuoted( const std::string & text, const char * quotes )
+        bool isQuoted(const std::string& text, const char* quotes)
         {
-            std::string retVal = stripBlanks( text ); // Get rid of leading/trailing spaces
-            for ( auto currQuote = quotes; *currQuote; ++currQuote )
+            std::string retVal = stripBlanks(text); // Get rid of leading/trailing spaces
+            for (auto currQuote = quotes; *currQuote; ++currQuote)
             {
-                if ( ( retVal.length() >= 2 ) && *retVal.begin() == *currQuote && *retVal.rbegin() == *currQuote )
+                if ((retVal.length() >= 2) && *retVal.begin() == *currQuote && *retVal.rbegin() == *currQuote)
                     return true;
-                if ( ( retVal.length() >= 3 ) && *retVal.begin() == *currQuote && ( ( *( retVal.rbegin() ) == '\\' ) || ( *( retVal.rbegin() ) == '/' ) ) && *( retVal.rbegin() + 1 ) == *currQuote )
+                if ((retVal.length() >= 3) && *retVal.begin() == *currQuote && ((*(retVal.rbegin()) == '\\') || (*(retVal.rbegin()) == '/')) && *(retVal.rbegin() + 1) == *currQuote)
                     return true;
             }
 
             return false;
         }
 
-        bool isQuoted( const QString & text, const char * quotes )
+        bool isQuoted(const QString& text, const char* quotes)
         {
             QString retVal = text.trimmed();
-            for ( auto currQuote = quotes; *currQuote; ++currQuote )
+            for (auto currQuote = quotes; *currQuote; ++currQuote)
             {
-                if ( ( retVal.length() >= 2 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && retVal.rightRef( 1 ).at( 0 ) == *currQuote )
+                if ((retVal.length() >= 2) && retVal.leftRef(1).at(0) == *currQuote && retVal.rightRef(1).at(0) == *currQuote)
                     return true;
-                if ( ( retVal.length() >= 3 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && ( ( retVal.rightRef( 1 ) == "\\" ) || ( retVal.rightRef( 1 ) == "/" ) ) && retVal.midRef( retVal.length() - 2, 1 ).at( 0 ) == *currQuote )
+                if ((retVal.length() >= 3) && retVal.leftRef(1).at(0) == *currQuote && ((retVal.rightRef(1) == "\\") || (retVal.rightRef(1) == "/")) && retVal.midRef(retVal.length() - 2, 1).at(0) == *currQuote)
                     return true;
             }
             return false;
         }
 
-        std::string stripAllBlanksAndQuotes( const std::string & text )
+        std::string stripAllBlanksAndQuotes(const std::string& text)
         {
-            static std::string whitespace( " \t\f\v\n\r" );
-            static std::string quotes( "\"\'" );
-            std::string retVal( "" );
-            retVal.reserve( text.length() + 1 );
-            for ( std::string::const_iterator si = text.begin(); si != text.end(); ++si )
+            static std::string whitespace(" \t\f\v\n\r");
+            static std::string quotes("\"\'");
+            std::string retVal("");
+            retVal.reserve(text.length() + 1);
+            for (std::string::const_iterator si = text.begin(); si != text.end(); ++si)
             {
-                if ( whitespace.find( *si ) != std::string::npos )
+                if (whitespace.find(*si) != std::string::npos)
                 {
-                    retVal.push_back( '_' );
+                    retVal.push_back('_');
                 }
-                else if ( quotes.find( *si ) == std::string::npos )
+                else if (quotes.find(*si) == std::string::npos)
                 {
-                    retVal.push_back( *si );
+                    retVal.push_back(*si);
                 }
             }
             return retVal;
@@ -400,17 +400,17 @@ namespace NSABUtils
 
         // Moved here from verity
         // -----------------------------------------------------------
-        std::string stripHead( const std::string & head, const std::string & name, bool * found )
+        std::string stripHead(const std::string& head, const std::string& name, bool* found)
         {
             std::string retVal = name;
-            size_t idx = retVal.find( head );
-            if ( found )
+            size_t idx = retVal.find(head);
+            if (found)
                 *found = false;
-            if ( idx != std::string::npos && !idx && retVal[ head.length() ] == '.' )
+            if (idx != std::string::npos && !idx && retVal[head.length()] == '.')
             {
-                if ( found )
+                if (found)
                     *found = true;
-                retVal = retVal.substr( head.length() + 1 );
+                retVal = retVal.substr(head.length() + 1);
             }
             return retVal;
         }
@@ -423,29 +423,29 @@ namespace NSABUtils
         // Returns true if string contains sub-string. Leading/trailing * is wild-card.
         // Revision History: Added , string::size_type *ind arg
         //////////////////////////////////////////////////////////////////////////
-        bool containsSubString( const std::string & str, const std::string & subs, std::string::size_type * ind )
+        bool containsSubString(const std::string& str, const std::string& subs, std::string::size_type* ind)
         {
             std::string::size_type idx;
 
-            if ( str.empty() || subs.empty() )
+            if (str.empty() || subs.empty())
                 return false;
 
-            idx = subs.find_first_not_of( "*" );
-            if ( idx == std::string::npos )
+            idx = subs.find_first_not_of("*");
+            if (idx == std::string::npos)
                 return true;
 
-            std::string realSubs = subs.substr( idx );
+            std::string realSubs = subs.substr(idx);
 
             size_t endi = realSubs.length() - 1;
 
-            if ( realSubs[ endi ] == '*' )
-                realSubs = realSubs.substr( 0, endi );
+            if (realSubs[endi] == '*')
+                realSubs = realSubs.substr(0, endi);
 
-            idx = str.find( realSubs );
-            if ( idx == std::string::npos )
+            idx = str.find(realSubs);
+            if (idx == std::string::npos)
                 return false;
 
-            if ( ind )
+            if (ind)
                 *ind = idx;
             return true;
         }
@@ -457,16 +457,16 @@ namespace NSABUtils
         //
         // Returns true if std::string contains sub-string. Ending * is wild-card
         //////////////////////////////////////////////////////////////////////////
-        bool hasPrefixSubString( const std::string & str, const std::string & prefix )
+        bool hasPrefixSubString(const std::string& str, const std::string& prefix)
         {
-            if ( str.empty() || prefix.empty() )
+            if (str.empty() || prefix.empty())
                 return false;
 
-            QString pre = QString::fromStdString( prefix );
-            if ( *pre.end() != '*' )
+            QString pre = QString::fromStdString(prefix);
+            if (*pre.end() != '*')
                 pre += "*";
-            QRegExp regEx( pre, Qt::CaseSensitive, QRegExp::Wildcard );
-            return regEx.exactMatch( QString::fromStdString( str ) );
+            QRegExp regEx(pre, Qt::CaseSensitive, QRegExp::Wildcard);
+            return regEx.exactMatch(QString::fromStdString(str));
         }
 
 
@@ -477,22 +477,22 @@ namespace NSABUtils
         //
         // Returns true if std::string contains sub-string. Starting * is wild-card
         //////////////////////////////////////////////////////////////////////////
-        bool hasSuffixSubString( const std::string & str, const std::string & suffix )
+        bool hasSuffixSubString(const std::string& str, const std::string& suffix)
         {
-            if ( str.empty() || suffix.empty() )
+            if (str.empty() || suffix.empty())
                 return false;
 
-            QString suf = QString::fromStdString( suffix );
-            if ( *suf.begin() != '*' )
-                suf.insert( 0, "*" );
-            QRegExp regEx( suf, Qt::CaseSensitive, QRegExp::Wildcard );
-            return regEx.exactMatch( QString::fromStdString( str ) );
+            QString suf = QString::fromStdString(suffix);
+            if (*suf.begin() != '*')
+                suf.insert(0, "*");
+            QRegExp regEx(suf, Qt::CaseSensitive, QRegExp::Wildcard);
+            return regEx.exactMatch(QString::fromStdString(str));
         }
 
-        std::string replaceAllNot( const std::string & inString, const std::string & notOf, char to )
+        std::string replaceAllNot(const std::string& inString, const std::string& notOf, char to)
         {
             std::string string = inString;
-            std::replace_if( string.begin(), string.end(), [notOf]( char x ) { return ( notOf.find( x ) == std::string::npos ); }, to );
+            std::replace_if(string.begin(), string.end(), [notOf](char x) { return (notOf.find(x) == std::string::npos); }, to);
             return string;
         }
 
@@ -504,14 +504,14 @@ namespace NSABUtils
         // Returns true if string contains wild-card * suffix
 
         //////////////////////////////////////////////////////////////////////////
-        bool hasWildCardSuffixSubString( const std::string & str )
+        bool hasWildCardSuffixSubString(const std::string& str)
         {
-            if ( str.empty() )
+            if (str.empty())
                 return false;
 
             size_t j = str.length() - 1;
 
-            if ( str[ j ] == '*' )
+            if (str[j] == '*')
                 return true;
 
             return false;
@@ -526,24 +526,24 @@ namespace NSABUtils
         // Returns true if string contains wild-card */? characters
 
         //////////////////////////////////////////////////////////////////////////
-        bool containsWildCardCharacters( const std::string & str )
+        bool containsWildCardCharacters(const std::string& str)
         {
-            if ( str.empty() )
+            if (str.empty())
                 return false;
 
-            for ( size_t j = 0; j < str.length(); j++ )
+            for (size_t j = 0; j < str.length(); j++)
             {
-                if ( ( str[ j ] == '*' ) || ( str[ j ] == '?' ) )
+                if ((str[j] == '*') || (str[j] == '?'))
                     return true;
             }
             return false;
         }
 
-        bool isLowerCaseString( const std::string & text )
+        bool isLowerCaseString(const std::string& text)
         {
-            for ( size_t i = 0; i < text.length(); i++ )
+            for (size_t i = 0; i < text.length(); i++)
             {
-                if ( isalpha( text[ i ] ) && !islower( text[ i ] ) )
+                if (isalpha(text[i]) && !islower(text[i]))
                     return false;
             }
             return true;
@@ -554,11 +554,11 @@ namespace NSABUtils
         //
         // Returns true if there is a lower case characer
         //////////////////////////////////////////////////////////////////////////
-        bool hasLowerCaseChars( const std::string & text )
+        bool hasLowerCaseChars(const std::string& text)
         {
-            for ( size_t i = 0; i < text.length(); i++ )
+            for (size_t i = 0; i < text.length(); i++)
             {
-                if ( isalpha( text[ i ] ) && islower( text[ i ] ) )
+                if (isalpha(text[i]) && islower(text[i]))
                     return true;
             }
             return false;
@@ -566,19 +566,19 @@ namespace NSABUtils
 
 
         int
-            count_identifiers( const char * stmt )
+            count_identifiers(const char* stmt)
         {
             int cnt = 0;
 
-            while ( *stmt != '\0' )
+            while (*stmt != '\0')
             {
-                while ( ( *stmt == ' ' ) || ( *stmt == '\t' ) || ( *stmt == '\n' ) )
+                while ((*stmt == ' ') || (*stmt == '\t') || (*stmt == '\n'))
                     stmt++;  // Skip spaces
-                if ( ( *stmt != '\0' ) && ( *stmt != ' ' ) &&
-                     ( *stmt != '\t' ) && ( *stmt != '\n' ) )
+                if ((*stmt != '\0') && (*stmt != ' ') &&
+                    (*stmt != '\t') && (*stmt != '\n'))
                     cnt++; // Increment count at start of non-white space identifier
-                while ( ( *stmt != '\0' ) && ( *stmt != ' ' ) &&
-                        ( *stmt != '\t' ) && ( *stmt != '\n' ) )
+                while ((*stmt != '\0') && (*stmt != ' ') &&
+                    (*stmt != '\t') && (*stmt != '\n'))
                     stmt++; // Skip rest of identifier
             }
 
@@ -590,29 +590,29 @@ namespace NSABUtils
         int curr_file_line_no = 0;
 
         bool
-            get_string_token( FILE * fp, char * s )
+            get_string_token(FILE* fp, char* s)
         {
             int fgetcValue;
             bool status = true;
             char last_c = 0;
             bool processing_token = false;
 
-            while ( ( fgetcValue = fgetc( fp ) ) != EOF )
+            while ((fgetcValue = fgetc(fp)) != EOF)
             {
                 char c = (char)fgetcValue;
-                if ( ( c == '/' ) && ( last_c == '/' ) )
+                if ((c == '/') && (last_c == '/'))
                 {
-                    *( s - 1 ) = '\0';
-                    while ( ( ( c = (char)fgetc( fp ) ) != EOF ) && c != '\n' )
+                    *(s - 1) = '\0';
+                    while (((c = (char)fgetc(fp)) != EOF) && c != '\n')
                         ;
                 }
-                else if ( processing_token &&
-                          ( ( c == '\t' ) || ( c == ' ' ) || ( c == '\n' ) ) )
+                else if (processing_token &&
+                    ((c == '\t') || (c == ' ') || (c == '\n')))
                 {
                     processing_token = false;
                     break;
                 }
-                else if ( ( c != '\t' ) && ( c != ' ' ) && ( c != '\n' ) )
+                else if ((c != '\t') && (c != ' ') && (c != '\n'))
                 {
                     processing_token = true;
                     last_c = c;
@@ -620,373 +620,373 @@ namespace NSABUtils
                 }
             }
 
-            if ( fgetcValue == '\n' )
+            if (fgetcValue == '\n')
                 curr_file_line_no++;
             *s = '\0';
-            if ( fgetcValue == EOF )
+            if (fgetcValue == EOF)
                 status = false;
 
             return status;
         }
 
 
-        bool has_suffix( const char * str, const char * suffix )
+        bool has_suffix(const char* str, const char* suffix)
         {
             int endi;
 
-            if ( suffix[ 0 ] == '*' )
+            if (suffix[0] == '*')
                 endi = 1;
             else
                 endi = 0;
-            size_t j = strlen( str ) - 1;
-            for ( int64_t i = ( strlen( suffix ) - 1 ); i >= endi; i--, j-- )
+            size_t j = strlen(str) - 1;
+            for (int64_t i = (strlen(suffix) - 1); i >= endi; i--, j--)
             {
-                if ( str[ j ] != suffix[ i ] )
+                if (str[j] != suffix[i])
                     return false;
             }
 
             return true;
         }
-        bool has_suffix( const std::string & str, const char * suffix )
+        bool has_suffix(const std::string& str, const char* suffix)
         {
-            return has_suffix( str.c_str(), suffix );
+            return has_suffix(str.c_str(), suffix);
         }
 
 
-        std::string hexToBin( char ch, bool * aOK )
+        std::string hexToBin(char ch, bool* aOK)
         {
-            if ( aOK )
+            if (aOK)
                 *aOK = true;
-            switch ( std::tolower( ch ) )
+            switch (std::tolower(ch))
             {
-                case '0': return "0000";
-                case '1': return "0001";
-                case '2': return "0010";
-                case '3': return "0011";
-                case '4': return "0100";
-                case '5': return "0101";
-                case '6': return "0110";
-                case '7': return "0111";
-                case '8': return "1000";
-                case '9': return "1001";
-                case 'a': return "1010";
-                case 'b': return "1011";
-                case 'c': return "1100";
-                case 'd': return "1101";
-                case 'e': return "1110";
-                case 'f': return "1111";
-                case 'x':
-                case 'z':
-                    return std::string( 4, ch );
-                default:
-                {
-                    if ( aOK )
-                        *aOK = false;
-                    return std::string( 4, 'X' );
-                }
+            case '0': return "0000";
+            case '1': return "0001";
+            case '2': return "0010";
+            case '3': return "0011";
+            case '4': return "0100";
+            case '5': return "0101";
+            case '6': return "0110";
+            case '7': return "0111";
+            case '8': return "1000";
+            case '9': return "1001";
+            case 'a': return "1010";
+            case 'b': return "1011";
+            case 'c': return "1100";
+            case 'd': return "1101";
+            case 'e': return "1110";
+            case 'f': return "1111";
+            case 'x':
+            case 'z':
+                return std::string(4, ch);
+            default:
+            {
+                if (aOK)
+                    *aOK = false;
+                return std::string(4, 'X');
+            }
             }
         }
 
-        std::string octToBin( char ch, bool * aOK )
+        std::string octToBin(char ch, bool* aOK)
         {
-            if ( aOK )
+            if (aOK)
                 *aOK = true;
-            switch ( std::tolower( ch ) )
+            switch (std::tolower(ch))
             {
-                case '0': return "000";
-                case '1': return "001";
-                case '2': return "010";
-                case '3': return "011";
-                case '4': return "100";
-                case '5': return "101";
-                case '6': return "110";
-                case '7': return "111";
-                case 'x':
-                case 'z':
-                    return std::string( 3, ch );
-                default:
-                {
-                    if ( aOK )
-                        *aOK = false;
-                    return std::string( 3, 'X' );
-                }
+            case '0': return "000";
+            case '1': return "001";
+            case '2': return "010";
+            case '3': return "011";
+            case '4': return "100";
+            case '5': return "101";
+            case '6': return "110";
+            case '7': return "111";
+            case 'x':
+            case 'z':
+                return std::string(3, ch);
+            default:
+            {
+                if (aOK)
+                    *aOK = false;
+                return std::string(3, 'X');
+            }
             }
         }
 
-        std::string hexToBinXY( const std::string & in, bool * aOK )
+        std::string hexToBinXY(const std::string& in, bool* aOK)
         {
             std::string retVal;
             bool lclOK = true;
-            for ( size_t ii = 0; ii < in.size(); ++ii )
+            for (size_t ii = 0; ii < in.size(); ++ii)
             {
                 bool tmpOK = true;
-                retVal += hexToBin( in[ ii ], &tmpOK );
+                retVal += hexToBin(in[ii], &tmpOK);
                 lclOK = lclOK && tmpOK;
             }
-            if ( aOK )
+            if (aOK)
                 *aOK = lclOK;
             return retVal;
         }
 
-        std::string octToBinXY( const std::string & in, bool * aOK )
+        std::string octToBinXY(const std::string& in, bool* aOK)
         {
             std::string retVal;
             bool lclOK = true;
-            for ( size_t ii = 0; ii < in.size(); ++ii )
+            for (size_t ii = 0; ii < in.size(); ++ii)
             {
                 bool tmpOK = true;
-                retVal += octToBin( in[ ii ], &tmpOK );
+                retVal += octToBin(in[ii], &tmpOK);
                 lclOK = lclOK && tmpOK;
             }
-            if ( aOK )
+            if (aOK)
                 *aOK = lclOK;
             return retVal;
         }
 
-        std::string toBin( std::ios_base & ( *base )( std::ios_base & ), const std::string & in, size_t len, bool * aOK )
+        std::string toBin(std::ios_base& (*base)(std::ios_base&), const std::string& in, size_t len, bool* aOK)
         {
-            if ( aOK )
+            if (aOK)
                 *aOK = false;
 
-            std::istringstream iss( in );
+            std::istringstream iss(in);
             int64_t val;
             iss >> base >> std::ws >> val;
 
-            if ( !iss.eof() )
+            if (!iss.eof())
                 iss >> std::ws;
 
-            if ( iss.fail() || !iss.eof() )
+            if (iss.fail() || !iss.eof())
                 return "";
-            if ( aOK )
+            if (aOK)
                 *aOK = true;
-            return toBinString( val, len );
+            return toBinString(val, len);
         }
 
-        std::string hexToBin( const std::string & in, size_t len, bool * aOK )
+        std::string hexToBin(const std::string& in, size_t len, bool* aOK)
         {
-            if ( len > 64 )
-                return hexToBinXY( in, aOK );
+            if (len > 64)
+                return hexToBinXY(in, aOK);
 
-            return toBin( std::hex, in, len, aOK );
+            return toBin(std::hex, in, len, aOK);
         }
 
-        std::string hexToBin( const std::string & in, bool * aOK )
+        std::string hexToBin(const std::string& in, bool* aOK)
         {
-            return hexToBin( in, in.length() * 4, aOK );
+            return hexToBin(in, in.length() * 4, aOK);
         }
 
-        std::string octToBin( const std::string & in, bool * aOK )
+        std::string octToBin(const std::string& in, bool* aOK)
         {
-            return octToBin( in, in.length() * 4, aOK );
+            return octToBin(in, in.length() * 4, aOK);
         }
 
-        std::string octToBin( const std::string & in, size_t  len, bool * aOK )
+        std::string octToBin(const std::string& in, size_t  len, bool* aOK)
         {
-            if ( len > 64 )
-                return octToBinXY( in, aOK );
+            if (len > 64)
+                return octToBinXY(in, aOK);
 
-            return toBin( std::oct, in, len, aOK );
+            return toBin(std::oct, in, len, aOK);
         }
 
-        std::string decToBin( const std::string & in, bool * aOK )
+        std::string decToBin(const std::string& in, bool* aOK)
         {
-            return decToBin( in, 32, aOK );
+            return decToBin(in, 32, aOK);
         }
 
-        std::string decToBin( const std::string & in, size_t len, bool * aOK )
+        std::string decToBin(const std::string& in, size_t len, bool* aOK)
         {
-            return toBin( std::dec, in, len, aOK );
+            return toBin(std::dec, in, len, aOK);
         }
 
-        std::string AsciiToBin( const std::string & in )
+        std::string AsciiToBin(const std::string& in)
         {
             std::string result = "";
-            result.reserve( in.length() * 8 );
-            for ( size_t i = 0; i < in.length(); ++i )
+            result.reserve(in.length() * 8);
+            for (size_t i = 0; i < in.length(); ++i)
             {
-                result += toBinString( in[ i ], 8 );
+                result += toBinString(in[i], 8);
             }
             return result;
         }
 
-        void stripBlanks( std::string & str )
+        void stripBlanks(std::string& str)
         {
-            for ( int64_t i = str.length() - 1; i >= 0; --i )
+            for (int64_t i = str.length() - 1; i >= 0; --i)
             {
-                if ( !isspace( str[ i ] ) ) break;
-                str = str.substr( 0, i );
+                if (!isspace(str[i])) break;
+                str = str.substr(0, i);
             }
         }
 
 
-        int hexToInt( const char * id, bool * aOK )
+        int hexToInt(const char* id, bool* aOK)
         {
-            if ( aOK )
+            if (aOK)
                 *aOK = false;
-            if ( !id )
+            if (!id)
                 return 0;
 
             int retVal;
-            bool lclOK = hexToInt< int >( retVal, std::string( id ) );
-            if ( aOK )
+            bool lclOK = hexToInt< int >(retVal, std::string(id));
+            if (aOK)
                 *aOK = lclOK;
             return retVal;
         }
 
-        std::string stripInline( const std::string & inStr, char value )
+        std::string stripInline(const std::string& inStr, char value)
         {
             std::string retVal = inStr;
-            strip( retVal, value );
+            strip(retVal, value);
             return retVal;
         }
 
-        void strip( std::string & str, char ch )
+        void strip(std::string& str, char ch)
         {
-            str.erase( std::remove( str.begin(), str.end(), ch ), str.end() );
+            str.erase(std::remove(str.begin(), str.end(), ch), str.end());
         }
 
-        std::string getFMTString( const char * fmt, ... )
+        std::string getFMTString(const char* fmt, ...)
         {
             std::string retVal;
-            if ( fmt != nullptr )
+            if (fmt != nullptr)
             {
                 va_list marker;
-                va_start( marker, fmt );
-                retVal = getVAString( fmt, marker );
-                va_end( marker );
+                va_start(marker, fmt);
+                retVal = getVAString(fmt, marker);
+                va_end(marker);
             }
             return retVal;
         }
 
-        std::string getVAString( const char * fmt, va_list marker )
+        std::string getVAString(const char* fmt, va_list marker)
         {
-            if ( !fmt )
+            if (!fmt)
                 return std::string();
 
             size_t len = 0;
             va_list tmp;
-            va_copy( tmp, marker );
-            len = vscprintf( fmt, tmp ) + 1;
-            va_end( tmp );
-            char * buff = new char[ len ];
+            va_copy(tmp, marker);
+            len = vscprintf(fmt, tmp) + 1;
+            va_end(tmp);
+            char* buff = new char[len];
 
             int written = 0;
 
-            va_copy( tmp, marker );
-            written = vsnprintf( buff, len, fmt, tmp );
-            va_end( tmp );
+            va_copy(tmp, marker);
+            written = vsnprintf(buff, len, fmt, tmp);
+            va_end(tmp);
 
             std::string retVal;
-            if ( written )
+            if (written)
                 retVal = buff;
             delete[] buff;
             return retVal;
         }
 
-        std::list< std::string > stripParen( const std::list< std::string > & list )
+        std::list< std::string > stripParen(const std::list< std::string >& list)
         {
             auto retVal = list;
-            for ( auto & ii : retVal )
+            for (auto& ii : retVal)
             {
-                if ( ii.empty() )
+                if (ii.empty())
                     continue;
 
-                if ( *ii.begin() == '(' && *ii.rbegin() == ')' )
+                if (*ii.begin() == '(' && *ii.rbegin() == ')')
                 {
-                    ii.erase( 0, 1 );
-                    ii.erase( ii.length() - 1, 1 );
+                    ii.erase(0, 1);
+                    ii.erase(ii.length() - 1, 1);
                 }
             }
             return retVal;
         }
 
-        QString PadString( const QString & str, size_t max, EPadType padType, char padChar )
+        QString PadString(const QString& str, size_t max, EPadType padType, char padChar)
         {
-            return QString::fromStdString( PadString( str.toStdString(), max, padType, padChar ) );
+            return QString::fromStdString(PadString(str.toStdString(), max, padType, padChar));
         }
 
 
-        std::string PadString( const std::string & str, size_t max, EPadType padType, char padChar )
+        std::string PadString(const std::string& str, size_t max, EPadType padType, char padChar)
         {
             std::string retVal;
             std::string::size_type diff = max - str.length();
-            if ( static_cast<size_t>( max ) < str.length() )
+            if (static_cast<size_t>(max) < str.length())
                 diff = 0;
 
-            switch ( padType )
+            switch (padType)
             {
-                case EPadType::eLeftJustify: // left justify add spaces in back of the string
-                    retVal = str + std::string( diff, padChar );
-                    break;
-                case EPadType::eRightJustify: // right justify add sapces in fron of the string
-                    retVal = std::string( diff, padChar ) + str;
-                    break;
-                default:
-                case EPadType::eCenter:
-                {
-                    std::string::size_type leftSide = (int)( std::floor( diff / 2.0 ) );
-                    std::string::size_type rightSide = 0;
-                    if ( diff >= leftSide )
-                        rightSide = diff - leftSide;
-                    retVal = std::string( leftSide, padChar ) + str + std::string( rightSide, padChar );
-                }
+            case EPadType::eLeftJustify: // left justify add spaces in back of the string
+                retVal = str + std::string(diff, padChar);
+                break;
+            case EPadType::eRightJustify: // right justify add sapces in fron of the string
+                retVal = std::string(diff, padChar) + str;
+                break;
+            default:
+            case EPadType::eCenter:
+            {
+                std::string::size_type leftSide = (int)(std::floor(diff / 2.0));
+                std::string::size_type rightSide = 0;
+                if (diff >= leftSide)
+                    rightSide = diff - leftSide;
+                retVal = std::string(leftSide, padChar) + str + std::string(rightSide, padChar);
+            }
 
             }
             return retVal;
         }
 
-        void stripLF( std::string & str )
+        void stripLF(std::string& str)
         {
-            if ( str.length() && ( *str.rbegin() == '\r' ) )
-                str.erase( --str.end() );
+            if (str.length() && (*str.rbegin() == '\r'))
+                str.erase(--str.end());
         }
 
-        void stripLF( char * str )
+        void stripLF(char* str)
         {
-            if ( str )
+            if (str)
             {
-                size_t len = strlen( str );
-                if ( len && ( str[ len - 1 ] == '\r' ) )
-                    str[ len - 1 ] = '\0';
+                size_t len = strlen(str);
+                if (len && (str[len - 1] == '\r'))
+                    str[len - 1] = '\0';
             }
         }
 
-        std::string joinString( const char * lhs, const char * rhs, char delim )
+        std::string joinString(const char* lhs, const char* rhs, char delim)
         {
-            return joinString( std::string( lhs ? lhs : "" ), std::string( rhs ? rhs : "" ), delim );
+            return joinString(std::string(lhs ? lhs : ""), std::string(rhs ? rhs : ""), delim);
         }
 
-        std::string joinString( const char * lhs, const char * rhs, const char * delim )
+        std::string joinString(const char* lhs, const char* rhs, const char* delim)
         {
-            return joinString( std::string( lhs ? lhs : "" ), std::string( rhs ? rhs : "" ), delim );
+            return joinString(std::string(lhs ? lhs : ""), std::string(rhs ? rhs : ""), delim);
         }
 
-        std::string joinString( const std::string & lhs, const std::string & rhs, const char * delim )
+        std::string joinString(const std::string& lhs, const std::string& rhs, const char* delim)
         {
-            if ( rhs.empty() )
+            if (rhs.empty())
                 return lhs;
-            if ( lhs.empty() )
+            if (lhs.empty())
                 return rhs;
-            if ( !delim )
+            if (!delim)
                 return lhs + rhs;
 
             std::string retVal = lhs;
 
-            size_t delimLen = strlen( delim );
-            bool lhsNeedsDelim = ( retVal.length() < delimLen );
-            if ( !lhsNeedsDelim )
+            size_t delimLen = strlen(delim);
+            bool lhsNeedsDelim = (retVal.length() < delimLen);
+            if (!lhsNeedsDelim)
             {
-                std::string::reverse_iterator ii = retVal.rbegin() + ( strlen( delim ) - 1 );
-                const char * lshD = &*( ii );
-                lhsNeedsDelim = strcmp( lshD, delim ) != 0;
+                std::string::reverse_iterator ii = retVal.rbegin() + (strlen(delim) - 1);
+                const char* lshD = &*(ii);
+                lhsNeedsDelim = strcmp(lshD, delim) != 0;
             }
-            bool rhsNeedsDelim = strncmp( rhs.c_str(), delim, strlen( delim ) ) != 0;
-            if ( lhsNeedsDelim && rhsNeedsDelim )
+            bool rhsNeedsDelim = strncmp(rhs.c_str(), delim, strlen(delim)) != 0;
+            if (lhsNeedsDelim && rhsNeedsDelim)
                 retVal += delim + rhs;
-            else if ( !lhsNeedsDelim && !rhsNeedsDelim )
+            else if (!lhsNeedsDelim && !rhsNeedsDelim)
             {
                 std::string newRHS = rhs;
-                newRHS.erase( newRHS.begin(), newRHS.begin() + delimLen );
+                newRHS.erase(newRHS.begin(), newRHS.begin() + delimLen);
                 retVal += newRHS;
             }
             else
@@ -994,356 +994,356 @@ namespace NSABUtils
             return retVal;
         }
 
-        std::string joinString( const std::string & lhs, const std::string & rhs, char delim )
+        std::string joinString(const std::string& lhs, const std::string& rhs, char delim)
         {
-            char d[ 2 ];
-            d[ 0 ] = delim;
-            d[ 1 ] = 0;
-            return joinString( lhs, rhs, d );
+            char d[2];
+            d[0] = delim;
+            d[1] = 0;
+            return joinString(lhs, rhs, d);
         }
 
-        std::string joinString( const std::string & lhs, const std::string & rhs, const std::string & delim )
+        std::string joinString(const std::string& lhs, const std::string& rhs, const std::string& delim)
         {
-            return joinString( lhs, rhs, delim.c_str() );
+            return joinString(lhs, rhs, delim.c_str());
         }
 
         template < typename T, typename S >
-        std::string joinString( const T & list, const S & delim, bool condenseBlanks )
+        std::string joinString(const T& list, const S& delim, bool condenseBlanks)
         {
             std::string retVal;
-            for ( typename T::const_iterator ii = list.begin(); ii != list.end(); ++ii )
+            for (typename T::const_iterator ii = list.begin(); ii != list.end(); ++ii)
             {
-                if ( ( !condenseBlanks || !( *ii ).empty() ) && !retVal.empty() )
+                if ((!condenseBlanks || !(*ii).empty()) && !retVal.empty())
                     retVal += delim;
                 retVal += *ii;
             }
             return retVal;
         }
 
-        std::string joinString( const std::pair< std::string, std::string > & pair, const std::string & delim, bool condenseBlanks )
+        std::string joinString(const std::pair< std::string, std::string >& pair, const std::string& delim, bool condenseBlanks)
         {
             std::list< std::string > list = { pair.first, pair.second };
-            return joinString< std::list< std::string >, std::string >( list, delim, condenseBlanks );
+            return joinString< std::list< std::string >, std::string >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::list< std::string > & list, const std::string & delim, bool condenseBlanks )
+        std::string joinString(const std::list< std::string >& list, const std::string& delim, bool condenseBlanks)
         {
-            return joinString< std::list< std::string >, std::string >( list, delim, condenseBlanks );
+            return joinString< std::list< std::string >, std::string >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::list< std::string > & list, char delim, bool condenseBlanks )
+        std::string joinString(const std::list< std::string >& list, char delim, bool condenseBlanks)
         {
-            return joinString< std::list< std::string >, char >( list, delim, condenseBlanks );
+            return joinString< std::list< std::string >, char >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::vector< std::string > & list, const std::string & delim, bool condenseBlanks )
+        std::string joinString(const std::vector< std::string >& list, const std::string& delim, bool condenseBlanks)
         {
-            return joinString< std::vector< std::string >, std::string >( list, delim, condenseBlanks );
+            return joinString< std::vector< std::string >, std::string >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::vector< std::string > & list, char delim, bool condenseBlanks )
+        std::string joinString(const std::vector< std::string >& list, char delim, bool condenseBlanks)
         {
-            return joinString< std::vector< std::string >, char >( list, delim, condenseBlanks );
+            return joinString< std::vector< std::string >, char >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::set< std::string > & list, const std::string & delim, bool condenseBlanks )
+        std::string joinString(const std::set< std::string >& list, const std::string& delim, bool condenseBlanks)
         {
-            return joinString< std::set< std::string >, std::string >( list, delim, condenseBlanks );
+            return joinString< std::set< std::string >, std::string >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::set< std::string > & list, char delim, bool condenseBlanks )
+        std::string joinString(const std::set< std::string >& list, char delim, bool condenseBlanks)
         {
-            return joinString< std::set< std::string >, char >( list, delim, condenseBlanks );
+            return joinString< std::set< std::string >, char >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::set< std::string, noCaseStringCmp > & list, const std::string & delim, bool condenseBlanks )
+        std::string joinString(const std::set< std::string, noCaseStringCmp >& list, const std::string& delim, bool condenseBlanks)
         {
-            return joinString< std::set< std::string, noCaseStringCmp >, std::string >( list, delim, condenseBlanks );
+            return joinString< std::set< std::string, noCaseStringCmp >, std::string >(list, delim, condenseBlanks);
         }
 
-        std::string joinString( const std::set< std::string, noCaseStringCmp > & list, char delim, bool condenseBlanks )
+        std::string joinString(const std::set< std::string, noCaseStringCmp >& list, char delim, bool condenseBlanks)
         {
-            return joinString< std::set< std::string, noCaseStringCmp >, char >( list, delim, condenseBlanks );
+            return joinString< std::set< std::string, noCaseStringCmp >, char >(list, delim, condenseBlanks);
         }
 
-        std::list< std::string > splitString( const std::string & string, const std::string & oneOfDelim, bool skipEmpty, bool keepQuoted, bool stripQuotes )
+        std::list< std::string > splitString(const std::string& string, const std::string& oneOfDelim, bool skipEmpty, bool keepQuoted, bool stripQuotes)
         {
             std::list< std::string > retVal;
-            if ( string.empty() )
+            if (string.empty())
                 return retVal;
             std::string delim = oneOfDelim;
-            if ( keepQuoted )
+            if (keepQuoted)
                 delim += "\"\'";
             std::string::size_type prevPos = 0;
-            auto pos = string.find_first_of( delim );
-            while ( pos != std::string::npos )
+            auto pos = string.find_first_of(delim);
+            while (pos != std::string::npos)
             {
-                if ( keepQuoted && ( ( string[ pos ] == '"' ) || ( string[ pos ] == '\'' ) ) )
+                if (keepQuoted && ((string[pos] == '"') || (string[pos] == '\'')))
                 {
                     std::string prefix;
-                    if ( pos != prevPos )
-                        prefix = string.substr( prevPos, pos - prevPos );
+                    if (pos != prevPos)
+                        prefix = string.substr(prevPos, pos - prevPos);
 
                     prevPos = pos;
-                    pos = string.find_first_of( "'\"", prevPos + 1 );
-                    if ( pos == std::string::npos )
+                    pos = string.find_first_of("'\"", prevPos + 1);
+                    if (pos == std::string::npos)
                     {
                         std::string curr;
-                        if ( prefix.empty() ) // it started with a quote
+                        if (prefix.empty()) // it started with a quote
                         {
-                            if ( stripQuotes )
-                                curr = string.substr( prevPos + 1 );
+                            if (stripQuotes)
+                                curr = string.substr(prevPos + 1);
                             else
-                                curr = string.substr( prevPos );
+                                curr = string.substr(prevPos);
                         }
                         else
                         {
                             // quote was embedded....
-                            pos = string.find_first_of( delim, prevPos + 1 );
-                            if ( pos == std::string::npos )
-                                curr = prefix + string.substr( prevPos );
+                            pos = string.find_first_of(delim, prevPos + 1);
+                            if (pos == std::string::npos)
+                                curr = prefix + string.substr(prevPos);
                             else
                             {
-                                curr = prefix + string.substr( prevPos, pos - prevPos );
-                                if ( stripQuotes )
-                                    curr = NStringUtils::stripQuotes( curr );
-                                retVal.push_back( curr );
+                                curr = prefix + string.substr(prevPos, pos - prevPos);
+                                if (stripQuotes)
+                                    curr = NStringUtils::stripQuotes(curr);
+                                retVal.push_back(curr);
                                 prevPos = pos + 1;
-                                pos = string.find_first_of( delim, prevPos );
+                                pos = string.find_first_of(delim, prevPos);
                                 continue;
                             }
                         }
 
 
-                        if ( stripQuotes )
-                            curr = NStringUtils::stripQuotes( curr );
-                        retVal.push_back( curr );
+                        if (stripQuotes)
+                            curr = NStringUtils::stripQuotes(curr);
+                        retVal.push_back(curr);
                         prevPos = std::string::npos;
                         break;
                     }
                     else
                     {
-                        auto curr = string.substr( prevPos, pos - prevPos + 1 );
-                        if ( stripQuotes )
-                            curr = NStringUtils::stripQuotes( curr );
-                        retVal.push_back( prefix + curr );
+                        auto curr = string.substr(prevPos, pos - prevPos + 1);
+                        if (stripQuotes)
+                            curr = NStringUtils::stripQuotes(curr);
+                        retVal.push_back(prefix + curr);
                         prevPos = pos + 2;
-                        pos = string.find_first_of( delim, prevPos );
+                        pos = string.find_first_of(delim, prevPos);
                         continue;
                     }
                 }
 
-                std::string curr = string.substr( prevPos, pos - prevPos );
-                if ( !skipEmpty || !curr.empty() )
+                std::string curr = string.substr(prevPos, pos - prevPos);
+                if (!skipEmpty || !curr.empty())
                 {
-                    if ( stripQuotes )
-                        curr = NStringUtils::stripQuotes( curr );
-                    retVal.push_back( curr );
+                    if (stripQuotes)
+                        curr = NStringUtils::stripQuotes(curr);
+                    retVal.push_back(curr);
                 }
                 prevPos = pos + 1;
-                pos = string.find_first_of( delim, prevPos );
+                pos = string.find_first_of(delim, prevPos);
             }
-            if ( prevPos < string.length() || ( oneOfDelim.find( *string.rbegin() ) != std::string::npos ) )
+            if (prevPos < string.length() || (oneOfDelim.find(*string.rbegin()) != std::string::npos))
             {
-                std::string curr = string.substr( prevPos );
-                if ( !skipEmpty || !curr.empty() )
+                std::string curr = string.substr(prevPos);
+                if (!skipEmpty || !curr.empty())
                 {
-                    if ( stripQuotes )
-                        curr = NStringUtils::stripQuotes( curr );
-                    retVal.push_back( curr );
+                    if (stripQuotes)
+                        curr = NStringUtils::stripQuotes(curr);
+                    retVal.push_back(curr);
                 }
             }
 
             return retVal;
         }
 
-        std::list< std::string > splitString( const std::string & string, char delimChar, bool skipEmpty, bool keepQuoted, bool stripQuotes )
+        std::list< std::string > splitString(const std::string& string, char delimChar, bool skipEmpty, bool keepQuoted, bool stripQuotes)
         {
-            if ( string.empty() )
+            if (string.empty())
                 return std::list< std::string >();
 
-            std::string delim( 1, delimChar );
+            std::string delim(1, delimChar);
 
-            return splitString( string, delim, skipEmpty, keepQuoted, stripQuotes );
+            return splitString(string, delim, skipEmpty, keepQuoted, stripQuotes);
         }
 
-        std::string toupper( std::string retVal )
+        std::string toupper(std::string retVal)
         {
-            std::transform( retVal.begin(), retVal.end(), retVal.begin(), ::toupper );
+            std::transform(retVal.begin(), retVal.end(), retVal.begin(), ::toupper);
             return retVal;
         }
 
-        char *
-            convert_to_lower_case( char * string )
+        char*
+            convert_to_lower_case(char* string)
         {
-            char * s;
+            char* s;
             s = string;
-            while ( !NStringUtils::isWhiteSpace( s ) &&
-                    ( *s != '\0' ) &&
-                    ( *s != '\n' ) )
+            while (!NStringUtils::isWhiteSpace(s) &&
+                (*s != '\0') &&
+                (*s != '\n'))
             {
-                if ( isalpha( *s ) && isupper( *s ) )
+                if (isalpha(*s) && isupper(*s))
                     *s = *s + 'a' - 'A'; //convert to lower
                 s++;
             }
             return string;
         }
 
-        std::string tolower( std::string retVal )
+        std::string tolower(std::string retVal)
         {
-            std::transform( retVal.begin(), retVal.end(), retVal.begin(), ::tolower );
+            std::transform(retVal.begin(), retVal.end(), retVal.begin(), ::tolower);
             return retVal;
         }
 
 
-        int strNCaseCmp( const char * s1, const char * s2, size_t n )
+        int strNCaseCmp(const char* s1, const char* s2, size_t n)
         {
 #ifdef Q_OS_WINDOWS
-            return( _strnicmp( s1, s2, n ) );
+            return(_strnicmp(s1, s2, n));
 #else
-            return( strncasecmp( s1, s2, n ) );
+            return(strncasecmp(s1, s2, n));
 #endif
         }
 
-        int strNCaseCmp( const std::string & s1, const char * s2, size_t n )
+        int strNCaseCmp(const std::string& s1, const char* s2, size_t n)
         {
-            return strNCaseCmp( s1.c_str(), s2, n );
+            return strNCaseCmp(s1.c_str(), s2, n);
         }
 
-        int strNCaseCmp( const char * s1, const std::string & s2, size_t n )
+        int strNCaseCmp(const char* s1, const std::string& s2, size_t n)
         {
-            return strNCaseCmp( s1, s2.c_str(), n );
+            return strNCaseCmp(s1, s2.c_str(), n);
         }
 
-        int strNCaseCmp( const std::string & s1, const std::string & s2, size_t n )
+        int strNCaseCmp(const std::string& s1, const std::string& s2, size_t n)
         {
-            return strNCaseCmp( s1.c_str(), s2.c_str(), n );
+            return strNCaseCmp(s1.c_str(), s2.c_str(), n);
         }
 
-        int strCaseCmp( const char * s1, const char * s2 )
+        int strCaseCmp(const char* s1, const char* s2)
         {
 #ifdef Q_OS_WINDOWS
-            return( _stricmp( s1, s2 ) );
+            return(_stricmp(s1, s2));
 #else
-            return( strcasecmp( s1, s2 ) );
+            return(strcasecmp(s1, s2));
 #endif
         }
 
-        int strCaseCmp( const std::string & s1, const char * s2 )
+        int strCaseCmp(const std::string& s1, const char* s2)
         {
-            return strCaseCmp( s1.c_str(), s2 );
+            return strCaseCmp(s1.c_str(), s2);
         }
 
-        int strCaseCmp( const char * s1, const std::string & s2 )
+        int strCaseCmp(const char* s1, const std::string& s2)
         {
-            return strCaseCmp( s1, s2.c_str() );
+            return strCaseCmp(s1, s2.c_str());
         }
 
-        int strCaseCmp( const std::string & s1, const std::string & s2 )
+        int strCaseCmp(const std::string& s1, const std::string& s2)
         {
-            return strCaseCmp( s1.c_str(), s2.c_str() );
+            return strCaseCmp(s1.c_str(), s2.c_str());
         }
 
-        std::string::size_type strCaseFind( const std::string & s1, const std::string & substr )
+        std::string::size_type strCaseFind(const std::string& s1, const std::string& substr)
         {
-            auto pos = std::search( s1.begin(), s1.end(), substr.begin(), substr.end(),
-                                    []( char ch1, char ch2 ) { return std::toupper( ch1, std::locale() ) == std::toupper( ch2, std::locale() ); }
+            auto pos = std::search(s1.begin(), s1.end(), substr.begin(), substr.end(),
+                [](char ch1, char ch2) { return std::toupper(ch1, std::locale()) == std::toupper(ch2, std::locale()); }
             );
-            if ( pos == s1.end() )
+            if (pos == s1.end())
                 return std::string::npos;
             return pos - s1.begin();
         }
 
-        bool strCaseSuffix( const std::string & s1, const std::string & substr )
+        bool strCaseSuffix(const std::string& s1, const std::string& substr)
         {
-            if ( s1.length() < substr.length() )
+            if (s1.length() < substr.length())
             {
                 return false;
             }
             std::string::size_type retVal = s1.length() - substr.length();
-            return strCaseCmp( s1.substr( retVal ), substr ) == 0;
+            return strCaseCmp(s1.substr(retVal), substr) == 0;
         }
 
-        bool stringCompare( const std::string & s1, const std::string & s2, bool caseInsentive )
+        bool stringCompare(const std::string& s1, const std::string& s2, bool caseInsentive)
         {
-            if ( !caseInsentive )
+            if (!caseInsentive)
                 return s1 == s2;
-            return ( s1.size() == s2.size() ) && std::equal( s1.begin(), s1.end(), s2.begin(), []( std::string::value_type c1, std::string::value_type c2 ) { return ::toupper( c1 ) == ::toupper( c2 ); } );
+            return (s1.size() == s2.size()) && std::equal(s1.begin(), s1.end(), s2.begin(), [](std::string::value_type c1, std::string::value_type c2) { return ::toupper(c1) == ::toupper(c2); });
         }
 
-        bool strEqual( const char * s1, const char * s2, bool caseInsensitive )
+        bool strEqual(const char* s1, const char* s2, bool caseInsensitive)
         {
-            if ( caseInsensitive )
-                return strCaseCmp( s1, s2 ) == 0;
+            if (caseInsensitive)
+                return strCaseCmp(s1, s2) == 0;
             else
-                return strcmp( s1, s2 ) == 0;
+                return strcmp(s1, s2) == 0;
         }
 
-        bool strEqual( const std::string & s1, const char * s2, bool caseInsensitive )
+        bool strEqual(const std::string& s1, const char* s2, bool caseInsensitive)
         {
-            return strEqual( s1.c_str(), s2, caseInsensitive );
+            return strEqual(s1.c_str(), s2, caseInsensitive);
         }
 
-        bool strEqual( const char * s1, const std::string & s2, bool caseInsensitive )
+        bool strEqual(const char* s1, const std::string& s2, bool caseInsensitive)
         {
-            return strEqual( s1, s2.c_str(), caseInsensitive );
+            return strEqual(s1, s2.c_str(), caseInsensitive);
         }
 
-        bool strEqual( const std::string & s1, const std::string & s2, bool caseInsensitive )
+        bool strEqual(const std::string& s1, const std::string& s2, bool caseInsensitive)
         {
-            return strEqual( s1.c_str(), s2.c_str(), caseInsensitive );
+            return strEqual(s1.c_str(), s2.c_str(), caseInsensitive);
         }
 
-        bool strNEqual( const char * s1, const char * s2, size_t len, bool caseInsensitive )
+        bool strNEqual(const char* s1, const char* s2, size_t len, bool caseInsensitive)
         {
-            if ( caseInsensitive )
-                return strNCaseCmp( s1, s2, len ) == 0;
+            if (caseInsensitive)
+                return strNCaseCmp(s1, s2, len) == 0;
             else
-                return strncmp( s1, s2, len ) == 0;
+                return strncmp(s1, s2, len) == 0;
         }
 
-        bool strNEqual( const std::string & s1, const char * s2, size_t len, bool caseInsensitive )
+        bool strNEqual(const std::string& s1, const char* s2, size_t len, bool caseInsensitive)
         {
-            return strNEqual( s1.c_str(), s2, len, caseInsensitive );
+            return strNEqual(s1.c_str(), s2, len, caseInsensitive);
         }
 
-        bool strNEqual( const char * s1, const std::string & s2, size_t len, bool caseInsensitive )
+        bool strNEqual(const char* s1, const std::string& s2, size_t len, bool caseInsensitive)
         {
-            return strNEqual( s1, s2.c_str(), len, caseInsensitive );
+            return strNEqual(s1, s2.c_str(), len, caseInsensitive);
         }
 
-        bool strNEqual( const std::string & s1, const std::string & s2, size_t len, bool caseInsensitive )
+        bool strNEqual(const std::string& s1, const std::string& s2, size_t len, bool caseInsensitive)
         {
-            return strNEqual( s1.c_str(), s2.c_str(), len, caseInsensitive );
+            return strNEqual(s1.c_str(), s2.c_str(), len, caseInsensitive);
         }
 
-        std::string writeEscaped( const std::string & s, bool escapeWhitespace )
+        std::string writeEscaped(const std::string& s, bool escapeWhitespace)
         {
             std::string escaped;
-            escaped.reserve( s.size() );
-            for ( size_t ii = 0; ii < s.size(); ++ii )
+            escaped.reserve(s.size());
+            for (size_t ii = 0; ii < s.size(); ++ii)
             {
-                char c = s.at( ii );
-                if ( c == '<' )
+                char c = s.at(ii);
+                if (c == '<')
                     escaped += "&lt;";
-                else if ( c == '>' )
-                    escaped.append( "&gt;" );
-                else if ( c == '&' )
-                    escaped.append( "&amp;" );
-                else if ( c == '\"' )
-                    escaped.append( "&quot;" );
-                else if ( c == '\\' )
-                    escaped.append( "\\\\" );
-                else if ( escapeWhitespace && ::isspace( c ) )
+                else if (c == '>')
+                    escaped.append("&gt;");
+                else if (c == '&')
+                    escaped.append("&amp;");
+                else if (c == '\"')
+                    escaped.append("&quot;");
+                else if (c == '\\')
+                    escaped.append("\\\\");
+                else if (escapeWhitespace && ::isspace(c))
                 {
-                    if ( c == '\n' )
-                        escaped.append( "&#10;" );
-                    else if ( c == '\r' )
-                        escaped.append( "&#13;" );
-                    else if ( c == '\t' )
-                        escaped.append( "&#9;" );
-                    else if ( c == ' ' )
-                        escaped.append( "%20" );
+                    if (c == '\n')
+                        escaped.append("&#10;");
+                    else if (c == '\r')
+                        escaped.append("&#13;");
+                    else if (c == '\t')
+                        escaped.append("&#9;");
+                    else if (c == ' ')
+                        escaped.append("%20");
                     else
                         escaped += c;
                 }
@@ -1354,81 +1354,81 @@ namespace NSABUtils
             }
             return escaped;
         }
-        std::string writeQuotedStringForXml( const std::string & name )
+        std::string writeQuotedStringForXml(const std::string& name)
         {
-            auto retVal = NStringUtils::writeEscaped( name );
-            if ( !retVal.empty() && retVal.back() == '\\' )
+            auto retVal = NStringUtils::writeEscaped(name);
+            if (!retVal.empty() && retVal.back() == '\\')
                 retVal += " ";
             retVal = '\"' + retVal + '\"';
             return retVal;
         }
-        bool extractEnvVariable( const std::string & inStr, std::string & pre, std::string & var, std::string & post )
+        bool extractEnvVariable(const std::string& inStr, std::string& pre, std::string& var, std::string& post)
         {
-            std::string::size_type pos1 = inStr.find( '%' );
+            std::string::size_type pos1 = inStr.find('%');
             std::string::size_type pos2 = std::string::npos;
-            if ( pos1 != std::string::npos ) // has a % in it
+            if (pos1 != std::string::npos) // has a % in it
             {
-                pos2 = inStr.find( '%', pos1 + 1 );
-                if ( pos2 == std::string::npos )
+                pos2 = inStr.find('%', pos1 + 1);
+                if (pos2 == std::string::npos)
                 {
                     var = inStr;
                     return true; // not an 
                 }
-                pre = inStr.substr( 0, pos1 );
-                var = inStr.substr( pos1 + 1, pos2 - pos1 - 1 );
-                post = inStr.substr( pos2 + 1 );
+                pre = inStr.substr(0, pos1);
+                var = inStr.substr(pos1 + 1, pos2 - pos1 - 1);
+                post = inStr.substr(pos2 + 1);
                 return true;
             }
-            pos1 = inStr.find( '$' );
-            if ( pos1 == std::string::npos )
+            pos1 = inStr.find('$');
+            if (pos1 == std::string::npos)
             {
                 var = inStr;
                 return true;
             }
-            pre = inStr.substr( 0, pos1 );
+            pre = inStr.substr(0, pos1);
 
             char otherChar = 0;
-            if ( *( inStr.begin() + pos1 + 1 ) == '{' )
+            if (*(inStr.begin() + pos1 + 1) == '{')
             {
                 otherChar = '}';
             }
-            else if ( *( inStr.begin() + pos1 + 1 ) == '(' )
+            else if (*(inStr.begin() + pos1 + 1) == '(')
             {
                 otherChar = ')';
             }
             else
             {
                 // is $VAR
-                pos2 = inStr.find_first_of( " \t/\\$", pos1 + 1 );
-                if ( pos2 == std::string::npos )
+                pos2 = inStr.find_first_of(" \t/\\$", pos1 + 1);
+                if (pos2 == std::string::npos)
                 {
-                    var = inStr.substr( pos1 + 1 );
+                    var = inStr.substr(pos1 + 1);
                     post = std::string();
                     return true;
                 }
-                var = inStr.substr( pos1 + 1, pos2 - pos1 - 1 );
-                post = inStr.substr( pos2 );
+                var = inStr.substr(pos1 + 1, pos2 - pos1 - 1);
+                post = inStr.substr(pos2);
                 return true;
             }
 
             // is $(VAR) or ${VAR}
-            pos2 = inStr.find( otherChar, pos1 );
-            if ( pos2 == std::string::npos )// malformed return false
+            pos2 = inStr.find(otherChar, pos1);
+            if (pos2 == std::string::npos)// malformed return false
                 return false;
 
-            var = inStr.substr( pos1 + 2, pos2 - pos1 - 2 );
-            post = inStr.substr( pos2 + 1 );
+            var = inStr.substr(pos1 + 2, pos2 - pos1 - 2);
+            post = inStr.substr(pos2 + 1);
 
             return true;
         }
 
-        std::string expandEnvVariable( const std::string & string, std::string * msg, bool * aOK )
+        std::string expandEnvVariable(const std::string& string, std::string* msg, bool* aOK)
         {
-            if ( aOK )
+            if (aOK)
                 *aOK = false;
-            if ( string.empty() )
+            if (string.empty())
             {
-                if ( aOK )
+                if (aOK)
                     *aOK = true;
                 return string;
             }
@@ -1436,62 +1436,62 @@ namespace NSABUtils
             std::string pre;
             std::string envVar;
             std::string post;
-            if ( !extractEnvVariable( string, pre, envVar, post ) )
+            if (!extractEnvVariable(string, pre, envVar, post))
             {
-                if ( msg )
+                if (msg)
                     *msg = "Malformed environmental variable";
                 return string;
             }
 
-            if ( envVar == string )
+            if (envVar == string)
             {
-                if ( aOK )
+                if (aOK)
                     *aOK = true;
                 return string;
             }
 
-            auto tmp = qgetenv( envVar.c_str() );
-            if ( tmp == nullptr )
+            auto tmp = qgetenv(envVar.c_str());
+            if (tmp == nullptr)
             {
-                envVar = toupper( envVar );
-                tmp = qgetenv( envVar.c_str() );
+                envVar = toupper(envVar);
+                tmp = qgetenv(envVar.c_str());
             }
 
-            if ( aOK )
-                *aOK = ( tmp != nullptr );
+            if (aOK)
+                *aOK = (tmp != nullptr);
             std::string retVal;
-            if ( tmp == nullptr )
+            if (tmp == nullptr)
             {
-                if ( msg )
+                if (msg)
                     *msg = "Environmental variable '" + envVar + "' not found";
                 retVal = pre + "" + post;
-                if ( aOK )
+                if (aOK)
                     *aOK = false;
                 return retVal;
             }
             else
                 retVal = pre + tmp.toStdString() + post;
-            if ( retVal.find_first_of( "%$" ) != std::string::npos )
+            if (retVal.find_first_of("%$") != std::string::npos)
             {
-                return expandEnvVariable( retVal, msg, aOK );
+                return expandEnvVariable(retVal, msg, aOK);
             }
-            if ( aOK )
+            if (aOK)
                 *aOK = true;
             return retVal;
         }
 
-        char * get_identifier_from_string( const char * string, char * id )
+        char* get_identifier_from_string(const char* string, char* id)
         {
-            while ( NStringUtils::isWhiteSpace( string ) )
+            while (NStringUtils::isWhiteSpace(string))
                 string++;
 
-            if ( *string == '"' )
+            if (*string == '"')
             {
                 *id++ = *string++;
-                while ( *string != '\0' )
+                while (*string != '\0')
                 {
                     *id++ = *string;
-                    if ( *string++ == '"' )
+                    if (*string++ == '"')
                     {
                         break;
                     }
@@ -1500,47 +1500,47 @@ namespace NSABUtils
             else
             {
                 //Allow a semi-colon terminator
-                while ( !NStringUtils::isWhiteSpace( string ) && ( *string != '\0' ) &&
-                        ( *string != '\n' ) && ( *string != ':' ) && ( *string != ';' ) )
+                while (!NStringUtils::isWhiteSpace(string) && (*string != '\0') &&
+                    (*string != '\n') && (*string != ':') && (*string != ';'))
                 {
                     *id++ = *string++;
                 }
             }
             *id = '\0';
 
-            if ( *string == '\0' )
+            if (*string == '\0')
             {
             }
-            else if ( *string == ':' )
+            else if (*string == ':')
             {
                 string++;
-                while ( NStringUtils::isWhiteSpace( string ) )
+                while (NStringUtils::isWhiteSpace(string))
                     string++;
             }
 
-            return (char *)string;
+            return (char*)string;
         }
 
-        std::string get_identifier_from_string_std( const std::string & string, std::string & id )
+        std::string get_identifier_from_string_std(const std::string& string, std::string& id)
         {
             id.clear();
 
             std::string retVal = string;
 
-            size_t pos = retVal.find_first_not_of( " \t" );
-            if ( pos != std::string::npos )
-                retVal = retVal.substr( pos );
+            size_t pos = retVal.find_first_not_of(" \t");
+            if (pos != std::string::npos)
+                retVal = retVal.substr(pos);
 
-            if ( retVal.empty() )
+            if (retVal.empty())
                 return retVal;
 
-            if ( retVal[ 0 ] == '"' )
+            if (retVal[0] == '"')
             {
-                pos = retVal.find( '"', 1 );
-                if ( pos != std::string::npos )
+                pos = retVal.find('"', 1);
+                if (pos != std::string::npos)
                 {
-                    id = retVal.substr( 0, pos + 1 );
-                    retVal = retVal.substr( pos + 1 );
+                    id = retVal.substr(0, pos + 1);
+                    retVal = retVal.substr(pos + 1);
                 }
                 else
                 {
@@ -1550,11 +1550,11 @@ namespace NSABUtils
             }
             else
             {
-                pos = retVal.find_first_of( " \t\n:;" );
-                if ( pos != std::string::npos )
+                pos = retVal.find_first_of(" \t\n:;");
+                if (pos != std::string::npos)
                 {
-                    id = retVal.substr( 0, pos );
-                    retVal = retVal.substr( pos );
+                    id = retVal.substr(0, pos);
+                    retVal = retVal.substr(pos);
                 }
                 else
                 {
@@ -1563,12 +1563,12 @@ namespace NSABUtils
                 }
             }
 
-            if ( !retVal.empty() && retVal[ 0 ] == ':' )
+            if (!retVal.empty() && retVal[0] == ':')
             {
-                retVal = retVal.substr( 1 );
-                size_t pos = retVal.find_first_not_of( " \t" );
-                if ( pos != std::string::npos )
-                    retVal = retVal.substr( pos );
+                retVal = retVal.substr(1);
+                size_t pos = retVal.find_first_not_of(" \t");
+                if (pos != std::string::npos)
+                    retVal = retVal.substr(pos);
                 else
                     retVal.clear();
             }
@@ -1576,76 +1576,76 @@ namespace NSABUtils
             return retVal;
         }
 
-        std::string strip_terminal( const std::string & token, const std::string & term )
+        std::string strip_terminal(const std::string& token, const std::string& term)
         {
-            if ( term.size() > token.size() )
+            if (term.size() > token.size())
             {
                 return token;
             }
 
-            size_t idx = token.rfind( term );
-            if ( idx == std::string::npos )
+            size_t idx = token.rfind(term);
+            if (idx == std::string::npos)
                 return token;
-            return token.substr( 0, idx );
+            return token.substr(0, idx);
         }
 
 
-        bool matchKeyWord( const std::string & line, const std::string & key )
+        bool matchKeyWord(const std::string& line, const std::string& key)
         {
-            return ( strNCaseCmp( line, key, key.length() ) == 0 ) && line.length() >= key.length();
+            return (strNCaseCmp(line, key, key.length()) == 0) && line.length() >= key.length();
         }
 
 
-        std::string binToHex( const std::string & string )
+        std::string binToHex(const std::string& string)
         {
-            if ( string.empty() )
+            if (string.empty())
                 return "";
             std::string hexStr;
-            hexStr.reserve( string.length() / 4 + ( string.length() % 4 > 0 ) );
+            hexStr.reserve(string.length() / 4 + (string.length() % 4 > 0));
             int bitsSeen = 0;
             int totalBits =
-                std::count( string.begin(), string.end(), '0' ) + std::count( string.begin(), string.end(), '1' )
-                + std::count( string.begin(), string.end(), 'Z' ) + std::count( string.begin(), string.end(), 'z' )
-                + std::count( string.begin(), string.end(), 'X' ) + std::count( string.begin(), string.end(), 'x' )
-                + std::count( string.begin(), string.end(), '?' );
+                std::count(string.begin(), string.end(), '0') + std::count(string.begin(), string.end(), '1')
+                + std::count(string.begin(), string.end(), 'Z') + std::count(string.begin(), string.end(), 'z')
+                + std::count(string.begin(), string.end(), 'X') + std::count(string.begin(), string.end(), 'x')
+                + std::count(string.begin(), string.end(), '?');
             ;
 
             unsigned hexChar = 0;
             char xchar = 0;
-            for ( unsigned idx = 0; idx < string.length(); ++idx )
+            for (unsigned idx = 0; idx < string.length(); ++idx)
             {
-                switch ( string[ idx ] )
+                switch (string[idx])
                 {
-                    case '1':
-                        hexChar <<= 1;
-                        hexChar++;
-                        bitsSeen++;
-                        break;
-                    case '0':
-                        hexChar <<= 1;
-                        bitsSeen++;
-                        break;
-                    case '?':
-                    case 'X':
-                    case 'x':
-                    case 'Z':
-                    case 'z':
-                        xchar = string[ idx ];
-                        bitsSeen++;
-                        break;
-                    case ' ':
-                        continue;
-                        break;
-                    default:
-                        return "";
-                        break;
+                case '1':
+                    hexChar <<= 1;
+                    hexChar++;
+                    bitsSeen++;
+                    break;
+                case '0':
+                    hexChar <<= 1;
+                    bitsSeen++;
+                    break;
+                case '?':
+                case 'X':
+                case 'x':
+                case 'Z':
+                case 'z':
+                    xchar = string[idx];
+                    bitsSeen++;
+                    break;
+                case ' ':
+                    continue;
+                    break;
+                default:
+                    return "";
+                    break;
                 }
-                if ( ( totalBits - bitsSeen ) % 4 == 0 )
+                if ((totalBits - bitsSeen) % 4 == 0)
                 {
-                    if ( xchar )
-                        hexStr.push_back( xchar );
+                    if (xchar)
+                        hexStr.push_back(xchar);
                     else
-                        hexStr.push_back( "0123456789abcdef"[ hexChar ] );
+                        hexStr.push_back("0123456789abcdef"[hexChar]);
                     xchar = 0;
                     hexChar = 0;
                 }
@@ -1653,102 +1653,102 @@ namespace NSABUtils
             return hexStr;
         }
 
-        bool getOnOffValue( const char * value, bool & aOK, bool defaultVal )
+        bool getOnOffValue(const char* value, bool& aOK, bool defaultVal)
         {
             aOK = true;
-            if ( !value || !*value )
+            if (!value || !*value)
                 return defaultVal;
-            size_t len = strlen( value );
+            size_t len = strlen(value);
 
-            if ( value[ 0 ] == '"' && value[ strlen( value ) - 1 ] == '"' )
+            if (value[0] == '"' && value[strlen(value) - 1] == '"')
             {
                 len -= 2;
                 value++;
             }
 
-            if ( !strNCaseCmp( "on", value, len ) || !strNCaseCmp( value, "yes", len ) || !strNCaseCmp( value, "true", len ) || !strNCaseCmp( value, "1", len ) )
+            if (!strNCaseCmp("on", value, len) || !strNCaseCmp(value, "yes", len) || !strNCaseCmp(value, "true", len) || !strNCaseCmp(value, "1", len))
                 return true;
-            if ( !strNCaseCmp( value, "no", len ) || !strNCaseCmp( value, "off", len ) || !strNCaseCmp( value, "false", len ) || !strNCaseCmp( value, "0", len ) )
+            if (!strNCaseCmp(value, "no", len) || !strNCaseCmp(value, "off", len) || !strNCaseCmp(value, "false", len) || !strNCaseCmp(value, "0", len))
                 return false;
             aOK = false;
             return defaultVal;
         }
 
-        bool getOnOffValue( const std::string & str, bool & aOK, bool defaultVal )
+        bool getOnOffValue(const std::string& str, bool& aOK, bool defaultVal)
         {
-            return getOnOffValue( str.c_str(), aOK, defaultVal );
+            return getOnOffValue(str.c_str(), aOK, defaultVal);
         }
 
-        long getSerialNum( const std::string & str, const std::string & prefix )
+        long getSerialNum(const std::string& str, const std::string& prefix)
         {
-            if ( str.find( prefix ) != 0 )
+            if (str.find(prefix) != 0)
                 return -1;
             long val = 1;
-            bool aOk = fromString( val, str.substr( prefix.length() ) );
-            if ( aOk )
+            bool aOk = fromString(val, str.substr(prefix.length()));
+            if (aOk)
                 return val;
             return 1;
         }
 
-        void padBinary( std::string & data, size_t maxSize, bool isSigned )
+        void padBinary(std::string& data, size_t maxSize, bool isSigned)
         {
-            if ( maxSize != static_cast<size_t>( -1 ) )
+            if (maxSize != static_cast<size_t>(-1))
             {
-                if ( data.length() < maxSize )
+                if (data.length() < maxSize)
                 {
-                    char fillChar = isSigned ? ( ( data.length() > 0 ) ? data[ 0 ] : '0' ) : '0';
-                    std::string pad = std::string( maxSize - data.length(), fillChar );
+                    char fillChar = isSigned ? ((data.length() > 0) ? data[0] : '0') : '0';
+                    std::string pad = std::string(maxSize - data.length(), fillChar);
                     data = pad + data;
                 }
-                if ( data.length() > maxSize )
-                    data.erase( 0, data.length() - maxSize );
+                if (data.length() > maxSize)
+                    data.erase(0, data.length() - maxSize);
             }
         }
 
-        std::string presentationFormat( const std::string & format )
+        std::string presentationFormat(const std::string& format)
         {
             std::string retVal = format;
-            replaceAll( retVal, "\n", "" );
-            size_t pos = retVal.find( '%' );
-            while ( pos != std::string::npos )
+            replaceAll(retVal, "\n", "");
+            size_t pos = retVal.find('%');
+            while (pos != std::string::npos)
             {
                 std::string replaceString;
                 std::string::iterator endPos = retVal.begin() + pos + 1;
-                while ( endPos != retVal.end() && ( ::isdigit( *endPos ) || ( *endPos == '.' ) ) )
+                while (endPos != retVal.end() && (::isdigit(*endPos) || (*endPos == '.')))
                     endPos++;
-                if ( endPos != retVal.end() )
+                if (endPos != retVal.end())
                 {
-                    if ( *endPos == 'l' )
+                    if (*endPos == 'l')
                         endPos++;
 
-                    switch ( *endPos )
+                    switch (*endPos)
                     {
-                        case 's':
-                            replaceString = "<string>";
-                            break;
+                    case 's':
+                        replaceString = "<string>";
+                        break;
 
-                        case 'd':
-                        case 'f':
-                        case 'g':
-                        case 'e':
-                            replaceString = "<number>";
-                            break;
-                        case 'x':
-                        case 'X':
-                            replaceString = "<hex number>";
-                            break;
-                        case 'o':
-                            replaceString = "<octal number>";
-                            break;
-                        case 'c':
-                            replaceString = "<character>";
-                            break;
+                    case 'd':
+                    case 'f':
+                    case 'g':
+                    case 'e':
+                        replaceString = "<number>";
+                        break;
+                    case 'x':
+                    case 'X':
+                        replaceString = "<hex number>";
+                        break;
+                    case 'o':
+                        replaceString = "<octal number>";
+                        break;
+                    case 'c':
+                        replaceString = "<character>";
+                        break;
                     }
                 }
-                if ( !replaceString.empty() )
-                    retVal.replace( retVal.begin() + pos, endPos + 1, replaceString );
+                if (!replaceString.empty())
+                    retVal.replace(retVal.begin() + pos, endPos + 1, replaceString);
 
-                pos = retVal.find( '%', pos + ( replaceString.empty() ? 1 : replaceString.length() ) );
+                pos = retVal.find('%', pos + (replaceString.empty() ? 1 : replaceString.length()));
             }
             return retVal;
         }
@@ -1762,26 +1762,26 @@ namespace NSABUtils
 
           Revision:
           ***********************************************************************************************/
-        std::string binaryAttrToASCII( const std::string & bString )
+        std::string binaryAttrToASCII(const std::string& bString)
         {
             // Check the format
-            size_t pos = bString.find( "'b" );
-            if ( pos == std::string::npos )
+            size_t pos = bString.find("'b");
+            if (pos == std::string::npos)
                 return bString; // Can't convert.
 
             // Check the provided-size prefix.
-            std::string tmpString = bString.substr( 0, pos );
+            std::string tmpString = bString.substr(0, pos);
             size_t size;
-            NSABUtils::fromString( size, tmpString );
-            if ( size % 8 != 0 )
+            NSABUtils::fromString(size, tmpString);
+            if (size % 8 != 0)
                 return bString;
-            tmpString = bString.substr( pos + 2, bString.size() );
-            if ( size != tmpString.size() )
+            tmpString = bString.substr(pos + 2, bString.size());
+            if (size != tmpString.size())
                 return bString;
 
             bool aOK;
-            std::string retVal = binaryToASCII( tmpString, aOK );
-            if ( !aOK )
+            std::string retVal = binaryToASCII(tmpString, aOK);
+            if (!aOK)
                 return bString;
             return retVal;
         }
@@ -1794,44 +1794,44 @@ namespace NSABUtils
 
           Revision:
           ***********************************************************************************************/
-        std::string binaryToASCII( const std::string & bString, bool & aOK )
+        std::string binaryToASCII(const std::string& bString, bool& aOK)
         {
             aOK = false;
             int hexIdx = 0; // 4-bits for hex data
             int hexCnt = 0; // 2-hexes for byte
             unsigned int hexNum = 0; // Keep two hex numbers each time
-            const char * c = bString.c_str();
+            const char* c = bString.c_str();
             std::string aString;
-            for ( size_t idx = 0; idx < bString.size(); ++idx )
+            for (size_t idx = 0; idx < bString.size(); ++idx)
             {
                 // Build the hex number
-                switch ( c[ idx ] )
+                switch (c[idx])
                 {
-                    case '0':
-                        // No need to do anything
-                        break;
-                    case '1':
-                        if ( hexIdx == 0 )
-                            hexNum += 0x8; // Reverse significant
-                        else if ( hexIdx == 1 )
-                            hexNum += 0x4;
-                        else if ( hexIdx == 2 )
-                            hexNum += 0x2;
-                        else if ( hexIdx == 3 )
-                            hexNum += 0x1;
-                        else
-                            Q_ASSERT( 0 );
-                        break;
-                    default:
-                        Q_ASSERT( 0 );
-                        break;
+                case '0':
+                    // No need to do anything
+                    break;
+                case '1':
+                    if (hexIdx == 0)
+                        hexNum += 0x8; // Reverse significant
+                    else if (hexIdx == 1)
+                        hexNum += 0x4;
+                    else if (hexIdx == 2)
+                        hexNum += 0x2;
+                    else if (hexIdx == 3)
+                        hexNum += 0x1;
+                    else
+                        Q_ASSERT(0);
+                    break;
+                default:
+                    Q_ASSERT(0);
+                    break;
                 }
 
                 // Manage hex number
-                if ( ++hexIdx == 4 )
+                if (++hexIdx == 4)
                 {
                     hexIdx = 0; // Reset
-                    if ( hexCnt++ == 0 )
+                    if (hexCnt++ == 0)
                         hexNum <<= 4; // Shift to upper hex
                     else // Two hexes number
                     {
@@ -1847,10 +1847,10 @@ namespace NSABUtils
             }
 
             //cout << "#Debug: aString: " << aString << endl;
-            for ( std::string::const_iterator ii = aString.begin(); ii != aString.end(); ++ii )
+            for (std::string::const_iterator ii = aString.begin(); ii != aString.end(); ++ii)
             {
                 int curr = *ii;
-                if ( ( curr <= 0 ) || ( curr >= 255 ) || !isprint( *ii ) )
+                if ((curr <= 0) || (curr >= 255) || !isprint(*ii))
                 {
                     return bString;
                 }
@@ -1859,29 +1859,29 @@ namespace NSABUtils
             return aString;
         }
 
-        bool isHSC( char ch, const char * hsc )
+        bool isHSC(char ch, const char* hsc)
         {
-            for ( auto curr = hsc; *curr; ++curr )
+            for (auto curr = hsc; *curr; ++curr)
             {
-                if ( *curr == ch )
+                if (*curr == ch)
                     return true;
             }
             return false;
         }
 
-        std::list< std::pair< std::string, bool > > splitByEscape( const std::string & string, bool regExp, const char * hsc )
+        std::list< std::pair< std::string, bool > > splitByEscape(const std::string& string, bool regExp, const char* hsc)
         {
             std::list< std::pair< std::string, bool > > tmp;
             std::string::size_type prevPos = 0;
             auto separator = regExp ? "\\\\" : "\\";
-            std::string::size_type pos = string.find( separator );
-            while ( pos != std::string::npos )
+            std::string::size_type pos = string.find(separator);
+            while (pos != std::string::npos)
             {
-                if ( pos != prevPos )
+                if (pos != prevPos)
                 {
-                    auto curr = string.substr( prevPos, pos - prevPos );
-                    if ( !curr.empty() )
-                        tmp.push_back( std::make_pair( curr, false ) );
+                    auto curr = string.substr(prevPos, pos - prevPos);
+                    if (!curr.empty())
+                        tmp.push_back(std::make_pair(curr, false));
                 }
                 /* find the end of escaped...
                  handle \\foo.\barfoo\
@@ -1889,114 +1889,114 @@ namespace NSABUtils
                  */
                 auto escStart = pos;
                 int escCount = 0;
-                while ( ( pos < string.length() ) && ( string[ pos ] == '\\' ) )
+                while ((pos < string.length()) && (string[pos] == '\\'))
                 {
                     escCount++;
                     pos++;
                 }
-                while ( ( pos < string.length() ) && ( escCount > 0 ) )
+                while ((pos < string.length()) && (escCount > 0))
                 {
-                    if ( string[ pos ] == '\\' )
+                    if (string[pos] == '\\')
                     {
                         escCount--;
-                        if ( escCount == 0 )
+                        if (escCount == 0)
                             break;
                     }
                     pos++;
                 }
 
                 std::string curr;
-                if ( escCount == 0 )
-                    curr = string.substr( escStart, pos - escStart + 1 );
+                if (escCount == 0)
+                    curr = string.substr(escStart, pos - escStart + 1);
                 else
-                    curr = string.substr( escStart );
-                if ( !curr.empty() )
-                    tmp.push_back( std::make_pair( curr, true ) );
+                    curr = string.substr(escStart);
+                if (!curr.empty())
+                    tmp.push_back(std::make_pair(curr, true));
                 prevPos = pos + 1;
-                pos = string.find( separator, prevPos );
+                pos = string.find(separator, prevPos);
             }
 
-            if ( prevPos < string.length() )
+            if (prevPos < string.length())
             {
-                std::string curr = string.substr( prevPos );
-                if ( !curr.empty() )
+                std::string curr = string.substr(prevPos);
+                if (!curr.empty())
                 {
-                    tmp.push_back( std::make_pair( curr, false ) );
+                    tmp.push_back(std::make_pair(curr, false));
                 }
             }
 
             bool isFirst = true;
-            for ( auto ii = tmp.begin(); ii != tmp.end(); ++ii )
+            for (auto ii = tmp.begin(); ii != tmp.end(); ++ii)
             {
-                if ( ( *ii ).second )
+                if ((*ii).second)
                 {
                     isFirst = false;
                     continue;
                 }
 
-                if ( ( ( *ii ).first.length() == 1 ) && isHSC( ( *ii ).first[ 0 ], hsc ) )
+                if (((*ii).first.length() == 1) && isHSC((*ii).first[0], hsc))
                 {
                     auto tmpIter = ii;
                     tmpIter--;
-                    tmp.erase( ii );
+                    tmp.erase(ii);
                     ii = tmpIter;
                     continue;
                 }
 
-                if ( !isFirst )
+                if (!isFirst)
                 {
-                    if ( isHSC( *( *ii ).first.begin(), hsc ) )
-                        ( *ii ).first.erase( ( *ii ).first.begin() );
+                    if (isHSC(*(*ii).first.begin(), hsc))
+                        (*ii).first.erase((*ii).first.begin());
                 }
                 isFirst = false;
-                if ( isHSC( *( *ii ).first.rbegin(), hsc ) )
-                    ( *ii ).first.erase( ( *ii ).first.begin() + ( *ii ).first.length() - 1 );
+                if (isHSC(*(*ii).first.rbegin(), hsc))
+                    (*ii).first.erase((*ii).first.begin() + (*ii).first.length() - 1);
             }
             return tmp;
         }
 
-        std::list< std::string > splitSDCPattern( const std::string & pattern, bool regExp, const char * hsc, bool & aOK, std::string * msg )
+        std::list< std::string > splitSDCPattern(const std::string& pattern, bool regExp, const char* hsc, bool& aOK, std::string* msg)
         {
             std::list< std::string > retVal;
             // search for escape char;
 
-            auto pos1 = pattern.find( regExp ? "\\\\" : "\\" );
-            if ( pos1 != std::string::npos )
+            auto pos1 = pattern.find(regExp ? "\\\\" : "\\");
+            if (pos1 != std::string::npos)
             {
-                auto tmp = splitByEscape( pattern, regExp, hsc );
+                auto tmp = splitByEscape(pattern, regExp, hsc);
 
-                for ( auto && ii : tmp )
+                for (auto&& ii : tmp)
                 {
-                    if ( !ii.second )
+                    if (!ii.second)
                     {
-                        auto curr = splitSDCPattern( ii.first, regExp, hsc, aOK, msg );
-                        if ( !aOK )
+                        auto curr = splitSDCPattern(ii.first, regExp, hsc, aOK, msg);
+                        if (!aOK)
                             return{};
-                        retVal.insert( retVal.end(), curr.begin(), curr.end() );
+                        retVal.insert(retVal.end(), curr.begin(), curr.end());
                     }
                     else
-                        retVal.push_back( ii.first );
+                        retVal.push_back(ii.first);
                 }
                 return retVal;
             }
-            if ( regExp )
+            if (regExp)
             {
-                QString origHSC = QString( "%1" ).arg( hsc );
-                QString realHSC = QRegularExpression::escape( QString( "%1" ).arg( hsc ) );
-                if ( realHSC != origHSC )
+                QString origHSC = QString("%1").arg(hsc);
+                QString realHSC = QRegularExpression::escape(QString("%1").arg(hsc));
+                if (realHSC != origHSC)
                 {
-                    realHSC = QRegularExpression::escape( QString( "\\%1" ).arg( hsc ) );
+                    realHSC = QRegularExpression::escape(QString("\\%1").arg(hsc));
                 }
-                retVal = splitStringRegEx( pattern, realHSC.toStdString() );
+                retVal = splitStringRegEx(pattern, realHSC.toStdString());
 
-                for ( auto ii : retVal )
+                for (auto ii : retVal)
                 {
-                    QRegularExpression regExp( QString::fromStdString( ii ) );
-                    if ( !regExp.isValid() )
+                    QRegularExpression regExp(QString::fromStdString(ii));
+                    if (!regExp.isValid())
                     {
-                        if ( msg )
+                        if (msg)
                         {
-                            *msg = QString( "Invalid sub-regular expression '%1' post splitting on the hierarchy separator: '%2' - %3(%4)" ).arg( QString::fromStdString( ii ) ).arg( hsc ).arg( regExp.errorString() ).arg( regExp.patternErrorOffset() ).toStdString();
+                            *msg = QString("Invalid sub-regular expression '%1' post splitting on the hierarchy separator: '%2' - %3(%4)").arg(QString::fromStdString(ii)).arg(hsc).arg(regExp.errorString()).arg(regExp.patternErrorOffset()).toStdString();
                             aOK = false;
                             return{};
                         }
@@ -2005,10 +2005,10 @@ namespace NSABUtils
             }
             else
             {
-                retVal = splitString( pattern, hsc, false, true, false );
+                retVal = splitString(pattern, hsc, false, true, false);
             }
 
-            while ( !retVal.empty() && retVal.front().empty() )
+            while (!retVal.empty() && retVal.front().empty())
             {
                 retVal.pop_front();
             }
@@ -2017,62 +2017,62 @@ namespace NSABUtils
             return retVal;
         }
 
-        QStringList splitSDCPattern( const QString & objName, bool regexp, const char * hsc, bool & aOK, QString * msg )
+        QStringList splitSDCPattern(const QString& objName, bool regexp, const char* hsc, bool& aOK, QString* msg)
         {
             std::string lclMsg;
-            auto list = splitSDCPattern( objName.toStdString(), regexp, hsc, aOK, &lclMsg );
+            auto list = splitSDCPattern(objName.toStdString(), regexp, hsc, aOK, &lclMsg);
 
-            if ( msg )
-                *msg = QString::fromStdString( lclMsg );
+            if (msg)
+                *msg = QString::fromStdString(lclMsg);
 
             QStringList retVal;
-            for ( auto && ii : list )
+            for (auto&& ii : list)
             {
-                retVal.push_back( QString::fromStdString( ii ) );
+                retVal.push_back(QString::fromStdString(ii));
             }
 
             return retVal;
         }
 
-        std::list< std::string > splitSDCPattern( const std::string & objName, bool regexp, char singleHSC, bool & aOK, std::string * msg )
+        std::list< std::string > splitSDCPattern(const std::string& objName, bool regexp, char singleHSC, bool& aOK, std::string* msg)
         {
-            char hsc[ 2 ];
-            hsc[ 0 ] = singleHSC;
-            hsc[ 1 ] = 0;
-            return splitSDCPattern( objName, regexp, hsc, aOK, msg );
+            char hsc[2];
+            hsc[0] = singleHSC;
+            hsc[1] = 0;
+            return splitSDCPattern(objName, regexp, hsc, aOK, msg);
         }
 
-        QStringList splitSDCPattern( const QString & objName, bool regexp, char singleHSC, bool & aOK, QString * msg )
+        QStringList splitSDCPattern(const QString& objName, bool regexp, char singleHSC, bool& aOK, QString* msg)
         {
-            char hsc[ 2 ];
-            hsc[ 0 ] = singleHSC;
-            hsc[ 1 ] = 0;
-            return splitSDCPattern( objName, regexp, hsc, aOK, msg );
+            char hsc[2];
+            hsc[0] = singleHSC;
+            hsc[1] = 0;
+            return splitSDCPattern(objName, regexp, hsc, aOK, msg);
         }
 
-        char IsSwitch( const std::string & str )
+        char IsSwitch(const std::string& str)
         {
-            return IsSwitch( str.c_str() );
+            return IsSwitch(str.c_str());
         }
 
-        char IsSwitch( const char * str )
+        char IsSwitch(const char* str)
         {
-            if ( !str )
+            if (!str)
                 return 0;
-            if ( !*str )
+            if (!*str)
                 return 0;
-            if ( !str[ 1 ] )
+            if (!str[1])
                 return 0;
-            char switchChar = str[ 0 ];
-            char nextChar = str[ 1 ];
-            if ( switchChar != '-' && switchChar != '+' )
+            char switchChar = str[0];
+            char nextChar = str[1];
+            if (switchChar != '-' && switchChar != '+')
                 switchChar = 0;
-            else if ( nextChar == '-' || nextChar == '+' )
+            else if (nextChar == '-' || nextChar == '+')
                 return 0;
-            else if ( switchChar == '-' )
+            else if (switchChar == '-')
             {
-                int intVal = atoi( str );
-                if ( intVal < 0 )
+                int intVal = atoi(str);
+                if (intVal < 0)
                 {
                     return 0;
                 }
@@ -2080,16 +2080,16 @@ namespace NSABUtils
             return switchChar;
         }
 
-        bool isSeparatorEscaped( const std::string & name, char secondSep/*=0 */ )
+        bool isSeparatorEscaped(const std::string& name, char secondSep/*=0 */)
         {
             bool inEscape = false;
-            for ( auto ii = name.begin(); ii != name.end(); ++ii )
+            for (auto ii = name.begin(); ii != name.end(); ++ii)
             {
-                if ( *ii == '\\' )
+                if (*ii == '\\')
                     inEscape = !inEscape;
-                else if ( ( *ii == '.' ) || ( secondSep && ( *ii == secondSep ) ) )
+                else if ((*ii == '.') || (secondSep && (*ii == secondSep)))
                 {
-                    if ( !inEscape )
+                    if (!inEscape)
                         return false;
                 }
             }
@@ -2097,138 +2097,138 @@ namespace NSABUtils
             return true;
         }
 
-        std::string separatorEscape( const std::string & name, char secondSep/*=0 */ )
+        std::string separatorEscape(const std::string& name, char secondSep/*=0 */)
         {
-            if ( name.size() > 2 && !isSeparatorEscaped( name, secondSep ) )
+            if (name.size() > 2 && !isSeparatorEscaped(name, secondSep))
             {
                 return '\\' + name + '\\';
             }
             return name;
         }
 
-        size_t findLastSeparator( const std::string & str, char separator, size_t offset/*=std::string::npos */ )
+        size_t findLastSeparator(const std::string& str, char separator, size_t offset/*=std::string::npos */)
         {
-            if ( str.empty() )
+            if (str.empty())
                 return std::string::npos;
 
-            auto ii = ( offset != std::string::npos ) ? offset : ( str.size() - 1 );
+            auto ii = (offset != std::string::npos) ? offset : (str.size() - 1);
             bool inEscape = false;
-            for ( ; ( ii != std::string::npos ) && ( ii < str.length() ); ( ( ii == 0 ) ? ( ii = std::string::npos ) : --ii ) )
+            for (; (ii != std::string::npos) && (ii < str.length()); ((ii == 0) ? (ii = std::string::npos) : --ii))
             {
-                if ( str.at( ii ) == '\\' )
+                if (str.at(ii) == '\\')
                     inEscape = !inEscape;
-                else if ( !inEscape && ( str.at( ii ) == separator ) )
+                else if (!inEscape && (str.at(ii) == separator))
                     break;
             }
             return ii;
         }
 
-        size_t findSeparator( const std::string & str, char separator, size_t offset/*=std::string::npos */ )
+        size_t findSeparator(const std::string& str, char separator, size_t offset/*=std::string::npos */)
         {
-            if ( str.empty() )
+            if (str.empty())
                 return std::string::npos;
 
-            auto ii = ( offset != std::string::npos ) ? offset : 0;
+            auto ii = (offset != std::string::npos) ? offset : 0;
             bool inEscape = false;
-            for ( ; ii < str.size(); ++ii )
+            for (; ii < str.size(); ++ii)
             {
-                if ( str.at( ii ) == '\\' )
+                if (str.at(ii) == '\\')
                     inEscape = !inEscape;
-                else if ( !inEscape && ( str.at( ii ) == separator ) )
+                else if (!inEscape && (str.at(ii) == separator))
                     break;
             }
-            return ( ii == str.size() ) ? std::string::npos : ii;
+            return (ii == str.size()) ? std::string::npos : ii;
         }
 
-        QStringList asReport( const QStringList & columnNames, const QStringList & subHeader, const QList< QStringList > & data, bool sortData )
+        QStringList asReport(const QStringList& columnNames, const QStringList& subHeader, const QList< QStringList >& data, bool sortData)
         {
             // first row is the columnNames
             std::vector< int > maxSize;
-            maxSize.resize( columnNames.size() );
-            for ( int ii = 0; ii < columnNames.size(); ++ii )
-                maxSize[ ii ] = columnNames[ ii ].length() + 1;
+            maxSize.resize(columnNames.size());
+            for (int ii = 0; ii < columnNames.size(); ++ii)
+                maxSize[ii] = columnNames[ii].length() + 1;
 
-            Q_ASSERT( subHeader.isEmpty() || ( subHeader.size() == columnNames.size() ) );
-            for ( int ii = 0; ii < subHeader.size(); ++ii )
-                maxSize[ ii ] = std::max( maxSize[ ii ], subHeader[ ii ].length() + 1 );
+            Q_ASSERT(subHeader.isEmpty() || (subHeader.size() == columnNames.size()));
+            for (int ii = 0; ii < subHeader.size(); ++ii)
+                maxSize[ii] = std::max(maxSize[ii], subHeader[ii].length() + 1);
 
-            for ( auto && ii : data )
+            for (auto&& ii : data)
             {
-                Q_ASSERT( ii.size() == maxSize.size() );
-                for ( int jj = 0; ( jj < static_cast<int>( maxSize.size() ) ) && ( jj < ii.size() ); jj++ )
+                Q_ASSERT(ii.size() == maxSize.size());
+                for (int jj = 0; (jj < static_cast<int>(maxSize.size())) && (jj < ii.size()); jj++)
                 {
-                    maxSize[ jj ] = std::max( maxSize[ jj ], ii[ jj ].length() + 1 );
+                    maxSize[jj] = std::max(maxSize[jj], ii[jj].length() + 1);
                 }
             }
 
             QStringList headers;
             QString headerLine;
-            QTextStream ts( &headerLine );
-            for ( int ii = 0; ii < columnNames.size(); ++ii )
-                ts << NStringUtils::PadString( columnNames[ ii ], maxSize[ ii ], NStringUtils::EPadType::eCenter ) << "  ";
+            QTextStream ts(&headerLine);
+            for (int ii = 0; ii < columnNames.size(); ++ii)
+                ts << NStringUtils::PadString(columnNames[ii], maxSize[ii], NStringUtils::EPadType::eCenter) << "  ";
             headers << headerLine;
             headerLine.clear();
-            for ( int ii = 0; ii < columnNames.size(); ++ii )
-                ts << QString( maxSize[ ii ], '-' ) << "  ";
+            for (int ii = 0; ii < columnNames.size(); ++ii)
+                ts << QString(maxSize[ii], '-') << "  ";
             headers << headerLine;
 
-            if ( !subHeader.isEmpty() )
+            if (!subHeader.isEmpty())
             {
                 QString headerLine;
-                QTextStream ts( &headerLine );
-                for ( int ii = 0; ( ii < subHeader.size() ) && ( ii < static_cast<int>( maxSize.size() ) ); ++ii )
-                    ts << NStringUtils::PadString( subHeader[ ii ], maxSize[ ii ], NStringUtils::EPadType::eLeftJustify ) << "  ";
+                QTextStream ts(&headerLine);
+                for (int ii = 0; (ii < subHeader.size()) && (ii < static_cast<int>(maxSize.size())); ++ii)
+                    ts << NStringUtils::PadString(subHeader[ii], maxSize[ii], NStringUtils::EPadType::eLeftJustify) << "  ";
                 headers << headerLine;
 
                 headerLine.clear();
-                for ( int ii = 0; ii < columnNames.size(); ++ii )
-                    ts << QString( maxSize[ ii ], '-' ) << "  ";
+                for (int ii = 0; ii < columnNames.size(); ++ii)
+                    ts << QString(maxSize[ii], '-') << "  ";
                 headers << headerLine;
             }
 
             QStringList retVal;
-            for ( auto && ii : data )
+            for (auto&& ii : data)
             {
-                Q_ASSERT( ii.size() == maxSize.size() );
+                Q_ASSERT(ii.size() == maxSize.size());
                 QString currLine;
-                QTextStream ts( &currLine );
-                for ( int jj = 0; ( jj < static_cast<int>( maxSize.size() ) ) && ( jj < ii.size() ); jj++ )
+                QTextStream ts(&currLine);
+                for (int jj = 0; (jj < static_cast<int>(maxSize.size())) && (jj < ii.size()); jj++)
                 {
-                    ts << NStringUtils::PadString( ii[ jj ], maxSize[ jj ], NStringUtils::EPadType::eLeftJustify ) << "  ";
+                    ts << NStringUtils::PadString(ii[jj], maxSize[jj], NStringUtils::EPadType::eLeftJustify) << "  ";
                 }
                 retVal << currLine;
             }
 
-            if ( sortData )
+            if (sortData)
                 retVal.sort();
 
             retVal = headers + retVal;
             return retVal;
         }
 
-        bool isNumericString( const std::string & constString, uint64_t & val, unsigned int & numBits )
+        bool isNumericString(const std::string& constString, uint64_t& val, unsigned int& numBits)
         {
             val = 0;
             numBits = 0;
 
-            char bit = constString[ 0 ];
+            char bit = constString[0];
             bool allsame = true;
-            for ( size_t i = 0; allsame && ( i < constString.size() ); i++ )
+            for (size_t i = 0; allsame && (i < constString.size()); i++)
             {
-                allsame = ( bit == constString[ i ] );
+                allsame = (bit == constString[i]);
             }
 
             bool retVal = true;
-            if ( allsame && ( ( constString[ 0 ] == '0' ) || ( constString.size() <= 64 && constString[ 0 ] == '1' ) ) )
+            if (allsame && ((constString[0] == '0') || (constString.size() <= 64 && constString[0] == '1')))
             {
-                numBits = static_cast<unsigned int>( constString.size() );
+                numBits = static_cast<unsigned int>(constString.size());
                 retVal = true;
-                if ( constString[ 0 ] == '0' )
+                if (constString[0] == '0')
                     val = 0;
                 else
                 {
-                    auto isSigned = ( constString.size() == 64 ) && constString[ 0 ] == '1';
-                    val = NStringUtils::binToDec< uint64_t >( constString, isSigned, &retVal );
+                    auto isSigned = (constString.size() == 64) && constString[0] == '1';
+                    val = NStringUtils::binToDec< uint64_t >(constString, isSigned, &retVal);
                 }
             }
             else
@@ -2236,33 +2236,33 @@ namespace NSABUtils
                 // 0 1 constants ?
                 size_t maxBit = 64;
                 retVal = true;
-                for ( size_t bitNum = 0; retVal && ( bitNum < constString.size() ) && ( bitNum < maxBit ); bitNum++ )
+                for (size_t bitNum = 0; retVal && (bitNum < constString.size()) && (bitNum < maxBit); bitNum++)
                 {
-                    char bit = constString[ bitNum ];
-                    retVal = ( bit == '1' ) || ( bit == '0' );
-                    if ( !retVal )
+                    char bit = constString[bitNum];
+                    retVal = (bit == '1') || (bit == '0');
+                    if (!retVal)
                     {
                         break;
                     }
-                    val = ( val << 1 ) + ( bit == '1' );
+                    val = (val << 1) + (bit == '1');
                     numBits++;
                 }
-                if ( numBits >= maxBit )
+                if (numBits >= maxBit)
                 {
                     retVal = false;
                 }
-                numBits = static_cast<unsigned int>( constString.size() );
+                numBits = static_cast<unsigned int>(constString.size());
             }
             return retVal;
         }
 
-        bool endsWith( const char * str, char ch )
+        bool endsWith(const char* str, char ch)
         {
-            if ( *str == ch )
+            if (*str == ch)
             {
-                for ( const char * nextChar = str; *nextChar; ++nextChar )
+                for (const char* nextChar = str; *nextChar; ++nextChar)
                 {
-                    if ( ( *nextChar == ch ) || !*nextChar )
+                    if ((*nextChar == ch) || !*nextChar)
                         return true;
                     return false;
                 }
@@ -2270,42 +2270,42 @@ namespace NSABUtils
             return false;
         }
 
-        bool isValidEncodeChar( char ch )
+        bool isValidEncodeChar(char ch)
         {
-            if ( ( ch >= 'A' && ch <= 'Z' )
-                 || ( ch >= 'a' && ch <= 'z' )
-                 || ( ch >= '0' && ch <= '9' )
-                 || ( ( ch == '+' ) || ( ch == '/' ) )
-                 )
+            if ((ch >= 'A' && ch <= 'Z')
+                || (ch >= 'a' && ch <= 'z')
+                || (ch >= '0' && ch <= '9')
+                || ((ch == '+') || (ch == '/'))
+                )
                 return true;
             return false;
         }
 
-        bool validateBase64String( const char * str, size_t len )
+        bool validateBase64String(const char* str, size_t len)
         {
-            if ( !str )
+            if (!str)
                 return true;
 
-            if ( len == std::string::npos )
-                len = std::strlen( str );
+            if (len == std::string::npos)
+                len = std::strlen(str);
 
-            if ( len >= 2 )
+            if (len >= 2)
             {
-                if ( *str == '-' && ( *( str + 1 ) == '-' ) )
+                if (*str == '-' && (*(str + 1) == '-'))
                     return true;
 
-                if ( *str == '/' && ( *( str + 1 ) == '/' ) )
+                if (*str == '/' && (*(str + 1) == '/'))
                     return true;
             }
 
-            for ( const char * curr = str; *curr; ++curr )
+            for (const char* curr = str; *curr; ++curr)
             {
-                if ( endsWith( curr, '=' ) )
+                if (endsWith(curr, '='))
                     continue;
-                if ( ( *curr == '\r' ) || ( *curr == '\n' ) )
+                if ((*curr == '\r') || (*curr == '\n'))
                     continue;
 
-                if ( !isValidEncodeChar( *curr ) )
+                if (!isValidEncodeChar(*curr))
                 {
                     return false;
                 }
@@ -2313,39 +2313,39 @@ namespace NSABUtils
             return true;
         }
 
-        bool validateBase64String( const std::string & str )
+        bool validateBase64String(const std::string& str)
         {
-            return validateBase64String( str.c_str(), str.length() );
+            return validateBase64String(str.c_str(), str.length());
         }
 
-        bool validateUUEncodeString( const char * str, size_t len )
+        bool validateUUEncodeString(const char* str, size_t len)
         {
-            if ( !str )
+            if (!str)
                 return true;
 
-            if ( len == std::string::npos )
-                len = std::strlen( str );
+            if (len == std::string::npos)
+                len = std::strlen(str);
 
-            if ( len >= 2 )
+            if (len >= 2)
             {
-                if ( *str == '-' && ( *( str + 1 ) == '-' ) )
+                if (*str == '-' && (*(str + 1) == '-'))
                     return true;
 
-                if ( *str == '/' && ( *( str + 1 ) == '/' ) )
+                if (*str == '/' && (*(str + 1) == '/'))
                     return true;
             }
 
-            if ( len > 76 )
+            if (len > 76)
                 return false;
 
-            for ( const char * curr = str; *curr; ++curr )
+            for (const char* curr = str; *curr; ++curr)
             {
-                if ( endsWith( curr, '=' ) )
+                if (endsWith(curr, '='))
                     continue;
-                if ( ( *curr == '\r' ) || ( *curr == '\n' ) )
+                if ((*curr == '\r') || (*curr == '\n'))
                     continue;
 
-                if ( !isValidEncodeChar( *curr ) )
+                if (!isValidEncodeChar(*curr))
                 {
                     return false;
                 }
@@ -2353,65 +2353,65 @@ namespace NSABUtils
             return true;
         }
 
-        bool validateUUEncodeString( const std::string & str )
+        bool validateUUEncodeString(const std::string& str)
         {
-            return validateBase64String( str.c_str(), str.length() );
+            return validateBase64String(str.c_str(), str.length());
         }
 
-        bool validateQuotedPrintableString( const char * str, size_t len )
+        bool validateQuotedPrintableString(const char* str, size_t len)
         {
-            if ( !str )
+            if (!str)
                 return true;
 
-            if ( len == std::string::npos )
-                len = std::strlen( str );
+            if (len == std::string::npos)
+                len = std::strlen(str);
 
-            if ( len > 76 )
+            if (len > 76)
                 return false;
 
-            if ( len >= 2 )
+            if (len >= 2)
             {
-                if ( *str == '-' && ( *( str + 1 ) == '-' ) )
+                if (*str == '-' && (*(str + 1) == '-'))
                     return true;
 
-                if ( *str == '/' && ( *( str + 1 ) == '/' ) )
+                if (*str == '/' && (*(str + 1) == '/'))
                     return true;
             }
 
-            for ( const char * curr = str; *curr; ++curr )
+            for (const char* curr = str; *curr; ++curr)
             {
-                if ( ( *curr == '=' ) && *( curr + 1 ) && *( curr + 2 ) )
+                if ((*curr == '=') && *(curr + 1) && *(curr + 2))
                 {
-                    if ( ( *( curr + 1 ) >= 'A' ) && ( *( curr + 1 ) <= 'F' ) )
+                    if ((*(curr + 1) >= 'A') && (*(curr + 1) <= 'F'))
                         continue;
-                    if ( ( *( curr + 1 ) >= '0' ) && ( *( curr + 1 ) <= '9' ) )
+                    if ((*(curr + 1) >= '0') && (*(curr + 1) <= '9'))
                         continue;
 
                     return false;
                 }
-                if ( ( *curr == '\r' ) || ( *curr == '\n' ) )
+                if ((*curr == '\r') || (*curr == '\n'))
                     continue;
 
-                if ( ( *curr >= 33 ) && ( *curr <= 60 ) )
+                if ((*curr >= 33) && (*curr <= 60))
                     continue;
-                if ( ( *curr >= 62 ) && ( *curr <= 126 ) )
+                if ((*curr >= 62) && (*curr <= 126))
                     continue;
 
-                if ( ( *curr == 9 ) && ( *curr == 32 ) )
+                if ((*curr == 9) && (*curr == 32))
                 {
-                    if ( !*( curr + 1 ) ) // at the end of the line
+                    if (!*(curr + 1)) // at the end of the line
                         return false;
                 }
             }
             return true;
         }
 
-        bool validateQuotedPrintableString( const std::string & str )
+        bool validateQuotedPrintableString(const std::string& str)
         {
-            return validateQuotedPrintableString( str.c_str(), str.length() );
+            return validateQuotedPrintableString(str.c_str(), str.length());
         }
 
-        bool isDiacriticalCharacter( const QChar & ch, QString * ascii )
+        bool isDiacriticalCharacter(const QChar& ch, QString* ascii)
         {
             static auto map = std::map< QChar, QString >(
                 {
@@ -2605,69 +2605,69 @@ namespace NSABUtils
                     ,{ u'ź', u8"z" }
                     ,{ u'ż', u8"z" }
                     ,{ u'ž', u8"z" }
-                } );
-            auto pos = map.find( ch );
-            if ( pos == map.end() )
+                });
+            auto pos = map.find(ch);
+            if (pos == map.end())
                 return false;
-            if ( ascii )
-                *ascii = ( *pos ).second;
+            if (ascii)
+                *ascii = (*pos).second;
             return true;
         }
 
-        bool startsOrEndsWithNumber( const QString & string, QString * number /*= nullptr*/, QString * extra /*= nullptr*/, bool * numIsPrefix /*= nullptr*/ ) // a numbers separated by a non A-Z 
+        bool startsOrEndsWithNumber(const QString& string, QString* number /*= nullptr*/, QString* extra /*= nullptr*/, bool* numIsPrefix /*= nullptr*/) // a numbers separated by a non A-Z 
         {
-            if ( number )
+            if (number)
                 number->clear();
-            if ( extra )
+            if (extra)
                 extra->clear();
-            if ( numIsPrefix )
+            if (numIsPrefix)
                 *numIsPrefix = false;
-            auto regExp = QRegularExpression( R"((^((?<prefixNumber>\d+)_)(?<numIsPrefix>.*)$)|((?<numIsSuffix>.*)(_(?<suffixNumber>\d+))$))" );
-            auto match = regExp.match( string );
-            if ( !match.hasMatch() )
+            auto regExp = QRegularExpression(R"((^((?<prefixNumber>\d+)_)(?<numIsPrefix>.*)$)|((?<numIsSuffix>.*)(_(?<suffixNumber>\d+))$))");
+            auto match = regExp.match(string);
+            if (!match.hasMatch())
                 return false;
-            if ( !match.captured( "numIsPrefix" ).isEmpty() )
+            if (!match.captured("numIsPrefix").isEmpty())
             {
-                if ( numIsPrefix )
+                if (numIsPrefix)
                     *numIsPrefix = true;
-                if ( extra )
-                    *extra = match.captured( "numIsPrefix" );
-                if ( number )
-                    *number = match.captured( "prefixNumber" );
+                if (extra)
+                    *extra = match.captured("numIsPrefix");
+                if (number)
+                    *number = match.captured("prefixNumber");
             }
             else /*if ( !match.captured( "numIsSuffix" ).isEmpty() )*/
             {
-                if ( numIsPrefix )
+                if (numIsPrefix)
                     *numIsPrefix = false;
-                if ( extra )
-                    *extra = match.captured( "numIsSuffix" );
-                if ( number )
-                    *number = match.captured( "suffixNumber" );
+                if (extra)
+                    *extra = match.captured("numIsSuffix");
+                if (number)
+                    *number = match.captured("suffixNumber");
             }
             return true;
         }
 
-        bool isValidEmailAddress( const QString & email )
+        bool isValidEmailAddress(const QString& email)
         {
-            if ( email.isEmpty() )
+            if (email.isEmpty())
                 return false;
 
             auto regExpStr = R"((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))";
             //auto regExpStr = R"(/(?(DEFINE)(?<address>(?&mailbox) | (?&group)) (? (?&name_addr) | (?&addr_spec)) (? (?&display_name)? (?&angle_addr)) (? (?&CFWS)? < (?&addr_spec) > (?&CFWS)?) (? (?&display_name) : (?:(?&mailbox_list) | (?&CFWS))? ; (?&CFWS)?) (? (?&phrase)) (? (?&mailbox) (?: , (?&mailbox))*) (? (?&local_part) \@ (?&domain)) (? (?&dot_atom) | (?&quoted_string)) (? (?&dot_atom) | (?&domain_literal)) (? (?&CFWS)? \[ (?: (?&FWS)? (?&dcontent))* (?&FWS)? \] (?&CFWS)?) (? (?&dtext) | (?&quoted_pair)) (? (?&NO_WS_CTL) | [\x21-\x5a\x5e-\x7e]) (? (?&ALPHA) | (?&DIGIT) | [!#\$%&'*+-/=?^_`{|}~]) (? (?&CFWS)? (?&atext)+ (?&CFWS)?) (? (?&CFWS)? (?&dot_atom_text) (?&CFWS)?) (? (?&atext)+ (?: \. (?&atext)+)*) (? [\x01-\x09\x0b\x0c\x0e-\x7f]) (? \\ (?&text)) (? (?&NO_WS_CTL) | [\x21\x23-\x5b\x5d-\x7e]) (? (?&qtext) | (?&quoted_pair)) (? (?&CFWS)? (?&DQUOTE) (?:(?&FWS)? (?&qcontent))* (?&FWS)? (?&DQUOTE) (?&CFWS)?) (? (?&atom) | (?&quoted_string)) (? (?&word)+) # Folding white space (? (?: (?&WSP)* (?&CRLF))? (?&WSP)+) (? (?&NO_WS_CTL) | [\x21-\x27\x2a-\x5b\x5d-\x7e]) (? (?&ctext) | (?&quoted_pair) | (?&comment)) (? \( (?: (?&FWS)? (?&ccontent))* (?&FWS)? \) ) (? (?: (?&FWS)? (?&comment))* (?: (?:(?&FWS)? (?&comment)) | (?&FWS))) # No whitespace control (? [\x01-\x08\x0b\x0c\x0e-\x1f\x7f]) (? [A-Za-z]) (? [0-9]) (? \x0d \x0a) (? ") (? [\x20\x09]) ) (?&address)/x</address>)";
-            QRegularExpression regExp( regExpStr );
-            Q_ASSERT( regExp.isValid() );
-            auto match = regExp.match( email );
-            bool retVal = match.hasMatch() && ( match.capturedLength() == email.length() );
+            QRegularExpression regExp(regExpStr);
+            Q_ASSERT(regExp.isValid());
+            auto match = regExp.match(email);
+            bool retVal = match.hasMatch() && (match.capturedLength() == email.length());
             return retVal;
         }
 
-        QString removeDiacriticalCharacters( const QString & str )
+        QString removeDiacriticalCharacters(const QString& str)
         {
             QString retVal;
-            for ( auto && ii : str )
+            for (auto&& ii : str)
             {
                 QString ascii;
-                if ( isDiacriticalCharacter( ii, &ascii ) )
+                if (isDiacriticalCharacter(ii, &ascii))
                     retVal += ascii;
                 else
                     retVal += ii;
@@ -2676,7 +2676,7 @@ namespace NSABUtils
             return retVal;
         }
 
-        const std::unordered_set< QString > & unimportantWords()
+        const std::unordered_set< QString >& unimportantWords()
         {
             static std::unordered_set< QString > retVal =
             {
@@ -2707,75 +2707,75 @@ namespace NSABUtils
             return retVal;
         }
 
-        std::vector< QString > getImportantWordsInOrder( const QString & string, bool stripPunctuation )
+        std::vector< QString > getImportantWordsInOrder(const QString& string, bool stripPunctuation)
         {
             std::vector< QString > retVal;
             auto wordsToRemove = unimportantWords();
 
-            auto regExp = stripPunctuation ? QRegularExpression( R"(\s|\-|\:)" ) : QRegularExpression( "\\s" );
-            auto words = string.toLower().split( regExp, TSkipEmptyParts );
-            for ( auto && ii : words )
+            auto regExp = stripPunctuation ? QRegularExpression(R"(\s|\-|\:)") : QRegularExpression("\\s");
+            auto words = string.toLower().split(regExp, TSkipEmptyParts);
+            for (auto&& ii : words)
             {
-                if ( stripPunctuation )
+                if (stripPunctuation)
                 {
-                    ii = removeDiacriticalCharacters( ii );
-                    ii = ii.remove( QRegularExpression( "\\W" ) );
+                    ii = removeDiacriticalCharacters(ii);
+                    ii = ii.remove(QRegularExpression("\\W"));
                 }
-                if ( wordsToRemove.find( ii ) != wordsToRemove.end() )
+                if (wordsToRemove.find(ii) != wordsToRemove.end())
                     continue;
-                retVal.push_back( ii );
+                retVal.push_back(ii);
             }
             return retVal;
         }
 
-        std::unordered_set< QString > getImportantWords( const QString & string, bool stripPunctuation )
+        std::unordered_set< QString > getImportantWords(const QString& string, bool stripPunctuation)
         {
-            auto ordered = getImportantWordsInOrder( string, stripPunctuation );
+            auto ordered = getImportantWordsInOrder(string, stripPunctuation);
 
             std::unordered_set< QString > retVal = { ordered.begin(), ordered.end() };
             return retVal;
         }
 
         // is every word in the RHS in the LHS
-        bool isSimilar( const QString & lhs, const QString & rhs, bool inOrder )
+        bool isSimilar(const QString& lhs, const QString& rhs, bool inOrder)
         {
-            if ( !inOrder )
+            if (!inOrder)
             {
-                auto lhsWords = getImportantWords( lhs, true );
-                auto rhsWords = getImportantWords( rhs, true );
+                auto lhsWords = getImportantWords(lhs, true);
+                auto rhsWords = getImportantWords(rhs, true);
 
-                for ( auto && ii : rhsWords )
+                for (auto&& ii : rhsWords)
                 {
-                    if ( lhsWords.find( ii ) == lhsWords.end() )
+                    if (lhsWords.find(ii) == lhsWords.end())
                         return false;
                 }
                 return true;
             }
             else
             {
-                auto lhsWords = getImportantWordsInOrder( lhs, true );
-                auto rhsWords = getImportantWordsInOrder( rhs, true );
-                return ( lhsWords == rhsWords );
+                auto lhsWords = getImportantWordsInOrder(lhs, true);
+                auto rhsWords = getImportantWordsInOrder(rhs, true);
+                return (lhsWords == rhsWords);
             }
         }
 
-        double SABUTILS_EXPORT cleanPercentage( double in )
+        double SABUTILS_EXPORT cleanPercentage(double in)
         {
-            auto integral = static_cast<int>( std::floor( in ) );
-            auto decimal = static_cast<int>( std::floor( 100 * ( in - integral ) ) );
+            auto integral = static_cast<int>(std::floor(in));
+            auto decimal = static_cast<int>(std::floor(100 * (in - integral)));
             return integral + 1.0 * decimal / 100.0;
         }
 
-        std::string SABUTILS_EXPORT getPercentageAsString( double value )
+        std::string SABUTILS_EXPORT getPercentageAsString(double value)
         {
-            value = cleanPercentage( value );
+            value = cleanPercentage(value);
             std::ostringstream oss;
-            oss << std::setw( 5 ) << std::fixed << std::setfill( '0' ) << std::setprecision( 2 ) << value;
+            oss << std::setw(5) << std::fixed << std::setfill('0') << std::setprecision(2) << value;
             auto retVal = oss.str();
             return retVal;
         }
 
-        int romanCharValue( QChar ch, bool & aOK )
+        int romanCharValue(QChar ch, bool& aOK)
         {
             static std::unordered_map< char, int > sValueMap =
             {
@@ -2788,42 +2788,42 @@ namespace NSABUtils
                 { 'm', 1000 }
             };
 
-            auto pos = sValueMap.find( ch.toLower().toLatin1() );
-            if ( pos == sValueMap.end() )
+            auto pos = sValueMap.find(ch.toLower().toLatin1());
+            if (pos == sValueMap.end())
             {
                 aOK = false;
                 return -1;
             }
-            return ( *pos ).second;
+            return (*pos).second;
         }
 
-        int romanToDecimal( QString string, bool & aOK )
+        int romanToDecimal(QString string, bool& aOK)
         {
             auto regExStr = "[^MDCLXVI\\s]";
-            auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
-            if ( regEx.match( string ).hasMatch() )
+            auto regEx = QRegularExpression(regExStr, QRegularExpression::CaseInsensitiveOption);
+            if (regEx.match(string).hasMatch())
             {
                 aOK = false;
                 return -1;
             }
-            string = string.replace( QRegularExpression( "\\s" ), "" );
+            string = string.replace(QRegularExpression("\\s"), "");
 
             int retVal = 0;
-            for ( int ii = 0; ii < string.length(); ++ii )
+            for (int ii = 0; ii < string.length(); ++ii)
             {
-                if ( string[ ii ].isSpace() )
+                if (string[ii].isSpace())
                     continue;
-                auto currValue = romanCharValue( string[ ii ], aOK );
-                if ( !aOK )
+                auto currValue = romanCharValue(string[ii], aOK);
+                if (!aOK)
                     return -1;
 
-                if ( ( ii + 1 ) < string.length() ) // not last char
+                if ((ii + 1) < string.length()) // not last char
                 {
-                    auto nextValue = romanCharValue( string[ ii + 1 ], aOK );
-                    if ( !aOK )
+                    auto nextValue = romanCharValue(string[ii + 1], aOK);
+                    if (!aOK)
                         return -1;
 
-                    if ( currValue >= nextValue )
+                    if (currValue >= nextValue)
                     {
                         retVal += currValue;
                     }
@@ -2840,67 +2840,67 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool isRomanNumeral( const QString & string )
+        bool isRomanNumeral(const QString& string)
         {
             auto regExStr = "^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$";
-            auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
-            if ( !regEx.match( string ).hasMatch() )
+            auto regEx = QRegularExpression(regExStr, QRegularExpression::CaseInsensitiveOption);
+            if (!regEx.match(string).hasMatch())
                 return false;
 
             bool aOK;
-            int value = romanToDecimal( string, aOK );
+            int value = romanToDecimal(string, aOK);
             (void)value;
             return aOK;
         }
 
-        QString titleCase( const QString & string, bool first, bool ignoreAllCase )
+        QString titleCase(const QString& string, bool first, bool ignoreAllCase)
         {
-            if ( string.isEmpty() )
+            if (string.isEmpty())
                 return string;
 
             auto retVal = string;
             QString prefix;
-            if ( retVal.startsWith( "." ) || retVal.startsWith( ":" ) || retVal.startsWith( "-" ) )
+            if (retVal.startsWith(".") || retVal.startsWith(":") || retVal.startsWith("-"))
             {
-                prefix = retVal[ 0 ];
-                retVal.remove( 0, 1 );
+                prefix = retVal[0];
+                retVal.remove(0, 1);
             }
 
             QString suffix;
-            if ( retVal.endsWith( "." ) || retVal.endsWith( ":" ) || retVal.endsWith( "-" ) )
+            if (retVal.endsWith(".") || retVal.endsWith(":") || retVal.endsWith("-"))
             {
                 suffix = retVal.back();
-                retVal.remove( retVal.length() - 1, 1 );
+                retVal.remove(retVal.length() - 1, 1);
             }
-            bool isRomanNumber = isRomanNumeral( retVal );
+            bool isRomanNumber = isRomanNumeral(retVal);
             retVal = prefix + retVal + suffix;
-            if ( isRomanNumber )
+            if (isRomanNumber)
                 return retVal.toUpper();
 
 
             bool allCap = true;
-            for ( auto && ii : string )
+            for (auto&& ii : string)
             {
-                if ( ii != ii.toUpper() )
+                if (ii != ii.toUpper())
                 {
                     allCap = false;
                     break;
                 }
             }
-            if ( !ignoreAllCase && allCap )
+            if (!ignoreAllCase && allCap)
                 return string;
 
-            auto hasDash = retVal.indexOf( "-" ) != -1;
+            auto hasDash = retVal.indexOf("-") != -1;
 
             auto keepLower = unimportantWords();
-            if ( !hasDash && !first && ( keepLower.find( retVal ) != keepLower.end() ) )
+            if (!hasDash && !first && (keepLower.find(retVal) != keepLower.end()))
                 retVal = retVal.toLower();
             else
             {
                 bool prevIsDashOrFirstChar = true;
-                for ( auto && ii : retVal )
+                for (auto&& ii : retVal)
                 {
-                    if ( prevIsDashOrFirstChar )
+                    if (prevIsDashOrFirstChar)
                         ii = ii.toUpper();
                     else
                         ii = ii.toLower();
@@ -2910,43 +2910,43 @@ namespace NSABUtils
             return retVal;
         }
 
-        QString titleCase( const QString & string, bool ignoreAllCase )
+        QString titleCase(const QString& string, bool ignoreAllCase)
         {
-            return titleCase( string, false, ignoreAllCase );
+            return titleCase(string, false, ignoreAllCase);
         }
 
-        QString transformTitle( const QString & title, bool ignoreAllCase )
+        QString transformTitle(const QString& title, bool ignoreAllCase)
         {
             auto retVal = title;
             bool isNumber = false;
-            for ( int ii = 0; ii < retVal.length(); ++ii )
+            for (int ii = 0; ii < retVal.length(); ++ii)
             {
-                if ( retVal[ ii ] != '.' )
+                if (retVal[ii] != '.')
                     continue;
 
-                if ( ( ii > 0 ) && ( ii < ( retVal.length() + 1 ) ) )
+                if ((ii > 0) && (ii < (retVal.length() + 1)))
                 {
-                    if ( retVal[ ii - 1 ].isDigit() && retVal[ ii + 1 ].isDigit() )
+                    if (retVal[ii - 1].isDigit() && retVal[ii + 1].isDigit())
                         continue;
-                    if ( retVal[ ii + 1 ].isSpace() )
+                    if (retVal[ii + 1].isSpace())
                         continue;
                 }
 
-                if ( ( ii < ( retVal.length() - 2 ) ) && ( retVal.mid( ii, 3 ) == "..." ) )
+                if ((ii < (retVal.length() - 2)) && (retVal.mid(ii, 3) == "..."))
                     continue;
 
-                retVal[ ii ] = ' ';
+                retVal[ii] = ' ';
             }
             retVal = retVal.trimmed();
-            auto tmp = retVal.split( ' ' );
+            auto tmp = retVal.split(' ');
             bool prevEndSentence = true;
-            for ( auto && ii = tmp.begin(); ii != tmp.end(); ++ii )
+            for (auto&& ii = tmp.begin(); ii != tmp.end(); ++ii)
             {
-                *ii = titleCase( *ii, prevEndSentence, ignoreAllCase );
-                prevEndSentence = ( *ii == "." ) || ( *ii == "-" ) || ( *ii == ":" ) || ( *ii ).endsWith( "." ) || ( *ii ).endsWith( "-" ) || ( *ii ).endsWith( ":" );
+                *ii = titleCase(*ii, prevEndSentence, ignoreAllCase);
+                prevEndSentence = (*ii == ".") || (*ii == "-") || (*ii == ":") || (*ii).endsWith(".") || (*ii).endsWith("-") || (*ii).endsWith(":");
             }
 
-            return tmp.join( " " );
+            return tmp.join(" ");
         }
     }
 }

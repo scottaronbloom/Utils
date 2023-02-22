@@ -38,14 +38,14 @@ namespace NSABUtils
     {
         Q_OBJECT;
     public:
-        CThreadedProgressDialog( TVoidFunction xFunc, const QString & xLabelText, const QString & xCancelButtonText, int xMinimum, int xMaximum, QWidget * xParent = nullptr, Qt::WindowFlags xFlags = Qt::WindowFlags() );
-        CThreadedProgressDialog( TVoidFunction xFunc, QWidget * xParent = nullptr, Qt::WindowFlags xFlags = Qt::WindowFlags() );
+        CThreadedProgressDialog(TVoidFunction xFunc, const QString& xLabelText, const QString& xCancelButtonText, int xMinimum, int xMaximum, QWidget* xParent = nullptr, Qt::WindowFlags xFlags = Qt::WindowFlags());
+        CThreadedProgressDialog(TVoidFunction xFunc, QWidget* xParent = nullptr, Qt::WindowFlags xFlags = Qt::WindowFlags());
         ~CThreadedProgressDialog();
 
-        void setCancelButtonText( const QString & xText );
+        void setCancelButtonText(const QString& xText);
         QString cancelButtonText() const;
 
-        void mSetHasCancel( bool xHasCancel );
+        void mSetHasCancel(bool xHasCancel);
 
         int exec() override;
     private:
@@ -57,10 +57,10 @@ namespace NSABUtils
     {
         Q_OBJECT;
     public:
-        CThreadedEventLoop( TVoidFunction xFunc, QObject * xParent = nullptr );
+        CThreadedEventLoop(TVoidFunction xFunc, QObject* xParent = nullptr);
         ~CThreadedEventLoop();
 
-        int exec( QEventLoop::ProcessEventsFlags flags = AllEvents );
+        int exec(QEventLoop::ProcessEventsFlags flags = AllEvents);
     public Q_SLOTS:
         void mExit(); // calls exit();
     private:

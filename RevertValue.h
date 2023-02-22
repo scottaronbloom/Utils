@@ -32,9 +32,9 @@ namespace NSABUtils
     class SABUTILS_EXPORT CRevertValue
     {
     public:
-        CRevertValue( T & value ) :
-            fValue( value ),
-            fOrigValue( value )
+        CRevertValue(T& value) :
+            fValue(value),
+            fOrigValue(value)
         {
         }
 
@@ -43,7 +43,7 @@ namespace NSABUtils
             fValue = fOrigValue;
         }
     private:
-        T & fValue;
+        T& fValue;
         T fOrigValue;
     };
 }

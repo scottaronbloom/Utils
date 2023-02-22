@@ -41,11 +41,11 @@ namespace NSABUtils
 #ifndef Q_OS_WIN
 #define S_OK 0
 #endif
-    CSelectFileUrl::CSelectFileUrl( QObject * parent ) :
-        QObject( parent )
+    CSelectFileUrl::CSelectFileUrl(QObject* parent) :
+        QObject(parent)
     {
 #ifdef Q_OS_WIN
-        QDesktopServices::setUrlHandler( "file", this, "slotOpenUrl" );
+        QDesktopServices::setUrlHandler("file", this, "slotOpenUrl");
 #endif
     }
 
@@ -53,15 +53,15 @@ namespace NSABUtils
     class CLaunchThread : public QThread
     {
     public:
-        explicit CLaunchThread( QString path )
+        explicit CLaunchThread(QString path)
         {
 #ifdef Q_OS_WIN
-            auto fi = QFileInfo( path );
-            auto dirloc = fi.absolutePath().replace( "/", "\\" );
-            fDir = ILCreateFromPath( reinterpret_cast<const wchar_t *>( dirloc.utf16() ) );
+            auto fi = QFileInfo(path);
+            auto dirloc = fi.absolutePath().replace("/", "\\");
+            fDir = ILCreateFromPath(reinterpret_cast<const wchar_t*>(dirloc.utf16()));
 
-            path = path.replace( "/", "\\" );
-            fPath = ILCreateFromPath( reinterpret_cast<const wchar_t *>( path.utf16() ) );
+            path = path.replace("/", "\\");
+            fPath = ILCreateFromPath(reinterpret_cast<const wchar_t*>(path.utf16()));
 #else
             (void)path;
 #endif
@@ -70,14 +70,14 @@ namespace NSABUtils
         ~CLaunchThread()
         {
 #ifdef Q_OS_WIN
-            ILFree( fDir );
-            ILFree( fPath );
+            ILFree(fDir);
+            ILFree(fPath);
 #endif
         }
         void run() override
         {
 #ifdef Q_OS_WIN
-            fResult = SHOpenFolderAndSelectItems( fDir, 1, (LPCITEMIDLIST *)&fPath, 0 );
+            fResult = SHOpenFolderAndSelectItems(fDir, 1, (LPCITEMIDLIST*)&fPath, 0);
 #endif
         }
 
@@ -91,19 +91,19 @@ namespace NSABUtils
         uint64_t fResult{ S_OK };
     };
 
-    void CSelectFileUrl::slotOpenUrl( const QUrl & url )
+    void CSelectFileUrl::slotOpenUrl(const QUrl& url)
     {
-        if ( !url.isLocalFile() )
+        if (!url.isLocalFile())
             return;
         auto path = url.toLocalFile();
-        auto fi = QFileInfo( path );
-        if ( fi.isDir() )
+        auto fi = QFileInfo(path);
+        if (fi.isDir())
         {
-            QDesktopServices::openUrl( url );
+            QDesktopServices::openUrl(url);
             return;
         }
 
-        CLaunchThread thread( url.toLocalFile() );
+        CLaunchThread thread(url.toLocalFile());
         thread.start();
         thread.wait();
     }

@@ -39,47 +39,47 @@
 
 namespace NSABUtils
 {
-    SDownloadFileInfo::SDownloadFileInfo( const QString & name, const QUrl & url, uint64_t size ) :
-        fName( name ),
-        fUrl( url ),
-        fSize( size )
+    SDownloadFileInfo::SDownloadFileInfo(const QString& name, const QUrl& url, uint64_t size) :
+        fName(name),
+        fUrl(url),
+        fSize(size)
     {
 
     }
 
-    CDownloadFile::CDownloadFile( const SDownloadFileInfo & fileInfo, QWidget * parent ) :
-        QDialog( parent ),
-        fImpl( new Ui::CDownloadFile ),
-        fHasError( false ),
-        fFileInfo( fileInfo )
+    CDownloadFile::CDownloadFile(const SDownloadFileInfo& fileInfo, QWidget* parent) :
+        QDialog(parent),
+        fImpl(new Ui::CDownloadFile),
+        fHasError(false),
+        fFileInfo(fileInfo)
     {
-        fImpl->setupUi( this );
-        setWindowFlags( this->windowFlags() & ~Qt::WindowContextHelpButtonHint );
+        fImpl->setupUi(this);
+        setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-        fManager = new QNetworkAccessManager( this );
-        connect( fManager, &QNetworkAccessManager::finished, this, &CDownloadFile::slotRequestFinished );
-        connect( fManager, &QNetworkAccessManager::authenticationRequired, this, &CDownloadFile::slotAuthenticationRequired );
-        connect( fManager, &QNetworkAccessManager::encrypted, this, &CDownloadFile::slotEncrypted );
-        connect( fManager, &QNetworkAccessManager::preSharedKeyAuthenticationRequired, this, &CDownloadFile::slotPreSharedKeyAuthenticationRequired );
-        connect( fManager, &QNetworkAccessManager::proxyAuthenticationRequired, this, &CDownloadFile::slotProxyAuthenticationRequired );
-        connect( fManager, &QNetworkAccessManager::sslErrors, this, &CDownloadFile::slotSSLErrors );
+        fManager = new QNetworkAccessManager(this);
+        connect(fManager, &QNetworkAccessManager::finished, this, &CDownloadFile::slotRequestFinished);
+        connect(fManager, &QNetworkAccessManager::authenticationRequired, this, &CDownloadFile::slotAuthenticationRequired);
+        connect(fManager, &QNetworkAccessManager::encrypted, this, &CDownloadFile::slotEncrypted);
+        connect(fManager, &QNetworkAccessManager::preSharedKeyAuthenticationRequired, this, &CDownloadFile::slotPreSharedKeyAuthenticationRequired);
+        connect(fManager, &QNetworkAccessManager::proxyAuthenticationRequired, this, &CDownloadFile::slotProxyAuthenticationRequired);
+        connect(fManager, &QNetworkAccessManager::sslErrors, this, &CDownloadFile::slotSSLErrors);
 
-        fImpl->buttonBox->button( QDialogButtonBox::Yes )->setText( tr( "Install" ) );
-        fImpl->buttonBox->button( QDialogButtonBox::No )->setText( tr( "Close" ) );
+        fImpl->buttonBox->button(QDialogButtonBox::Yes)->setText(tr("Install"));
+        fImpl->buttonBox->button(QDialogButtonBox::No)->setText(tr("Close"));
 #ifndef Q_OS_WIN
-        fImpl->buttonBox->button( QDialogButtonBox::Yes )->setHidden( true );
+        fImpl->buttonBox->button(QDialogButtonBox::Yes)->setHidden(true);
 #endif
-        fImpl->buttonBox->button( QDialogButtonBox::Yes )->setEnabled( false );
-        fImpl->buttonBox->button( QDialogButtonBox::No )->setEnabled( false );
-        fImpl->buttonBox->button( QDialogButtonBox::Cancel )->setEnabled( true );
+        fImpl->buttonBox->button(QDialogButtonBox::Yes)->setEnabled(false);
+        fImpl->buttonBox->button(QDialogButtonBox::No)->setEnabled(false);
+        fImpl->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(true);
 
-        connect( fImpl->buttonBox->button( QDialogButtonBox::Yes ), &QPushButton::clicked, this, &CDownloadFile::slotInstallNow );
-        connect( fImpl->buttonBox->button( QDialogButtonBox::No ), &QPushButton::clicked, this, &CDownloadFile::slotSaveOnly );
-        connect( fImpl->buttonBox->button( QDialogButtonBox::Cancel ), &QPushButton::clicked, this, &CDownloadFile::slotCancel );
+        connect(fImpl->buttonBox->button(QDialogButtonBox::Yes), &QPushButton::clicked, this, &CDownloadFile::slotInstallNow);
+        connect(fImpl->buttonBox->button(QDialogButtonBox::No), &QPushButton::clicked, this, &CDownloadFile::slotSaveOnly);
+        connect(fImpl->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &CDownloadFile::slotCancel);
     }
 
-    CDownloadFile::CDownloadFile( const QString & name, const QUrl & url, uint64_t size, QWidget * parent ) :
-        CDownloadFile( SDownloadFileInfo( name, url, size ), parent )
+    CDownloadFile::CDownloadFile(const QString& name, const QUrl& url, uint64_t size, QWidget* parent) :
+        CDownloadFile(SDownloadFileInfo(name, url, size), parent)
     {
 
     }
@@ -90,8 +90,8 @@ namespace NSABUtils
 
     void CDownloadFile::reject()
     {
-        if ( !fDownloadFileName.isEmpty() )
-            QFile( fDownloadFileName + ".tmp" ).remove();
+        if (!fDownloadFileName.isEmpty())
+            QFile(fDownloadFileName + ".tmp").remove();
 
         QDialog::reject();
     }
@@ -99,127 +99,127 @@ namespace NSABUtils
     bool CDownloadFile::startDownload()
     {
         fWasCanceled = false;
-        auto downloadDirs = QStandardPaths::standardLocations( QStandardPaths::DownloadLocation );
+        auto downloadDirs = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation);
         QDir initDir;
         QString fileName;
-        if ( !downloadDirs.empty() )
+        if (!downloadDirs.empty())
         {
-            initDir = QDir( downloadDirs.front() );
-            fileName = initDir.absoluteFilePath( fFileInfo.fName );
+            initDir = QDir(downloadDirs.front());
+            fileName = initDir.absoluteFilePath(fFileInfo.fName);
         }
         else
             fileName = fFileInfo.fName;
 
-        fDownloadFileName = QFileDialog::getSaveFileName( this, "Save Filename:", fileName );
-        if ( fDownloadFileName.isEmpty() )
+        fDownloadFileName = QFileDialog::getSaveFileName(this, "Save Filename:", fileName);
+        if (fDownloadFileName.isEmpty())
         {
             return false;
         }
-        if ( QFile::exists( fDownloadFileName ) )
+        if (QFile::exists(fDownloadFileName))
         {
-            QFile::remove( fDownloadFileName + ".bak" );
-            QFile::rename( fDownloadFileName, fDownloadFileName + ".bak" );
+            QFile::remove(fDownloadFileName + ".bak");
+            QFile::rename(fDownloadFileName, fDownloadFileName + ".bak");
         }
-        fOutputFile.setFileName( fDownloadFileName + ".tmp" );
-        if ( !fOutputFile.open( QIODevice::WriteOnly | QIODevice::Truncate ) )
+        fOutputFile.setFileName(fDownloadFileName + ".tmp");
+        if (!fOutputFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
         {
-            QMessageBox::warning( this, "Could not open", QString( "Could not open file '%1' for writing." ).arg( fDownloadFileName + ".tmp" ) );
+            QMessageBox::warning(this, "Could not open", QString("Could not open file '%1' for writing.").arg(fDownloadFileName + ".tmp"));
             return false;
         }
 
         QNetworkRequest request;
-        request.setUrl( fFileInfo.fUrl );
-        request.setAttribute( QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy );
+        request.setUrl(fFileInfo.fUrl);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
         //qDebug() << fFileInfo.fUrl << " - " << fFileInfo.fSize << fileName;
-        fReply = fManager->get( request );
-        connect( fReply, &QNetworkReply::downloadProgress, this, &CDownloadFile::slotDownloadProgress );
-        connect( fReply, &QNetworkReply::encrypted, this, &CDownloadFile::slotEncryptedReply );
+        fReply = fManager->get(request);
+        connect(fReply, &QNetworkReply::downloadProgress, this, &CDownloadFile::slotDownloadProgress);
+        connect(fReply, &QNetworkReply::encrypted, this, &CDownloadFile::slotEncryptedReply);
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
-        connect( fReply, &QNetworkReply::errorOccurred, this, &CDownloadFile::slotErrorOccurred );
+        connect(fReply, &QNetworkReply::errorOccurred, this, &CDownloadFile::slotErrorOccurred);
 #endif
-        connect( fReply, &QNetworkReply::finished, this, &CDownloadFile::slotFinished );
-        connect( fReply, &QNetworkReply::metaDataChanged, this, &CDownloadFile::slotMetaDataChanged );
-        connect( fReply, &QNetworkReply::preSharedKeyAuthenticationRequired, this, &CDownloadFile::slotPreSharedKeyAuthenticationRequiredReply );
-        connect( fReply, &QNetworkReply::redirectAllowed, this, &CDownloadFile::slotRedirectAllowed );
-        connect( fReply, &QNetworkReply::redirected, this, &CDownloadFile::slotRedirected );
-        connect( fReply, &QNetworkReply::sslErrors, this, &CDownloadFile::slotSSLErrorsReply );
-        connect( fReply, &QNetworkReply::uploadProgress, this, &CDownloadFile::slotUploadProgress );
-        connect( fReply, &QNetworkReply::aboutToClose, this, &CDownloadFile::slotAboutToClose );
-        connect( fReply, &QNetworkReply::bytesWritten, this, &CDownloadFile::slotBytesWritten );
-        connect( fReply, &QNetworkReply::channelBytesWritten, this, &CDownloadFile::slotChannelBytesWritten );
-        connect( fReply, &QNetworkReply::channelReadyRead, this, &CDownloadFile::slotChannelReadyRead );
-        connect( fReply, &QNetworkReply::readChannelFinished, this, &CDownloadFile::slotReadChannelFinished );
-        connect( fReply, &QNetworkReply::readyRead, this, &CDownloadFile::slotReadyRead );
-        fImpl->speed->setText( "" );
+        connect(fReply, &QNetworkReply::finished, this, &CDownloadFile::slotFinished);
+        connect(fReply, &QNetworkReply::metaDataChanged, this, &CDownloadFile::slotMetaDataChanged);
+        connect(fReply, &QNetworkReply::preSharedKeyAuthenticationRequired, this, &CDownloadFile::slotPreSharedKeyAuthenticationRequiredReply);
+        connect(fReply, &QNetworkReply::redirectAllowed, this, &CDownloadFile::slotRedirectAllowed);
+        connect(fReply, &QNetworkReply::redirected, this, &CDownloadFile::slotRedirected);
+        connect(fReply, &QNetworkReply::sslErrors, this, &CDownloadFile::slotSSLErrorsReply);
+        connect(fReply, &QNetworkReply::uploadProgress, this, &CDownloadFile::slotUploadProgress);
+        connect(fReply, &QNetworkReply::aboutToClose, this, &CDownloadFile::slotAboutToClose);
+        connect(fReply, &QNetworkReply::bytesWritten, this, &CDownloadFile::slotBytesWritten);
+        connect(fReply, &QNetworkReply::channelBytesWritten, this, &CDownloadFile::slotChannelBytesWritten);
+        connect(fReply, &QNetworkReply::channelReadyRead, this, &CDownloadFile::slotChannelReadyRead);
+        connect(fReply, &QNetworkReply::readChannelFinished, this, &CDownloadFile::slotReadChannelFinished);
+        connect(fReply, &QNetworkReply::readyRead, this, &CDownloadFile::slotReadyRead);
+        fImpl->speed->setText("");
         fDownloadTime.start();
         return true;
     }
 
-    void CDownloadFile::slotRequestFinished( QNetworkReply * reply )
+    void CDownloadFile::slotRequestFinished(QNetworkReply* reply)
     {
-        if ( reply && reply->error() != QNetworkReply::NoError )
+        if (reply && reply->error() != QNetworkReply::NoError)
         {
-            if ( !fWasCanceled )
-                QMessageBox::critical( this, tr( "Error downloading latest version" ), tr( "Error downloading latest version<br>%1" ).arg( reply->errorString() ) );
-            if ( fOutputFile.isOpen() )
+            if (!fWasCanceled)
+                QMessageBox::critical(this, tr("Error downloading latest version"), tr("Error downloading latest version<br>%1").arg(reply->errorString()));
+            if (fOutputFile.isOpen())
                 fOutputFile.close();
-            fImpl->buttonBox->button( QDialogButtonBox::Yes )->setEnabled( false );
-            fImpl->buttonBox->button( QDialogButtonBox::No )->setEnabled( true );
-            fImpl->buttonBox->button( QDialogButtonBox::Cancel )->setEnabled( false );
+            fImpl->buttonBox->button(QDialogButtonBox::Yes)->setEnabled(false);
+            fImpl->buttonBox->button(QDialogButtonBox::No)->setEnabled(true);
+            fImpl->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
             return;
         }
 
-        if ( fOutputFile.isOpen() && reply )
-            fOutputFile.write( reply->readAll() );
+        if (fOutputFile.isOpen() && reply)
+            fOutputFile.write(reply->readAll());
 
-        fImpl->buttonBox->button( QDialogButtonBox::Yes )->setEnabled( true );
-        fImpl->buttonBox->button( QDialogButtonBox::No )->setEnabled( true );
-        fImpl->buttonBox->button( QDialogButtonBox::Cancel )->setEnabled( false );
+        fImpl->buttonBox->button(QDialogButtonBox::Yes)->setEnabled(true);
+        fImpl->buttonBox->button(QDialogButtonBox::No)->setEnabled(true);
+        fImpl->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
 
         reply->deleteLater();
         fReply = nullptr;
 
-        if ( !fOutputFile.isOpen() )
+        if (!fOutputFile.isOpen())
             return;
         else
             fOutputFile.close();
 
-        QFile::rename( fDownloadFileName + ".tmp", fDownloadFileName );
+        QFile::rename(fDownloadFileName + ".tmp", fDownloadFileName);
 #ifdef Q_OS_WIN
-        QFile fi( fDownloadFileName );
-        fi.setPermissions( fi.permissions() | QFileDevice::ExeOwner );
+        QFile fi(fDownloadFileName);
+        fi.setPermissions(fi.permissions() | QFileDevice::ExeOwner);
 #endif
     }
 
-    void CDownloadFile::slotAuthenticationRequired( QNetworkReply * reply, QAuthenticator * authenticator )
+    void CDownloadFile::slotAuthenticationRequired(QNetworkReply* reply, QAuthenticator* authenticator)
     {
         (void)reply;
         (void)authenticator;
         //qDebug() << "slotAuthenticationRequired:" << reply << reply->url().toString() << authenticator;
     }
 
-    void CDownloadFile::slotEncrypted( QNetworkReply * reply )
+    void CDownloadFile::slotEncrypted(QNetworkReply* reply)
     {
         (void)reply;
         //qDebug() << "slotEncrypted:" << reply << reply->url().toString();
     }
 
-    void CDownloadFile::slotPreSharedKeyAuthenticationRequired( QNetworkReply * reply, QSslPreSharedKeyAuthenticator * authenticator )
+    void CDownloadFile::slotPreSharedKeyAuthenticationRequired(QNetworkReply* reply, QSslPreSharedKeyAuthenticator* authenticator)
     {
         (void)reply;
         (void)authenticator;
         //qDebug() << "slotPreSharedKeyAuthenticationRequired: 0x" << /*Qt::hex << */reply << reply->url().toString() << authenticator;
     }
 
-    void CDownloadFile::slotProxyAuthenticationRequired( const QNetworkProxy & proxy, QAuthenticator * authenticator )
+    void CDownloadFile::slotProxyAuthenticationRequired(const QNetworkProxy& proxy, QAuthenticator* authenticator)
     {
         (void)proxy;
         (void)authenticator;
         //qDebug() << "slotProxyAuthenticationRequired: 0x" << /*Qt::hex << */&proxy << authenticator;
     }
 
-    void CDownloadFile::slotSSLErrors( QNetworkReply * reply, const QList<QSslError> & errors )
+    void CDownloadFile::slotSSLErrors(QNetworkReply* reply, const QList<QSslError>& errors)
     {
         (void)reply;
         (void)errors;
@@ -228,9 +228,9 @@ namespace NSABUtils
 
     void CDownloadFile::slotReadyRead()
     {
-        auto reply = dynamic_cast<QNetworkReply *>( sender() );
-        if ( fOutputFile.isOpen() && reply )
-            fOutputFile.write( reply->readAll() );
+        auto reply = dynamic_cast<QNetworkReply*>(sender());
+        if (fOutputFile.isOpen() && reply)
+            fOutputFile.write(reply->readAll());
     }
 
     void CDownloadFile::slotInstallNow()
@@ -248,10 +248,10 @@ namespace NSABUtils
     void CDownloadFile::slotCancel()
     {
         fWasCanceled = true;
-        fImpl->currentProgressBar->setMaximum( 100 );
-        fImpl->currentProgressBar->setValue( 100 );
-        fImpl->currentProgressBar->setValue( fImpl->currentProgressBar->maximum() );
-        fImpl->speed->setText( "Download canceled" );
+        fImpl->currentProgressBar->setMaximum(100);
+        fImpl->currentProgressBar->setValue(100);
+        fImpl->currentProgressBar->setValue(fImpl->currentProgressBar->maximum());
+        fImpl->speed->setText("Download canceled");
         fReply->abort();
         reject();
     }
@@ -261,7 +261,7 @@ namespace NSABUtils
         //qDebug() << "slotEncryptedReply";
     }
 
-    void CDownloadFile::slotErrorOccurred( QNetworkReply::NetworkError code )
+    void CDownloadFile::slotErrorOccurred(QNetworkReply::NetworkError code)
     {
         (void)code;
         //qDebug() << "slotErrorOccurred" << code;
@@ -277,7 +277,7 @@ namespace NSABUtils
         //qDebug() << "slotMetaDataChanged";
     }
 
-    void CDownloadFile::slotPreSharedKeyAuthenticationRequiredReply( QSslPreSharedKeyAuthenticator * authenticator )
+    void CDownloadFile::slotPreSharedKeyAuthenticationRequiredReply(QSslPreSharedKeyAuthenticator* authenticator)
     {
         (void)authenticator;
         //qDebug() << "slotPreSharedKeyAuthenticationRequiredReply" << authenticator;
@@ -288,19 +288,19 @@ namespace NSABUtils
         //qDebug() << "slotRedirectAllowed";
     }
 
-    void CDownloadFile::slotRedirected( const QUrl & url )
+    void CDownloadFile::slotRedirected(const QUrl& url)
     {
         (void)url;
         //qDebug() << "slotRedirected" << url;
     }
 
-    void CDownloadFile::slotSSLErrorsReply( const QList<QSslError> & errors )
+    void CDownloadFile::slotSSLErrorsReply(const QList<QSslError>& errors)
     {
         (void)errors;
         //qDebug() << "slotSSLErrorsReply" << errors;
     }
 
-    void CDownloadFile::slotUploadProgress( qint64 bytesSent, qint64 bytesTotal )
+    void CDownloadFile::slotUploadProgress(qint64 bytesSent, qint64 bytesTotal)
     {
         (void)bytesSent;
         (void)bytesTotal;
@@ -312,20 +312,20 @@ namespace NSABUtils
         //qDebug() << "slotAboutToClose";
     }
 
-    void CDownloadFile::slotBytesWritten( qint64 bytes )
+    void CDownloadFile::slotBytesWritten(qint64 bytes)
     {
         (void)bytes;
         //qDebug() << "slotBytesWritten" << bytes;
     }
 
-    void CDownloadFile::slotChannelBytesWritten( int channel, qint64 bytes )
+    void CDownloadFile::slotChannelBytesWritten(int channel, qint64 bytes)
     {
         (void)channel;
         (void)bytes;
         //qDebug() << "slotChannelBytesWritten" << channel << bytes;
     }
 
-    void CDownloadFile::slotChannelReadyRead( int channel )
+    void CDownloadFile::slotChannelReadyRead(int channel)
     {
         (void)channel;
         //qDebug() << "slotChannelReadyRead" << channel;
@@ -336,40 +336,40 @@ namespace NSABUtils
         //qDebug() << "slotReadChannelFinished";
     }
 
-    void CDownloadFile::slotDownloadProgress( qint64 progress, qint64 total )
+    void CDownloadFile::slotDownloadProgress(qint64 progress, qint64 total)
     {
-        if ( fWasCanceled )
+        if (fWasCanceled)
             return;
         //fProgress = progress;
-        if ( total != fImpl->currentProgressBar->maximum() )
-            fImpl->currentProgressBar->setMaximum( total );
+        if (total != fImpl->currentProgressBar->maximum())
+            fImpl->currentProgressBar->setMaximum(total);
 
         double speed = progress * 1000.0 / fDownloadTime.elapsed();
         QString unit;
-        if ( speed < 1024 )
+        if (speed < 1024)
         {
-            unit = tr( "bytes/sec" );
+            unit = tr("bytes/sec");
         }
-        else if ( speed < 1024 * 1024 )
+        else if (speed < 1024 * 1024)
         {
             speed /= 1024;
-            unit = tr( "kB/s" );
+            unit = tr("kB/s");
         }
-        else if ( speed < 1024 * 1024 * 1024 )
+        else if (speed < 1024 * 1024 * 1024)
         {
             speed /= 1024 * 1024;
-            unit = tr( "MB/s" );
+            unit = tr("MB/s");
         }
         else
         {
             speed /= 1024 * 1024 * 1024;
-            unit = tr( "GB/s" );
+            unit = tr("GB/s");
         }
 
-        fImpl->speed->setText( QString( "%1 %2" ).arg( speed, 3, 'f', 1 ).arg( unit ) );
+        fImpl->speed->setText(QString("%1 %2").arg(speed, 3, 'f', 1).arg(unit));
         //layout()->activate();
         //resize( layout()->totalMinimumSize() );
 
-        fImpl->currentProgressBar->setValue( progress );
+        fImpl->currentProgressBar->setValue(progress);
     }
 }

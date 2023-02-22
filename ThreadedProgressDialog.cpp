@@ -31,55 +31,55 @@ namespace NSABUtils
     class CThreadedProgressDialogImpl
     {
     public:
-        CThreadedProgressDialogImpl( TVoidFunction xFunc, CThreadedProgressDialog * xParent ) :
-            dFunction( xFunc ),
-            dParent( xParent )
+        CThreadedProgressDialogImpl(TVoidFunction xFunc, CThreadedProgressDialog* xParent) :
+            dFunction(xFunc),
+            dParent(xParent)
         {
         }
 
         void mRunIt()
         {
-            dWatcher = new QFutureWatcher<void>( dParent );
-            QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedProgressDialog::close );
-            QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &QFutureWatcher< void >::deleteLater );
+            dWatcher = new QFutureWatcher<void>(dParent);
+            QObject::connect(dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedProgressDialog::close);
+            QObject::connect(dWatcher, &QFutureWatcher< void >::finished, dParent, &QFutureWatcher< void >::deleteLater);
 
-            auto lFuture = QtConcurrent::run( QThreadPool::globalInstance(), dFunction );
-            dWatcher->setFuture( lFuture );
+            auto lFuture = QtConcurrent::run(QThreadPool::globalInstance(), dFunction);
+            dWatcher->setFuture(lFuture);
         }
-        QString dCancelButtonText{ QObject::tr( "&Cancel" ) };
+        QString dCancelButtonText{ QObject::tr("&Cancel") };
         TVoidFunction dFunction;
-        CThreadedProgressDialog * dParent{ nullptr };
-        QFutureWatcher<void> * dWatcher{ nullptr };
+        CThreadedProgressDialog* dParent{ nullptr };
+        QFutureWatcher<void>* dWatcher{ nullptr };
     };
 
-    CThreadedProgressDialog::CThreadedProgressDialog( TVoidFunction xFunc, const QString & xLabelText, const QString & xCancelButtonText, int xMinimum, int xMaximum, QWidget * xParent /*= nullptr*/, Qt::WindowFlags xFlags /*= Qt::WindowFlags() */ ) :
-        QProgressDialog( xLabelText, xCancelButtonText, xMinimum, xMaximum, xParent, xFlags ),
-        dImpl( new CThreadedProgressDialogImpl( xFunc, this ) )
+    CThreadedProgressDialog::CThreadedProgressDialog(TVoidFunction xFunc, const QString& xLabelText, const QString& xCancelButtonText, int xMinimum, int xMaximum, QWidget* xParent /*= nullptr*/, Qt::WindowFlags xFlags /*= Qt::WindowFlags() */) :
+        QProgressDialog(xLabelText, xCancelButtonText, xMinimum, xMaximum, xParent, xFlags),
+        dImpl(new CThreadedProgressDialogImpl(xFunc, this))
     {
-        setWindowModality( Qt::WindowModal );
-        mSetHasCancel( false );
+        setWindowModality(Qt::WindowModal);
+        mSetHasCancel(false);
     }
 
-    CThreadedProgressDialog::CThreadedProgressDialog( TVoidFunction xFunc, QWidget * xParent /*= nullptr*/, Qt::WindowFlags xFlags /*= Qt::WindowFlags() */ ) :
-        QProgressDialog( xParent, xFlags ),
-        dImpl( new CThreadedProgressDialogImpl( xFunc, this ) )
+    CThreadedProgressDialog::CThreadedProgressDialog(TVoidFunction xFunc, QWidget* xParent /*= nullptr*/, Qt::WindowFlags xFlags /*= Qt::WindowFlags() */) :
+        QProgressDialog(xParent, xFlags),
+        dImpl(new CThreadedProgressDialogImpl(xFunc, this))
     {
-        setWindowModality( Qt::WindowModal );
-        mSetHasCancel( false );
-        setMinimum( 0 );
-        setMaximum( 0 );
+        setWindowModality(Qt::WindowModal);
+        mSetHasCancel(false);
+        setMinimum(0);
+        setMaximum(0);
     }
 
     CThreadedProgressDialog::~CThreadedProgressDialog()
     {
     }
 
-    void CThreadedProgressDialog::mSetHasCancel( bool xHasCancel )
+    void CThreadedProgressDialog::mSetHasCancel(bool xHasCancel)
     {
-        if ( xHasCancel )
-            setCancelButton( new QPushButton( dImpl->dCancelButtonText ) );
+        if (xHasCancel)
+            setCancelButton(new QPushButton(dImpl->dCancelButtonText));
         else
-            setCancelButton( nullptr );
+            setCancelButton(nullptr);
     }
 
     QString CThreadedProgressDialog::cancelButtonText() const
@@ -87,10 +87,10 @@ namespace NSABUtils
         return dImpl->dCancelButtonText;
     }
 
-    void CThreadedProgressDialog::setCancelButtonText( const QString & xText )
+    void CThreadedProgressDialog::setCancelButtonText(const QString& xText)
     {
         dImpl->dCancelButtonText = xText;
-        QProgressDialog::setCancelButtonText( xText );
+        QProgressDialog::setCancelButtonText(xText);
     }
 
     int CThreadedProgressDialog::exec()
@@ -102,30 +102,30 @@ namespace NSABUtils
     class CThreadedEventLoopImpl
     {
     public:
-        CThreadedEventLoopImpl( TVoidFunction xFunc, CThreadedEventLoop * xParent ) :
-            dFunction( xFunc ),
-            dParent( xParent )
+        CThreadedEventLoopImpl(TVoidFunction xFunc, CThreadedEventLoop* xParent) :
+            dFunction(xFunc),
+            dParent(xParent)
         {
         }
 
         void mRunIt()
         {
-            dWatcher = new QFutureWatcher<void>( dParent );
-            QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedEventLoop::mExit );
-            QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &QFutureWatcher< void >::deleteLater );
+            dWatcher = new QFutureWatcher<void>(dParent);
+            QObject::connect(dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedEventLoop::mExit);
+            QObject::connect(dWatcher, &QFutureWatcher< void >::finished, dParent, &QFutureWatcher< void >::deleteLater);
 
-            auto lFuture = QtConcurrent::run( QThreadPool::globalInstance(), dFunction );
-            dWatcher->setFuture( lFuture );
+            auto lFuture = QtConcurrent::run(QThreadPool::globalInstance(), dFunction);
+            dWatcher->setFuture(lFuture);
         }
-        QString dCancelButtonText{ QObject::tr( "&Cancel" ) };
+        QString dCancelButtonText{ QObject::tr("&Cancel") };
         TVoidFunction dFunction;
-        CThreadedEventLoop * dParent{ nullptr };
-        QFutureWatcher<void> * dWatcher{ nullptr };
+        CThreadedEventLoop* dParent{ nullptr };
+        QFutureWatcher<void>* dWatcher{ nullptr };
     };
 
-    CThreadedEventLoop::CThreadedEventLoop( TVoidFunction xFunc, QObject * xParent /*= nullptr*/ ) :
-        QEventLoop( xParent ),
-        dImpl( new CThreadedEventLoopImpl( xFunc, this ) )
+    CThreadedEventLoop::CThreadedEventLoop(TVoidFunction xFunc, QObject* xParent /*= nullptr*/) :
+        QEventLoop(xParent),
+        dImpl(new CThreadedEventLoopImpl(xFunc, this))
     {
     }
 
@@ -139,11 +139,11 @@ namespace NSABUtils
         return QEventLoop::exit();
     }
 
-    int CThreadedEventLoop::exec( QEventLoop::ProcessEventsFlags flags )
+    int CThreadedEventLoop::exec(QEventLoop::ProcessEventsFlags flags)
     {
-        QApplication::setOverrideCursor( Qt::WaitCursor );
+        QApplication::setOverrideCursor(Qt::WaitCursor);
         dImpl->mRunIt();
-        int lRetVal = QEventLoop::exec( flags );
+        int lRetVal = QEventLoop::exec(flags);
         QApplication::restoreOverrideCursor();
         return lRetVal;
     }

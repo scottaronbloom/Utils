@@ -30,21 +30,21 @@ class SABUTILS_EXPORT CHyperLinkLineEdit : public QTextEdit
 {
     Q_OBJECT;
 public:
-    explicit CHyperLinkLineEdit( QWidget * parent = nullptr );
-    explicit CHyperLinkLineEdit( const QString & text, QWidget * parent = nullptr );
+    explicit CHyperLinkLineEdit(QWidget* parent = nullptr);
+    explicit CHyperLinkLineEdit(const QString& text, QWidget* parent = nullptr);
 
     virtual QSize sizeHint() const override;
     virtual ~CHyperLinkLineEdit() override;
 
-    virtual void keyPressEvent( QKeyEvent * event ) override;
-    virtual void mouseMoveEvent( QMouseEvent * event ) override;
-    virtual void mouseReleaseEvent( QMouseEvent * event ) override;
-    virtual void leaveEvent( QEvent * /*event*/ ) override;
+    virtual void keyPressEvent(QKeyEvent* event) override;
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+    virtual void leaveEvent(QEvent* /*event*/) override;
 
     QString text() const;
-    void setText( const QString & text );
+    void setText(const QString& text);
 private:
-    QString addText( const QString & text, bool & urlFound ) const;
+    QString addText(const QString& text, bool& urlFound) const;
     QString fAnchor;
 };
 

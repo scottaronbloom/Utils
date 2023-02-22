@@ -26,5 +26,5 @@
 namespace NSABUtils
 {
     // if require local is true, will return false if the OpenSSL libraries are not local
-    SABUTILS_EXPORT std::pair< bool, QString > validateOpenSSL( bool requireLocal = true );
+    SABUTILS_EXPORT std::pair< bool, QString > validateOpenSSL(bool requireLocal = true);
 }

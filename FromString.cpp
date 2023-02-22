@@ -32,148 +32,148 @@
 
 namespace NSABUtils
 {
-    bool restIsSpace( const std::string & str, size_t sz )
+    bool restIsSpace(const std::string& str, size_t sz)
     {
-        auto pos = std::find_if( str.begin() + sz, str.end(), []( char value ) { return !std::isspace( value ); } );
+        auto pos = std::find_if(str.begin() + sz, str.end(), [](char value) { return !std::isspace(value); });
         return pos == str.end();
     }
 
-    bool fromString( long & retVal, const std::string & arg, int base )
+    bool fromString(long& retVal, const std::string& arg, int base)
     {
         retVal = 0;
-        if ( arg.empty() )
+        if (arg.empty())
             return false;
 
         size_t sz;
         try
         {
-            retVal = std::stol( arg, &sz, base );
+            retVal = std::stol(arg, &sz, base);
         }
-        catch ( ... )
+        catch (...)
         {
             return false;
         }
-        auto aOK = restIsSpace( arg, sz );
+        auto aOK = restIsSpace(arg, sz);
 
-        if ( !aOK )
+        if (!aOK)
             retVal = 0;
 
         return aOK;
     }
 
-    bool fromString( long & retVal, const std::string & arg )
+    bool fromString(long& retVal, const std::string& arg)
     {
-        return fromString( retVal, arg, 10 );
+        return fromString(retVal, arg, 10);
     }
 
-    bool fromString( long & retVal, const char * arg, int base )
+    bool fromString(long& retVal, const char* arg, int base)
     {
-        return fromString( retVal, std::string( arg ), base );
+        return fromString(retVal, std::string(arg), base);
     }
 
-    bool fromString( int & retVal, const std::string & arg, int base )
+    bool fromString(int& retVal, const std::string& arg, int base)
     {
         long tmp;
-        bool aOK = fromString( tmp, arg, base );
-        if ( !aOK )
+        bool aOK = fromString(tmp, arg, base);
+        if (!aOK)
             return false;
-        if ( ( tmp > INT_MAX ) || ( tmp < INT_MIN ) )
+        if ((tmp > INT_MAX) || (tmp < INT_MIN))
             return false;
 
-        retVal = static_cast<int>( tmp );
+        retVal = static_cast<int>(tmp);
         return true;
     }
 
-    bool fromString( int & retVal, const std::string & arg )
+    bool fromString(int& retVal, const std::string& arg)
     {
-        return fromString( retVal, arg, 10 );
+        return fromString(retVal, arg, 10);
     }
 
 
-    bool fromString( int & retVal, const char * arg, int base )
+    bool fromString(int& retVal, const char* arg, int base)
     {
-        return fromString( retVal, std::string( arg ), base );
+        return fromString(retVal, std::string(arg), base);
     }
 
-    bool fromString( int & retVal, const char * arg )
+    bool fromString(int& retVal, const char* arg)
     {
-        return fromString( retVal, std::string( arg ) );
+        return fromString(retVal, std::string(arg));
     }
 
-    bool fromString( double & retVal, const std::string & arg )
+    bool fromString(double& retVal, const std::string& arg)
     {
         retVal = 0;
-        if ( arg.empty() )
+        if (arg.empty())
             return false;
         std::string::size_type sz;
         try
         {
-            retVal = std::stod( arg, &sz );
+            retVal = std::stod(arg, &sz);
         }
-        catch ( ... )
+        catch (...)
         {
             return false;
         }
-        bool aOK = restIsSpace( arg, sz );
-        if ( !aOK )
+        bool aOK = restIsSpace(arg, sz);
+        if (!aOK)
             retVal = 0.0;
         return aOK;
     }
 
-    bool fromString( double & retVal, const char * arg )
+    bool fromString(double& retVal, const char* arg)
     {
-        return fromString( retVal, std::string( arg ) );
+        return fromString(retVal, std::string(arg));
     }
 
-    bool fromString( float & retVal, const std::string & arg )
+    bool fromString(float& retVal, const std::string& arg)
     {
         double tmp;
-        bool aOK = fromString( tmp, arg );
-        if ( !aOK )
+        bool aOK = fromString(tmp, arg);
+        if (!aOK)
             return false;
-        if ( ( tmp > FLT_MAX ) || ( tmp < FLT_MIN ) )
+        if ((tmp > FLT_MAX) || (tmp < FLT_MIN))
             return false;
 
-        retVal = static_cast<float>( tmp );
+        retVal = static_cast<float>(tmp);
         return true;
     }
 
-    bool fromString( float & retVal, const char * arg )
+    bool fromString(float& retVal, const char* arg)
     {
-        return fromString( retVal, std::string( arg ) );
+        return fromString(retVal, std::string(arg));
     }
 
-    bool fromString( bool & retVal, const std::string & arg )
+    bool fromString(bool& retVal, const std::string& arg)
     {
         retVal = false; // default value;
-        if ( arg.length() == 0 )
+        if (arg.length() == 0)
             return false;
 
         double doubleVal = 0.0;
-        bool isDouble = fromString( doubleVal, arg );
-        if ( isDouble )
+        bool isDouble = fromString(doubleVal, arg);
+        if (isDouble)
         {
             retVal = doubleVal != 0.0;
             return true;
         }
 
         int intVal = 0;
-        bool isInt = fromString( intVal, arg );
-        if ( isInt )
+        bool isInt = fromString(intVal, arg);
+        if (isInt)
         {
             retVal = intVal != 0;
         }
 
         std::string lc = arg;
-        std::transform( lc.begin(), lc.end(), lc.begin(), ::tolower );
+        std::transform(lc.begin(), lc.end(), lc.begin(), ::tolower);
 
-        retVal = ( lc != "false" ) && ( lc != "no" ) && ( lc != "off" ) && ( lc != "n" ) && ( lc != "f" );
+        retVal = (lc != "false") && (lc != "no") && (lc != "off") && (lc != "n") && (lc != "f");
         return true;
     }
 
-    bool fromString( bool & retVal, const char * arg )
+    bool fromString(bool& retVal, const char* arg)
     {
-        return fromString( retVal, std::string( arg ) );
+        return fromString(retVal, std::string(arg));
     }
 }
 

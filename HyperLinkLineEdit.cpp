@@ -30,37 +30,37 @@
 #include <QDesktopServices>
 #include <QDebug>
 
-CHyperLinkLineEdit::CHyperLinkLineEdit( QWidget * parent /*= nullptr */ ) :
-    QTextEdit( parent )
+CHyperLinkLineEdit::CHyperLinkLineEdit(QWidget* parent /*= nullptr */) :
+    QTextEdit(parent)
 {
-    QSizePolicy sizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
-    sizePolicy.setHorizontalStretch( 0 );
-    sizePolicy.setVerticalStretch( 0 );
-    sizePolicy.setHeightForWidth( this->sizePolicy().hasHeightForWidth() );
+    QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    sizePolicy.setHorizontalStretch(0);
+    sizePolicy.setVerticalStretch(0);
+    sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
 
-    setSizePolicy( sizePolicy );
+    setSizePolicy(sizePolicy);
 
-    setLineWrapMode( QTextEdit::NoWrap );
-    setWordWrapMode( QTextOption::WrapMode::NoWrap );
+    setLineWrapMode(QTextEdit::NoWrap);
+    setWordWrapMode(QTextOption::WrapMode::NoWrap);
 
-    setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-    setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    document()->setMaximumBlockCount( 1 );
+    document()->setMaximumBlockCount(1);
 
-    setMaximumHeight( sizeHint().height() );
-    setAcceptRichText( true );
+    setMaximumHeight(sizeHint().height());
+    setAcceptRichText(true);
 
-    setMouseTracking( true );
+    setMouseTracking(true);
     //Q_ASSERT( parent );
     //if ( parent )
     //    parent->installEventFilter( this );
 }
 
-CHyperLinkLineEdit::CHyperLinkLineEdit( const QString & text, QWidget * parent /*= nullptr */ ) :
-    CHyperLinkLineEdit( parent )
+CHyperLinkLineEdit::CHyperLinkLineEdit(const QString& text, QWidget* parent /*= nullptr */) :
+    CHyperLinkLineEdit(parent)
 {
-    setText( text );
+    setText(text);
 }
 
 CHyperLinkLineEdit::~CHyperLinkLineEdit()
@@ -68,51 +68,51 @@ CHyperLinkLineEdit::~CHyperLinkLineEdit()
 
 }
 
-void CHyperLinkLineEdit::leaveEvent( QEvent * /*event*/ )
+void CHyperLinkLineEdit::leaveEvent(QEvent* /*event*/)
 {
     QApplication::restoreOverrideCursor();
 }
 
-void CHyperLinkLineEdit::keyPressEvent( QKeyEvent * event )
+void CHyperLinkLineEdit::keyPressEvent(QKeyEvent* event)
 {
-    if ( ( event->key() == Qt::Key_Return )
-         || ( event->key() == Qt::Key_Enter ) )
+    if ((event->key() == Qt::Key_Return)
+        || (event->key() == Qt::Key_Enter))
     {
         event->ignore();
         return;
     }
-    else if ( event->key() == Qt::Key_Tab )
+    else if (event->key() == Qt::Key_Tab)
     {
         event->ignore();
         return;
     }
-    else if ( event->key() == Qt::Key_Backtab )
+    else if (event->key() == Qt::Key_Backtab)
     {
         event->ignore();
         return;
     }
-    QTextEdit::keyPressEvent( event );
+    QTextEdit::keyPressEvent(event);
 }
 
-void CHyperLinkLineEdit::mouseMoveEvent( QMouseEvent * event )
+void CHyperLinkLineEdit::mouseMoveEvent(QMouseEvent* event)
 {
-    fAnchor = this->anchorAt( event->pos() );
-    if ( !fAnchor.isEmpty() )
+    fAnchor = this->anchorAt(event->pos());
+    if (!fAnchor.isEmpty())
     {
-        if ( !QApplication::overrideCursor() )
-            QApplication::setOverrideCursor( Qt::PointingHandCursor );
+        if (!QApplication::overrideCursor())
+            QApplication::setOverrideCursor(Qt::PointingHandCursor);
     }
     else
         QApplication::restoreOverrideCursor();
 }
 
-void CHyperLinkLineEdit::mouseReleaseEvent( QMouseEvent * /*event*/ )
+void CHyperLinkLineEdit::mouseReleaseEvent(QMouseEvent* /*event*/)
 {
-    if ( !fAnchor.isEmpty() )
+    if (!fAnchor.isEmpty())
     {
-        if ( fAnchor.indexOf( "://" ) == -1 )
+        if (fAnchor.indexOf("://") == -1)
             fAnchor = "http://" + fAnchor;
-        QDesktopServices::openUrl( QUrl( fAnchor ) );
+        QDesktopServices::openUrl(QUrl(fAnchor));
         QApplication::restoreOverrideCursor();
     }
 }
@@ -120,23 +120,23 @@ void CHyperLinkLineEdit::mouseReleaseEvent( QMouseEvent * /*event*/ )
 QSize CHyperLinkLineEdit::sizeHint() const
 {
     ensurePolished();
-    QFontMetrics fm( font() );
-    const int iconSize = style()->pixelMetric( QStyle::PM_SmallIconSize, nullptr, this );
+    QFontMetrics fm(font());
+    const int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, nullptr, this);
 
     //const QMargins tm = d->effectiveTextMargins();
 
-    int h = qMax( fm.height(), qMax( 14, iconSize - 2 ) ) + 2 * 1 /*QLineEditPrivate::verticalMargin*/
+    int h = qMax(fm.height(), qMax(14, iconSize - 2)) + 2 * 1 /*QLineEditPrivate::verticalMargin*/
         //+ tm.left() + tm.right()
         + 1 /* topmargin() */ + 1 /*bottommargin() */;
 
-    int w = fm.horizontalAdvance( QLatin1Char( 'x' ) ) * 17 + 2 * 2 /*QLineEditPrivate::horizontalMargin */
+    int w = fm.horizontalAdvance(QLatin1Char('x')) * 17 + 2 * 2 /*QLineEditPrivate::horizontalMargin */
         //+ tm.left() + tm.right()
         + 0 /* topmargin() */ + 0 /*bottommargin() */;
 
     QStyleOptionFrame opt;
-    initStyleOption( &opt );
-    return ( style()->sizeFromContents( QStyle::CT_LineEdit, &opt, QSize( w, h ).
-             expandedTo( QApplication::globalStrut() ), this ) );
+    initStyleOption(&opt);
+    return (style()->sizeFromContents(QStyle::CT_LineEdit, &opt, QSize(w, h).
+        expandedTo(QApplication::globalStrut()), this));
 }
 
 QString CHyperLinkLineEdit::text() const
@@ -144,50 +144,50 @@ QString CHyperLinkLineEdit::text() const
     return toPlainText();
 }
 
-QString CHyperLinkLineEdit::addText( const QString & text, bool & urlFound ) const
+QString CHyperLinkLineEdit::addText(const QString& text, bool& urlFound) const
 {
-    auto pos = text.indexOf( QRegularExpression( R"(\S)" ) );
-    if ( pos == -1 )
+    auto pos = text.indexOf(QRegularExpression(R"(\S)"));
+    if (pos == -1)
         return text;
-    auto pre = text.left( pos );
-    auto remaining = text.mid( pos );
+    auto pre = text.left(pos);
+    auto remaining = text.mid(pos);
     bool isURL = false;
-    isURL = isURL || remaining.startsWith( "www" );
-    isURL = isURL || remaining.startsWith( "http://" );
-    isURL = isURL || remaining.startsWith( "https://" );
-    if ( !isURL )
+    isURL = isURL || remaining.startsWith("www");
+    isURL = isURL || remaining.startsWith("http://");
+    isURL = isURL || remaining.startsWith("https://");
+    if (!isURL)
     {
-        auto match = QRegularExpression( R"(\:\d+)" ).match( remaining );
-        if ( match.hasMatch() && match.capturedEnd() == remaining.length() )
+        auto match = QRegularExpression(R"(\:\d+)").match(remaining);
+        if (match.hasMatch() && match.capturedEnd() == remaining.length())
             isURL = true;
     }
 
-    if ( isURL )
+    if (isURL)
     {
-        auto retVal = QString( R"(%1<a href="%2">%2</a>)" ).arg( pre ).arg( remaining );
+        auto retVal = QString(R"(%1<a href="%2">%2</a>)").arg(pre).arg(remaining);
         urlFound = true;
         return retVal;
     }
     return text;
 }
 
-void CHyperLinkLineEdit::setText( const QString & text )
+void CHyperLinkLineEdit::setText(const QString& text)
 {
     QString actualString;
     int prevPos = 0;
-    auto pos = text.indexOf( QRegularExpression( R"(\s)" ), prevPos );
+    auto pos = text.indexOf(QRegularExpression(R"(\s)"), prevPos);
     bool urlFound = false;
-    while ( pos != -1 )
+    while (pos != -1)
     {
-        actualString += addText( text.mid( prevPos, pos - prevPos ), urlFound );
+        actualString += addText(text.mid(prevPos, pos - prevPos), urlFound);
         prevPos = pos;
-        pos = text.indexOf( QRegularExpression( R"(\s)" ), prevPos + 1 );
+        pos = text.indexOf(QRegularExpression(R"(\s)"), prevPos + 1);
     }
 
-    actualString += addText( text.mid( prevPos ), urlFound );
-    if ( urlFound )
-        QTextEdit::setHtml( actualString );
+    actualString += addText(text.mid(prevPos), urlFound);
+    if (urlFound)
+        QTextEdit::setHtml(actualString);
     else
-        QTextEdit::setPlainText( actualString );
+        QTextEdit::setPlainText(actualString);
 }
 

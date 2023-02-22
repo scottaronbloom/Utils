@@ -52,7 +52,7 @@ namespace NSABUtils
 {
     namespace NVSInstallUtils
     {
-        QString fromBStr( bstr_t string )
+        QString fromBStr(bstr_t string)
         {
             std::wstring ws(string, SysStringLen(string));
             return QString::fromStdWString(ws);
@@ -117,7 +117,7 @@ namespace NSABUtils
                     hr = e->Next(1, pInstances, NULL);
                 }
             }
-            catch (std::exception& )
+            catch (std::exception&)
             {
                 return { false, QObject::tr("Exception Thrown"), {} };
             }

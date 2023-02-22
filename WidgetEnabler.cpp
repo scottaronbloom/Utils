@@ -26,55 +26,55 @@
 
 namespace NSABUtils
 {
-    CWidgetEnabler::CWidgetEnabler( QAbstractButton * btn, QWidget * widget, QObject * parent ) :
-        CWidgetEnabler( btn, { widget }, parent )
+    CWidgetEnabler::CWidgetEnabler(QAbstractButton* btn, QWidget* widget, QObject* parent) :
+        CWidgetEnabler(btn, { widget }, parent)
     {
     }
 
-    CWidgetEnabler::CWidgetEnabler( QAbstractButton * checkBox, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
-        CWidgetEnabler( { checkBox, nullptr }, widgets, parent )
+    CWidgetEnabler::CWidgetEnabler(QAbstractButton* checkBox, const std::initializer_list< QWidget* >& widgets, QObject* parent) :
+        CWidgetEnabler({ checkBox, nullptr }, widgets, parent)
     {
     }
 
-    CWidgetEnabler::CWidgetEnabler( QGroupBox * gb, QWidget * widget, QObject * parent ) :
-        CWidgetEnabler( gb, { widget }, parent )
+    CWidgetEnabler::CWidgetEnabler(QGroupBox* gb, QWidget* widget, QObject* parent) :
+        CWidgetEnabler(gb, { widget }, parent)
     {
     }
 
-    CWidgetEnabler::CWidgetEnabler( QGroupBox * gb, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
-        CWidgetEnabler( { nullptr, gb }, widgets, parent )
+    CWidgetEnabler::CWidgetEnabler(QGroupBox* gb, const std::initializer_list< QWidget* >& widgets, QObject* parent) :
+        CWidgetEnabler({ nullptr, gb }, widgets, parent)
     {
     }
 
-    CWidgetEnabler::CWidgetEnabler( const std::pair< QAbstractButton *, QGroupBox * > & checker, const std::initializer_list< QWidget * > & widgets, QObject * parent ) :
-        QObject( parent ),
-        fChecker( checker ),
-        fWidgets( widgets )
+    CWidgetEnabler::CWidgetEnabler(const std::pair< QAbstractButton*, QGroupBox* >& checker, const std::initializer_list< QWidget* >& widgets, QObject* parent) :
+        QObject(parent),
+        fChecker(checker),
+        fWidgets(widgets)
     {
-        Q_ASSERT( ( fChecker.first != nullptr ) || ( fChecker.second != nullptr ) );
-        Q_ASSERT( !fWidgets.empty() );
-        if ( parent == nullptr )
+        Q_ASSERT((fChecker.first != nullptr) || (fChecker.second != nullptr));
+        Q_ASSERT(!fWidgets.empty());
+        if (parent == nullptr)
         {
-            setParent( fChecker.first ? static_cast<QWidget *>( fChecker.first ) : fChecker.second );
+            setParent(fChecker.first ? static_cast<QWidget*>(fChecker.first) : fChecker.second);
         }
 
         fInitState = checkState();
-        if ( fChecker.first )
+        if (fChecker.first)
         {
-            connect( fChecker.first, &QAbstractButton::toggled, this, &CWidgetEnabler::slotButtonToggled );
-            slotButtonToggled( fInitState );
+            connect(fChecker.first, &QAbstractButton::toggled, this, &CWidgetEnabler::slotButtonToggled);
+            slotButtonToggled(fInitState);
         }
-        else if ( fChecker.second )
+        else if (fChecker.second)
         {
-            Q_ASSERT( fChecker.second->isCheckable() );
-            connect( fChecker.second, &QGroupBox::clicked, this, &CWidgetEnabler::slotSetWidgetsEnabled );
-            slotSetWidgetsEnabled( fInitState );
+            Q_ASSERT(fChecker.second->isCheckable());
+            connect(fChecker.second, &QGroupBox::clicked, this, &CWidgetEnabler::slotSetWidgetsEnabled);
+            slotSetWidgetsEnabled(fInitState);
         }
     }
 
     bool CWidgetEnabler::checkState() const
     {
-        if ( fChecker.first )
+        if (fChecker.first)
             return fChecker.first->isChecked();
         else
             return fChecker.second->isChecked();
@@ -82,22 +82,22 @@ namespace NSABUtils
 
     void CWidgetEnabler::slotReset()
     {
-        if ( fChecker.first )
-            fChecker.first->setChecked( fInitState );
+        if (fChecker.first)
+            fChecker.first->setChecked(fInitState);
         else
-            fChecker.second->setChecked( fInitState );
+            fChecker.second->setChecked(fInitState);
     }
 
-    void CWidgetEnabler::slotButtonToggled( bool checked )
+    void CWidgetEnabler::slotButtonToggled(bool checked)
     {
-        slotSetWidgetsEnabled( checked );
+        slotSetWidgetsEnabled(checked);
     }
 
-    void CWidgetEnabler::slotSetWidgetsEnabled( bool enabled )
+    void CWidgetEnabler::slotSetWidgetsEnabled(bool enabled)
     {
-        for ( auto && ii : fWidgets )
+        for (auto&& ii : fWidgets)
         {
-            ii->setEnabled( enabled );
+            ii->setEnabled(enabled);
         }
     }
 }

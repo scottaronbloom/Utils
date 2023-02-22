@@ -31,11 +31,11 @@ namespace NSABUtils
     class SABUTILS_EXPORT CStayAwake : public QRunnable
     {
     public:
-        CStayAwake( bool keepScreenOn ) :
-            fKeepScreenOn( keepScreenOn ),
+        CStayAwake(bool keepScreenOn) :
+            fKeepScreenOn(keepScreenOn),
             QRunnable()
         {
-            setAutoDelete( false );
+            setAutoDelete(false);
         };
 
         virtual void run() override;

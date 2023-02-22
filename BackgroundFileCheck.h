@@ -34,86 +34,86 @@ namespace NSABUtils
     {
         Q_OBJECT;
     public:
-        CBackgroundFileCheck( QObject * parent = nullptr );
+        CBackgroundFileCheck(QObject* parent = nullptr);
         virtual ~CBackgroundFileCheck();
 
-        void stop( bool markAsStopped = true );
+        void stop(bool markAsStopped = true);
 
         void checkPath();
-        void checkPath( const QString & pathName );
+        void checkPath(const QString& pathName);
 
     Q_SIGNALS:
-        void sigFinished( bool aOK, const QString & msg );
+        void sigFinished(bool aOK, const QString& msg);
 
     public:
         int timeOut() const;
-        void setTimeOut( int val );
+        void setTimeOut(int val);
 
         QString pathName() const;
-        void setPathName( const QString & pathName );
+        void setPathName(const QString& pathName);
 
         bool checkExists() const;
-        void setCheckExists( bool val );
+        void setCheckExists(bool val);
 
         bool checkIsBundle() const;
-        void setCheckIsBundle( bool val );
+        void setCheckIsBundle(bool val);
 
         bool checkIsDir() const;
-        void setCheckIsDir( bool val );
+        void setCheckIsDir(bool val);
 
         bool checkIsExecutable() const;
-        void setCheckIsExecutable( bool val );
+        void setCheckIsExecutable(bool val);
 
         bool checkIsFile() const;
-        void setCheckIsFile( bool val );
+        void setCheckIsFile(bool val);
 
         bool checkIsHidden() const;
-        void setCheckIsHidden( bool val );
+        void setCheckIsHidden(bool val);
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool checkIsJunction() const;
-        void setCheckIsJunction( bool val );
+        void setCheckIsJunction(bool val);
 #endif
 
         bool checkIsReadable() const;
-        void setCheckIsReadable( bool val );
+        void setCheckIsReadable(bool val);
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool checkIsShortcut() const;
-        void setCheckIsShortcut( bool val );
+        void setCheckIsShortcut(bool val);
 #endif
 
         bool checkIsSymLink() const;
-        void setCheckIsSymLink( bool val );
+        void setCheckIsSymLink(bool val);
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
         bool checkIsSymbolicLink() const;
-        void setCheckIsSymbolicLink( bool val );
+        void setCheckIsSymbolicLink(bool val);
 #endif
         bool checkIsWritable() const;
-        void setCheckIsWritable( bool val );
+        void setCheckIsWritable(bool val);
 
         QFile::Permissions checkPermissions() const;
-        void setCheckPermissions( QFile::Permissions val );
+        void setCheckPermissions(QFile::Permissions val);
 
         bool useNTFSPermissions() const;
-        void setUseNTFSPermissions( bool val );
+        void setUseNTFSPermissions(bool val);
 
         QString msg() const;
     public Q_SLOTS:
         void slotFinished();
         void slotTimeout();
     private:
-        CBackgroundFileCheckImpl * fImpl{ nullptr };
+        CBackgroundFileCheckImpl* fImpl{ nullptr };
     };
 
     class SABUTILS_EXPORT CBackgroundFileCheckThread : public QThread
     {
     public:
-        CBackgroundFileCheckThread( CBackgroundFileCheckImpl * impl );
+        CBackgroundFileCheckThread(CBackgroundFileCheckImpl* impl);
         virtual void run() override;
     private:
-        CBackgroundFileCheckImpl * fImpl{ nullptr };
+        CBackgroundFileCheckImpl* fImpl{ nullptr };
     };
 }
 #endif

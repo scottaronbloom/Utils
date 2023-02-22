@@ -27,23 +27,23 @@ namespace NSABUtils
 {
     namespace NFileUtils
     {
-        std::optional< QList< QFileInfo > > findAllFiles( const QDir & dir, const QStringList & nameFilters, bool recursive, bool sortByName, QString * errorMsg )
+        std::optional< QList< QFileInfo > > findAllFiles(const QDir& dir, const QStringList& nameFilters, bool recursive, bool sortByName, QString* errorMsg)
         {
-            if ( !dir.exists() || !dir.isReadable() )
+            if (!dir.exists() || !dir.isReadable())
             {
-                if ( errorMsg )
-                    *errorMsg = QString( "Directory '%1' does not exist." ).arg( dir.absolutePath() );
+                if (errorMsg)
+                    *errorMsg = QString("Directory '%1' does not exist.").arg(dir.absolutePath());
                 return {};
             }
             //qDebug() << dir.absolutePath();
-            auto retVal = dir.entryInfoList( nameFilters, QDir::Files, sortByName ? QDir::SortFlag::Name : QDir::SortFlag::NoSort );
-            if ( recursive )
+            auto retVal = dir.entryInfoList(nameFilters, QDir::Files, sortByName ? QDir::SortFlag::Name : QDir::SortFlag::NoSort);
+            if (recursive)
             {
-                auto subDirs = dir.entryInfoList( QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot, sortByName ? QDir::SortFlag::Name : QDir::SortFlag::NoSort );
-                for ( auto && ii : subDirs )
+                auto subDirs = dir.entryInfoList(QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot, sortByName ? QDir::SortFlag::Name : QDir::SortFlag::NoSort);
+                for (auto&& ii : subDirs)
                 {
-                    auto curr = findAllFiles( QDir( ii.absoluteFilePath() ), nameFilters, recursive, sortByName, errorMsg );
-                    if ( !curr.has_value() )
+                    auto curr = findAllFiles(QDir(ii.absoluteFilePath()), nameFilters, recursive, sortByName, errorMsg);
+                    if (!curr.has_value())
                         return curr;
                     retVal << curr.value();
                 }

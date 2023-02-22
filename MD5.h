@@ -37,22 +37,22 @@ class QPixmap;
 
 namespace NSABUtils
 {
-    SABUTILS_EXPORT QByteArray getMd5( const QByteArray & data );
-    SABUTILS_EXPORT QString getMd5( const QFileInfo & fi );
-    SABUTILS_EXPORT QByteArray getMd5( const QStringList & data );
-    SABUTILS_EXPORT QString getMd5( const QString & data, bool isFileName = false );
-    SABUTILS_EXPORT QByteArray getMd5( const QIcon & icon );
-    SABUTILS_EXPORT QByteArray getMd5( const QPixmap & pixmap );
-    SABUTILS_EXPORT std::string getMd5( const std::string & data, bool isFileName = false );
-    SABUTILS_EXPORT QByteArray formatMd5( const QByteArray & digest, bool isHex );
+    SABUTILS_EXPORT QByteArray getMd5(const QByteArray& data);
+    SABUTILS_EXPORT QString getMd5(const QFileInfo& fi);
+    SABUTILS_EXPORT QByteArray getMd5(const QStringList& data);
+    SABUTILS_EXPORT QString getMd5(const QString& data, bool isFileName = false);
+    SABUTILS_EXPORT QByteArray getMd5(const QIcon& icon);
+    SABUTILS_EXPORT QByteArray getMd5(const QPixmap& pixmap);
+    SABUTILS_EXPORT std::string getMd5(const std::string& data, bool isFileName = false);
+    SABUTILS_EXPORT QByteArray formatMd5(const QByteArray& digest, bool isHex);
 
 
     class SABUTILS_EXPORT CComputeMD5 : public QObject, public QRunnable
     {
         Q_OBJECT;
     public:
-        CComputeMD5( const QString & fileName ) :
-            fFileInfo( fileName )
+        CComputeMD5(const QString& fileName) :
+            fFileInfo(fileName)
         {
         };
 
@@ -64,11 +64,11 @@ namespace NSABUtils
 
         void stop() { slotStop(); }
     Q_SIGNALS:
-        void sigStarted( unsigned long long threadID, const QDateTime & dt, const QString & filename );
-        void sigFinishedReading( unsigned long long threadID, const QDateTime & dt, const QString & filename );
-        void sigReadPositionStatus( unsigned long long threadID, const QDateTime & dt, const QString & filename, qint64 pos );
-        void sigFinishedComputing( unsigned long long threadID, const QDateTime & dt, const QString & filename );
-        void sigFinished( unsigned long long threadID, const QDateTime & dt, const QString & filename, const QString & md5 );
+        void sigStarted(unsigned long long threadID, const QDateTime& dt, const QString& filename);
+        void sigFinishedReading(unsigned long long threadID, const QDateTime& dt, const QString& filename);
+        void sigReadPositionStatus(unsigned long long threadID, const QDateTime& dt, const QString& filename, qint64 pos);
+        void sigFinishedComputing(unsigned long long threadID, const QDateTime& dt, const QString& filename);
+        void sigFinished(unsigned long long threadID, const QDateTime& dt, const QString& filename, const QString& md5);
     public Q_SLOTS:
         void slotStop();
     private:

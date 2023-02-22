@@ -29,30 +29,30 @@
 
 namespace NSABUtils
 {
-    bool launchIfURLClicked( const QString & title, const QPoint & pt, const QFont & font )
+    bool launchIfURLClicked(const QString& title, const QPoint& pt, const QFont& font)
     {
         int urlStart;
         int urlLength;
-        auto hasUrl = NSABUtils::isValidURL( title, &urlStart, &urlLength );
-        if ( hasUrl )
+        auto hasUrl = NSABUtils::isValidURL(title, &urlStart, &urlLength);
+        if (hasUrl)
         {
             auto xLoc = pt.x();
-            if ( xLoc >= 30 )
+            if (xLoc >= 30)
             {
                 xLoc -= 30;
-                QFontMetrics fm( font );
+                QFontMetrics fm(font);
 
-                auto preURL = title.left( urlStart );
-                auto url = title.mid( urlStart, urlLength );
+                auto preURL = title.left(urlStart);
+                auto url = title.mid(urlStart, urlLength);
 
-                auto preRect = fm.boundingRect( preURL );
-                if ( xLoc >= preRect.width() )
+                auto preRect = fm.boundingRect(preURL);
+                if (xLoc >= preRect.width())
                 {
                     xLoc -= preRect.width();
-                    auto urlRect = fm.boundingRect( url );
-                    if ( xLoc <= urlRect.width() )
+                    auto urlRect = fm.boundingRect(url);
+                    if (xLoc <= urlRect.width())
                     {
-                        QDesktopServices::openUrl( url );
+                        QDesktopServices::openUrl(url);
                         return true;
                     }
                 }

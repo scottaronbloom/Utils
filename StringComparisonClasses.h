@@ -36,35 +36,35 @@ namespace NSABUtils
         class SABUTILS_EXPORT noCaseStringCmp
         {
         public:
-            bool operator() ( const std::string & s1, const std::string & s2 ) const;
+            bool operator() (const std::string& s1, const std::string& s2) const;
         };
 
         class SABUTILS_EXPORT noCaseStringEq
         {
         public:
-            bool operator() ( const std::string & s1, const std::string & s2 ) const;
+            bool operator() (const std::string& s1, const std::string& s2) const;
         };
 
         struct SABUTILS_EXPORT noCaseStringHash
         {
-            size_t operator()( const std::string & s ) const;
+            size_t operator()(const std::string& s) const;
         };
 
         class SABUTILS_EXPORT noCaseQStringCmp
         {
         public:
-            bool operator() ( const QString & s1, const QString & s2 ) const;
+            bool operator() (const QString& s1, const QString& s2) const;
         };
 
         class SABUTILS_EXPORT noCaseQStringEq
         {
         public:
-            bool operator() ( const QString & s1, const QString & s2 ) const;
+            bool operator() (const QString& s1, const QString& s2) const;
         };
 
         struct SABUTILS_EXPORT noCaseQStringHash
         {
-            size_t operator()( const QString & s ) const;
+            size_t operator()(const QString& s) const;
         };
     }
 }

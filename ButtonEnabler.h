@@ -36,18 +36,18 @@ namespace NSABUtils
     {
         Q_OBJECT;
     public:
-        CButtonEnabler( QAbstractItemView * view, QAbstractButton * btn, QObject * parent = nullptr );
-        CButtonEnabler( QLineEdit * le, QAbstractButton * btn, QObject * parent = nullptr );
+        CButtonEnabler(QAbstractItemView* view, QAbstractButton* btn, QObject* parent = nullptr);
+        CButtonEnabler(QLineEdit* le, QAbstractButton* btn, QObject* parent = nullptr);
 
         void setLineEditIsFile() { fLineEditIsFile = true; };
     public Q_SLOTS:
         void slotReset();
 
     private Q_SLOTS:
-        void slotSelectionChanged( const QItemSelection & selected, const QItemSelection & );
-        void slotTextChanged( const QString & changed );
+        void slotSelectionChanged(const QItemSelection& selected, const QItemSelection&);
+        void slotTextChanged(const QString& changed);
     private:
-        QAbstractButton * fButton;
+        QAbstractButton* fButton;
         bool fLineEditIsFile{ true };
     };
 }

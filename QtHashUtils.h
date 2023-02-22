@@ -34,9 +34,9 @@ namespace std
     template <>
     struct hash<QString>
     {
-        std::size_t operator()( const QString & k ) const
+        std::size_t operator()(const QString& k) const
         {
-            return qHash( k );
+            return qHash(k);
         }
     };
 }
@@ -46,9 +46,9 @@ namespace std
     template<>
     struct hash< QFileInfo >
     {
-        std::size_t operator()( const QFileInfo & k ) const
+        std::size_t operator()(const QFileInfo& k) const
         {
-            return qHash( k.filePath() );
+            return qHash(k.filePath());
         }
     };
 }

@@ -26,7 +26,7 @@
 
 static void initResources()
 {
-    Q_INIT_RESOURCE( SABUtils );
+    Q_INIT_RESOURCE(SABUtils);
 }
 
 namespace NSABUtils

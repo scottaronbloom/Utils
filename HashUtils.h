@@ -32,55 +32,55 @@
 namespace NSABUtils
 {
     template< typename T>
-    inline auto HashCombine( size_t seed, const std::initializer_list< T > & values, bool needsHash )
+    inline auto HashCombine(size_t seed, const std::initializer_list< T >& values, bool needsHash)
         -> typename std::enable_if< std::is_same< std::size_t, T >::value, size_t >::type
     {
         std::hash< T > hasher;
         std::size_t retVal = seed;
-        for ( auto ii = values.begin(); ii != values.end(); ++ii )
+        for (auto ii = values.begin(); ii != values.end(); ++ii)
         {
-            auto currValue = needsHash ? hasher( *ii ) : *ii;
-            retVal ^= currValue + 0x9e489236 + ( retVal << 6 ) + ( retVal >> 2 );
+            auto currValue = needsHash ? hasher(*ii) : *ii;
+            retVal ^= currValue + 0x9e489236 + (retVal << 6) + (retVal >> 2);
         }
         return retVal;
     }
 
     template< typename T >
-    inline auto HashCombine( const std::initializer_list< T > & values, bool needsHash ) // only use when needsHash == false
+    inline auto HashCombine(const std::initializer_list< T >& values, bool needsHash) // only use when needsHash == false
         -> typename std::enable_if< std::is_same< std::size_t, T >::value, size_t >::type
     {
-        return HashCombine( 0, values, needsHash );
+        return HashCombine(0, values, needsHash);
     }
 
     template< typename T>
-    inline std::size_t HashCombine( size_t seed, const std::initializer_list< T > & values )
+    inline std::size_t HashCombine(size_t seed, const std::initializer_list< T >& values)
     {
         std::hash< T > hasher;
         std::size_t retVal = seed;
-        for ( auto ii = values.begin(); ii != values.end(); ++ii )
+        for (auto ii = values.begin(); ii != values.end(); ++ii)
         {
-            auto currValue = hasher( *ii );
-            retVal ^= currValue + 0x9e489236 + ( retVal << 6 ) + ( retVal >> 2 );
+            auto currValue = hasher(*ii);
+            retVal ^= currValue + 0x9e489236 + (retVal << 6) + (retVal >> 2);
         }
         return retVal;
     }
 
     template< typename T >
-    inline std::size_t HashCombine( const std::initializer_list< T > & values )
+    inline std::size_t HashCombine(const std::initializer_list< T >& values)
     {
-        return HashCombine( 0, values );
+        return HashCombine(0, values);
     }
 
     template< typename T >
-    inline std::size_t HashCombine( T h1, T h2, bool needsHash )
+    inline std::size_t HashCombine(T h1, T h2, bool needsHash)
     {
-        return HashCombine( 0, { h1, h2 }, needsHash );
+        return HashCombine(0, { h1, h2 }, needsHash);
     }
 
     template< typename T1, typename T2 >
-    inline std::size_t HashCombine( const std::pair< T1, T2 > & key )
+    inline std::size_t HashCombine(const std::pair< T1, T2 >& key)
     {
-        return NSABUtils::HashCombine( NSABUtils::HashCombine( 0, { key.first } ), { key.second } );
+        return NSABUtils::HashCombine(NSABUtils::HashCombine(0, { key.first }), { key.second });
     }
 
     namespace
@@ -88,27 +88,27 @@ namespace NSABUtils
         template <class Tuple, size_t Index = std::tuple_size<Tuple>::value - 1>
         struct HashValueImpl
         {
-            static void apply( size_t & seed, Tuple const & tuple )
+            static void apply(size_t& seed, Tuple const& tuple)
             {
-                HashValueImpl<Tuple, Index - 1>::apply( seed, tuple );
-                NSABUtils::HashCombine( seed, { std::get<Index>( tuple ) } );
+                HashValueImpl<Tuple, Index - 1>::apply(seed, tuple);
+                NSABUtils::HashCombine(seed, { std::get<Index>(tuple) });
             }
         };
 
         template <class Tuple>
         struct HashValueImpl<Tuple, 0>
         {
-            static void apply( size_t & seed, Tuple const & tuple )
+            static void apply(size_t& seed, Tuple const& tuple)
             {
-                NSABUtils::HashCombine( seed, { std::get<0>( tuple ) }  );
+                NSABUtils::HashCombine(seed, { std::get<0>(tuple) });
             }
         };
     }
     template <typename ... TT>
-    inline std::size_t HashCombine( const std::tuple<TT...> & tt )
+    inline std::size_t HashCombine(const std::tuple<TT...>& tt)
     {
         size_t seed = 0;
-        HashValueImpl<std::tuple<TT...> >::apply( seed, tt );
+        HashValueImpl<std::tuple<TT...> >::apply(seed, tt);
         return seed;
     };
 

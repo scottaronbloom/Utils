@@ -36,10 +36,10 @@ namespace NSABUtils
     {
         Q_OBJECT;
     public:
-        CSelectFileUrl( QObject * parent = nullptr );
+        CSelectFileUrl(QObject* parent = nullptr);
 
     public Q_SLOTS:
-        void slotOpenUrl( const QUrl & url );
+        void slotOpenUrl(const QUrl& url);
     };
 }
 #endif

@@ -30,54 +30,54 @@
 
 namespace NSABUtils
 {
-    CDelayLineEdit::CDelayLineEdit( QWidget * parent ) :
-        CDelayLineEdit( QString(), 250, parent )
+    CDelayLineEdit::CDelayLineEdit(QWidget* parent) :
+        CDelayLineEdit(QString(), 250, parent)
     {
     }
 
-    CDelayLineEdit::CDelayLineEdit( const QString & text, QWidget * parent ) :
-        CDelayLineEdit( text, 250, parent )
+    CDelayLineEdit::CDelayLineEdit(const QString& text, QWidget* parent) :
+        CDelayLineEdit(text, 250, parent)
     {
     }
 
-    CDelayLineEdit::CDelayLineEdit( const QString & text, int delayMS, QWidget * parent ) :
-        QLineEdit( text, parent ),
-        fDelayMS( delayMS )
+    CDelayLineEdit::CDelayLineEdit(const QString& text, int delayMS, QWidget* parent) :
+        QLineEdit(text, parent),
+        fDelayMS(delayMS)
     {
-        connectToEditor( true );
+        connectToEditor(true);
 
-        fChangedTimer = new QTimer( this );
-        fChangedTimer->setSingleShot( true );
-        connect( fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout );
+        fChangedTimer = new QTimer(this);
+        fChangedTimer->setSingleShot(true);
+        connect(fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout);
 
-        fEditedTimer = new QTimer( this );
-        fEditedTimer->setSingleShot( true );
-        connect( fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout );
+        fEditedTimer = new QTimer(this);
+        fEditedTimer->setSingleShot(true);
+        connect(fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout);
 
-        setDelay( delayMS );
+        setDelay(delayMS);
     }
 
-    void CDelayLineEdit::setText( const QString & text )
+    void CDelayLineEdit::setText(const QString& text)
     {
-        if ( !isVisible() )
+        if (!isVisible())
         {
-            connectToEditor( false );
+            connectToEditor(false);
         }
 
-        QLineEdit::setText( text );
+        QLineEdit::setText(text);
 
-        if ( !isVisible() )
+        if (!isVisible())
         {
-            connectToEditor( true );
+            connectToEditor(true);
             slotTextChanged();
         }
     }
 
-    void CDelayLineEdit::setDelay( int delayMS )
+    void CDelayLineEdit::setDelay(int delayMS)
     {
         fDelayMS = delayMS;
-        NSABUtils::updateTimer( fDelayMS, fChangedTimer );
-        NSABUtils::updateTimer( fDelayMS, fEditedTimer );
+        NSABUtils::updateTimer(fDelayMS, fChangedTimer);
+        NSABUtils::updateTimer(fDelayMS, fEditedTimer);
     }
 
     CDelayLineEdit::~CDelayLineEdit()
@@ -87,10 +87,10 @@ namespace NSABUtils
     void CDelayLineEdit::slotTextChanged()
     {
         fChangedTimer->stop();
-        if ( fDelayMS > 0 )
+        if (fDelayMS > 0)
         {
             fChangedTimer->start();
-            setLineEditColor( ELineEditStatus::ePending );
+            setLineEditColor(ELineEditStatus::ePending);
         }
     }
 
@@ -98,108 +98,108 @@ namespace NSABUtils
     {
         fEditingFinished = false;
         fEditedTimer->stop();
-        if ( fDelayMS > 0 )
+        if (fDelayMS > 0)
         {
             fEditedTimer->start();
-            setLineEditColor( ELineEditStatus::ePending );
+            setLineEditColor(ELineEditStatus::ePending);
         }
     }
 
-    void CDelayLineEdit::keyPressEvent( QKeyEvent * event )
+    void CDelayLineEdit::keyPressEvent(QKeyEvent* event)
     {
-        if ( event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return )
+        if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
         {
             fEditingFinished = true;
-            if ( fStatus == ELineEditStatus::eOK )
-                emit sigFinishedEditingAfterDelay( text() );
+            if (fStatus == ELineEditStatus::eOK)
+                emit sigFinishedEditingAfterDelay(text());
         }
-        QLineEdit::keyPressEvent( event );
+        QLineEdit::keyPressEvent(event);
     }
 
     void CDelayLineEdit::slotChangedTimerTimeout()
     {
-        changeTimeout( fIsOK.first ? fIsOK.first( text() ) : true );
+        changeTimeout(fIsOK.first ? fIsOK.first(text()) : true);
     }
 
-    void CDelayLineEdit::changeTimeout( bool aOK )
+    void CDelayLineEdit::changeTimeout(bool aOK)
     {
-        setLineEditColor( aOK );
-        emit sigTextChangedAfterDelay( text() );
+        setLineEditColor(aOK);
+        emit sigTextChangedAfterDelay(text());
     }
 
     void CDelayLineEdit::slotEditTimerTimeout()
     {
-        editTimeout( fIsOK.first ? fIsOK.first( text() ) : true );
+        editTimeout(fIsOK.first ? fIsOK.first(text()) : true);
     }
 
-    void CDelayLineEdit::editTimeout( bool aOK )
+    void CDelayLineEdit::editTimeout(bool aOK)
     {
-        setLineEditColor( aOK );
-        emit sigTextEditedAfterDelay( text() );
-        if ( fEditingFinished )
-            emit sigFinishedEditingAfterDelay( text() );
+        setLineEditColor(aOK);
+        emit sigTextEditedAfterDelay(text());
+        if (fEditingFinished)
+            emit sigFinishedEditingAfterDelay(text());
     }
 
-    void CDelayLineEdit::connectToEditor( bool connectOrDisconnect )
+    void CDelayLineEdit::connectToEditor(bool connectOrDisconnect)
     {
-        if ( connectOrDisconnect )
+        if (connectOrDisconnect)
         {
-            connect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
-            connect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+            connect(this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged);
+            connect(this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited);
         }
         else
         {
-            disconnect( this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged );
-            disconnect( this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited );
+            disconnect(this, &QLineEdit::textChanged, this, &CDelayLineEdit::slotTextChanged);
+            disconnect(this, &QLineEdit::textEdited, this, &CDelayLineEdit::slotTextEdited);
         }
     }
 
-    void CDelayLineEdit::setLineEditColor( bool aOK )
+    void CDelayLineEdit::setLineEditColor(bool aOK)
     {
-        setLineEditColor( aOK ? ELineEditStatus::eOK : ELineEditStatus::eNotOK );
+        setLineEditColor(aOK ? ELineEditStatus::eOK : ELineEditStatus::eNotOK);
     }
 
-    void CDelayLineEdit::setLineEditColor( ELineEditStatus status )
+    void CDelayLineEdit::setLineEditColor(ELineEditStatus status)
     {
         fStatus = status;
-        setToolTip( QString() );
-        if ( status == ELineEditStatus::ePending )
+        setToolTip(QString());
+        if (status == ELineEditStatus::ePending)
         {
-            setStyleSheet( "QLineEdit { background-color: #b7bfaf }" );
-            setToolTip( tr( "Checking the status" ) );
+            setStyleSheet("QLineEdit { background-color: #b7bfaf }");
+            setToolTip(tr("Checking the status"));
         }
-        else if ( status == ELineEditStatus::eOK )
+        else if (status == ELineEditStatus::eOK)
         {
-            setStyleSheet( "QLineEdit { background-color: white }" );
-            setToolTip( text() );
+            setStyleSheet("QLineEdit { background-color: white }");
+            setToolTip(text());
         }
-        else if ( status == ELineEditStatus::eNotOK )
+        else if (status == ELineEditStatus::eNotOK)
         {
             auto errorMsg = fIsOK.second;
-            if ( !errorMsg.isEmpty() )
+            if (!errorMsg.isEmpty())
             {
-                if ( errorMsg.contains( "%1" ) )
-                    errorMsg = errorMsg.arg( text() );
-                setToolTip( errorMsg );
+                if (errorMsg.contains("%1"))
+                    errorMsg = errorMsg.arg(text());
+                setToolTip(errorMsg);
             }
-            setStyleSheet( "QLineEdit { background-color: red }" );
+            setStyleSheet("QLineEdit { background-color: red }");
         }
     }
 
-    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit( QWidget * parent /*= nullptr */ ) :
-        CDelayLineEdit( parent )
+    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit(QWidget* parent /*= nullptr */) :
+        CDelayLineEdit(parent)
     {
         init();
     }
 
-    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit( const QString & text, QWidget * parent /*= nullptr */ ) :
-        CDelayLineEdit( text, parent )
+    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit(const QString& text, QWidget* parent /*= nullptr */) :
+        CDelayLineEdit(text, parent)
     {
         init();
     }
 
-    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit( const QString & text, int delayMS, QWidget * parent /*= nullptr */ ) :
-        CDelayLineEdit( text, delayMS, parent )
+    CPathBasedDelayLineEdit::CPathBasedDelayLineEdit(const QString& text, int delayMS, QWidget* parent /*= nullptr */) :
+        CDelayLineEdit(text, delayMS, parent)
     {
         init();
     }
@@ -207,13 +207,13 @@ namespace NSABUtils
     void CPathBasedDelayLineEdit::init()
     {
         fFileChecker = new CBackgroundFileCheck;
-        connect( fFileChecker, &CBackgroundFileCheck::sigFinished, this, &CPathBasedDelayLineEdit::slotFileCheckFinished );
+        connect(fFileChecker, &CBackgroundFileCheck::sigFinished, this, &CPathBasedDelayLineEdit::slotFileCheckFinished);
 
-        disconnect( fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout );
-        disconnect( fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout );
+        disconnect(fChangedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotChangedTimerTimeout);
+        disconnect(fEditedTimer, &QTimer::timeout, this, &CDelayLineEdit::slotEditTimerTimeout);
 
-        connect( fChangedTimer, &QTimer::timeout, this, &CPathBasedDelayLineEdit::slotChangedTimerTimeout );
-        connect( fEditedTimer, &QTimer::timeout, this, &CPathBasedDelayLineEdit::slotEditTimerTimeout );
+        connect(fChangedTimer, &QTimer::timeout, this, &CPathBasedDelayLineEdit::slotChangedTimerTimeout);
+        connect(fEditedTimer, &QTimer::timeout, this, &CPathBasedDelayLineEdit::slotEditTimerTimeout);
     }
 
     CPathBasedDelayLineEdit::~CPathBasedDelayLineEdit()
@@ -221,10 +221,10 @@ namespace NSABUtils
         delete fFileChecker;
     }
 
-    void CPathBasedDelayLineEdit::setDelay( int delayMS )
+    void CPathBasedDelayLineEdit::setDelay(int delayMS)
     {
-        fFileChecker->setTimeOut( delayMS / 2 );
-        CDelayLineEdit::setDelay( delayMS );
+        fFileChecker->setTimeOut(delayMS / 2);
+        CDelayLineEdit::setDelay(delayMS);
     }
 
     bool CPathBasedDelayLineEdit::checkExists() const
@@ -232,9 +232,9 @@ namespace NSABUtils
         return fFileChecker->checkExists();
     }
 
-    void CPathBasedDelayLineEdit::setCheckExists( bool val )
+    void CPathBasedDelayLineEdit::setCheckExists(bool val)
     {
-        fFileChecker->setCheckExists( val );
+        fFileChecker->setCheckExists(val);
     }
 
     bool CPathBasedDelayLineEdit::checkIsBundle() const
@@ -242,9 +242,9 @@ namespace NSABUtils
         return fFileChecker->checkIsBundle();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsBundle( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsBundle(bool val)
     {
-        fFileChecker->setCheckIsBundle( val );
+        fFileChecker->setCheckIsBundle(val);
     }
 
     bool CPathBasedDelayLineEdit::checkIsDir() const
@@ -252,9 +252,9 @@ namespace NSABUtils
         return fFileChecker->checkIsDir();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsDir( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsDir(bool val)
     {
-        fFileChecker->setCheckIsDir( val );
+        fFileChecker->setCheckIsDir(val);
     }
 
     bool CPathBasedDelayLineEdit::checkIsExecutable() const
@@ -262,9 +262,9 @@ namespace NSABUtils
         return fFileChecker->checkIsExecutable();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsExecutable( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsExecutable(bool val)
     {
-        fFileChecker->setCheckIsExecutable( val );
+        fFileChecker->setCheckIsExecutable(val);
     }
 
     bool CPathBasedDelayLineEdit::checkIsFile() const
@@ -272,9 +272,9 @@ namespace NSABUtils
         return fFileChecker->checkIsFile();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsFile( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsFile(bool val)
     {
-        fFileChecker->setCheckIsFile( val );
+        fFileChecker->setCheckIsFile(val);
     }
 
     bool CPathBasedDelayLineEdit::checkIsHidden() const
@@ -282,9 +282,9 @@ namespace NSABUtils
         return fFileChecker->checkIsHidden();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsHidden( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsHidden(bool val)
     {
-        fFileChecker->setCheckIsHidden( val );
+        fFileChecker->setCheckIsHidden(val);
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
@@ -293,9 +293,9 @@ namespace NSABUtils
         return fFileChecker->checkIsJunction();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsJunction( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsJunction(bool val)
     {
-        fFileChecker->setCheckIsJunction( val );
+        fFileChecker->setCheckIsJunction(val);
     }
 #endif
 
@@ -304,9 +304,9 @@ namespace NSABUtils
         return fFileChecker->checkIsReadable();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsReadable( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsReadable(bool val)
     {
-        fFileChecker->setCheckIsReadable( val );
+        fFileChecker->setCheckIsReadable(val);
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
@@ -315,9 +315,9 @@ namespace NSABUtils
         return fFileChecker->checkIsShortcut();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsShortcut( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsShortcut(bool val)
     {
-        fFileChecker->setCheckIsShortcut( val );
+        fFileChecker->setCheckIsShortcut(val);
     }
 #endif
 
@@ -326,9 +326,9 @@ namespace NSABUtils
         return fFileChecker->checkIsSymLink();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsSymLink( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsSymLink(bool val)
     {
-        fFileChecker->setCheckIsSymLink( val );
+        fFileChecker->setCheckIsSymLink(val);
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
@@ -337,9 +337,9 @@ namespace NSABUtils
         return fFileChecker->checkIsSymbolicLink();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsSymbolicLink( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsSymbolicLink(bool val)
     {
-        fFileChecker->setCheckIsSymbolicLink( val );
+        fFileChecker->setCheckIsSymbolicLink(val);
     }
 #endif
 
@@ -348,9 +348,9 @@ namespace NSABUtils
         return fFileChecker->checkIsWritable();
     }
 
-    void CPathBasedDelayLineEdit::setCheckIsWritable( bool val )
+    void CPathBasedDelayLineEdit::setCheckIsWritable(bool val)
     {
-        fFileChecker->setCheckIsWritable( val );
+        fFileChecker->setCheckIsWritable(val);
     }
 
     QFile::Permissions CPathBasedDelayLineEdit::checkPermissions() const
@@ -358,9 +358,9 @@ namespace NSABUtils
         return fFileChecker->checkPermissions();
     }
 
-    void CPathBasedDelayLineEdit::setCheckPermissions( QFile::Permissions val )
+    void CPathBasedDelayLineEdit::setCheckPermissions(QFile::Permissions val)
     {
-        fFileChecker->setCheckPermissions( val );
+        fFileChecker->setCheckPermissions(val);
     }
 
     bool CPathBasedDelayLineEdit::useNTFSPermissions() const
@@ -368,36 +368,36 @@ namespace NSABUtils
         return fFileChecker->useNTFSPermissions();
     }
 
-    void CPathBasedDelayLineEdit::setUseNTFSPermissions( bool val )
+    void CPathBasedDelayLineEdit::setUseNTFSPermissions(bool val)
     {
-        fFileChecker->setUseNTFSPermissions( val );
+        fFileChecker->setUseNTFSPermissions(val);
     }
 
     void CPathBasedDelayLineEdit::slotChangedTimerTimeout()
     {
         fChanged = true;
-        fFileChecker->checkPath( text() );
+        fFileChecker->checkPath(text());
     }
 
     void CPathBasedDelayLineEdit::slotEditTimerTimeout()
     {
         fEdited = true;
-        fFileChecker->checkPath( text() );
+        fFileChecker->checkPath(text());
     }
 
-    void CPathBasedDelayLineEdit::slotFileCheckFinished( bool aOK )
+    void CPathBasedDelayLineEdit::slotFileCheckFinished(bool aOK)
     {
-        if ( fEdited )
+        if (fEdited)
         {
             fIsOK.second = fFileChecker->msg();
-            editTimeout( aOK );
+            editTimeout(aOK);
             fEdited = false;
         }
 
-        if ( fChanged )
+        if (fChanged)
         {
             fIsOK.second = fFileChecker->msg();
-            changeTimeout( aOK );
+            changeTimeout(aOK);
             fChanged = false;
         }
     }
