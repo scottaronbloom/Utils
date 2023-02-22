@@ -22,8 +22,8 @@
 #include "ImageScrollBar.h"
 
 #ifdef BIF_SCROLLBAR_SUPPORT
-#include "BIFFile.h"
-#include "BIFModel.h"
+    #include "BIFFile.h"
+    #include "BIFModel.h"
 #endif
 
 #include <QDebug>
@@ -36,46 +36,46 @@
 
 namespace NSABUtils
 {
-    CImageScrollBar::CImageScrollBar(QWidget* parent /*= 0 */) :
-        QScrollBar(parent)
+    CImageScrollBar::CImageScrollBar( QWidget *parent /*= 0 */ ) :
+        QScrollBar( parent )
     {
         init();
     }
 
-    CImageScrollBar::CImageScrollBar(Qt::Orientation orientation, QWidget* parent /*= nullptr */) :
-        QScrollBar(orientation, parent)
+    CImageScrollBar::CImageScrollBar( Qt::Orientation orientation, QWidget *parent /*= nullptr */ ) :
+        QScrollBar( orientation, parent )
     {
         init();
     }
 
     void CImageScrollBar::init()
     {
-        connect(this, &QScrollBar::valueChanged, this, &CImageScrollBar::slotValueChanged);
-        connect(this, &QScrollBar::sliderMoved, this, &CImageScrollBar::slotSliderMoved);
-        connect(this, &QScrollBar::sliderPressed, this, &CImageScrollBar::slotSliderPressed);
-        connect(this, &QScrollBar::sliderReleased, this, &CImageScrollBar::slotSliderReleased);
+        connect( this, &QScrollBar::valueChanged, this, &CImageScrollBar::slotValueChanged );
+        connect( this, &QScrollBar::sliderMoved, this, &CImageScrollBar::slotSliderMoved );
+        connect( this, &QScrollBar::sliderPressed, this, &CImageScrollBar::slotSliderPressed );
+        connect( this, &QScrollBar::sliderReleased, this, &CImageScrollBar::slotSliderReleased );
     }
 
 #ifdef BIF_SCROLLBAR_SUPPORT
-    void CImageScrollBar::setBIFFile(std::shared_ptr< NBIF::CFile > bifFile)
+    void CImageScrollBar::setBIFFile( std::shared_ptr< NBIF::CFile > bifFile )
     {
         fBIFFile = bifFile;
-        slotValueChanged(0);
+        slotValueChanged( 0 );
     }
 
-    void CImageScrollBar::setBIFModel(std::shared_ptr< NBIF::CModel > bifModel)
+    void CImageScrollBar::setBIFModel( std::shared_ptr< NBIF::CModel > bifModel )
     {
         fBIFModel = bifModel;
-        slotValueChanged(0);
+        slotValueChanged( 0 );
     }
 #endif
 
-    void CImageScrollBar::setImages(const std::vector< QImage >& images)
+    void CImageScrollBar::setImages( const std::vector< QImage > &images )
     {
         fImages = images;
     }
 
-    void CImageScrollBar::setImages(const std::list< QImage >& images)
+    void CImageScrollBar::setImages( const std::list< QImage > &images )
     {
         fImages = { images.begin(), images.end() };
     }
@@ -83,58 +83,57 @@ namespace NSABUtils
     bool CImageScrollBar::hasImages() const
     {
 #ifdef BIF_SCROLLBAR_SUPPORT
-        if (fBIFFile)
+        if ( fBIFFile )
             return true;
-        else if (fBIFModel)
+        else if ( fBIFModel )
             return true;
         else
-#endif            
+#endif
             return fImages.empty() == false;
-
     }
 
-    void CImageScrollBar::slotValueChanged(int value)
+    void CImageScrollBar::slotValueChanged( int value )
     {
-        updateValue(value);
+        updateValue( value );
     }
 
-    void CImageScrollBar::slotSliderMoved(int value)
+    void CImageScrollBar::slotSliderMoved( int value )
     {
-        updateValue(value);
+        updateValue( value );
     }
 
-    void CImageScrollBar::updateValue(int value)
+    void CImageScrollBar::updateValue( int value )
     {
-        if (!hasImages())
+        if ( !hasImages() )
             return;
 
-        setCurrentImageNum(-1);
+        setCurrentImageNum( -1 );
         int min = this->minimum();
         int max = this->maximum();
 
-        if (min == max)
+        if ( min == max )
             return;
 
-        auto percentage = 1.0 * value / (max - min);
+        auto percentage = 1.0 * value / ( max - min );
 
         auto numImagesLoaded = numImages();
-        auto imageNum = static_cast<int>(percentage * numImagesLoaded);
-        if (imageNum >= numImagesLoaded)
+        auto imageNum = static_cast< int >( percentage * numImagesLoaded );
+        if ( imageNum >= numImagesLoaded )
             imageNum = numImagesLoaded;
-        setCurrentImageNum(imageNum);
+        setCurrentImageNum( imageNum );
     }
 
-    int CImageScrollBar::pixelPosToRangeValue(int pos) const
+    int CImageScrollBar::pixelPosToRangeValue( int pos ) const
     {
         QStyleOptionSlider opt;
-        initStyleOption(&opt);
+        initStyleOption( &opt );
 
-        auto rect = style()->subControlRect(QStyle::CC_ScrollBar, &opt, QStyle::SC_ScrollBarGroove, this);
+        auto rect = style()->subControlRect( QStyle::CC_ScrollBar, &opt, QStyle::SC_ScrollBarGroove, this );
 
         int total = 0;
         int spanMin = 0;
         int spanMax = 0;
-        if (orientation() == Qt::Horizontal)
+        if ( orientation() == Qt::Horizontal )
         {
             spanMin = rect.x();
             spanMax = rect.x() + rect.width();
@@ -147,43 +146,41 @@ namespace NSABUtils
             total = rect.height();
         }
 
-
         auto min = minimum();
         auto max = maximum();
-        if (pos <= spanMin || total <= 0) // smaller than it should be
+        if ( pos <= spanMin || total <= 0 )   // smaller than it should be
         {
-            if (opt.upsideDown)
+            if ( opt.upsideDown )
                 return max;
             else
                 return min;
         }
         auto range = max - min;
-        if (pos >= spanMax)
+        if ( pos >= spanMax )
         {
-            if (opt.upsideDown)
+            if ( opt.upsideDown )
                 return min;
             else
                 return max;
         }
 
-        auto percentage = 100.0 * pos / (spanMax - spanMin);
-        auto tmp = static_cast<int>(percentage * (range) / 100.0);
+        auto percentage = 100.0 * pos / ( spanMax - spanMin );
+        auto tmp = static_cast< int >( percentage * ( range ) / 100.0 );
         auto value = opt.upsideDown ? max - tmp : tmp + min;
         return value;
     }
 
     void CImageScrollBar::updateImageFromPos()
     {
-        auto currPos = mapFromGlobal(QCursor::pos());
+        auto currPos = mapFromGlobal( QCursor::pos() );
         int value = 0;
-        if (orientation() == Qt::Horizontal)
-            value = pixelPosToRangeValue(currPos.x());
+        if ( orientation() == Qt::Horizontal )
+            value = pixelPosToRangeValue( currPos.x() );
         else
-            value = pixelPosToRangeValue(currPos.y());
+            value = pixelPosToRangeValue( currPos.y() );
 
-        updateValue(value);
+        updateValue( value );
     }
-
 
     void CImageScrollBar::slotSliderPressed()
     {
@@ -197,36 +194,36 @@ namespace NSABUtils
         updateImage();
     }
 
-    bool CImageScrollBar::event(QEvent* event)
+    bool CImageScrollBar::event( QEvent *event )
     {
-        if (event->type() == QEvent::HoverEnter)
+        if ( event->type() == QEvent::HoverEnter )
         {
-            if (fUpdateOnScrollOnly)
+            if ( fUpdateOnScrollOnly )
             {
                 fShowImage = true;
                 updateImageFromPos();
             }
         }
-        else if (event->type() == QEvent::HoverLeave)
+        else if ( event->type() == QEvent::HoverLeave )
         {
-            if (fUpdateOnScrollOnly)
+            if ( fUpdateOnScrollOnly )
             {
                 fShowImage = true;
                 updateImageFromPos();
             }
         }
-        else if (event->type() == QEvent::HoverMove)
+        else if ( event->type() == QEvent::HoverMove )
         {
-            if (fUpdateOnScrollOnly)
+            if ( fUpdateOnScrollOnly )
             {
                 updateImageFromPos();
             }
         }
 
-        return QScrollBar::event(event);
+        return QScrollBar::event( event );
     }
 
-    void CImageScrollBar::setCurrentImageNum(int imageNum)
+    void CImageScrollBar::setCurrentImageNum( int imageNum )
     {
         fCurrentImageNum = imageNum;
         updateImage();
@@ -234,69 +231,69 @@ namespace NSABUtils
 
     void CImageScrollBar::updateImage()
     {
-        if (!fShowImage)
+        if ( !fShowImage )
             QToolTip::hideText();
-        else if (hasImages())
+        else if ( hasImages() )
         {
-            fCurrentImage = getImage(fCurrentImageNum);
-            if (!fCurrentImage.isNull())
+            fCurrentImage = getImage( fCurrentImageNum );
+            if ( !fCurrentImage.isNull() )
             {
                 QByteArray data;
-                QBuffer buffer(&data);
-                fCurrentImage.save(&buffer, "PNG");
+                QBuffer buffer( &data );
+                fCurrentImage.save( &buffer, "PNG" );
 
-                auto html = QString("<img src='data:image/png;base64, %1'><center>%2</center>").arg(QString(data.toBase64())).arg(message());
-                QToolTip::showText(QCursor::pos(), html, this);
+                auto html = QString( "<img src='data:image/png;base64, %1'><center>%2</center>" ).arg( QString( data.toBase64() ) ).arg( message() );
+                QToolTip::showText( QCursor::pos(), html, this );
             }
         }
     }
 
     QString CImageScrollBar::message() const
     {
-        if (fCurrentImageNum == -1)
+        if ( fCurrentImageNum == -1 )
             return QString();
 
         QString format = fMsgFormat;
         auto num = fCurrentImageNum;
         auto numImages = this->numImages();
-        auto percentage = static_cast<int>(100.0 * num / 1.0 * numImages);
+        auto percentage = static_cast< int >( 100.0 * num / 1.0 * numImages );
 
-        format = format.replace("%v", QString::number(num));
-        format = format.replace("%m", QString::number(numImages));
-        format = format.replace("%p", QString::number(percentage));
+        format = format.replace( "%v", QString::number( num ) );
+        format = format.replace( "%m", QString::number( numImages ) );
+        format = format.replace( "%p", QString::number( percentage ) );
 
         return format;
     }
 
     int CImageScrollBar::numImages() const
     {
-        if (!hasImages())
+        if ( !hasImages() )
             return 0;
 #ifdef BIF_SCROLLBAR_SUPPORT
-        if (fBIFFile)
+        if ( fBIFFile )
             return fBIFFile->lastImageLoaded();
-        else if (fBIFModel)
+        else if ( fBIFModel )
             return fBIFModel->rowCount();
         else
-#endif            
-            return static_cast<int>(fImages.size());
+#endif
+            return static_cast< int >( fImages.size() );
     }
 
-    QImage CImageScrollBar::getImage(int imageNum) const
+    QImage CImageScrollBar::getImage( int imageNum ) const
     {
-        if (imageNum >= numImages())
+        if ( imageNum >= numImages() )
             return QImage();
 
 #ifdef BIF_SCROLLBAR_SUPPORT
-        if (fBIFFile)
-            return fBIFFile->image(imageNum);
-        else if (fBIFModel)
+        if ( fBIFFile )
+            return fBIFFile->image( imageNum );
+        else if ( fBIFModel )
         {
-            return fBIFModel->index(imageNum).data(NBIF::CModel::ECustomRoles::eImage).value< QImage >();
+            return fBIFModel->index( imageNum ).data( NBIF::CModel::ECustomRoles::eImage ).value< QImage >();
         }
         else
-#endif            
-            return fImages[imageNum];
+#endif
+            return fImages[ imageNum ];
     }
 
 }

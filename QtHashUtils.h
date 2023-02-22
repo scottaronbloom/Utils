@@ -27,17 +27,14 @@
 
 #include <QHash>
 #include <QFileInfo>
-#if QT_VERSION < QT_VERSION_CHECK(5,14,0)
-#include <QString>
+#if QT_VERSION < QT_VERSION_CHECK( 5, 14, 0 )
+    #include <QString>
 namespace std
 {
-    template <>
-    struct hash<QString>
+    template<>
+    struct hash< QString >
     {
-        std::size_t operator()(const QString& k) const
-        {
-            return qHash(k);
-        }
+        std::size_t operator()( const QString &k ) const { return qHash( k ); }
     };
 }
 #endif
@@ -46,12 +43,8 @@ namespace std
     template<>
     struct hash< QFileInfo >
     {
-        std::size_t operator()(const QFileInfo& k) const
-        {
-            return qHash(k.filePath());
-        }
+        std::size_t operator()( const QFileInfo &k ) const { return qHash( k.filePath() ); }
     };
 }
 
 #endif
-

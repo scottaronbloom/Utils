@@ -42,24 +42,24 @@ namespace NSABUtils
 
     namespace NCPUUtilization
     {
-        std::optional< std::pair< void*, void* > > SABUTILS_EXPORT initQuery(); // returns the handle to the query and the specific counter, the first needs to have free query called on it
-        void SABUTILS_EXPORT freeQuery(std::pair< void*, void* >& query);
+        std::optional< std::pair< void *, void * > > SABUTILS_EXPORT initQuery();   // returns the handle to the query and the specific counter, the first needs to have free query called on it
+        void SABUTILS_EXPORT freeQuery( std::pair< void *, void * > &query );
 
-        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations(uint64_t sampleTime = 1000); // returns a map of logical processor id to %utilization over a 1000 msec sample
-        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations(const std::pair< void*, void* >& query);
+        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations( uint64_t sampleTime = 1000 );   // returns a map of logical processor id to %utilization over a 1000 msec sample
+        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations( const std::pair< void *, void * > &query );
     }
 
     class SABUTILS_EXPORT CSystemInfo
     {
     public:
-        CSystemInfo(bool baseSettings = false);
+        CSystemInfo( bool baseSettings = false );
         enum class EFormat
         {
             eText,
             eHtml,
             eJSON
         };
-        std::string getText(EFormat format = EFormat::eText, bool memoryOnly = false, bool showSystemMemory = true) const;
+        std::string getText( EFormat format = EFormat::eText, bool memoryOnly = false, bool showSystemMemory = true ) const;
 
         static std::string getOSName();
         static std::string getOSVersion();
@@ -73,12 +73,13 @@ namespace NSABUtils
         std::list< std::pair< std::string, std::string > > fSystemInformation;
 
         std::list< SNicInfo > fNics;
+
     private:
-        std::string dumpTable(const std::list< std::pair< std::string, std::string > >& table, const std::string& title, const std::pair< std::string, std::string >& subTitle, EFormat format, QJsonArray& jsonParentArray) const;
-        std::string dumpNics(const std::list< SNicInfo >& nics, const std::string& title, EFormat format, QJsonArray& jsonParentArray) const;
+        std::string dumpTable( const std::list< std::pair< std::string, std::string > > &table, const std::string &title, const std::pair< std::string, std::string > &subTitle, EFormat format, QJsonArray &jsonParentArray ) const;
+        std::string dumpNics( const std::list< SNicInfo > &nics, const std::string &title, EFormat format, QJsonArray &jsonParentArray ) const;
         void Load();
         void LoadSystemInfo();
-        void LoadMemoryInfo(bool baseInfo);
+        void LoadMemoryInfo( bool baseInfo );
         void LoadNICInfo();
 
         static std::string sBaseApplicationMemory;
@@ -86,4 +87,3 @@ namespace NSABUtils
 }
 
 #endif
-

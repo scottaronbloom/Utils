@@ -34,29 +34,30 @@ namespace NSABUtils
     class SABUTILS_EXPORT CWidgetEnabler : public QObject
     {
         Q_OBJECT;
-        CWidgetEnabler(const std::pair< QAbstractButton*, QGroupBox* >& checker, const std::initializer_list< QWidget* >& widgets, QObject* parent = nullptr);
+        CWidgetEnabler( const std::pair< QAbstractButton *, QGroupBox * > &checker, const std::initializer_list< QWidget * > &widgets, QObject *parent = nullptr );
+
     public:
-        CWidgetEnabler(QAbstractButton* btn, QWidget* widget, QObject* parent = nullptr);
-        CWidgetEnabler(QAbstractButton* btn, const std::initializer_list< QWidget* >& widgets, QObject* parent = nullptr);
+        CWidgetEnabler( QAbstractButton *btn, QWidget *widget, QObject *parent = nullptr );
+        CWidgetEnabler( QAbstractButton *btn, const std::initializer_list< QWidget * > &widgets, QObject *parent = nullptr );
 
-        CWidgetEnabler(QGroupBox* gb, QWidget* widget, QObject* parent = nullptr);
-        CWidgetEnabler(QGroupBox* gb, const std::initializer_list< QWidget* >& widgets, QObject* parent = nullptr);
+        CWidgetEnabler( QGroupBox *gb, QWidget *widget, QObject *parent = nullptr );
+        CWidgetEnabler( QGroupBox *gb, const std::initializer_list< QWidget * > &widgets, QObject *parent = nullptr );
 
-        void setEnableOnPartial(bool value) { fEnableOnPartial = value; };
+        void setEnableOnPartial( bool value ) { fEnableOnPartial = value; };
         bool enableOnPartial() const { return fEnableOnPartial; }
     public Q_SLOTS:
         void slotReset();
 
     private Q_SLOTS:
-        void slotButtonToggled(bool checked);
-        void slotSetWidgetsEnabled(bool clicked);
+        void slotButtonToggled( bool checked );
+        void slotSetWidgetsEnabled( bool clicked );
+
     private:
         bool checkState() const;
         bool fInitState{ false };
         bool fEnableOnPartial{ false };
-        std::pair< QAbstractButton*, QGroupBox* > fChecker{ nullptr, nullptr };
-        std::list< QWidget* > fWidgets;
+        std::pair< QAbstractButton *, QGroupBox * > fChecker{ nullptr, nullptr };
+        std::list< QWidget * > fWidgets;
     };
 }
 #endif
-

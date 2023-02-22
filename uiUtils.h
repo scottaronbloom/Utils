@@ -30,6 +30,6 @@ class QPoint;
 class QFont;
 namespace NSABUtils
 {
-    SABUTILS_EXPORT bool launchIfURLClicked(const QString& title, const QPoint& pt, const QFont& font);
+    SABUTILS_EXPORT bool launchIfURLClicked( const QString &title, const QPoint &pt, const QFont &font );
 }
 #endif

@@ -28,20 +28,22 @@
 #include <QObject>
 namespace NSABUtils
 {
-    class SABUTILS_EXPORT CAutoWaitCursor : public QObject // allows for delete later
+    class SABUTILS_EXPORT CAutoWaitCursor : public QObject   // allows for delete later
     {
         Q_OBJECT;
+
     public:
-        CAutoWaitCursor(QObject* revertOnOpen = nullptr);
-        CAutoWaitCursor(QObject* revertOnOpen, Qt::CursorShape cursorShape);
+        CAutoWaitCursor( QObject *revertOnOpen = nullptr );
+        CAutoWaitCursor( QObject *revertOnOpen, Qt::CursorShape cursorShape );
         ~CAutoWaitCursor();
 
         void restore();
 
-        bool eventFilter(QObject*, QEvent*);
+        bool eventFilter( QObject *, QEvent * );
         static bool active();
+
     private:
-        QObject* fRestoreOnOpenWidget;
+        QObject *fRestoreOnOpenWidget;
     };
 }
 #endif

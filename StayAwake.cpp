@@ -20,42 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 #include "StayAwake.h"
 #include <QThread>
 
 #ifdef Q_OS_WINDOWS
-#include <qt_windows.h>
+    #include <qt_windows.h>
 
 namespace NSABUtils
 {
     void CStayAwake::run()
     {
         bool success = false;
-        while (!fStopped)
+        while ( !fStopped )
         {
             try
             {
-                if (fKeepScreenOn)
-                    success = SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED | ES_DISPLAY_REQUIRED);
+                if ( fKeepScreenOn )
+                    success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED | ES_DISPLAY_REQUIRED );
                 else
-                    success = SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
-                Q_ASSERT(success);
-                if (!success)
+                    success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED );
+                Q_ASSERT( success );
+                if ( !success )
                     break;
             }
-            catch (...)
+            catch ( ... )
             {
                 success = false;
             }
-            QThread::sleep(2);
+            QThread::sleep( 2 );
         }
         try
         {
-            if (success)
-                success = SetThreadExecutionState(ES_CONTINUOUS);
+            if ( success )
+                success = SetThreadExecutionState( ES_CONTINUOUS );
         }
-        catch (...)
+        catch ( ... )
         {
         }
     }

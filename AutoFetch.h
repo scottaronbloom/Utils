@@ -33,8 +33,7 @@ namespace NSABUtils
     class SABUTILS_EXPORT CAutoFetchMore : public QObject
     {
     public:
-        CAutoFetchMore(QTreeView* view);
+        CAutoFetchMore( QTreeView *view );
     };
 }
 #endif
-

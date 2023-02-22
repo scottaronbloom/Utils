@@ -28,19 +28,18 @@
 #include <QDesktopServices>
 class QUrl;
 
-
 namespace NSABUtils
 {
     class CDelayLineEdit;
     class SABUTILS_EXPORT CSelectFileUrl : public QObject
     {
         Q_OBJECT;
+
     public:
-        CSelectFileUrl(QObject* parent = nullptr);
+        CSelectFileUrl( QObject *parent = nullptr );
 
     public Q_SLOTS:
-        void slotOpenUrl(const QUrl& url);
+        void slotOpenUrl( const QUrl &url );
     };
 }
 #endif
-

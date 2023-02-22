@@ -32,42 +32,42 @@ namespace NSABUtils
     class SABUTILS_EXPORT CDelaySpinBox : public QSpinBox
     {
         Q_OBJECT;
+
     public:
-        explicit CDelaySpinBox(QWidget* parent = nullptr);
-        explicit CDelaySpinBox(int delayMS, QWidget* parent = nullptr);
+        explicit CDelaySpinBox( QWidget *parent = nullptr );
+        explicit CDelaySpinBox( int delayMS, QWidget *parent = nullptr );
         ~CDelaySpinBox();
 
-        void setDelay(int delayMS);
+        void setDelay( int delayMS );
 
-        void setValue(int val);
+        void setValue( int val );
 
     Q_SIGNALS:
-        void sigValueChangedAfterDelay(int);
+        void sigValueChangedAfterDelay( int );
         void sigEditingFinishedAfterDelay();
 
-        void sigTextChangedAfterDelay(const QString&);
+        void sigTextChangedAfterDelay( const QString & );
 
     public Q_SLOTS:
         void slotValueChanged();
         void slotEditingFinished();
-#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+#if QT_VERSION > QT_VERSION_CHECK( 5, 14, 0 )
         void slotTextChanged();
 #endif
 
         void slotValueChangedTimerTimeout();
         void slotEditingFinishedTimerTimeout();
-#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
+#if QT_VERSION > QT_VERSION_CHECK( 5, 14, 0 )
         void slotTextChangedTimerTimeout();
 #endif
 
     private:
         int fDelayMS{ 500 };
-        QTimer* fValueChangedTimer{ nullptr };
-        QTimer* fEditFinishedTimer{ nullptr };
-#if QT_VERSION > QT_VERSION_CHECK(5,14,0)
-        QTimer* fTextChangedTimer{ nullptr };
+        QTimer *fValueChangedTimer{ nullptr };
+        QTimer *fEditFinishedTimer{ nullptr };
+#if QT_VERSION > QT_VERSION_CHECK( 5, 14, 0 )
+        QTimer *fTextChangedTimer{ nullptr };
 #endif
     };
 }
 #endif
-

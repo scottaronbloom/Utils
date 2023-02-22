@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 #include "FileCompare.h"
 #include "FileUtils.h"
 #include "MD5.h"
@@ -35,9 +34,9 @@ namespace NSABUtils
         class CFileCompareImpl
         {
         public:
-            CFileCompareImpl(const QFileInfo& lhs, const QFileInfo& rhs) :
-                fLHS(lhs),
-                fRHS(rhs)
+            CFileCompareImpl( const QFileInfo &lhs, const QFileInfo &rhs ) :
+                fLHS( lhs ),
+                fRHS( rhs )
             {
             }
 
@@ -56,20 +55,18 @@ namespace NSABUtils
             bool fMD5{ true };
         };
 
-        CFileCompare::CFileCompare(const std::string& lhs, const std::string& rhs) :
-            CFileCompare(QString::fromStdString(lhs), QString::fromStdString(rhs))
+        CFileCompare::CFileCompare( const std::string &lhs, const std::string &rhs ) :
+            CFileCompare( QString::fromStdString( lhs ), QString::fromStdString( rhs ) )
         {
-
         }
 
-        CFileCompare::CFileCompare(const QString& lhs, const QString& rhs) :
-            CFileCompare(QFileInfo(lhs), QFileInfo(rhs))
+        CFileCompare::CFileCompare( const QString &lhs, const QString &rhs ) :
+            CFileCompare( QFileInfo( lhs ), QFileInfo( rhs ) )
         {
-
         }
 
-        CFileCompare::CFileCompare(const QFileInfo& lhs, const QFileInfo& rhs) :
-            fImpl(new CFileCompareImpl(lhs, rhs))
+        CFileCompare::CFileCompare( const QFileInfo &lhs, const QFileInfo &rhs ) :
+            fImpl( new CFileCompareImpl( lhs, rhs ) )
         {
         }
 
@@ -78,7 +75,7 @@ namespace NSABUtils
             delete fImpl;
         }
 
-        void CFileCompare::setCheckSize(bool value)
+        void CFileCompare::setCheckSize( bool value )
         {
             fImpl->fCheckSize = value;
         }
@@ -90,10 +87,10 @@ namespace NSABUtils
 
         void CFileCompare::disableCheckTimeStamps()
         {
-            checkTimeStamp({});
+            checkTimeStamp( {} );
         }
 
-        void CFileCompare::checkTimeStamp(std::list< QFileDevice::FileTime > value) // default modtime only
+        void CFileCompare::checkTimeStamp( std::list< QFileDevice::FileTime > value )   // default modtime only
         {
             fImpl->fTimeStampsToCheck = value;
         }
@@ -103,7 +100,7 @@ namespace NSABUtils
             return fImpl->fTimeStampsToCheck;
         }
 
-        void CFileCompare::setTimeStampTolerance(int seconds) // default 2 seconds
+        void CFileCompare::setTimeStampTolerance( int seconds )   // default 2 seconds
         {
             fImpl->fTolerance = seconds;
         }
@@ -113,7 +110,7 @@ namespace NSABUtils
             return fImpl->fTolerance;
         }
 
-        void CFileCompare::compareArchiveBit(bool value) // default false
+        void CFileCompare::compareArchiveBit( bool value )   // default false
         {
             fImpl->fArchiveBit = value;
         }
@@ -123,7 +120,7 @@ namespace NSABUtils
             return fImpl->fArchiveBit;
         }
 
-        void CFileCompare::compareSystemBit(bool value) // default false
+        void CFileCompare::compareSystemBit( bool value )   // default false
         {
             fImpl->fSystemBit = value;
         }
@@ -133,7 +130,7 @@ namespace NSABUtils
             return fImpl->fSystemBit;
         }
 
-        void CFileCompare::compareHiddenBit(bool value) // default false
+        void CFileCompare::compareHiddenBit( bool value )   // default false
         {
             fImpl->fHiddenBit = value;
         }
@@ -143,7 +140,7 @@ namespace NSABUtils
             return fImpl->fHiddenBit;
         }
 
-        void CFileCompare::compareReadOnlyBit(bool value) // default false
+        void CFileCompare::compareReadOnlyBit( bool value )   // default false
         {
             fImpl->fReadOnlyBit = value;
         }
@@ -153,7 +150,7 @@ namespace NSABUtils
             return fImpl->fReadOnlyBit;
         }
 
-        void CFileCompare::compareMD5(bool value) // default true
+        void CFileCompare::compareMD5( bool value )   // default true
         {
             fImpl->fMD5 = value;
         }
@@ -180,42 +177,42 @@ namespace NSABUtils
 
         bool CFileCompareImpl::compare() const
         {
-            if (fCheckSize)
+            if ( fCheckSize )
             {
-                if (fLHS.size() != fRHS.size())
+                if ( fLHS.size() != fRHS.size() )
                     return false;
             }
 
-            if (!compareTimeStamp(fLHS, fRHS, fTolerance, fTimeStampsToCheck))
+            if ( !compareTimeStamp( fLHS, fRHS, fTolerance, fTimeStampsToCheck ) )
             {
                 return false;
             }
 
-            if (fArchiveBit)
+            if ( fArchiveBit )
             {
-                if (isArchiveFile(fLHS) != isArchiveFile(fRHS))
+                if ( isArchiveFile( fLHS ) != isArchiveFile( fRHS ) )
                     return false;
             }
 
-            if (fSystemBit)
+            if ( fSystemBit )
             {
-                if (isSystemFile(fLHS) != isSystemFile(fRHS))
+                if ( isSystemFile( fLHS ) != isSystemFile( fRHS ) )
                     return false;
             }
 
-            if (fHiddenBit)
+            if ( fHiddenBit )
             {
-                if (isHiddenFile(fLHS) != isHiddenFile(fRHS))
+                if ( isHiddenFile( fLHS ) != isHiddenFile( fRHS ) )
                     return false;
             }
 
-            if (fReadOnlyBit)
+            if ( fReadOnlyBit )
             {
-                if (isReadOnlyFile(fLHS) != isReadOnlyFile(fRHS))
+                if ( isReadOnlyFile( fLHS ) != isReadOnlyFile( fRHS ) )
                     return false;
             }
 
-            return NSABUtils::getMd5(fLHS) == NSABUtils::getMd5(fRHS);
+            return NSABUtils::getMd5( fLHS ) == NSABUtils::getMd5( fRHS );
         }
 
     }

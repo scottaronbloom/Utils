@@ -19,46 +19,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 #include "AutoWaitCursor.h"
 #include <QApplication>
 
 namespace NSABUtils
 {
 
-    CAutoWaitCursor::CAutoWaitCursor(QObject* revertOnShowWidget) :
-        CAutoWaitCursor(revertOnShowWidget, Qt::WaitCursor)
+    CAutoWaitCursor::CAutoWaitCursor( QObject *revertOnShowWidget ) :
+        CAutoWaitCursor( revertOnShowWidget, Qt::WaitCursor )
     {
     }
 
-    CAutoWaitCursor::CAutoWaitCursor(QObject* revertOnShowWidget, Qt::CursorShape cursorShape) :
-        QObject(nullptr),
-        fRestoreOnOpenWidget(revertOnShowWidget)
+    CAutoWaitCursor::CAutoWaitCursor( QObject *revertOnShowWidget, Qt::CursorShape cursorShape ) :
+        QObject( nullptr ),
+        fRestoreOnOpenWidget( revertOnShowWidget )
     {
-        if (!dynamic_cast<QApplication*>(QCoreApplication::instance()))
+        if ( !dynamic_cast< QApplication * >( QCoreApplication::instance() ) )
             return;
 
-        QCursor* cursor = QApplication::overrideCursor();
-        QApplication::setOverrideCursor(cursorShape);
-        if (!cursor)
+        QCursor *cursor = QApplication::overrideCursor();
+        QApplication::setOverrideCursor( cursorShape );
+        if ( !cursor )
             qApp->processEvents();
-        if (revertOnShowWidget)
+        if ( revertOnShowWidget )
         {
-            revertOnShowWidget->installEventFilter(this);
+            revertOnShowWidget->installEventFilter( this );
         }
         qApp->processEvents();
     }
 
-    bool CAutoWaitCursor::eventFilter(QObject* obj, QEvent* event)
+    bool CAutoWaitCursor::eventFilter( QObject *obj, QEvent *event )
     {
-        if (obj == fRestoreOnOpenWidget)
+        if ( obj == fRestoreOnOpenWidget )
         {
-            if (event->type() == QEvent::Show)
+            if ( event->type() == QEvent::Show )
             {
                 restore();
             }
         }
-        return QObject::eventFilter(obj, event);
+        return QObject::eventFilter( obj, event );
     }
 
     CAutoWaitCursor::~CAutoWaitCursor()
@@ -68,7 +67,7 @@ namespace NSABUtils
 
     void CAutoWaitCursor::restore()
     {
-        if (!dynamic_cast<QApplication*>(QCoreApplication::instance()))
+        if ( !dynamic_cast< QApplication * >( QCoreApplication::instance() ) )
             return;
 
         QApplication::restoreOverrideCursor();
@@ -77,7 +76,7 @@ namespace NSABUtils
 
     bool CAutoWaitCursor::active()
     {
-        if (!dynamic_cast<QApplication*>(QCoreApplication::instance()))
+        if ( !dynamic_cast< QApplication * >( QCoreApplication::instance() ) )
             return false;
 
         return QApplication::overrideCursor() != nullptr;

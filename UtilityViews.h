@@ -37,17 +37,19 @@ namespace NSABUtils
     class SABUTILS_EXPORT CTableWidgetWithSelectCommand : public QTableWidget
     {
         Q_OBJECT;
+
     public:
-        explicit CTableWidgetWithSelectCommand(QWidget* parent);
-        virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = nullptr) const override;
+        explicit CTableWidgetWithSelectCommand( QWidget *parent );
+        virtual QItemSelectionModel::SelectionFlags selectionCommand( const QModelIndex &index, const QEvent *event = nullptr ) const override;
     };
 
     class SABUTILS_EXPORT CTableViewWithSelectCommand : public QTableView
     {
         Q_OBJECT;
+
     public:
-        explicit CTableViewWithSelectCommand(QWidget* parent);
-        virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = nullptr) const override;
+        explicit CTableViewWithSelectCommand( QWidget *parent );
+        virtual QItemSelectionModel::SelectionFlags selectionCommand( const QModelIndex &index, const QEvent *event = nullptr ) const override;
     };
 
     class SABUTILS_EXPORT CNoEditDelegate : public QItemDelegate
@@ -55,9 +57,10 @@ namespace NSABUtils
         Q_OBJECT
 
     public:
-        CNoEditDelegate(std::unordered_set< int >& noEditColumns, QObject* parent = nullptr);
-        CNoEditDelegate(QObject* parent = nullptr);
-        virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+        CNoEditDelegate( std::unordered_set< int > &noEditColumns, QObject *parent = nullptr );
+        CNoEditDelegate( QObject *parent = nullptr );
+        virtual QWidget *createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+
     private:
         std::unordered_set< int > fNoEditColumns;
     };

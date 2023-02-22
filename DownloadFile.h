@@ -40,13 +40,16 @@ class QNetworkAccessManager;
 class QSslPreSharedKeyAuthenticator;
 class QSslError;
 
-namespace Ui { class CDownloadFile; }
+namespace Ui
+{
+    class CDownloadFile;
+}
 
 namespace NSABUtils
 {
     struct SABUTILS_EXPORT SDownloadFileInfo
     {
-        SDownloadFileInfo(const QString& name, const QUrl& url, uint64_t size);
+        SDownloadFileInfo( const QString &name, const QUrl &url, uint64_t size );
         QString fName;
         QUrl fUrl;
         uint64_t fSize{ 0 };
@@ -55,9 +58,10 @@ namespace NSABUtils
     class SABUTILS_EXPORT CDownloadFile : public QDialog
     {
         Q_OBJECT;
+
     public:
-        CDownloadFile(const SDownloadFileInfo& fileInfo, QWidget* parent);
-        CDownloadFile(const QString& name, const QUrl& url, uint64_t size, QWidget* parent);
+        CDownloadFile( const SDownloadFileInfo &fileInfo, QWidget *parent );
+        CDownloadFile( const QString &name, const QUrl &url, uint64_t size, QWidget *parent );
 
         ~CDownloadFile();
 
@@ -67,28 +71,28 @@ namespace NSABUtils
         bool installAfterDownload() const { return fInstallAfterDownload; }
     public slots:
         void reject() override;
-        void slotRequestFinished(QNetworkReply* reply);
-        void slotAuthenticationRequired(QNetworkReply* reply, QAuthenticator* authenticator);
-        void slotEncrypted(QNetworkReply* reply);
-        void slotPreSharedKeyAuthenticationRequired(QNetworkReply* reply, QSslPreSharedKeyAuthenticator* authenticator);
-        void slotProxyAuthenticationRequired(const QNetworkProxy& proxy, QAuthenticator* authenticator);
-        void slotSSLErrors(QNetworkReply* reply, const QList<QSslError>& errors);
+        void slotRequestFinished( QNetworkReply *reply );
+        void slotAuthenticationRequired( QNetworkReply *reply, QAuthenticator *authenticator );
+        void slotEncrypted( QNetworkReply *reply );
+        void slotPreSharedKeyAuthenticationRequired( QNetworkReply *reply, QSslPreSharedKeyAuthenticator *authenticator );
+        void slotProxyAuthenticationRequired( const QNetworkProxy &proxy, QAuthenticator *authenticator );
+        void slotSSLErrors( QNetworkReply *reply, const QList< QSslError > &errors );
 
         void slotEncryptedReply();
-        void slotErrorOccurred(QNetworkReply::NetworkError code);
+        void slotErrorOccurred( QNetworkReply::NetworkError code );
         void slotFinished();
         void slotMetaDataChanged();
-        void slotPreSharedKeyAuthenticationRequiredReply(QSslPreSharedKeyAuthenticator* authenticator);
+        void slotPreSharedKeyAuthenticationRequiredReply( QSslPreSharedKeyAuthenticator *authenticator );
         void slotRedirectAllowed();
-        void slotRedirected(const QUrl& url);
-        void slotSSLErrorsReply(const QList<QSslError>& errors);
-        void slotUploadProgress(qint64 bytesSent, qint64 bytesTotal);
-        void slotDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+        void slotRedirected( const QUrl &url );
+        void slotSSLErrorsReply( const QList< QSslError > &errors );
+        void slotUploadProgress( qint64 bytesSent, qint64 bytesTotal );
+        void slotDownloadProgress( qint64 bytesReceived, qint64 bytesTotal );
 
         void slotAboutToClose();
-        void slotBytesWritten(qint64 bytes);
-        void slotChannelBytesWritten(int channel, qint64 bytes);
-        void slotChannelReadyRead(int channel);
+        void slotBytesWritten( qint64 bytes );
+        void slotChannelBytesWritten( int channel, qint64 bytes );
+        void slotChannelReadyRead( int channel );
         void slotReadChannelFinished();
         void slotReadyRead();
 
@@ -100,8 +104,8 @@ namespace NSABUtils
         std::unique_ptr< Ui::CDownloadFile > fImpl;
         QString fDownloadFileName;
         QFile fOutputFile;
-        QNetworkAccessManager* fManager{ nullptr };
-        QNetworkReply* fReply{ nullptr };
+        QNetworkAccessManager *fManager{ nullptr };
+        QNetworkReply *fReply{ nullptr };
         QElapsedTimer fDownloadTime;
         bool fHasError;
         SDownloadFileInfo fFileInfo;
@@ -110,4 +114,3 @@ namespace NSABUtils
     };
 }
 #endif
-

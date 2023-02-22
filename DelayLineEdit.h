@@ -34,6 +34,7 @@ namespace NSABUtils
     class SABUTILS_EXPORT CDelayLineEdit : public QLineEdit
     {
         Q_OBJECT;
+
     public:
         enum class ELineEditStatus
         {
@@ -42,30 +43,27 @@ namespace NSABUtils
             eNotOK
         };
 
-        explicit CDelayLineEdit(QWidget* parent = nullptr);
-        explicit CDelayLineEdit(const QString& text, QWidget* parent = nullptr);
-        explicit CDelayLineEdit(const QString& text, int delayMS, QWidget* parent = nullptr);
+        explicit CDelayLineEdit( QWidget *parent = nullptr );
+        explicit CDelayLineEdit( const QString &text, QWidget *parent = nullptr );
+        explicit CDelayLineEdit( const QString &text, int delayMS, QWidget *parent = nullptr );
 
         virtual ~CDelayLineEdit();
-        virtual void keyPressEvent(QKeyEvent* event);
-        void setText(const QString& text);
-        virtual void setDelay(int delayMS);
+        virtual void keyPressEvent( QKeyEvent *event );
+        void setText( const QString &text );
+        virtual void setDelay( int delayMS );
 
-        void setLineEditColor(ELineEditStatus status);
-        void setLineEditColor(bool aOK);
-        void setIsOKFunction(std::function< bool(const QString& text) > func, const QString& errorMsg = {})
+        void setLineEditColor( ELineEditStatus status );
+        void setLineEditColor( bool aOK );
+        void setIsOKFunction( std::function< bool( const QString &text ) > func, const QString &errorMsg = {} )
         {
             fIsOK.first = func;
             fIsOK.second = errorMsg;
         }
-        bool isOK() const
-        {
-            return fStatus != ELineEditStatus::eNotOK;
-        }
+        bool isOK() const { return fStatus != ELineEditStatus::eNotOK; }
     Q_SIGNALS:
-        void sigTextChangedAfterDelay(const QString& text);
-        void sigTextEditedAfterDelay(const QString& text);
-        void sigFinishedEditingAfterDelay(const QString& text);
+        void sigTextChangedAfterDelay( const QString &text );
+        void sigTextEditedAfterDelay( const QString &text );
+        void sigFinishedEditingAfterDelay( const QString &text );
 
     public Q_SLOTS:
         void slotTextChanged();
@@ -74,93 +72,92 @@ namespace NSABUtils
         virtual void slotEditTimerTimeout();
 
     protected:
-        void editTimeout(bool aOK);
-        void changeTimeout(bool aOK);
-        void connectToEditor(bool connectOrDisconnect);
+        void editTimeout( bool aOK );
+        void changeTimeout( bool aOK );
+        void connectToEditor( bool connectOrDisconnect );
 
         int fDelayMS{ 500 };
-        QTimer* fChangedTimer{ nullptr };
-        QTimer* fEditedTimer{ nullptr };
+        QTimer *fChangedTimer{ nullptr };
+        QTimer *fEditedTimer{ nullptr };
         bool fEditingFinished{ false };
-        std::pair< std::function< bool(const QString& text) >, QString > fIsOK;
+        std::pair< std::function< bool( const QString &text ) >, QString > fIsOK;
         ELineEditStatus fStatus{ ELineEditStatus::ePending };
     };
 
     class SABUTILS_EXPORT CPathBasedDelayLineEdit : public CDelayLineEdit
     {
         Q_OBJECT;
+
     public:
-        explicit CPathBasedDelayLineEdit(QWidget* parent = nullptr);
-        explicit CPathBasedDelayLineEdit(const QString& text, QWidget* parent = nullptr);
-        explicit CPathBasedDelayLineEdit(const QString& text, int delayMS, QWidget* parent = nullptr);
+        explicit CPathBasedDelayLineEdit( QWidget *parent = nullptr );
+        explicit CPathBasedDelayLineEdit( const QString &text, QWidget *parent = nullptr );
+        explicit CPathBasedDelayLineEdit( const QString &text, int delayMS, QWidget *parent = nullptr );
 
         void init();
 
         virtual ~CPathBasedDelayLineEdit();
-        void setIsOKFunction(std::function< bool(const QString& text) > func, const QString& errorMsg = {}) = delete;
+        void setIsOKFunction( std::function< bool( const QString &text ) > func, const QString &errorMsg = {} ) = delete;
 
-        virtual void setDelay(int delayMS) override;
-
+        virtual void setDelay( int delayMS ) override;
 
         bool checkExists() const;
-        void setCheckExists(bool val);
+        void setCheckExists( bool val );
 
         bool checkIsBundle() const;
-        void setCheckIsBundle(bool val);
+        void setCheckIsBundle( bool val );
 
         bool checkIsDir() const;
-        void setCheckIsDir(bool val);
+        void setCheckIsDir( bool val );
 
         bool checkIsExecutable() const;
-        void setCheckIsExecutable(bool val);
+        void setCheckIsExecutable( bool val );
 
         bool checkIsFile() const;
-        void setCheckIsFile(bool val);
+        void setCheckIsFile( bool val );
 
         bool checkIsHidden() const;
-        void setCheckIsHidden(bool val);
+        void setCheckIsHidden( bool val );
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
         bool checkIsJunction() const;
-        void setCheckIsJunction(bool val);
+        void setCheckIsJunction( bool val );
 #endif
 
         bool checkIsReadable() const;
-        void setCheckIsReadable(bool val);
+        void setCheckIsReadable( bool val );
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
         bool checkIsShortcut() const;
-        void setCheckIsShortcut(bool val);
+        void setCheckIsShortcut( bool val );
 #endif
 
         bool checkIsSymLink() const;
-        void setCheckIsSymLink(bool val);
+        void setCheckIsSymLink( bool val );
 
-#if QT_VERSION >= QT_VERSION_CHECK( 5,15, 0 )
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 15, 0 )
         bool checkIsSymbolicLink() const;
-        void setCheckIsSymbolicLink(bool val);
+        void setCheckIsSymbolicLink( bool val );
 #endif
 
         bool checkIsWritable() const;
-        void setCheckIsWritable(bool val);
+        void setCheckIsWritable( bool val );
 
         QFile::Permissions checkPermissions() const;
-        void setCheckPermissions(QFile::Permissions val);
+        void setCheckPermissions( QFile::Permissions val );
 
         bool useNTFSPermissions() const;
-        void setUseNTFSPermissions(bool val);
+        void setUseNTFSPermissions( bool val );
     Q_SIGNALS:
 
     public Q_SLOTS:
-        void slotFileCheckFinished(bool aOK);
+        void slotFileCheckFinished( bool aOK );
         virtual void slotChangedTimerTimeout() override;
         virtual void slotEditTimerTimeout() override;
 
     private:
         bool fEdited{ false };
         bool fChanged{ false };
-        CBackgroundFileCheck* fFileChecker{ nullptr };
+        CBackgroundFileCheck *fFileChecker{ nullptr };
     };
 }
 #endif
-

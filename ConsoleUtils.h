@@ -24,41 +24,39 @@
 
 #include "SABUtilsExport.h"
 
-
 #include <string>
 #include <QString>
 namespace NSABUtils
 {
     enum class ESubSystem
     {
-        eIMAGE_SUBSYSTEM_UNKNOWN = 0
-        , eIMAGE_SUBSYSTEM_NATIVE = 1
-        , eIMAGE_SUBSYSTEM_WINDOWS_GUI = 2
-        , eIMAGE_SUBSYSTEM_WINDOWS_CUI = 3
-        , eIMAGE_SUBSYSTEM_OS2_CUI = 5
-        , eIMAGE_SUBSYSTEM_POSIX_CUI = 7
-        , eIMAGE_SUBSYSTEM_NATIVE_WINDOWS = 8
-        , eIMAGE_SUBSYSTEM_WINDOWS_CE_GUI = 9
-        , eIMAGE_SUBSYSTEM_EFI_APPLICATION = 10
-        , eIMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER = 11
-        , eIMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER = 12
-        , eIMAGE_SUBSYSTEM_EFI_ROM = 13
-        , eIMAGE_SUBSYSTEM_XBOX = 14
-        , eIMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION = 16
+        eIMAGE_SUBSYSTEM_UNKNOWN = 0,
+        eIMAGE_SUBSYSTEM_NATIVE = 1,
+        eIMAGE_SUBSYSTEM_WINDOWS_GUI = 2,
+        eIMAGE_SUBSYSTEM_WINDOWS_CUI = 3,
+        eIMAGE_SUBSYSTEM_OS2_CUI = 5,
+        eIMAGE_SUBSYSTEM_POSIX_CUI = 7,
+        eIMAGE_SUBSYSTEM_NATIVE_WINDOWS = 8,
+        eIMAGE_SUBSYSTEM_WINDOWS_CE_GUI = 9,
+        eIMAGE_SUBSYSTEM_EFI_APPLICATION = 10,
+        eIMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER = 11,
+        eIMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER = 12,
+        eIMAGE_SUBSYSTEM_EFI_ROM = 13,
+        eIMAGE_SUBSYSTEM_XBOX = 14,
+        eIMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION = 16
     };
 
     // windows only, not defined for linux
-    SABUTILS_EXPORT const char* toString(ESubSystem subsystem);
+    SABUTILS_EXPORT const char *toString( ESubSystem subsystem );
     SABUTILS_EXPORT ESubSystem getSubSystemForCurrentHandle();
-    SABUTILS_EXPORT ESubSystem getSubSystemForHandle(void* handle); // return from GetModuleHandle
+    SABUTILS_EXPORT ESubSystem getSubSystemForHandle( void *handle );   // return from GetModuleHandle
 
     // returns true for linux
-    SABUTILS_EXPORT bool runningAsConsole();  // getSubSystemForCurrentHandle() == eIMAGE_SUBSYSTEM_WINDOWS_CUI
+    SABUTILS_EXPORT bool runningAsConsole();   // getSubSystemForCurrentHandle() == eIMAGE_SUBSYSTEM_WINDOWS_CUI
 
     // does nothing for linux
-    SABUTILS_EXPORT bool attachConsole(std::string* msg = nullptr); // returns true if successful
-    SABUTILS_EXPORT bool attachConsole(QString* msg); // returns true if successful
+    SABUTILS_EXPORT bool attachConsole( std::string *msg = nullptr );   // returns true if successful
+    SABUTILS_EXPORT bool attachConsole( QString *msg );   // returns true if successful
 }
 
 #endif
-

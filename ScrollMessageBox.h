@@ -33,29 +33,32 @@ class QAbstractButton;
 
 namespace NSABUtils
 {
-    namespace Ui { class CScrollMessageBox; };
+    namespace Ui
+    {
+        class CScrollMessageBox;
+    };
 
     class SABUTILS_EXPORT CScrollMessageBox : public QDialog
     {
         Q_OBJECT
 
     public:
-        CScrollMessageBox(QWidget* parent = nullptr);
-        CScrollMessageBox(const QString& title, const QString& label, QWidget* parent = nullptr);
+        CScrollMessageBox( QWidget *parent = nullptr );
+        CScrollMessageBox( const QString &title, const QString &label, QWidget *parent = nullptr );
         ~CScrollMessageBox();
 
-        void setTitle(const QString& title);
-        void setLabel(const QString& label);
+        void setTitle( const QString &title );
+        void setLabel( const QString &label );
 
-        void setPlainText(const QString& text);
-        void setHtmlText(const QString& text);
-        void setIconLabel(const QMessageBox::Icon& icon);
-        void setButtons(QDialogButtonBox::StandardButtons buttons);
+        void setPlainText( const QString &text );
+        void setHtmlText( const QString &text );
+        void setIconLabel( const QMessageBox::Icon &icon );
+        void setButtons( QDialogButtonBox::StandardButtons buttons );
     private Q_SLOTS:
-        void slotButtonClicked(QAbstractButton* btn);
+        void slotButtonClicked( QAbstractButton *btn );
 
     private:
         std::unique_ptr< Ui::CScrollMessageBox > fImpl;
     };
 }
-#endif 
+#endif

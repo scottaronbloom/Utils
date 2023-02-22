@@ -21,48 +21,48 @@
 // SOFTWARE.
 
 #ifndef QT_NO_SSL
-#include "ValidateOpenSSL.h"
-#include <QApplication>
-#include <QSslSocket>
-#include <QLibrary>
-#include <QDir>
+    #include "ValidateOpenSSL.h"
+    #include <QApplication>
+    #include <QSslSocket>
+    #include <QLibrary>
+    #include <QDir>
 namespace NSABUtils
 {
-    std::pair< bool, QString > validateOpenSSL(bool requireLocal /*= true*/)
+    std::pair< bool, QString > validateOpenSSL( bool requireLocal /*= true*/ )
     {
-#if defined(Q_PROCESSOR_X86_64)
-#define QT_SSL_SUFFIX "-x64"
-#elif defined(Q_PROCESSOR_ARM_64)
-#define QT_SSL_SUFFIX "-arm64"
-#elif defined(Q_PROCESSOR_ARM_32)
-#define QT_SSL_SUFFIX "-arm"
-#else
-#define QT_SSL_SUFFIX
-#endif
+    #if defined( Q_PROCESSOR_X86_64 )
+        #define QT_SSL_SUFFIX "-x64"
+    #elif defined( Q_PROCESSOR_ARM_64 )
+        #define QT_SSL_SUFFIX "-arm64"
+    #elif defined( Q_PROCESSOR_ARM_32 )
+        #define QT_SSL_SUFFIX "-arm"
+    #else
+        #define QT_SSL_SUFFIX
+    #endif
 
-        if (requireLocal)
+        if ( requireLocal )
         {
-            auto libs = QStringList({ QString("libssl-1_1" QT_SSL_SUFFIX), QString("libcrypto-1_1" QT_SSL_SUFFIX) });
-            auto appDir = QDir(QApplication::applicationDirPath());
-            for (auto&& currLib : libs)
+            auto libs = QStringList( { QString( "libssl-1_1" QT_SSL_SUFFIX ), QString( "libcrypto-1_1" QT_SSL_SUFFIX ) } );
+            auto appDir = QDir( QApplication::applicationDirPath() );
+            for ( auto &&currLib : libs )
             {
-                auto path = appDir.absoluteFilePath(currLib);
-                QLibrary lib(path);
-                if (!lib.load())
+                auto path = appDir.absoluteFilePath( currLib );
+                QLibrary lib( path );
+                if ( !lib.load() )
                 {
-                    return { false, QObject::tr("Please re-install, The OpenSSL library '%1' could not be found.").arg(currLib) };
+                    return { false, QObject::tr( "Please re-install, The OpenSSL library '%1' could not be found." ).arg( currLib ) };
                 }
             }
         }
-        if (!QSslSocket::supportsSsl())
+        if ( !QSslSocket::supportsSsl() )
         {
-            return { false, QObject::tr("Please re-install, The OpenSSL libraries could not be found") };
+            return { false, QObject::tr( "Please re-install, The OpenSSL libraries could not be found" ) };
         }
 
-        //tryToLoadOpenSslWin32Library(QLatin1String(),
-        //    QLatin1String), result);
+        // tryToLoadOpenSslWin32Library(QLatin1String(),
+        //     QLatin1String), result);
 
-#undef QT_SSL_SUFFIX
+    #undef QT_SSL_SUFFIX
 
         return { true, QString() };
     }

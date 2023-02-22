@@ -39,17 +39,14 @@ namespace NSABUtils
         struct SABUTILS_EXPORT SSIDInfo
         {
             SSIDInfo() {}
-            SSIDInfo(void* sid);
+            SSIDInfo( void *sid );
 
             std::wstring dispName() const;
             std::wstring fSID;
             std::wstring fDomain;
             std::wstring fOwner;
 
-            bool operator<(const SSIDInfo& rhs) const
-            {
-                return dispName() < rhs.dispName();
-            }
+            bool operator<( const SSIDInfo &rhs ) const { return dispName() < rhs.dispName(); }
             std::pair< bool, std::wstring > fErrorMsg{ false, std::wstring() };
         };
 
@@ -57,24 +54,25 @@ namespace NSABUtils
         {
         public:
             // if onlyinvalid is true, DACLs will only contained invalid SID data
-            CSIDFileInfo(const std::wstring& pathName, bool onlyInvalidDACL = false);
-            CSIDFileInfo(const std::string& pathName, bool onlyInvalidDACL = false);
-            CSIDFileInfo(const QString& pathName, bool onlyInvalidDACL = false);
-            CSIDFileInfo(const QFileInfo& fileInfo, bool onlyInvalidDACL = false);
+            CSIDFileInfo( const std::wstring &pathName, bool onlyInvalidDACL = false );
+            CSIDFileInfo( const std::string &pathName, bool onlyInvalidDACL = false );
+            CSIDFileInfo( const QString &pathName, bool onlyInvalidDACL = false );
+            CSIDFileInfo( const QFileInfo &fileInfo, bool onlyInvalidDACL = false );
 
             std::wstring daclsString() const;
 
             bool hasInvalidSID() const;
             bool aOK() const { return fAOK; }
 
-            const SSIDInfo& owner() const { return fOwner; }
-            const SSIDInfo& group() const { return fGroup; }
-            const std::set< SSIDInfo >& dacls() const { return fDACLs; }
+            const SSIDInfo &owner() const { return fOwner; }
+            const SSIDInfo &group() const { return fGroup; }
+            const std::set< SSIDInfo > &dacls() const { return fDACLs; }
+
         private:
             bool fAOK{ false };
             bool fOnlyInvalidDACL{ false };
             std::wstring fFileName;
-            std::list< std::wstring > fMsg; // messages found;
+            std::list< std::wstring > fMsg;   // messages found;
 
             SSIDInfo fOwner;
             SSIDInfo fGroup;

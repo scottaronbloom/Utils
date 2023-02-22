@@ -35,7 +35,7 @@ namespace NSABUtils
 {
     namespace NVSInstallUtils
     {
-        using TInstalledVisualStudios = std::pair < std::map< QString, QString >, QStringList >;
+        using TInstalledVisualStudios = std::pair< std::map< QString, QString >, QStringList >;
         SABUTILS_EXPORT std::tuple< bool, QString, TInstalledVisualStudios > getInstalledVisualStudios();
     }
 }

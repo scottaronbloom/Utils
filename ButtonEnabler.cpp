@@ -29,60 +29,59 @@
 
 namespace NSABUtils
 {
-    CButtonEnabler::CButtonEnabler(QAbstractItemView* view, QAbstractButton* btn, QObject* parent) :
-        QObject(parent),
-        fButton(btn)
+    CButtonEnabler::CButtonEnabler( QAbstractItemView *view, QAbstractButton *btn, QObject *parent ) :
+        QObject( parent ),
+        fButton( btn )
     {
-        if (parent == nullptr)
-            setParent(btn);
-        if (view->selectionModel())
-            connect(view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CButtonEnabler::slotSelectionChanged);
-        btn->setEnabled(false);
-        if (view->selectionModel())
-            slotSelectionChanged(view->selectionModel()->selection(), QItemSelection());
+        if ( parent == nullptr )
+            setParent( btn );
+        if ( view->selectionModel() )
+            connect( view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CButtonEnabler::slotSelectionChanged );
+        btn->setEnabled( false );
+        if ( view->selectionModel() )
+            slotSelectionChanged( view->selectionModel()->selection(), QItemSelection() );
         else
-            slotSelectionChanged(QItemSelection(), QItemSelection());
+            slotSelectionChanged( QItemSelection(), QItemSelection() );
     }
 
-    CButtonEnabler::CButtonEnabler(QLineEdit* le, QAbstractButton* btn, QObject* parent) :
-        QObject(parent),
-        fButton(btn)
+    CButtonEnabler::CButtonEnabler( QLineEdit *le, QAbstractButton *btn, QObject *parent ) :
+        QObject( parent ),
+        fButton( btn )
     {
-        if (parent == nullptr)
-            setParent(btn);
-        connect(le, &QLineEdit::textChanged, this, &CButtonEnabler::slotTextChanged);
-        slotTextChanged(le->text());
+        if ( parent == nullptr )
+            setParent( btn );
+        connect( le, &QLineEdit::textChanged, this, &CButtonEnabler::slotTextChanged );
+        slotTextChanged( le->text() );
     }
-
 
     void CButtonEnabler::slotReset()
     {
-        if (fButton)
-            fButton->setEnabled(false);
+        if ( fButton )
+            fButton->setEnabled( false );
     }
 
-    void CButtonEnabler::slotSelectionChanged(const QItemSelection& selected, const QItemSelection&)
+    void CButtonEnabler::slotSelectionChanged( const QItemSelection &selected, const QItemSelection & )
     {
         bool enabled = selected.count() && selected.first().isValid();
-        if (!enabled)
+        if ( !enabled )
         {
-            auto selectionModel = dynamic_cast<QItemSelectionModel*>(sender());
-            if (selectionModel)
+            auto selectionModel = dynamic_cast< QItemSelectionModel * >( sender() );
+            if ( selectionModel )
             {
                 auto idxs = selectionModel->selectedIndexes();
                 enabled = idxs.count() && idxs.first().isValid();
             }
         }
-        fButton->setEnabled(enabled);
+        fButton->setEnabled( enabled );
     }
 
-    void CButtonEnabler::slotTextChanged(const QString& txt)
+    void CButtonEnabler::slotTextChanged( const QString &txt )
     {
         bool enable = !txt.isEmpty();
-        if (fLineEditIsFile && enable)
+        if ( fLineEditIsFile && enable )
         {
-            enable = QFile(txt).exists();
+            enable = QFile( txt ).exists();
         }
-        fButton->setEnabled(!txt.isEmpty());
+        fButton->setEnabled( !txt.isEmpty() );
     }
 }

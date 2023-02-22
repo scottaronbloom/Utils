@@ -38,43 +38,45 @@ namespace NSABUtils
     class SABUTILS_EXPORT CImageScrollBar : public QScrollBar
     {
         Q_OBJECT;
+
     public:
-        CImageScrollBar(QWidget* parent = nullptr);
-        CImageScrollBar(Qt::Orientation orientation, QWidget* parent = nullptr);
+        CImageScrollBar( QWidget *parent = nullptr );
+        CImageScrollBar( Qt::Orientation orientation, QWidget *parent = nullptr );
 
 #ifdef BIF_SCROLLBAR_SUPPORT
-        void setBIFFile(std::shared_ptr< NBIF::CFile > bifFile);
-        void setBIFModel(std::shared_ptr< NBIF::CModel > bifModel);
+        void setBIFFile( std::shared_ptr< NBIF::CFile > bifFile );
+        void setBIFModel( std::shared_ptr< NBIF::CModel > bifModel );
 #endif
-        void setImages(const std::list< QImage >& images);
-        void setImages(const std::vector< QImage >& images);
+        void setImages( const std::list< QImage > &images );
+        void setImages( const std::vector< QImage > &images );
 
-        void setMessageFormat(const QString& format) { fMsgFormat = format; }
+        void setMessageFormat( const QString &format ) { fMsgFormat = format; }
         QString messageFormat() const { return fMsgFormat; }
 
-        void setUpdateOnScrollOnly(bool updateOnScrollOnly) { fUpdateOnScrollOnly = updateOnScrollOnly; }
+        void setUpdateOnScrollOnly( bool updateOnScrollOnly ) { fUpdateOnScrollOnly = updateOnScrollOnly; }
         bool hasImages() const;
     private Q_SLOTS:
-        void slotValueChanged(int value);
-        void slotSliderMoved(int value);
+        void slotValueChanged( int value );
+        void slotSliderMoved( int value );
         void slotSliderPressed();
         void slotSliderReleased();
+
     private:
-        virtual bool event(QEvent* event) override;
+        virtual bool event( QEvent *event ) override;
 
         QString message() const;
         int numImages() const;
 
         void updateImage();
 
-        QImage getImage(int imageNum) const;
+        QImage getImage( int imageNum ) const;
 
         void updateImageFromPos();
-        void updateValue(int value);
+        void updateValue( int value );
 
-        void setCurrentImageNum(int num);
+        void setCurrentImageNum( int num );
         void init();
-        int pixelPosToRangeValue(int pos) const;
+        int pixelPosToRangeValue( int pos ) const;
 
         int fCurrentImageNum{ -1 };
         bool fShowImage{ false };

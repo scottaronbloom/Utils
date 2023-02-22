@@ -32,12 +32,12 @@ namespace NSABUtils
 {
     // for a given model, when it changes at all call/connect to the given member on the reciever object
     // if excluded then it only disconnects, and doesnt connect to the model and reciever
-    SABUTILS_EXPORT void setupModelChanged(const QAbstractItemModel* model, const QObject* reciever, const char* member, bool isExcluded = false);
-    SABUTILS_EXPORT void setupModelChanged(const QAbstractItemModel* model, const QObject* reciever, const QMetaMethod& member, bool isExcluded = false);
+    SABUTILS_EXPORT void setupModelChanged( const QAbstractItemModel *model, const QObject *reciever, const char *member, bool isExcluded = false );
+    SABUTILS_EXPORT void setupModelChanged( const QAbstractItemModel *model, const QObject *reciever, const QMetaMethod &member, bool isExcluded = false );
 
     // for a given parent widget call/connect to the given member on the parent widget for all the child widgets of the parent
     // if the child widget is in the excluded list OR its parent is in the excluded list, then it is not connected
     // if exclude all is set, then it disconnects from all previous connections
-    SABUTILS_EXPORT void setupWidgetChanged(const QWidget* parentWidget, const char* member, const std::set< QWidget* >& excluded = {}, bool excludeAll = false);
-    SABUTILS_EXPORT void setupWidgetChanged(const QWidget* parentWidget, const QMetaMethod& member, const std::set< QWidget* >& excluded = {}, bool excludeAll = false);
+    SABUTILS_EXPORT void setupWidgetChanged( const QWidget *parentWidget, const char *member, const std::set< QWidget * > &excluded = {}, bool excludeAll = false );
+    SABUTILS_EXPORT void setupWidgetChanged( const QWidget *parentWidget, const QMetaMethod &member, const std::set< QWidget * > &excluded = {}, bool excludeAll = false );
 }

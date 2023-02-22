@@ -30,43 +30,42 @@
 
 namespace NSABUtils
 {
-    CTableWidgetWithSelectCommand::CTableWidgetWithSelectCommand(QWidget* parent) :
-        QTableWidget(parent)
+    CTableWidgetWithSelectCommand::CTableWidgetWithSelectCommand( QWidget *parent ) :
+        QTableWidget( parent )
     {
     }
 
-    QItemSelectionModel::SelectionFlags CTableWidgetWithSelectCommand::selectionCommand(const QModelIndex& index, const QEvent* event /*= 0*/) const
+    QItemSelectionModel::SelectionFlags CTableWidgetWithSelectCommand::selectionCommand( const QModelIndex &index, const QEvent *event /*= 0*/ ) const
     {
-        return QTableWidget::selectionCommand(index, event);
+        return QTableWidget::selectionCommand( index, event );
     }
 
-
-    CTableViewWithSelectCommand::CTableViewWithSelectCommand(QWidget* parent) :
-        QTableView(parent)
-    {
-    }
-
-    QItemSelectionModel::SelectionFlags CTableViewWithSelectCommand::selectionCommand(const QModelIndex& index, const QEvent* event /*= 0*/) const
-    {
-        return QTableView::selectionCommand(index, event);
-    }
-
-    CNoEditDelegate::CNoEditDelegate(QObject* parent) :
-        QItemDelegate(parent)
+    CTableViewWithSelectCommand::CTableViewWithSelectCommand( QWidget *parent ) :
+        QTableView( parent )
     {
     }
 
-    CNoEditDelegate::CNoEditDelegate(std::unordered_set< int >& noEditColumns, QObject* parent) :
-        QItemDelegate(parent)
+    QItemSelectionModel::SelectionFlags CTableViewWithSelectCommand::selectionCommand( const QModelIndex &index, const QEvent *event /*= 0*/ ) const
+    {
+        return QTableView::selectionCommand( index, event );
+    }
+
+    CNoEditDelegate::CNoEditDelegate( QObject *parent ) :
+        QItemDelegate( parent )
+    {
+    }
+
+    CNoEditDelegate::CNoEditDelegate( std::unordered_set< int > &noEditColumns, QObject *parent ) :
+        QItemDelegate( parent )
     {
         fNoEditColumns = noEditColumns;
     }
 
-    QWidget* CNoEditDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+    QWidget *CNoEditDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const
     {
-        if (fNoEditColumns.empty() || (fNoEditColumns.find(index.column()) != fNoEditColumns.end()))
+        if ( fNoEditColumns.empty() || ( fNoEditColumns.find( index.column() ) != fNoEditColumns.end() ) )
             return nullptr;
-        return QItemDelegate::createEditor(parent, option, index);
+        return QItemDelegate::createEditor( parent, option, index );
     }
 
 }
