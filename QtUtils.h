@@ -210,9 +210,10 @@ namespace NSABUtils
     SABUTILS_EXPORT int itemCount( QAbstractItemModel *model, bool rowCountOnly );
 
     SABUTILS_EXPORT QStringList getHeadersForModel( QAbstractItemModel *model );
-    SABUTILS_EXPORT void writeModel( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, const QString &plauralSuffix,
-                                     const std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) > &writeRow =
-                                         std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) >() );
+    SABUTILS_EXPORT void writeModel(
+        QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, const QString &plauralSuffix,
+        const std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) > &writeRow =
+            std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) >() );
 
     SABUTILS_EXPORT void expandAll( QTreeView *view );
 

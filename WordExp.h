@@ -45,8 +45,9 @@ namespace NSABUtils
         static QStringList getAbsoluteFilePaths( const QString &pathName, bool *aOK = nullptr );   // aOK set to false if windows and invalid user request
 
         static QString getHomeDir( const QString &userName, bool *aOK = nullptr );   // on windows can only return for current user, aOK set to false if windows and invalid user request
-        static QString expandTildePath( const QString &fileName,
-                                        bool *aOK = nullptr );   // On linux, if it starts with ~user or ~/ on windows, only ~/ is supported, returns ~user (no expansion) otherwise, aOK set to false if windows and invalid user request
+        static QString expandTildePath(
+            const QString &fileName,
+            bool *aOK = nullptr );   // On linux, if it starts with ~user or ~/ on windows, only ~/ is supported, returns ~user (no expansion) otherwise, aOK set to false if windows and invalid user request
 
         static QString getUserName();
         static QString getHostName();

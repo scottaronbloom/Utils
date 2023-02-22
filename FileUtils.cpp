@@ -1017,10 +1017,11 @@ namespace NSABUtils
             QStringList retVal;
 
             auto tmp = resourceDir.absolutePath();
-            QDirIterator it( resourceDir.absolutePath(),
-                             QStringList() << "*"
-                                           << "*.*",
-                             QDir::NoDotAndDotDot | QDir::AllEntries );
+            QDirIterator it(
+                resourceDir.absolutePath(),
+                QStringList() << "*"
+                              << "*.*",
+                QDir::NoDotAndDotDot | QDir::AllEntries );
             while ( it.hasNext() )
             {
                 QString path = it.next();

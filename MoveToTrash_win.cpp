@@ -197,8 +197,8 @@ namespace NSABUtils
 
         IFACEMETHODIMP CFileOpProgSinkApp::PostCopyItem( DWORD /*dwFlags*/, IShellItem *psiItem, IShellItem *psiDestinationFolder, PCWSTR pszNewName, HRESULT hrCopy, IShellItem *psiNewlyCreated )
         {
-            return returnFinishedStatus( hrCopy, QString( "Copied <SOURCE> to directory '%1' as '%2'. Final path name '%4'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ).arg( getPathNameForItem( psiNewlyCreated ) ),
-                                         psiItem );
+            return returnFinishedStatus(
+                hrCopy, QString( "Copied <SOURCE> to directory '%1' as '%2'. Final path name '%4'." ).arg( getPathNameForItem( psiDestinationFolder ) ).arg( pszNewName ).arg( getPathNameForItem( psiNewlyCreated ) ), psiItem );
         }
 
         IFACEMETHODIMP CFileOpProgSinkApp::PreDeleteItem( DWORD dwFlags, IShellItem *psiItem )
@@ -296,12 +296,13 @@ namespace NSABUtils
             if ( FAILED( hr ) )
             {
                 // Couldn't add flags - clean up and return
-                return showError( "Couldn't add flags", hr,
-                                  [ fileOperation ]()
-                                  {
-                                      fileOperation->Release();
-                                      CoUninitialize();
-                                  } );
+                return showError(
+                    "Couldn't add flags", hr,
+                    [ fileOperation ]()
+                    {
+                        fileOperation->Release();
+                        CoUninitialize();
+                    } );
             }
 
             // auto path = QDir::current().absoluteFilePath( fileName ).toStdWString();
@@ -311,14 +312,15 @@ namespace NSABUtils
             hr = SHCreateItemFromParsingName( path.c_str(), nullptr, IID_PPV_ARGS( &fileOrFolderItem ) );
             if ( FAILED( hr ) )
             {
-                return showError( "Couldn't create IShellItem from path", hr,
-                                  [ fileOrFolderItem, fileOperation ]()
-                                  {
-                                      if ( fileOrFolderItem )
-                                          fileOrFolderItem->Release();
-                                      fileOperation->Release();
-                                      CoUninitialize();
-                                  } );
+                return showError(
+                    "Couldn't create IShellItem from path", hr,
+                    [ fileOrFolderItem, fileOperation ]()
+                    {
+                        if ( fileOrFolderItem )
+                            fileOrFolderItem->Release();
+                        fileOperation->Release();
+                        CoUninitialize();
+                    } );
             }
 
             auto pSync = new CFileOpProgSinkApp( options );
@@ -340,14 +342,15 @@ namespace NSABUtils
             fileOrFolderItem->Release();
             if ( FAILED( hr ) )
             {
-                return showError( "Failed to mark file/folder item for deletion", hr,
-                                  [ fileOrFolderItem, fileOperation, pSync ]()
-                                  {
-                                      fileOperation->Release();
-                                      if ( pSync )
-                                          pSync->Release();
-                                      CoUninitialize();
-                                  } );
+                return showError(
+                    "Failed to mark file/folder item for deletion", hr,
+                    [ fileOrFolderItem, fileOperation, pSync ]()
+                    {
+                        fileOperation->Release();
+                        if ( pSync )
+                            pSync->Release();
+                        CoUninitialize();
+                    } );
             }
             hr = fileOperation->PerformOperations();
             fileOperation->Release();

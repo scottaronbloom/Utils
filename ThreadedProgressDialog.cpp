@@ -52,8 +52,8 @@ namespace NSABUtils
         QFutureWatcher< void > *dWatcher{ nullptr };
     };
 
-    CThreadedProgressDialog::CThreadedProgressDialog( TVoidFunction xFunc, const QString &xLabelText, const QString &xCancelButtonText, int xMinimum, int xMaximum, QWidget *xParent /*= nullptr*/,
-                                                      Qt::WindowFlags xFlags /*= Qt::WindowFlags() */ ) :
+    CThreadedProgressDialog::CThreadedProgressDialog(
+        TVoidFunction xFunc, const QString &xLabelText, const QString &xCancelButtonText, int xMinimum, int xMaximum, QWidget *xParent /*= nullptr*/, Qt::WindowFlags xFlags /*= Qt::WindowFlags() */ ) :
         QProgressDialog( xLabelText, xCancelButtonText, xMinimum, xMaximum, xParent, xFlags ),
         dImpl( new CThreadedProgressDialogImpl( xFunc, this ) )
     {
