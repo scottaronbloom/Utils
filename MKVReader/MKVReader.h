@@ -40,13 +40,14 @@ namespace NSABUtils
         {
         public:
             CMKVFile();
-            CMKVFile( const QString & fileName );
+            CMKVFile( const QString &fileName );
             virtual ~CMKVFile();
 
-            bool open( const QString & fileName );
+            bool open( const QString &fileName );
 
             void close();
             QString errorMsg() const { return fErrorMsg; };
+
         private:
             QFile fFile;
             QString fErrorMsg;
@@ -56,12 +57,10 @@ namespace NSABUtils
             std::vector< std::shared_ptr< CAttachment > > fAttachments;
             std::vector< std::shared_ptr< CChapter > > fChapters;
             std::vector< std::shared_ptr< CTag > > fTags;
-
         };
 
     }
 
 }
-
 
 #endif

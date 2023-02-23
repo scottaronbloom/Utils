@@ -54,12 +54,11 @@ namespace NSABUtils
         class CEBML
         {
         public:
-            static std::tuple< uint32_t, uint64_t, uint64_t > readElementIDSize( QFile & file );
-            static std::tuple< uint32_t, uint64_t > readElementID( QFile & file );
+            static std::tuple< uint32_t, uint64_t, uint64_t > readElementIDSize( QFile &file );
+            static std::tuple< uint32_t, uint64_t > readElementID( QFile &file );
         };
     }
 
 }
-
 
 #endif
