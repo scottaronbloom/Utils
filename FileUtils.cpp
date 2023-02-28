@@ -736,15 +736,15 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool backup( const QString &fileName, const std::string &msg, bool useTrash, const std::string &format, bool moveFile )
+        bool backup( const QString &fileName, bool useTrash, const QString &format, bool moveFile )
         {
-            return backup( fileName.toStdString(), msg, useTrash, format, moveFile );
+            return backup( fileName.toStdString(), useTrash, format.toStdString(), moveFile );
         }
 
         // format
         // %FN for filename, %TS for timestamp
         // empty -> %f.bak
-        bool backup( const std::string &fileName, const std::string & /*msg*/, bool useTrash, const std::string &format, bool moveFile )
+        bool backup( const std::string &fileName, bool useTrash, const std::string &format, bool moveFile )
         {
             if ( NFileUtils::exists( fileName ) )
             {

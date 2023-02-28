@@ -86,8 +86,8 @@ namespace NSABUtils
 
         // %FN for filename, %TS for timestamp
         // empty -> %FN.bak
-        SABUTILS_EXPORT bool backup( const std::string &fileName, const std::string &msg, bool useTrash = false, const std::string &format = std::string(), bool moveFile = true );
-        SABUTILS_EXPORT bool backup( const QString &fileName, const std::string &msg, bool useTrash = false, const std::string &format = std::string(), bool moveFile = true );
+        SABUTILS_EXPORT bool backup( const std::string &fileName, bool useTrash = false, const std::string &format = std::string(), bool moveFile = true );
+        SABUTILS_EXPORT bool backup( const QString &fileName, bool useTrash = false, const QString &format = QString(), bool moveFile = true );
 
         SABUTILS_EXPORT std::list< std::string > getSubDirs( const std::string &dir, bool recursive, bool includeTopDir );
         SABUTILS_EXPORT std::list< std::string > getDirsFromPath( const std::string &searchPath );
