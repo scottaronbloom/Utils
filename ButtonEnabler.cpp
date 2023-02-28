@@ -26,6 +26,7 @@
 #include <QAbstractButton>
 #include <QLineEdit>
 #include <QFile>
+#include <QAction>
 
 namespace NSABUtils
 {
@@ -37,7 +38,22 @@ namespace NSABUtils
             setParent( btn );
         if ( view->selectionModel() )
             connect( view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CButtonEnabler::slotSelectionChanged );
-        btn->setEnabled( false );
+        slotReset();
+        if ( view->selectionModel() )
+            slotSelectionChanged( view->selectionModel()->selection(), QItemSelection() );
+        else
+            slotSelectionChanged( QItemSelection(), QItemSelection() );
+    }
+
+    CButtonEnabler::CButtonEnabler( QAbstractItemView * view, QAction * action, QObject * parent ) :
+        QObject( parent ),
+        fAction( action )
+    {
+        if ( parent == nullptr )
+            setParent( action );
+        if ( view->selectionModel() )
+            connect( view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &CButtonEnabler::slotSelectionChanged );
+        slotReset();
         if ( view->selectionModel() )
             slotSelectionChanged( view->selectionModel()->selection(), QItemSelection() );
         else
@@ -51,16 +67,35 @@ namespace NSABUtils
         if ( parent == nullptr )
             setParent( btn );
         connect( le, &QLineEdit::textChanged, this, &CButtonEnabler::slotTextChanged );
+        slotReset();
+        slotTextChanged( le->text() );
+    }
+
+    CButtonEnabler::CButtonEnabler( QLineEdit * le, QAction * action, QObject * parent ) :
+        QObject( parent ),
+        fAction( action )
+    {
+        if ( parent == nullptr )
+            setParent( action );
+        connect( le, &QLineEdit::textChanged, this, &CButtonEnabler::slotTextChanged );
+        slotReset();
         slotTextChanged( le->text() );
     }
 
     void CButtonEnabler::slotReset()
     {
-        if ( fButton )
-            fButton->setEnabled( false );
+        setEnabled( false );
     }
 
-    void CButtonEnabler::slotSelectionChanged( const QItemSelection &selected, const QItemSelection & )
+    void CButtonEnabler::setEnabled( bool enabled )
+    {
+        if ( fButton )
+            fButton->setEnabled( enabled );
+        if ( fAction )
+            fAction->setEnabled( enabled );
+    }
+
+    void CButtonEnabler::slotSelectionChanged( const QItemSelection & selected, const QItemSelection & )
     {
         bool enabled = selected.count() && selected.first().isValid();
         if ( !enabled )
@@ -72,16 +107,16 @@ namespace NSABUtils
                 enabled = idxs.count() && idxs.first().isValid();
             }
         }
-        fButton->setEnabled( enabled );
+        setEnabled( enabled );
     }
 
     void CButtonEnabler::slotTextChanged( const QString &txt )
     {
-        bool enable = !txt.isEmpty();
-        if ( fLineEditIsFile && enable )
+        bool enabled = !txt.isEmpty();
+        if ( fLineEditIsFile && enabled )
         {
-            enable = QFile( txt ).exists();
+            enabled = QFile( txt ).exists();
         }
-        fButton->setEnabled( !txt.isEmpty() );
+        setEnabled( enabled );
     }
 }
