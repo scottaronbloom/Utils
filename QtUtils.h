@@ -65,6 +65,17 @@ class QXmlQuery;
 namespace NSABUtils
 {
     template< typename T >
+    QList< T > replaceInList( const QList< T > & inList, int xFirst, int xCount, const QList< T > & values, int xNum=-1 )
+    {
+        auto prefix = inList.mid( 0, xFirst );
+        auto mid    = values.mid( 0, xNum );
+        auto suffix = inList.mid( xFirst + xCount );
+        
+        auto lRetVal = prefix + mid + suffix;
+        return lRetVal;
+    }
+
+	template< typename T >
 	QList< T > replaceInList(const QList< T > & inList, int xFirst, int xCount, int xNum, const QList< T > & values)
 	{
 		QList< T > retVal = inList;
