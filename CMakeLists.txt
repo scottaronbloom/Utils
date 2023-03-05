@@ -77,6 +77,10 @@ IF(WIN32)
     find_package(Qt5 COMPONENTS AxContainer REQUIRED)
 ENDIF()
 
+if ( MKVUTILS )
+    find_package(Qt5 COMPONENTS Multimedia REQUIRED)
+endif()
+
 find_package(Qt5 COMPONENTS XmlPatterns QUIET)
 find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)

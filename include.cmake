@@ -232,6 +232,7 @@ if ( MKVUTILS )
     )
     set(MKVREADERLIB  
         MKVReader
+        Qt5::Multimedia
     )
 endif()
 

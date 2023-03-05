@@ -29,10 +29,9 @@ namespace NSABUtils
     {
         CMKVFile::CMKVFile()
         {
-
         }
 
-        CMKVFile::CMKVFile( const QString & fileName ) :
+        CMKVFile::CMKVFile( const QString &fileName ) :
             CMKVFile()
         {
             open( fileName );
@@ -40,10 +39,9 @@ namespace NSABUtils
 
         CMKVFile::~CMKVFile()
         {
-
         }
 
-        bool CMKVFile::open( const QString & fileName )
+        bool CMKVFile::open( const QString &fileName )
         {
             if ( fFile.isOpen() )
                 fFile.close();

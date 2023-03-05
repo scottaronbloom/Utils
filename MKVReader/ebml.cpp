@@ -27,7 +27,7 @@ namespace NSABUtils
 {
     namespace NMKVReader
     {
-        std::tuple< uint32_t, uint64_t, uint64_t > CEBML::readElementIDSize( QFile & file )
+        std::tuple< uint32_t, uint64_t, uint64_t > CEBML::readElementIDSize( QFile &file )
         {
             uint32_t id{ 0 };
             uint64_t idLen{ 0 };
@@ -35,25 +35,25 @@ namespace NSABUtils
             return {};
         }
 
-        std::tuple< uint32_t, uint64_t > CEBML::readElementID( QFile & file )
+        std::tuple< uint32_t, uint64_t > CEBML::readElementID( QFile &file )
         {
             uint32_t id{ 0 };
             uint8_t tmp{ 0 };
-            file.read( reinterpret_cast<char *>( &tmp ), sizeof( tmp ) );
-                     id = ( 0x00FF & tmp ) << 24;
+            file.read( reinterpret_cast< char * >( &tmp ), sizeof( tmp ) );
+            id = ( 0x00FF & tmp ) << 24;
 
-            file.read( reinterpret_cast<char *>( &tmp ), sizeof( tmp ) );
+            file.read( reinterpret_cast< char * >( &tmp ), sizeof( tmp ) );
             uint32_t id2 = ( 0x00FF & tmp ) << 16;
 
-            file.read( reinterpret_cast<char *>( &tmp ), sizeof( tmp ) );
+            file.read( reinterpret_cast< char * >( &tmp ), sizeof( tmp ) );
             uint32_t id3 = ( 0x00FF & tmp ) << 8;
 
-            file.read( reinterpret_cast<char *>( &tmp ), sizeof( tmp ) );
+            file.read( reinterpret_cast< char * >( &tmp ), sizeof( tmp ) );
             uint32_t id4 = ( 0x00FF & tmp ) << 0;
             id = id | id2 | id3 | id4;
-            
+
             file.seek( 0 );
-            file.read( reinterpret_cast<char *>( &id ), sizeof( id ) );
+            file.read( reinterpret_cast< char * >( &id ), sizeof( id ) );
 
             uint64_t idLen{ 0 };
             return { id, idLen };
