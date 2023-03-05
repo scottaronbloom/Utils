@@ -488,5 +488,6 @@ if( NO_USE_MEDIAINFO_INSTALL )
     set_target_properties( mediainfo PROPERTIES FOLDER SharedLibs/MediaInfo )
     set_target_properties( zen PROPERTIES FOLDER SharedLibs/MediaInfo )
     set_target_properties( zlibstatic PROPERTIES FOLDER SharedLibs/MediaInfo )
+    set_target_properties( genexdebug PROPERTIES FOLDER SharedLibs/MediaInfo )
 endif()
 

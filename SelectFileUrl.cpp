@@ -49,6 +49,13 @@ namespace NSABUtils
 #endif
     }
 
+    CSelectFileUrl::~CSelectFileUrl()
+    {
+#ifdef Q_OS_WIN
+        QDesktopServices::unsetUrlHandler( "file" );
+#endif
+    }
+
     class CLaunchThread : public QThread
     {
     public:

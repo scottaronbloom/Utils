@@ -37,6 +37,7 @@ namespace NSABUtils
 
     public:
         CSelectFileUrl( QObject *parent = nullptr );
+        ~CSelectFileUrl();
 
     public Q_SLOTS:
         void slotOpenUrl( const QUrl &url );
