@@ -64,6 +64,21 @@ class QXmlQuery;
 
 namespace NSABUtils
 {
+    template< typename T >
+	QList< T > replaceInList(const QList< T > & inList, int xFirst, int xCount, int xNum, const QList< T > & values)
+	{
+		QList< T > retVal = inList;
+
+		int jj = 0;
+		for (int ii = xFirst; (ii < retVal.count()) && (ii < xFirst + xCount) && ( jj < values.count() ) && (jj < xNum); ++ii, ++jj)
+		{
+			auto curr = values[jj];
+			retVal[ii] = curr;
+		}
+
+		return retVal;
+	}
+
     struct SABUTILS_EXPORT CCaseInsensitiveHash
     {
         size_t operator()( const QString &str ) const;
