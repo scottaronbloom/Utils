@@ -65,30 +65,30 @@ class QXmlQuery;
 namespace NSABUtils
 {
     template< typename T >
-    QList< T > replaceInList( const QList< T > & inList, int xFirst, int xCount, const QList< T > & values, int xNum=-1 )
+    QList< T > replaceInList(const QList< T >& inList, int xFirst, int xCount, const QList< T >& values, int xNum = -1)
     {
-        auto prefix = inList.mid( 0, xFirst );
-        auto mid    = values.mid( 0, xNum );
-        auto suffix = inList.mid( xFirst + xCount );
-        
+        auto prefix = inList.mid(0, xFirst);
+        auto mid = values.mid(0, xNum);
+        auto suffix = inList.mid(xFirst + xCount);
+
         auto lRetVal = prefix + mid + suffix;
         return lRetVal;
     }
 
-	template< typename T >
-	QList< T > replaceInList(const QList< T > & inList, int xFirst, int xCount, int xNum, const QList< T > & values)
-	{
-		QList< T > retVal = inList;
+    template< typename T >
+    QList< T > replaceInList(const QList< T >& inList, int xFirst, int xCount, int xNum, const QList< T >& values)
+    {
+        QList< T > retVal = inList;
 
-		int jj = 0;
-		for (int ii = xFirst; (ii < retVal.count()) && (ii < xFirst + xCount) && ( jj < values.count() ) && (jj < xNum); ++ii, ++jj)
-		{
-			auto curr = values[jj];
-			retVal[ii] = curr;
-		}
+        int jj = 0;
+        for (int ii = xFirst; (ii < retVal.count()) && (ii < xFirst + xCount) && (jj < values.count()) && (jj < xNum); ++ii, ++jj)
+        {
+            auto curr = values[jj];
+            retVal[ii] = curr;
+        }
 
-		return retVal;
-	}
+        return retVal;
+    }
 
     struct SABUTILS_EXPORT CCaseInsensitiveHash
     {
@@ -101,17 +101,6 @@ namespace NSABUtils
     };
 
     using TCaseInsensitiveHash = std::unordered_set< QString, CCaseInsensitiveHash, CCaseInsensitiveEqual >;
-
-    template< typename T >
-    QList< T > replaceInList( const QList< T > &inList, int xFirst, int xCount, const QList< T > &values, int xNum = -1 )
-    {
-        auto prefix = inList.mid( 0, xFirst );
-        auto mid = values.mid( 0, xNum );
-        auto suffix = inList.mid( xFirst + xCount );
-
-        auto lRetVal = prefix + mid + suffix;
-        return lRetVal;
-    }
 
     SABUTILS_EXPORT QString allFilesFilter();
     SABUTILS_EXPORT QString defaultFileDialogDir();
