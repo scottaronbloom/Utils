@@ -891,6 +891,9 @@ namespace NSABUtils
             auto pos = txt.indexOf( regEx, lineStart );
             while ( pos != -1 )
             {
+                while ( ( txt.at( pos ) == '\r' ) && ( ( ( pos + 1 ) < txt.length() ) && ( txt.at( pos + 1 ) == '\r' ) ) )
+                    pos++;
+
                 if ( previousText.second )
                 {
                     previousText.second = false;
@@ -949,7 +952,7 @@ namespace NSABUtils
                 pos = txt.indexOf( regEx, pos + skip );
             }
         }
-        previousText.first = txt.mid( lineStart );
+        previousText.first += txt.mid( lineStart );
         textEdit->moveCursor( QTextCursor::End );
     }
 
