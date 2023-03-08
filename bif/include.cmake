@@ -24,11 +24,22 @@ set(_PROJECT_NAME bif)
 set(USE_QT TRUE)
 set(FOLDER_NAME SharedLibs)
 
+IF(WIN32)
+    set( OS_SRCS ../MoveToTrash_win.cpp ../WindowsError.cpp )
+    set( OS_HEADERS  )
+ELSE()
+    set( OS_SRCS ../MoveToTrash_linux.cpp)
+ENDIF()
+
 set(qtproject_SRCS
     BIFPlugin.cpp
     ../BIFFile.cpp
     ../FindAllFiles.cpp
+    ../BackupFile.cpp
+    ../MoveToTrash.cpp
+    ../FileUtils_Remove.cpp
     BIFIOHandler.cpp
+    ${OS_SRCS}
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -41,6 +52,7 @@ set(qtproject_H
 set(project_H
     BIFIOHandler.h
     ../FileUtils.h
+    ../BackupFile.h
     ../BIFFile.h
 )
 

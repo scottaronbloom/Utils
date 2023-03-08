@@ -20,43 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef __MOVETOTRASH_H
-#define __MOVETOTRASH_H
+#ifndef __WINDOWSERROR_H
+#define __WINDOWSERROR_H
 
 #include "SABUtilsExport.h"
-
-#include <string>
-#include <list>
-#include <set>
-#include <memory>
-#include <unordered_map>
-#include <QStringList>
-#include <QFileDevice>
-#include <QList>
-#include <memory>
-
-class QFileInfo;
-class QDateTime;
-class QString;
-class QDir;
-
+#include <QString>
 namespace NSABUtils
 {
-    namespace NFileUtils
-    {
-        struct SABUTILS_EXPORT SRecycleOptions
-        {
-            SRecycleOptions() {}
-
-            bool fDeleteOnRecycleFailure{ true };
-            bool fForce{ false };
-            bool fVerbose{ false };
-            bool fInteractive{ false };
-        };
-
-        SABUTILS_EXPORT bool moveToTrash( const QFileInfo &info, QString * msg=nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const QString &fileName, QString *msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const std::string &fileName, std::string*msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-    }
+    SABUTILS_EXPORT QString getWindowsError( int errorCode );   // returns empty string for non-windows
 }
 #endif

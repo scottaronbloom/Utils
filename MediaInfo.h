@@ -91,8 +91,8 @@ namespace NSABUtils
         eVideoBitrateString,
         eOverAllBitrate,
         eOverAllBitrateString,
-        eAudioBitrate, 
-        eAudioBitrateString,
+        eAudioSampleRate, 
+        eAudioSampleRateString,
         eLastTag
     };
     SABUTILS_EXPORT QString displayName( EMediaTags tag );

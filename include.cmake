@@ -29,8 +29,8 @@ else()
 endif()
 
 IF(WIN32)
-        set( OS_SRCS SystemInfo_win.cpp MoveToTrash_win.cpp ForceUnbufferedProcessModifier.cpp ConsoleUtils.cpp )
-        set( OS_HEADERS ForceUnbufferedProcessModifier.h ConsoleUtils.h )
+        set( OS_SRCS SystemInfo_win.cpp MoveToTrash_win.cpp ForceUnbufferedProcessModifier.cpp ConsoleUtils.cpp WindowsError.cpp )
+        set( OS_HEADERS ForceUnbufferedProcessModifier.h ConsoleUtils.h WindowsError.h )
 ELSE()
         set( OS_SRCS SystemInfo_linux.cpp MoveToTrash_linux.cpp)
 ENDIF()
@@ -48,7 +48,9 @@ set(qtproject_SRCS
     DelaySpinBox.cpp
     DoubleProgressDlg.cpp
     FileCompare.cpp
+    BackupFile.cpp
     FileUtils.cpp
+    FileUtils_Remove.cpp
     FindAllFiles.cpp
     FileSIDInfo.cpp
     FromString.cpp
@@ -118,6 +120,7 @@ set(project_H
     AutoFetch.h
     EnumUtils.h
     FileCompare.h
+    BackupFile.h
     FileUtils.h
     FileSIDInfo.h
     FromString.h

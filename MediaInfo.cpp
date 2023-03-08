@@ -369,19 +369,19 @@ namespace NSABUtils
         cleanFunc( EMediaTags::eVideoBitrateString,
             []( uint64_t bitRate )
             { 
-                return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true ) + "/s"; 
+                return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true, "B/s" ); 
             } );
 
-        cleanFunc( EMediaTags::eAudioBitrateString,
+        cleanFunc( EMediaTags::eAudioSampleRateString,
             []( uint64_t bitRate )
             {
-            return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true ) + "/s"; 
+            return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 2, true, "Hz" );
             } );
 
         cleanFunc( EMediaTags::eOverAllBitrateString,
             []( uint64_t bitRate )
             {
-            return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true ) + "/s"; 
+            return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true, "B/s" ); 
             } );
     }
 
@@ -441,7 +441,7 @@ namespace NSABUtils
                 EMediaTags::eVideoCodec,   //
                 EMediaTags::eAudioCodec,   //
                 EMediaTags::eVideoBitrate,
-                EMediaTags::eAudioBitrate
+                EMediaTags::eAudioSampleRate
             };
         }
 
@@ -464,8 +464,8 @@ namespace NSABUtils
                 retVal[ ii ] = value;
             }
             else if ( ( ii == NSABUtils::EMediaTags::eAudioCodec )//
-                || ( ii == NSABUtils::EMediaTags::eAudioBitrate )//
-                || ( ii == NSABUtils::EMediaTags::eAudioBitrateString ) )
+                || ( ii == NSABUtils::EMediaTags::eAudioSampleRate )   //
+                || ( ii == NSABUtils::EMediaTags::eAudioSampleRateString ) )
             {
                 auto value = findFirstValue( EStreamType::eAudio, ii );
                 retVal[ ii ] = value;
@@ -510,8 +510,8 @@ namespace NSABUtils
             case EMediaTags::eVideoBitrateString: return "BitRate";
             case EMediaTags::eOverAllBitrate: return "OverallBitRate";
             case EMediaTags::eOverAllBitrateString: return "OverallBitRate";
-            case EMediaTags::eAudioBitrate: return "BitRate";
-            case EMediaTags::eAudioBitrateString: return "BitRate";
+            case EMediaTags::eAudioSampleRate: return "SamplingRate";
+            case EMediaTags::eAudioSampleRateString: return "SamplingRate";
             default :
                 return QObject::tr( "" );
         }

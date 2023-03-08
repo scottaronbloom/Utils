@@ -22,6 +22,7 @@
 
 #include "MoveToTrash.h"
 #include "FileUtils.h"
+#include "WindowsError.h"
 
 #include <windows.h>
 
@@ -259,30 +260,39 @@ namespace NSABUtils
             return S_OK;
         }
 
-        bool showError( const QString &msg, HRESULT code, std::function< void() > runFunc )
+        QString getFullMsg( const QString &msg, HRESULT code )
         {
             auto fullMessage = QString( "%1 - %2" ).arg( msg ).arg( getWindowsError( code ) );
-            MessageBox( nullptr, fullMessage.toStdWString().c_str(), L"Error", MB_OK | MB_ICONERROR );
+            return fullMessage;
+        }
+        
+        bool showError( const QString &msg, HRESULT code, QString *fullMessage, bool interactive, std::function< void() > runFunc )
+        {
+            auto lclMsg = getFullMsg( msg, code );
+            if ( fullMessage )
+                *fullMessage = lclMsg;
+            if ( interactive )
+            {
+                MessageBox( nullptr, lclMsg.toStdWString().c_str(), L"Error", MB_OK | MB_ICONERROR );
+            }
             runFunc();
             return false;
         }
 
-        bool moveToTrashImpl( const QString &fileName, std::shared_ptr< SRecycleOptions > options )
+        bool moveToTrashImpl( const QString &fileName, QString *msg, std::shared_ptr< SRecycleOptions > options )
         {
-            if ( options->fVerbose )
+            if ( !QFileInfo( fileName ).exists() )
             {
-                if ( !QFileInfo( fileName ).exists() )
-                {
-                    std::cout << "File or Directory '" << fileName.toStdString() << "' does not exist." << std::endl;
-                    return false;
-                }
+                if ( msg )
+                    *msg = QObject::tr( "File or Directory '%1' does not exist." ).arg( fileName );
+                return true;
             }
 
             HRESULT hr = CoInitializeEx( nullptr, COINIT_MULTITHREADED );
             if ( FAILED( hr ) )
             {
                 // Couldn't initialize COM library - clean up and return
-                return showError( "Couldn't initialize COM library", hr, []() { CoUninitialize(); } );
+                return showError( "Couldn't initialize COM library", hr, msg, options->fInteractive, []() { CoUninitialize(); } );
             }
             // Initialize the file operation
             IFileOperation *fileOperation;
@@ -290,14 +300,14 @@ namespace NSABUtils
             if ( FAILED( hr ) )
             {
                 // Couldn't CoCreateInstance - clean up and return
-                return showError( "Couldn't CoCreateInstance", hr, []() { CoUninitialize(); } );
+                return showError( "Couldn't CoCreateInstance", hr, msg, options->fInteractive, []() { CoUninitialize(); } );
             }
             hr = fileOperation->SetOperationFlags( FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT | FOF_NO_UI | FOF_NOERRORUI );
             if ( FAILED( hr ) )
             {
                 // Couldn't add flags - clean up and return
                 return showError(
-                    "Couldn't add flags", hr,
+                    "Couldn't add flags", hr, msg, options->fInteractive,
                     [ fileOperation ]()
                     {
                         fileOperation->Release();
@@ -313,7 +323,7 @@ namespace NSABUtils
             if ( FAILED( hr ) )
             {
                 return showError(
-                    "Couldn't create IShellItem from path", hr,
+                    "Couldn't create IShellItem from path", hr, msg, options->fInteractive,
                     [ fileOrFolderItem, fileOperation ]()
                     {
                         if ( fileOrFolderItem )
@@ -343,7 +353,7 @@ namespace NSABUtils
             if ( FAILED( hr ) )
             {
                 return showError(
-                    "Failed to mark file/folder item for deletion", hr,
+                    "Failed to mark file/folder item for deletion", hr, msg, options->fInteractive,
                     [ fileOrFolderItem, fileOperation, pSync ]()
                     {
                         fileOperation->Release();
@@ -359,7 +369,7 @@ namespace NSABUtils
             CoUninitialize();
             if ( FAILED( hr ) )
             {
-                return showError( "Failed to carry out delete", hr, [ fileOrFolderItem, fileOperation ]() {} );
+                return showError( "Failed to carry out delete", hr, msg, options->fInteractive, [ fileOrFolderItem, fileOperation ]() {} );
             }
             return true;
         }

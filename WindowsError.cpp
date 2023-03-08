@@ -20,43 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef __MOVETOTRASH_H
-#define __MOVETOTRASH_H
-
-#include "SABUtilsExport.h"
-
-#include <string>
-#include <list>
-#include <set>
-#include <memory>
-#include <unordered_map>
-#include <QStringList>
-#include <QFileDevice>
-#include <QList>
-#include <memory>
-
-class QFileInfo;
-class QDateTime;
-class QString;
-class QDir;
+#include "WindowsError.h"
+#ifdef Q_OS_WINDOWS
+#include <qt_windows.h>
+#endif
 
 namespace NSABUtils
 {
-    namespace NFileUtils
+#ifdef Q_OS_WINDOWS
+    QString getWindowsError( int errorCode )
     {
-        struct SABUTILS_EXPORT SRecycleOptions
-        {
-            SRecycleOptions() {}
+        QString ret;
+    #ifndef Q_OS_WINRT
+        wchar_t *string = 0;
+        FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, errorCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPWSTR)&string, 0, NULL );
+        ret = QString::fromWCharArray( string );
+        LocalFree( (HLOCAL)string );
+    #else
+        wchar_t errorString[ 1024 ];
+        FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, NULL, errorCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPWSTR)&errorString, sizeof( errorString ) / sizeof( wchar_t ), NULL );
+        ret = QString::fromWCharArray( errorString );
+    #endif   // Q_OS_WINRT
 
-            bool fDeleteOnRecycleFailure{ true };
-            bool fForce{ false };
-            bool fVerbose{ false };
-            bool fInteractive{ false };
-        };
-
-        SABUTILS_EXPORT bool moveToTrash( const QFileInfo &info, QString * msg=nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const QString &fileName, QString *msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const std::string &fileName, std::string*msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
+        if ( ret.isEmpty() && errorCode == ERROR_MOD_NOT_FOUND )
+            ret = QString::fromLatin1( "The specified module could not be found." );
+        if ( ret.endsWith( QLatin1String( "\r\n" ) ) )
+            ret.chop( 2 );
+        if ( ret.isEmpty() )
+            ret = QString::fromLatin1( "Unknown error 0x%1." ).arg( unsigned( errorCode ), 8, 16, QLatin1Char( '0' ) );
+        return ret;
     }
-}
 #endif
+}

@@ -20,43 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef __MOVETOTRASH_H
-#define __MOVETOTRASH_H
+#ifndef __BACKUPFILE_H
+#define __BACKUPFILE_H
 
 #include "SABUtilsExport.h"
 
 #include <string>
-#include <list>
-#include <set>
-#include <memory>
-#include <unordered_map>
-#include <QStringList>
-#include <QFileDevice>
-#include <QList>
-#include <memory>
-
+#include <QString>
 class QFileInfo;
-class QDateTime;
-class QString;
-class QDir;
 
 namespace NSABUtils
 {
     namespace NFileUtils
     {
-        struct SABUTILS_EXPORT SRecycleOptions
+        enum class EMoveOrCopy
         {
-            SRecycleOptions() {}
-
-            bool fDeleteOnRecycleFailure{ true };
-            bool fForce{ false };
-            bool fVerbose{ false };
-            bool fInteractive{ false };
+            eMove,
+            eCopy
         };
+        // fileName -> Original filename
+        // format -> format of backup file, %FN for filename, %TS for timestamp, default is %FN.bak
+        // msg -> error message on failure
+        // keepBackup -> if backup exists keep it, add (NUM) to the basename, false means delete old backup
+        // useTrash -> if removing a file use the trash rather than destroy the file
+        // move -> if EMoveOrCopy::eMove moves the souurce file, otherwise copies it
 
-        SABUTILS_EXPORT bool moveToTrash( const QFileInfo &info, QString * msg=nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const QString &fileName, QString *msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const std::string &fileName, std::string*msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
+        SABUTILS_EXPORT bool backup( const std::string &fileName, const std::string &format = "%FN.bak", std::string *msg = nullptr, bool keepBackups = true, bool useTrash = false, EMoveOrCopy moveOrCopyFile = EMoveOrCopy::eMove );
+        SABUTILS_EXPORT bool backup( const QFileInfo &fileInfo, const QString &format = "%FN.bak", QString *msg = nullptr, bool keepBackups = true, bool useTrash = false, EMoveOrCopy moveOrCopyFile = EMoveOrCopy::eMove );
+        SABUTILS_EXPORT bool backup( const QString &fileName, const QString &format = "%FN.bak", QString *msg = nullptr, bool keepBackups = true, bool useTrash = false, EMoveOrCopy moveOrCopyFile = EMoveOrCopy::eMove );
     }
 }
 #endif

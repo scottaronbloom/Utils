@@ -24,6 +24,7 @@
 #include "MoveToTrash.h"
 #include "StringUtils.h"
 #include "utils.h"
+#include "WindowsError.h"
 
 #include <Qt>
 #include <QDebug>
@@ -352,9 +353,9 @@ namespace NSABUtils
             return lRetVal;
         }
 
-        QString byteSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix )
+        QString byteSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix, const QString & typeNameSuffix )
         {
-            return byteSizeString( fi.size(), prettyPrint, byteSize, precision, spaceBeforeSuffix );
+            return byteSizeString( fi.size(), prettyPrint, byteSize, precision, spaceBeforeSuffix, typeNameSuffix );
         }
 
         bool compareTimeStamp( const QFileInfo &lhs, const QFileInfo &rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck )
@@ -437,7 +438,7 @@ namespace NSABUtils
             return std::make_pair( value, overflow );
         }
 
-        QString byteSizeString( uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix )
+        QString byteSizeString( uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix, const QString &typeNameSuffix )
         {
             if ( !prettyPrint )
             {
@@ -445,7 +446,7 @@ namespace NSABUtils
                 return locale.toString( static_cast< qulonglong >( size ) );
             }
 
-            auto suffixes = std::vector< QString >( { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" } );
+            auto suffixes = std::vector< QString >( { "", "k", "M", "G", "T", "P", "E", "Z", "Y" } );
 
             auto base = static_cast< uint64_t >( byteSize ? 1024 : 1000 );
             auto suffixPos = 0U;
@@ -471,11 +472,13 @@ namespace NSABUtils
             size += overflow;
 
             auto suffix = suffixes[ suffixPos ];
-            if ( !byteSize && suffix.length() > 1 )
-                suffix = suffix.left( 1 );
+            auto realSuffix = QString( "%1%2%3%4" ).arg( spaceBeforeSuffix ? " " : "" ).arg( suffix ).arg( ( !byteSize && typeNameSuffix == "B" ) ? "i" : "" ).arg( typeNameSuffix );
 
             QLocale locale;
-            auto retVal = QString( "%1%2%3%4B" ).arg( locale.toString( static_cast< qulonglong >( size ) ) ).arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() ).arg( spaceBeforeSuffix ? " " : "" ).arg( suffix );
+            auto retVal = QString( "%1%2%3" )
+                .arg( locale.toString( static_cast< qulonglong >( size ) ) )
+                .arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() )
+                .arg( realSuffix  );
             return retVal;
         }
 
@@ -676,38 +679,6 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool removePath( const std::string &path )
-        {
-            return removePath( QString::fromStdString( path ) );
-        }
-
-        bool removePath( const QString &path )
-        {
-            QFileInfo fi( path );
-            bool success = false;
-            if ( fi.isFile() )
-            {
-                success = QFile::remove( fi.absoluteFilePath() );
-            }
-            else if ( fi.isDir() )
-            {
-                QDir dir( path );
-                success = dir.removeRecursively();
-            }
-            return success;
-        }
-
-        bool removeInsideOfDir( const QString &dirStr )
-        {
-            QDir dir( dirStr );
-            return dir.removeRecursively();
-        }
-
-        bool removeInsideOfDir( const std::string &dir )
-        {
-            return removeInsideOfDir( QString::fromStdString( dir ) );
-        }
-
         std::string canonicalFilePath( const std::string &fileName )
         {
             return canonicalFilePath( QString::fromStdString( fileName ) ).toStdString();
@@ -734,52 +705,6 @@ namespace NSABUtils
 #endif
             }
             return retVal;
-        }
-
-        bool backup( const QString &fileName, bool useTrash, const QString &format, bool moveFile )
-        {
-            return backup( fileName.toStdString(), useTrash, format.toStdString(), moveFile );
-        }
-
-        // format
-        // %FN for filename, %TS for timestamp
-        // empty -> %f.bak
-        bool backup( const std::string &fileName, bool useTrash, const std::string &format, bool moveFile )
-        {
-            if ( NFileUtils::exists( fileName ) )
-            {
-                std::ostringstream oss;
-                std::string backupFile = format;
-                if ( backupFile.empty() )
-                    backupFile = "%FN.bak";
-
-                auto pos = backupFile.find( "%FN" );
-                if ( pos != std::string::npos )
-                {
-                    backupFile = backupFile.replace( pos, 3, fileName );
-                }
-
-                pos = backupFile.find( "%TS" );
-                if ( pos != std::string::npos )
-                {
-                    backupFile = backupFile.replace( pos, 3, QDateTime::currentDateTime().toString( "ddMMyyyy_hhmmss.zzz" ).toStdString() );
-                }
-
-                if ( backupFile == fileName )
-                    backupFile = fileName + ".bak";
-
-                if ( useTrash && NFileUtils::exists( backupFile ) )
-                    NFileUtils::moveToTrash( backupFile );
-                else
-                    NFileUtils::removePath( backupFile );
-
-                if ( moveFile )
-                    return NFileUtils::renameFile( fileName, fileName + ".bak", true );
-                else
-                    return NFileUtils::copyFile( fileName, fileName + ".bak", true );
-            }
-            else
-                return true;
         }
 
         bool mkdir( const std::string &relDir, bool makeParents )
@@ -1077,29 +1002,6 @@ namespace NSABUtils
         }
 
 #ifdef Q_OS_WINDOWS
-        QString getWindowsError( int errorCode )
-        {
-            QString ret;
-    #ifndef Q_OS_WINRT
-            wchar_t *string = 0;
-            FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, errorCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPWSTR)&string, 0, NULL );
-            ret = QString::fromWCharArray( string );
-            LocalFree( (HLOCAL)string );
-    #else
-            wchar_t errorString[ 1024 ];
-            FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, NULL, errorCode, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPWSTR)&errorString, sizeof( errorString ) / sizeof( wchar_t ), NULL );
-            ret = QString::fromWCharArray( errorString );
-    #endif   // Q_OS_WINRT
-
-            if ( ret.isEmpty() && errorCode == ERROR_MOD_NOT_FOUND )
-                ret = QString::fromLatin1( "The specified module could not be found." );
-            if ( ret.endsWith( QLatin1String( "\r\n" ) ) )
-                ret.chop( 2 );
-            if ( ret.isEmpty() )
-                ret = QString::fromLatin1( "Unknown error 0x%1." ).arg( unsigned( errorCode ), 8, 16, QLatin1Char( '0' ) );
-            return ret;
-        }
-
         static inline bool toFileTime( const QDateTime &date, FILETIME *fileTime )
         {
             SYSTEMTIME sTime;

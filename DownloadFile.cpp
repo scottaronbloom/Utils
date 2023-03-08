@@ -23,6 +23,8 @@
 #include "DownloadFile.h"
 #include "GitHubGetVersions.h"
 
+#include "BackupFile.h"
+
 #include "ui_DownloadFile.h"
 
 #include <QMessageBox>
@@ -113,11 +115,9 @@ namespace NSABUtils
         {
             return false;
         }
-        if ( QFile::exists( fDownloadFileName ) )
-        {
-            QFile::remove( fDownloadFileName + ".bak" );
-            QFile::rename( fDownloadFileName, fDownloadFileName + ".bak" );
-        }
+
+        NFileUtils::backup( fDownloadFileName );
+
         fOutputFile.setFileName( fDownloadFileName + ".tmp" );
         if ( !fOutputFile.open( QIODevice::WriteOnly | QIODevice::Truncate ) )
         {

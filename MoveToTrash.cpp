@@ -31,31 +31,41 @@ namespace NSABUtils
 {
     namespace NFileUtils
     {
-        bool moveToTrashImpl( const QString &path, std::shared_ptr< SRecycleOptions > options );
-        bool moveToTrash( const QFileInfo &info, std::shared_ptr< SRecycleOptions > options )
+        bool moveToTrash( const QFileInfo &info, QString *msg, std::shared_ptr< SRecycleOptions > options )
         {
-            return moveToTrash( info.absoluteFilePath(), options );
+            return moveToTrash( info.absoluteFilePath(), msg, options );
         }
-        bool moveToTrash( const std::string &path, std::shared_ptr< SRecycleOptions > options )
+
+        bool moveToTrash( const std::string &path, std::string *msg, std::shared_ptr< SRecycleOptions > options )
         {
-            return moveToTrash( QString::fromStdString( path ), options );
+            QString lclMsg;
+            bool retVal = moveToTrash( QString::fromStdString( path ), &lclMsg,options );
+            if ( msg )
+                *msg = lclMsg.toStdString();
+            return retVal;
         }
-        bool moveToTrash( const QString &path, std::shared_ptr< SRecycleOptions > options )
+
+        bool moveToTrashImpl( const QString &path, QString *msg, std::shared_ptr< SRecycleOptions > options );
+        bool moveToTrash( const QString &path, QString *msg, std::shared_ptr< SRecycleOptions > options )
         {
             QFileInfo fi( path );
             auto nativePath = QDir::toNativeSeparators( fi.absoluteFilePath() );
             if ( options->fVerbose )
                 std::cout << "Starting Recycle of '" << nativePath.toStdString() << "'." << std::endl;
 
-            if ( !moveToTrashImpl( nativePath, options ) )
+            bool aOK = moveToTrashImpl( nativePath, msg, options );
+            if ( !aOK )
             {
-                std::cerr << "Could not move '" << path.toStdString() << "' to the recycle bin." << std::endl;
+                if ( msg )
+                    *msg = QObject::tr( "Could not move '%1' to the recycle bin." ).arg( path );
                 if ( options->fDeleteOnRecycleFailure )
-                    return QFile::remove( path );
-                else
-                    return false;
+                {
+                    aOK = QFile::remove( path );
+                    if ( !aOK )
+                        *msg += QObject::tr( "\nCould not remove '%1'." ).arg( path );
+                }
             }
-            return true;
+            return aOK;
         }
     }
 }

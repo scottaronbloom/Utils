@@ -75,19 +75,14 @@ namespace NSABUtils
         SABUTILS_EXPORT bool pathCompare( const std::string &lhs, const std::string &rhs );   // return is lhs is the same path as rhs
         SABUTILS_EXPORT std::string normalizePath( const std::string &path, const std::string &relToDir = std::string() );   // removes ".." and "." replaces all "\" with "/"
 
-        SABUTILS_EXPORT bool removePath( const QString &item );
-        SABUTILS_EXPORT bool removePath( const std::string &item );
-        SABUTILS_EXPORT bool removeInsideOfDir( const QString &dirStr );
-        SABUTILS_EXPORT bool removeInsideOfDir( const std::string &dir );
+        SABUTILS_EXPORT bool removePath( const QString &item, QString *msg = nullptr );
+        SABUTILS_EXPORT bool removePath( const std::string &item, std::string *msg = nullptr );
+        SABUTILS_EXPORT bool removeInsideOfDir( const QString &dirStr, QString *msg = nullptr );
+        SABUTILS_EXPORT bool removeInsideOfDir( const std::string &dir, std::string *msg = nullptr );
         SABUTILS_EXPORT bool copy( const std::string &fileName, const std::string &newFileName );
 
         SABUTILS_EXPORT QString canonicalFilePath( const QString &fileName );
         SABUTILS_EXPORT std::string canonicalFilePath( const std::string &fileName );
-
-        // %FN for filename, %TS for timestamp
-        // empty -> %FN.bak
-        SABUTILS_EXPORT bool backup( const std::string &fileName, bool useTrash = false, const std::string &format = std::string(), bool moveFile = true );
-        SABUTILS_EXPORT bool backup( const QString &fileName, bool useTrash = false, const QString &format = QString(), bool moveFile = true );
 
         SABUTILS_EXPORT std::list< std::string > getSubDirs( const std::string &dir, bool recursive, bool includeTopDir );
         SABUTILS_EXPORT std::list< std::string > getDirsFromPath( const std::string &searchPath );
@@ -119,10 +114,8 @@ namespace NSABUtils
         SABUTILS_EXPORT bool setTimeStamp( const QString &path, bool allTimeStamps, QString *msg = nullptr );   // uses QDateTime::currentDateTime
         SABUTILS_EXPORT bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > &timeStamps, QString *msg = nullptr );
 
-        SABUTILS_EXPORT QString byteSizeString(
-            const QFileInfo &fi, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1,
-            bool spaceBeforeSuffix=false );   // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
-        SABUTILS_EXPORT QString byteSizeString( uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1, bool spaceBeforeSuffix = false );
+        SABUTILS_EXPORT QString byteSizeString( const QFileInfo &fi, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1, bool spaceBeforeSuffix = false, const QString &typeNameSuffix = "B" ); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
+        SABUTILS_EXPORT QString byteSizeString( uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1, bool spaceBeforeSuffix = false, const QString & typeNameSuffix = "B" );
 
         enum class EAttribute
         {
@@ -141,8 +134,6 @@ namespace NSABUtils
         SABUTILS_EXPORT bool compareTimeStamp( const QDateTime &lhs, const QDateTime &rhs, int toleranceInSecs );
         SABUTILS_EXPORT bool compareTimeStamp( const QFileInfo &lhs, const QFileInfo &rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck );
         SABUTILS_EXPORT bool compareTimeStamp( const QFileInfo &lhs, const QFileInfo &rhs, int toleranceInSecs, const std::list< QFileDevice::FileTime > timeStampsToCheck );
-
-        SABUTILS_EXPORT QString getWindowsError( int errorCode );   // returns empty string for non-windows
 
         SABUTILS_EXPORT QString getCorrectPathCase( QString path );   // note, on linux returns path, windows does the actual analysis, and returns the absolute path
 

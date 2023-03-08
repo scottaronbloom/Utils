@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "BIFFile.h"
+#include "BackupFile.h"
 #include "FileUtils.h"
 
 #include <QFile>
@@ -382,7 +383,7 @@ namespace NSABUtils
             return false;
         }
 
-        bool CFile::createBIF( const QDir & dir, uint32_t timespan, const QString & outFile, const QString & bifTool, QString & msg )
+        bool CFile::createBIF( const QDir &dir, uint32_t timespan, const QString &outFile, const QString &bifTool, QString &msg )
         {
             if ( !dir.exists() || !dir.isReadable() )
             {
@@ -412,7 +413,7 @@ namespace NSABUtils
             }
             if ( num == 1 )
             {
-                for ( auto && ii : files )
+                for ( auto &&ii : files )
                 {
                     auto num = extractImageNum( ii );
                     if ( num <= 0 )
@@ -423,6 +424,11 @@ namespace NSABUtils
                     auto absPath = dir.absoluteFilePath( ii );
                     auto newName = dir.absoluteFilePath( QString( "%1.jpg" ).arg( num - 1, 5, 10, QChar( '0' ) ) );
 
+                    if ( !NFileUtils::backup( newName ) )
+                    {
+                        msg = QString( "Could not backup '%1'" ).arg( newName );
+                        return false;
+                    }
                     if ( !QFile::rename( absPath, newName ) )
                     {
                         msg = QString( "Could not rename image file from '%1' to '%2'" ).arg( absPath ).arg( newName );
@@ -431,7 +437,8 @@ namespace NSABUtils
                 }
             }
 
-            auto args = QStringList() << "-v" << "-t" << QString::number( timespan ) << dir.absolutePath();
+            auto args = QStringList() << "-v"
+                                      << "-t" << QString::number( timespan ) << dir.absolutePath();
             QProcess process;
             process.start( bifTool, args );
             if ( !process.waitForFinished( -1 ) || ( process.exitStatus() != QProcess::NormalExit ) || ( process.exitCode() != 0 ) )
@@ -447,6 +454,12 @@ namespace NSABUtils
                 msg = QString( "Generated BIF file '%1' does not exist." ).arg( tmpFile.absoluteFilePath() );
                 return false;
             }
+            if ( !NFileUtils::backup( outFile ) )
+            {
+                msg = QString( "Could not backup file '%1'." ).arg( outFile );
+                return false;
+            }
+
             if ( !QFile::rename( tmpFile.absoluteFilePath(), outFile ) )
             {
                 msg = QString( "Could not move generated BIF file '%1' to '%2' does not exist." ).arg( tmpFile.absoluteFilePath() ).arg( outFile );

@@ -32,11 +32,16 @@
 
 namespace NFileUtils
 {
-    bool moveToTrashImpl( const QString & fileName, std::shared_ptr< SRecycleOptions > options )
+    bool moveToTrashImpl( const QString & fileName, QString * msg, std::shared_ptr< SRecycleOptions > options )
     {
         QFileInfo fi( fileName );
         if ( !fi.exists() )
-            return false;
+        {
+            if ( msg )
+                *msg = QObject::tr( "File or Directory '%1' does not exist." ).arg( fileName );
+
+            return true;
+        }
 
         auto currentTime = QDateTime::currentDateTime();
 
@@ -44,16 +49,29 @@ namespace NFileUtils
         QString trashInfoPath = QDir::homePath() + "/.local/share/Trash/info/";     // trash info path contain delete files information
 
         if ( !NFileUtils::mkdir( trashFilePath.toStdString(), true ) )
+        {
+            if ( msg )
+                *msg = QString::tr( "Could not make directory '%1'" ).arg( trashFilePath );
             return false;
+        }
         if ( !NFileUtils::mkdir( trashInfoPath.toStdString(), true ) )
+        {
+            if ( msg )
+                *msg = QString::tr( "Could not make directory '%1'" ).arg( trashInfoPath );
             return false;
+        }
 
         // create file format for trash info file----- START
         QFile infoFile( trashInfoPath + fi.fileName() + ".trashinfo" );     //filename+extension+.trashinfo //  create file information file in /.local/share/Trash/info/ folder
 
 
         if ( !infoFile.open( QIODevice::WriteOnly ) || !infoFile.isOpen() )
+        {
+            if ( msg )
+                *msg = QString::tr( "Could not open file '%1' for write" ).arg( infoFile.absoluteFilePath() );
             return false;
+        }
+
 
         QTextStream stream( &infoFile );         // for write data on open file
 
@@ -66,7 +84,10 @@ namespace NFileUtils
         // create info file format of trash file----- END
 
         QDir file;
-        return file.rename( fi.absoluteFilePath(), trashFilePath + fi.fileName() );  // rename(file old path, file trash path)
+        auto retVal = file.rename( fi.absoluteFilePath(), trashFilePath + fi.fileName() );  // rename(file old path, file trash path)
+        if ( !retVal && msg )
+            *msg = QObject::tr( "Could not rename file '%1' to '%2'" ).arg( fi.absoluteFilePath() ).arg( trashFilePath + fi.fileName() );
+        return retVal;
     }
 }
 
