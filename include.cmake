@@ -29,7 +29,8 @@ else()
 endif()
 
 IF(WIN32)
-        set( OS_SRCS SystemInfo_win.cpp MoveToTrash_win.cpp)
+        set( OS_SRCS SystemInfo_win.cpp MoveToTrash_win.cpp ForceUnbufferedProcessModifier.cpp ConsoleUtils.cpp )
+        set( OS_HEADERS ForceUnbufferedProcessModifier.h ConsoleUtils.h )
 ELSE()
         set( OS_SRCS SystemInfo_linux.cpp MoveToTrash_linux.cpp)
 ENDIF()
@@ -80,8 +81,8 @@ set(qtproject_SRCS
     WidgetEnabler.cpp
     WidgetChanged.cpp
     WordExp.cpp
-    ${OS_SRCS}
     SystemInfo.cpp
+    ${OS_SRCS}
 )
 
 set(qtproject_CPPMOC_SRCS
@@ -110,6 +111,7 @@ set(qtproject_H
     UtilityModels.h
     UtilityViews.h
     WidgetEnabler.h
+    ${Q_OS_HEADERS}
 )
 
 set(project_H
@@ -141,12 +143,8 @@ set(project_H
     WordExp.h
     ValidateOpenSSL.h
     VSInstallUtils.h
+    ${OS_HEADERS}
 )
-
-if(WIN32)
-    set(qtproject_SRCS ${qtproject_SRCS} ConsoleUtils.cpp)
-    set(project_H ${project_H} ConsoleUtils.h)
-endif()
 
 set(qtproject_UIS
     ScrollMessageBox.ui
