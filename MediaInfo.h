@@ -90,7 +90,10 @@ namespace NSABUtils
         eVideoBitrate, // if not found falls back to overall bitrate
         eVideoBitrateString,
         eOverAllBitrate,
-        eOverAllBitrateString
+        eOverAllBitrateString,
+        eAudioBitrate, 
+        eAudioBitrateString,
+        eLastTag
     };
     SABUTILS_EXPORT QString displayName( EMediaTags tag );
     SABUTILS_EXPORT EMediaTags fromDisplayName( const QString &tag );

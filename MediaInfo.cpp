@@ -335,52 +335,54 @@ namespace NSABUtils
 
     void CMediaInfo::cleanUpValues( std::unordered_map<NSABUtils::EMediaTags, QString> & retVal ) const
     {
-        auto pos = retVal.find( EMediaTags::eLengthS );
-        if ( pos != retVal.end() )
+        auto cleanFunc = [ &retVal ]( EMediaTags tag, std::function< QString( uint64_t ) > newStringFunc )
         {
-            bool aOK;
-            uint64_t numMSecs = ( *pos ).second.toInt( &aOK );
-            if ( !aOK )
-                numMSecs = 0;
-            auto numSecs = numMSecs / 1000;
-            ( *pos ).second = QString::number( numSecs );
-        }
+            auto pos = retVal.find( tag );
+            if ( pos != retVal.end() )
+            {
+                bool aOK;
+                uint64_t numMSecs = ( *pos ).second.toInt( &aOK );
+                if ( !aOK )
+                    numMSecs = 0;
 
-        pos = retVal.find( EMediaTags::eLength );
-        if ( pos != retVal.end() )
-        {
-            bool aOK;
-            uint64_t numMSecs = ( *pos ).second.toInt( &aOK );
-            if ( !aOK )
-                numMSecs = 0;
+                auto newString = newStringFunc( numMSecs );
+                ( *pos ).second = newString;
+            }
+        };
 
-            NSABUtils::CTimeString ts( numMSecs );
-            ( *pos ).second = ts.toString( "hh:mm:ss" );
-        }
+        cleanFunc(
+            EMediaTags::eLengthS,
+            []( uint64_t numMSecs )
+            {
+                auto numSecs = numMSecs / 1000;
+                return QString::number( numSecs );
+            } );
 
-        pos = retVal.find( EMediaTags::eVideoBitrateString );
-        if ( pos != retVal.end() )
-        {
-            bool aOK;
-            uint64_t bitRate = ( *pos ).second.toInt( &aOK );
-            if ( !aOK )
-                bitRate = 0;
+        cleanFunc(
+            EMediaTags::eLength,
+            []( uint64_t numMSecs )
+            {
+                NSABUtils::CTimeString ts( numMSecs );
+                return ts.toString( "hh:mm:ss" );
+            } );
 
-            auto string = NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3 ) + "/s";
-            ( *pos ).second = string;
-        }
+        cleanFunc( EMediaTags::eVideoBitrateString,
+            []( uint64_t bitRate )
+            { 
+                return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true ) + "/s"; 
+            } );
 
-        pos = retVal.find( EMediaTags::eOverAllBitrateString );
-        if ( pos != retVal.end() )
-        {
-            bool aOK;
-            uint64_t bitRate = ( *pos ).second.toInt( &aOK );
-            if ( !aOK )
-                bitRate = 0;
+        cleanFunc( EMediaTags::eAudioBitrateString,
+            []( uint64_t bitRate )
+            {
+            return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true ) + "/s"; 
+            } );
 
-            auto string = NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3 ) + "/s";
-            ( *pos ).second = string;
-        }
+        cleanFunc( EMediaTags::eOverAllBitrateString,
+            []( uint64_t bitRate )
+            {
+            return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true ) + "/s"; 
+            } );
     }
 
     QString CMediaInfo::getMediaTag( const QString &path, NSABUtils::EMediaTags tag )
@@ -438,7 +440,8 @@ namespace NSABUtils
                 EMediaTags::eResolution,   //
                 EMediaTags::eVideoCodec,   //
                 EMediaTags::eAudioCodec,   //
-                EMediaTags::eVideoBitrate
+                EMediaTags::eVideoBitrate,
+                EMediaTags::eAudioBitrate
             };
         }
 
@@ -460,7 +463,9 @@ namespace NSABUtils
                 }
                 retVal[ ii ] = value;
             }
-            else if ( ii == NSABUtils::EMediaTags::eAudioCodec )
+            else if ( ( ii == NSABUtils::EMediaTags::eAudioCodec )//
+                || ( ii == NSABUtils::EMediaTags::eAudioBitrate )//
+                || ( ii == NSABUtils::EMediaTags::eAudioBitrateString ) )
             {
                 auto value = findFirstValue( EStreamType::eAudio, ii );
                 retVal[ ii ] = value;
@@ -505,6 +510,8 @@ namespace NSABUtils
             case EMediaTags::eVideoBitrateString: return "BitRate";
             case EMediaTags::eOverAllBitrate: return "OverallBitRate";
             case EMediaTags::eOverAllBitrateString: return "OverallBitRate";
+            case EMediaTags::eAudioBitrate: return "BitRate";
+            case EMediaTags::eAudioBitrateString: return "BitRate";
             default :
                 return QObject::tr( "" );
         }
@@ -515,7 +522,7 @@ namespace NSABUtils
         static std::unordered_map< QString, EMediaTags > sMap;
         if ( sMap.empty() )
         {
-            for ( auto &&ii = EMediaTags::eFileName; ii != EMediaTags::eOverAllBitrate; ii = static_cast< EMediaTags >( static_cast< int >( ii ) + 1 ) )
+            for ( auto &&ii = EMediaTags::eFileName; ii < EMediaTags::eLastTag; ii = static_cast< EMediaTags >( static_cast< int >( ii ) + 1 ) )
             {
                 auto string = mediaInfoTagName( ii );
                 sMap[ string ] = ii;
