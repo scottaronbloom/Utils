@@ -352,9 +352,9 @@ namespace NSABUtils
             return lRetVal;
         }
 
-        QString byteSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision )
+        QString byteSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix )
         {
-            return byteSizeString( fi.size(), prettyPrint, byteSize, precision );
+            return byteSizeString( fi.size(), prettyPrint, byteSize, precision, spaceBeforeSuffix );
         }
 
         bool compareTimeStamp( const QFileInfo &lhs, const QFileInfo &rhs, int toleranceInSecs, QFileDevice::FileTime timeToCheck )
@@ -437,7 +437,7 @@ namespace NSABUtils
             return std::make_pair( value, overflow );
         }
 
-        QString byteSizeString( uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision )
+        QString byteSizeString( uint64_t size, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix )
         {
             if ( !prettyPrint )
             {
@@ -475,7 +475,7 @@ namespace NSABUtils
                 suffix = suffix.left( 1 );
 
             QLocale locale;
-            auto retVal = QString( "%1%2%3B" ).arg( locale.toString( static_cast< qulonglong >( size ) ) ).arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() ).arg( suffix );
+            auto retVal = QString( "%1%2%3%4B" ).arg( locale.toString( static_cast< qulonglong >( size ) ) ).arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() ).arg( spaceBeforeSuffix ? " " : "" ).arg( suffix );
             return retVal;
         }
 
