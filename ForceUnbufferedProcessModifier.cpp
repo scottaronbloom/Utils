@@ -1,6 +1,6 @@
 // The MIT License( MIT )
 //
-// Copyright( c ) 2020-2021 Scott Aron Bloom
+// Copyright( c ) 2023 Scott Aron Bloom
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -34,8 +34,6 @@ namespace NSABUtils
         {
             __pragma( pack( push, 1 ) ) struct HackedHandlePasser
             {
-                using HANDLE = void *;
-
                 DWORD NumberOfHandles{ 3 };   // 4 Byte
                 BYTE FlagsPerHandle[ 3 ]{ 0 };   // 3 * 1 Byte
                 HANDLE Handles[ 3 ]{ 0 };   // 3 * 8 Byte
@@ -59,7 +57,6 @@ namespace NSABUtils
             handles.FlagsPerHandle[ 0 ] = 0;
             std::memset( &handles.FlagsPerHandle[ 1 ], FOPEN | FDEV, 2 );
 
-            const HANDLE invalid = INVALID_HANDLE_VALUE;
             std::memcpy( &handles.Handles[ 0 ], &args->startupInfo->hStdInput, sizeof( HANDLE ) );
             std::memcpy( &handles.Handles[ 1 ], &args->startupInfo->hStdOutput, sizeof( HANDLE ) );
             std::memcpy( &handles.Handles[ 2 ], &args->startupInfo->hStdError, sizeof( HANDLE ) );
