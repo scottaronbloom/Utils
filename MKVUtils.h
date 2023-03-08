@@ -30,83 +30,29 @@
 #include <vector>
 #include <QString>
 #include <cstdint>
+#include <memory>
 
 namespace MediaInfoDLL
 {
-    enum stream_t :int;
+    class MediaInfo;
+    enum class EMediaTags;
 }
 
 namespace NSABUtils
 {
-    SABUTILS_EXPORT int64_t getNumberOfSeconds( const QString & fileName );
-    SABUTILS_EXPORT int64_t getNumberOfMSecs( const QString & fileName );
-
-    enum class EMediaTags
-    {
-        eFileName,
-        eTitle,
-        eLengthMS,
-        eLengthS,
-        eLength,
-        eDate,
-        eComment,
-        eBPM,
-        eArtist,
-        eComposer,
-        eGenre,
-        eTrack,
-        eAlbum,
-        eAlbumArtist,
-        eDiscnumber,
-        eAspectRatio,
-        eWidth,
-        eHeight
-    };
-    QString toString( MediaInfoDLL::stream_t );
-    struct SABUTILS_EXPORT SStreamData
-    {
-        SStreamData( MediaInfoDLL::stream_t type, const QString & name, int num );
-        MediaInfoDLL::stream_t fStreamType;
-        QString fStreamName;
-        int fStreamNum{ 0 };
-        std::vector< std::pair< QString, QString > > fStreamData;
-        std::map< QString, QString > fStreamDataMap;
-    };
-
-
-    struct SABUTILS_EXPORT SAllMediaInfo
-    {
-        QString fVersion;
-        std::list< SStreamData > fData;
-    };
-
-
-    SABUTILS_EXPORT QString displayName( EMediaTags tag );
-    SABUTILS_EXPORT EMediaTags fromDisplayName( const QString & tag );
-    SABUTILS_EXPORT QString mediaInfoName( EMediaTags tag );
-    SABUTILS_EXPORT QString getMKVEditName( EMediaTags tag );
-
-    SABUTILS_EXPORT QString getMediaTag( const QString & fileName, NSABUtils::EMediaTags tag );
-    SABUTILS_EXPORT std::unordered_map< EMediaTags, QString > getMediaTags( const QString & fileName, const std::list< NSABUtils::EMediaTags > & tags = {} );
-
-    SABUTILS_EXPORT bool isSettableTag( EMediaTags tag );
-    SABUTILS_EXPORT std::unordered_map< EMediaTags, QString > getSettableMediaTags( const QString & fileName );
-    SABUTILS_EXPORT SAllMediaInfo getAllMediaInfo( const QString & fileName );
-    SABUTILS_EXPORT bool setMediaTags( const QString & fileName, const std::unordered_map< EMediaTags, QString > & tags, const QString & mkvPropEdit, QString * msg = nullptr );
-    SABUTILS_EXPORT std::vector< double > getChapterStarts( const QString & fileName, const QString & ffprobeExe, QString & msg );
+    enum class EMediaTags;
 }
 
 namespace std
 {
-    template <>
-    struct hash<NSABUtils::EMediaTags>
-    {
-        std::size_t operator()( const NSABUtils::EMediaTags & ii ) const
-        {
-            auto tmp = static_cast<int>( ii );
-            return std::hash< int >()( tmp );
-        }
-    };
+    template<>
+    struct hash< NSABUtils::EMediaTags >;
+};
+
+namespace NSABUtils
+{
+    SABUTILS_EXPORT bool setMediaTags( const QString &fileName, const std::unordered_map< EMediaTags, QString > &tags, const QString &mkvPropEdit, QString *msg = nullptr );
+    SABUTILS_EXPORT std::vector< double > getChapterStarts( const QString & fileName, const QString & ffprobeExe, QString & msg );
 }
 
 #endif
