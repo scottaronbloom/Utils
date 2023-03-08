@@ -51,6 +51,7 @@ set(qtproject_SRCS
     FindAllFiles.cpp
     FileSIDInfo.cpp
     FromString.cpp
+    GPUDetect.cpp
     HyperLinkLineEdit.cpp
     ImageScrollBar.cpp
     JsonUtils.cpp
@@ -119,6 +120,7 @@ set(project_H
     FileSIDInfo.h
     FromString.h
     HashUtils.h
+    GPUDetect.h
     QtHashUtils.h
     JsonUtils.h
     MoveToTrash.h
@@ -216,6 +218,7 @@ if ( MKVUTILS )
     set(qtproject_SRCS
         ${qtproject_SRCS}
         MKVUtils.cpp
+        MediaInfo.cpp
         SetMKVTags.cpp
     )
     set(qtproject_H
@@ -225,6 +228,7 @@ if ( MKVUTILS )
     set(project_H
         ${project_H}
         MKVUtils.h
+        MediaInfo.h
     )
     set(qtproject_UIS
         ${qtproject_UIS}
