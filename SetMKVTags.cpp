@@ -22,9 +22,13 @@
 
 #include "SetMKVTags.h"
 #include "ui_SetMKVTags.h"
+
+#include "MediaInfo.h"
 #include "MKVUtils.h"
 #include "AutoWaitCursor.h"
 #include "UtilityViews.h"
+
+
 
 #include <QMessageBox>
 #include <QTimer>
@@ -55,7 +59,10 @@ namespace NSABUtils
     void CSetMKVTags::slotLoadTags()
     {
         NSABUtils::CAutoWaitCursor awc;
-        auto tags = NSABUtils::getMediaTags( fImpl->fileName->text() );
+        
+        auto mediaInfo = CMediaInfo( fImpl->fileName->text() );
+        auto tags = mediaInfo.getMediaTags();
+        
         fImpl->tags->setHeaderLabels( QStringList() << tr( "Tag Name" ) << tr( "Value" ) );
         for ( auto && ii : tags )
         {
