@@ -32,8 +32,8 @@ IF(GIT_EXE_EXECUTABLE)
         SET(_GIT_SAVED_LC_ALL "$ENV{LC_ALL}")
         SET(ENV{LC_ALL} C)
 
-        Message( STATUS "Using GIT: '${GIT_EXE_EXECUTABLE}'" )
-        Message( STATUS "Getting GIT info on '${dir}'" )
+        MESSAGE( STATUS "Using GIT: '${GIT_EXE_EXECUTABLE}'" )
+        MESSAGE( STATUS "Getting GIT info on '${dir}'" )
         EXECUTE_PROCESS(
             COMMAND 
                 ${GIT_EXE_EXECUTABLE} -C "${dir}" 
@@ -43,7 +43,7 @@ IF(GIT_EXE_EXECUTABLE)
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_STRIP_TRAILING_WHITESPACE
         )
-
+        
         if ( "${_FULL_GIT_VERSION}" STREQUAL "" )
             MESSAGE( FATAL_ERROR "Could not get GIT info on directory '${dir}'\r     '${${prefix}_ERROR}'" )
             SET(${prefix}_REV "N/A")
@@ -63,6 +63,16 @@ IF(GIT_EXE_EXECUTABLE)
                 SET( ${prefix}_DIFF FALSE )
             ENDIF()
 
+            string(REPLACE "-g" ";"  ${prefix}_REV ${${prefix}_REV} )
+            LIST( LENGTH ${prefix}_REV _LEN )
+            if ( _LEN GREATER 2)
+                MESSAGE( FATAL_ERROR "Invalid GIT format for version returned '${_FULL_GIT_VERSION}'" )
+            ENDIF()
+            
+            if ( _LEN EQUAL 2)
+                LIST( GET ${prefix}_REV 1 ${prefix}_REV )
+            ENDIF()
+                      
             execute_process(
                 COMMAND ${GIT_EXE_EXECUTABLE} -C "${dir}" 
                     describe --exact-match --tags
