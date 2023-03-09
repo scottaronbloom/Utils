@@ -25,6 +25,7 @@
 
 #include "utils.h"
 #include "FileUtils.h"
+#include <QFileInfo>
 
 #include "MediaInfoDLL/MediaInfoDLL_Static.h"
 
@@ -262,13 +263,37 @@ namespace NSABUtils
         return isHEVCVideo( getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
     }
 
-    bool CMediaInfo::isHEVCVideo( QString codecName )
+    bool CMediaInfo::isVideoCodec( const QString &checkCodecName ) const
     {
-        codecName = codecName.toLower();
-        bool isHEVC = codecName.contains( "hevc" );
-        isHEVC = isHEVC || codecName.contains( "hvc1" );
-        isHEVC = isHEVC || codecName.contains( "hev1" );
-        return isHEVC;
+        return isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
+    }
+
+    bool CMediaInfo::isFormat( const QString &formatName ) const
+    {
+        auto ext = QFileInfo( fFileName ).suffix().toLower();
+        if ( formatName.toLower() == "matroska" || formatName.toLower() == "webm" )
+            return ( ext == "mkv" ) || ( ext == "webm" );
+        else if ( formatName.toLower() == "mp4" )
+            return ext == "mp4";
+        return false;
+    }
+
+    bool CMediaInfo::isAudioCodec( const QString &checkCodecName ) const
+    {
+        return isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eAudioCodec ) );
+    }
+
+    bool CMediaInfo::isHEVCVideo( QString mediaCodecName )
+    {
+        return isCodec( "hevc", mediaCodecName ) || isCodec( "hvc1", mediaCodecName ) || isCodec( "hev1", mediaCodecName ); 
+    }
+
+    bool CMediaInfo::isCodec( QString checkCodecName, QString mediaCodecName )
+    {
+        checkCodecName = checkCodecName.toLower();
+        mediaCodecName = mediaCodecName.toLower();
+        bool isCodec = mediaCodecName.contains( checkCodecName );
+        return isCodec;
     }
 
     std::vector< std::shared_ptr< CStreamData > > CMediaInfo::getStreamData( EStreamType whichStream ) const

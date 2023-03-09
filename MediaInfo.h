@@ -152,6 +152,9 @@ namespace NSABUtils
 
         QString version() const { return fVersion; }
         bool isHEVCVideo() const;
+        bool isAudioCodec( const QString & checkCodecName ) const;
+        bool isVideoCodec( const QString & checkCodecName ) const;
+        bool isFormat( const QString &formatName ) const;
 
         std::vector< std::shared_ptr< CStreamData > > getStreamData( EStreamType whichStream ) const;
 
@@ -164,7 +167,8 @@ namespace NSABUtils
         int64_t getNumberOfSeconds() const;
         int64_t getNumberOfMSecs() const;
 
-        static bool isHEVCVideo( QString codecName );
+        static bool isCodec( QString checkCodecName, QString mediaCodecName );
+        static bool isHEVCVideo( QString mediaCodecName );
         static int64_t getNumberOfSeconds( const QString &fileName );
         static int64_t getNumberOfMSecs( const QString &fileName );
 
