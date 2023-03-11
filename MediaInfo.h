@@ -25,6 +25,7 @@
 #include "SABUtilsExport.h"
 
 #include <QString>
+#include <QStringList>
 #include <unordered_map>
 #include <map>
 #include <memory>
@@ -61,7 +62,6 @@ namespace std
     };
 }
 
-
 namespace NSABUtils
 {
     enum class EMediaTags
@@ -87,11 +87,11 @@ namespace NSABUtils
         eResolution,
         eVideoCodec,
         eAudioCodec,
-        eVideoBitrate, // if not found falls back to overall bitrate
+        eVideoBitrate,   // if not found falls back to overall bitrate
         eVideoBitrateString,
         eOverAllBitrate,
         eOverAllBitrateString,
-        eAudioSampleRate, 
+        eAudioSampleRate,
         eAudioSampleRateString,
         eLastTag
     };
@@ -147,13 +147,15 @@ namespace NSABUtils
         CMediaInfo() {}
         CMediaInfo( const QString &fileName );
         ~CMediaInfo();
-        
+
         bool aOK() const { return fAOK; }
 
         QString version() const { return fVersion; }
         bool isHEVCVideo() const;
-        bool isAudioCodec( const QString & checkCodecName ) const;
-        bool isVideoCodec( const QString & checkCodecName ) const;
+        bool isAudioCodec( const QString &checkCodecName ) const;
+        bool isAudioCodec( const QStringList &allowedCodecs ) const;
+        
+        bool isVideoCodec( const QString &checkCodecName ) const;
         bool isFormat( const QString &formatName ) const;
 
         std::vector< std::shared_ptr< CStreamData > > getStreamData( EStreamType whichStream ) const;
@@ -174,9 +176,13 @@ namespace NSABUtils
 
         static QString getMediaTag( const QString &fileName, EMediaTags tag );
         static std::unordered_map< EMediaTags, QString > getMediaTags( const QString &path, const std::list< EMediaTags > &tags );
-    private :
+
+    private:
         void initMediaInfo();
-        QString findFirstValue( EStreamType whichStream, const EMediaTags &key ) const;
+        QString findFirstValue( EStreamType whichStream, const QString &key ) const;
+        QString findFirstValue( EStreamType whichStream, EMediaTags key ) const;
+        QStringList findAllValues( EStreamType whichStream, const QString &key ) const;
+        QStringList findAllValues( EStreamType whichStream, EMediaTags key ) const;
         void cleanUpValues( std::unordered_map< EMediaTags, QString > &retVal ) const;
 
         QString fVersion;

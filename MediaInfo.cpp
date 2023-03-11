@@ -26,6 +26,7 @@
 #include "utils.h"
 #include "FileUtils.h"
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #include "MediaInfoDLL/MediaInfoDLL_Static.h"
 
@@ -280,8 +281,30 @@ namespace NSABUtils
 
     bool CMediaInfo::isAudioCodec( const QString &checkCodecName ) const
     {
-        return isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eAudioCodec ) );
+        auto values =  QStringList() //
+            << findAllValues( EStreamType::eAudio, mediaInfoTagName( NSABUtils::EMediaTags::eAudioCodec ) ) //
+            << findAllValues( EStreamType::eAudio, "Format" ) //
+            << findAllValues( EStreamType::eAudio, "InternetMediaType" ) //
+            ;
+
+        for ( auto &&value : values )
+        {
+            if ( isCodec( checkCodecName, value ) )
+                return true;
+        }
+        return false;
     }
+
+    bool CMediaInfo::isAudioCodec( const QStringList &allowedCodecs ) const
+    {
+        for ( auto &&ii : allowedCodecs )
+        {
+            if ( isAudioCodec( ii ) )
+                return true;
+        }
+        return false;
+    }
+
 
     bool CMediaInfo::isHEVCVideo( QString mediaCodecName )
     {
@@ -290,8 +313,8 @@ namespace NSABUtils
 
     bool CMediaInfo::isCodec( QString checkCodecName, QString mediaCodecName )
     {
-        checkCodecName = checkCodecName.toLower();
-        mediaCodecName = mediaCodecName.toLower();
+        checkCodecName = checkCodecName.toLower().remove( QRegularExpression( R"([-_])" ) );
+        mediaCodecName = mediaCodecName.toLower().remove( QRegularExpression( R"([-_])" ) );
         bool isCodec = mediaCodecName.contains( checkCodecName );
         return isCodec;
     }
@@ -578,7 +601,23 @@ namespace NSABUtils
         );
     }
 
-    QString CMediaInfo::findFirstValue( EStreamType whichStream, const EMediaTags &key ) const
+    QString CMediaInfo::findFirstValue( EStreamType whichStream, const QString &key ) const
+    {
+        auto pos = fData.find( whichStream );
+        if ( pos == fData.end() )
+            return {};
+
+        for ( auto &&currStream : ( *pos ).second )
+        {
+            auto value = currStream->value( key );
+            if ( value.isEmpty() )
+                continue;
+            return value;
+        }
+        return {};
+    }
+
+    QString CMediaInfo::findFirstValue( EStreamType whichStream, EMediaTags key ) const
     {
         auto pos = fData.find( whichStream );
         if ( pos == fData.end() )
@@ -602,5 +641,28 @@ namespace NSABUtils
         }
         return {};
     }
+    
+    QStringList CMediaInfo::findAllValues( EStreamType whichStream, EMediaTags key ) const
+    {
+        return findAllValues( whichStream, mediaInfoTagName( key ) );
+    }
 
+    QStringList CMediaInfo::findAllValues( EStreamType whichStream, const QString & key ) const
+    {
+        auto pos = fData.find( whichStream );
+        if ( pos == fData.end() )
+            return {};
+
+        QStringList retVal;
+        for ( auto &&currStream : ( *pos ).second )
+        {
+            auto value = currStream->value( key );
+            if ( value.isEmpty() )
+                continue;
+            retVal << value;
+        }
+
+        return retVal;
+
+    }
 }
