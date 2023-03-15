@@ -485,7 +485,7 @@ namespace NSABUtils
     template< typename T >
     T MarshalRead( void *mem, size_t offset )
     {
-        T retVal;
+        T retVal = {};
         auto tmp = sizeof( T );
         ::memcpy( &retVal, ( (char *)mem ) + offset, sizeof( retVal ) );
 
