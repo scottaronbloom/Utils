@@ -104,6 +104,15 @@ namespace NSABUtils
         Q_ASSERT( validate() );
     }
 
+    bool CFFMpegFormats::isFormat( const QString &suffix, const QString &formatName ) const
+    {
+        Q_ASSERT( loaded() );
+        auto realSuffix = suffix;
+        if ( !realSuffix.startsWith( "*." ) )
+            realSuffix = "*." + realSuffix;
+        return getExtensionsForFormat( formatName ).contains( realSuffix );
+    }
+
     void CFFMpegFormats::checkLoaded()
     {
         bool loaded = !fTerseFormats.isEmpty() && !fVerboseFormats.isEmpty() /* && !fMediaFormatExtensions.empty() && !fReverseMediaFormatExtensions.empty() */;

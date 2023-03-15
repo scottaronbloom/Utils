@@ -60,6 +60,7 @@ namespace NSABUtils
         bool loaded() const { return fLoaded; }
         TFormatMap mediaFormatExtensions() const { return fMediaFormatExtensions; }
 
+        bool isFormat( const QString & suffix, const QString & formatName ) const;
         QStringList formats( bool verbose ) const
         {
             if ( verbose )
