@@ -149,6 +149,7 @@ namespace NSABUtils
         ~CMediaInfo();
 
         bool aOK() const { return fAOK; }
+        QString fileName() const { return fFileName; }
 
         QString version() const { return fVersion; }
         bool isHEVCVideo() const;
