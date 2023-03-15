@@ -54,11 +54,15 @@ namespace NSABUtils
         void setHtmlText( const QString &text );
         void setIconLabel( const QMessageBox::Icon &icon );
         void setButtons( QDialogButtonBox::StandardButtons buttons );
+        QPushButton *button( QDialogButtonBox::StandardButton btn ) const;
+
+        QPushButton *buttonClicked() const { return fButtonClicked; }
     private Q_SLOTS:
         void slotButtonClicked( QAbstractButton *btn );
 
     private:
         std::unique_ptr< Ui::CScrollMessageBox > fImpl;
+        QPushButton *fButtonClicked{ nullptr };
     };
 }
 #endif

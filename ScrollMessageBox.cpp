@@ -25,6 +25,7 @@
 
 #include <QAbstractButton>
 #include <QMessageBox>
+#include <QPushButton>
 
 namespace NSABUtils
 {
@@ -96,8 +97,14 @@ namespace NSABUtils
         fImpl->buttonBox->setStandardButtons( buttons );
     }
 
+    QPushButton * CScrollMessageBox::button( QDialogButtonBox::StandardButton btn ) const
+    {
+        return fImpl->buttonBox->button( btn );
+    }
+
     void CScrollMessageBox::slotButtonClicked( QAbstractButton *btn )
     {
+        fButtonClicked = dynamic_cast< QPushButton * >( btn );
         if ( ( fImpl->buttonBox->buttonRole( btn ) == QDialogButtonBox::ApplyRole ) || ( fImpl->buttonBox->buttonRole( btn ) == QDialogButtonBox::YesRole ) )
         {
             accept();
