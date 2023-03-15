@@ -90,6 +90,7 @@ namespace NSABUtils
         SBarInfo( CDoubleProgressDlgImpl *impl, int min = 0, int max = 100, const QString &format = QString( "  %v of %m (%p%)  " ) ) :
             fRange( { min, max } ),
             fFormat( format ),
+            fDefaultFormat( format ),
             fImpl( impl )
         {
         }
@@ -119,6 +120,7 @@ namespace NSABUtils
         }
 
         QString format() const { return fFormat; }
+        QString defaultFormat() const { return fDefaultFormat; }
         void reset() const
         {
             if ( fBar )
@@ -239,6 +241,7 @@ namespace NSABUtils
         QProgressBar *fBar{ nullptr };
         QLabel *fLabel{ nullptr };
         QString fFormat;
+        QString fDefaultFormat;
         int fEventsPerIncrement{ 1 };
         CDoubleProgressDlgImpl *fImpl{ nullptr };
     };
@@ -327,6 +330,11 @@ namespace NSABUtils
         return fImpl->fPrimaryBar->format();
     }
 
+    QString CDoubleProgressDlg::defaultPrimaryFormat() const
+    {
+        return fImpl->fPrimaryBar->defaultFormat();
+    }
+
     void CDoubleProgressDlg::setSecondaryValue( int value )
     {
         fImpl->fSecondaryBar->setValue( value, false );
@@ -361,6 +369,12 @@ namespace NSABUtils
     {
         return fImpl->fSecondaryBar->format();
     }
+
+    QString CDoubleProgressDlg::defaultSecondaryFormat() const
+    {
+        return fImpl->fSecondaryBar->defaultFormat();
+    }
+
 
     void CDoubleProgressDlg::setPrimaryProgressLabel( const QString &label )
     {

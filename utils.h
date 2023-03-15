@@ -42,6 +42,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QLocale>
+#include <QRegularExpression>
 
 class QFont;
 class QPoint;
@@ -243,21 +244,32 @@ namespace NSABUtils
 
             QLocale locale;
             QString retVal = format;
+            bool firstValue = true;
             if ( autoTrim && ( days == 0 ) )
-                retVal.replace( "dd:", QString() );
+                retVal.replace( QRegularExpression( R"(dd([\:.])?)" ), QString() );
             else
-                retVal.replace( "dd", QString( "%1" ).arg( days, 2, 10, QChar( '0' ) ) );
+            {
+                retVal.replace( "dd", QString( "%1" ).arg( days, ( firstValue ? 1 : 2 ), 10, QChar( '0' ) ) );
+                firstValue = false;
+            }
 
-            if ( autoTrim && ( hours == 0 ) )
-                retVal.replace( "hh:", QString() );
+            if ( firstValue && autoTrim && ( hours == 0 ) )
+                retVal.replace( QRegularExpression( R"(hh([\:.])?)" ), QString() );
             else
-                retVal.replace( "hh", QString( "%1" ).arg( hours, 2, 10, QChar( '0' ) ) );
-            if ( autoTrim && ( mins == 0 ) )
-                retVal.replace( "mm:", QString() );
-            else
-                retVal.replace( "mm", QString( "%1" ).arg( mins, 2, 10, QChar( '0' ) ) );
+            {
+                retVal.replace( "hh", QString( "%1" ).arg( hours, ( firstValue ? 1 : 2 ), 10, QChar( '0' ) ) );
+                firstValue = false;
+            }
 
-            retVal.replace( "ss", QString( "%1" ).arg( secs, 2, 10, QChar( '0' ) ) );
+            if ( firstValue && autoTrim && ( mins == 0 ) )
+                retVal.replace( QRegularExpression( R"(mm([\:.])?)" ), QString() );
+            else
+            {
+                retVal.replace( "mm", QString( "%1" ).arg( mins, ( firstValue ? 1 : 2 ), 10, QChar( '0' ) ) );
+                firstValue = false;
+            }
+
+            retVal.replace( "ss", QString( "%1" ).arg( secs, ( firstValue ? 1 : 2 ), 10, QChar( '0' ) ) );
             retVal.replace( "zzz", QString( "%1" ).arg( fracSeconds, ( fMicroSecondsAvailable ? 6 : 3 ), 10, QChar( '0' ) ) );
             retVal.replace( "SS", locale.toString( static_cast< qulonglong >( totalSeconds ) ) );
 

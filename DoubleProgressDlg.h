@@ -48,11 +48,13 @@ namespace NSABUtils
         int primaryMin() const;
         int primaryMax() const;
         QString primaryFormat() const;
+        QString defaultPrimaryFormat() const;
 
         int secondaryValue() const;
         int secondaryMin() const;
         int secondaryMax() const;
         QString secondaryFormat() const;
+        QString defaultSecondaryFormat() const;
 
         QString title() const;
         QString subTitle() const;
