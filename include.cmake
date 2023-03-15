@@ -36,6 +36,7 @@ ELSE()
 ENDIF()
 
 set(qtproject_SRCS
+    FFMpegFormats.cpp
     GitHubGetVersions.cpp
     DownloadFile.cpp
     AutoFetch.cpp
@@ -120,6 +121,7 @@ set(project_H
     AutoFetch.h
     EnumUtils.h
     FileCompare.h
+    FFMpegFormats.h
     BackupFile.h
     FileUtils.h
     FileSIDInfo.h
