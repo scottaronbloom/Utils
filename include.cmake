@@ -50,6 +50,7 @@ set(qtproject_SRCS
     DoubleProgressDlg.cpp
     FileCompare.cpp
     BackupFile.cpp
+    FileBasedCache.cpp
     FileUtils.cpp
     FileUtils_Remove.cpp
     FindAllFiles.cpp
@@ -125,6 +126,7 @@ set(project_H
     BackupFile.h
     FileUtils.h
     FileSIDInfo.h
+    FileBasedCache.h
     FromString.h
     HashUtils.h
     GPUDetect.h

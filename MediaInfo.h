@@ -26,6 +26,8 @@
 
 #include <QString>
 #include <QStringList>
+#include <QDateTime>
+#include <QFileInfo>
 #include <unordered_map>
 #include <map>
 #include <memory>
@@ -121,47 +123,26 @@ namespace std
 namespace NSABUtils
 {
     enum class EMediaTags;
-    class SABUTILS_EXPORT CStreamData
-    {
-    public:
-        CStreamData() {}
-        CStreamData( MediaInfoDLL::MediaInfo *mediaInfo, EStreamType type, int num );
-
-        QString value( const QString &key ) const;
-        QString value( EMediaTags key ) const;
-
-        size_t size() const { return fStreamData.size(); }
-        std::pair< QString, QString > operator[]( size_t idx ) const { return fStreamData[ idx ]; }
-
-    private:
-        EStreamType fStreamType{ EStreamType::eGeneral };
-        QString fStreamName;
-        int fStreamNum{ 0 };
-        std::vector< std::pair< QString, QString > > fStreamData;
-        std::map< QString, QString > fStreamDataMap;
-        std::map< EMediaTags, QString > fKnownTagStreamDataMap;
-    };
-
+    class CStreamData;
+    class CMediaInfoImpl;
     class SABUTILS_EXPORT CMediaInfo
     {
     public:
-        CMediaInfo() {}
+        CMediaInfo();
         CMediaInfo( const QString &fileName );
         CMediaInfo( const QFileInfo & fi );
         ~CMediaInfo();
 
-        bool aOK() const { return fAOK; }
-        QString fileName() const { return fFileName; }
+        bool aOK() const;
+        QString fileName() const;
+        QString version() const;
 
-        QString version() const { return fVersion; }
         bool isHEVCVideo() const;
         bool isAudioCodec( const QString &checkCodecName ) const;
         bool isAudioCodec( const QStringList &allowedCodecs ) const;
         
         bool isVideoCodec( const QString &checkCodecName ) const;
         bool isFormat( const QString &formatName ) const;
-
-        std::vector< std::shared_ptr< CStreamData > > getStreamData( EStreamType whichStream ) const;
 
         std::unordered_map< EMediaTags, QString > getSettableMediaTags() const;
         QString getMediaTag( EMediaTags tag ) const;
@@ -181,19 +162,8 @@ namespace NSABUtils
         static std::unordered_map< EMediaTags, QString > getMediaTags( const QString &path, const std::list< EMediaTags > &tags );
 
     private:
-        void initMediaInfo();
-        QString findFirstValue( EStreamType whichStream, const QString &key ) const;
-        QString findFirstValue( EStreamType whichStream, EMediaTags key ) const;
-        QStringList findAllValues( EStreamType whichStream, const QString &key ) const;
-        QStringList findAllValues( EStreamType whichStream, EMediaTags key ) const;
-        void cleanUpValues( std::unordered_map< EMediaTags, QString > &retVal ) const;
-
-        QString fVersion;
-        QString fFileName;
-        std::shared_ptr< MediaInfoDLL::MediaInfo > fMediaInfo;
-
-        std::unordered_map< EStreamType, std::vector< std::shared_ptr< CStreamData > > > fData;
-        bool fAOK{ false };
+        std::shared_ptr< CMediaInfoImpl > fImpl;
     };
 }
+
 #endif
