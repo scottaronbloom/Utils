@@ -241,6 +241,11 @@ namespace NSABUtils
         initMediaInfo();
     }
 
+    CMediaInfo::CMediaInfo( const QFileInfo &fi ) :
+        CMediaInfo( fi.absoluteFilePath() )
+    {
+    }
+
     CMediaInfo::~CMediaInfo()
     {
         fMediaInfo->Close();

@@ -30,6 +30,7 @@
 #include <map>
 #include <memory>
 
+class QFileInfo;
 namespace MediaInfoDLL
 {
     class MediaInfo;
@@ -146,6 +147,7 @@ namespace NSABUtils
     public:
         CMediaInfo() {}
         CMediaInfo( const QString &fileName );
+        CMediaInfo( const QFileInfo & fi );
         ~CMediaInfo();
 
         bool aOK() const { return fAOK; }
