@@ -132,8 +132,8 @@ namespace NSABUtils
 
         return retVal == 0;
     }
-    
-        std::vector< double > getChapterStarts( const QString &fileName, const QString &ffprobeExe, QString &msg )
+
+    std::vector< double > getChapterStarts( const QString &fileName, const QString &ffprobeExe, QString &msg )
     {
         auto args = QStringList() << "-i" << QString( "file:\"%1\"" ).arg( fileName ) << "-threads"
                                   << "0"
