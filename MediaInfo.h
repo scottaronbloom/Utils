@@ -128,16 +128,17 @@ namespace NSABUtils
     class SABUTILS_EXPORT CMediaInfo
     {
     public:
+        static void setFFProbeEXE( const QString &path );
+        static QString ffprobeEXE();
         CMediaInfo();
         CMediaInfo( const QString &fileName );
-        CMediaInfo( const QFileInfo & fi );
+        CMediaInfo( const QFileInfo &fi );
         ~CMediaInfo();
 
         bool aOK() const;
         QString fileName() const;
         QString version() const;
 
-        bool isHEVCCodec() const;
         bool isAudioCodec( const QString &checkCodecName ) const;
         
         bool isVideoCodec( const QString &checkCodecName ) const;

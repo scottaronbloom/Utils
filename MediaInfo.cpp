@@ -29,6 +29,10 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QDebug>
+#include <QProcess>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include "MediaInfoDLL/MediaInfoDLL_Static.h"
 
@@ -40,6 +44,8 @@ namespace NSABUtils
         CStreamData() {}
         CStreamData( MediaInfoDLL::MediaInfo *mediaInfo, EStreamType type, int num );
 
+        void addData( const QString &name, const QString &value );
+
         QString value( const QString &key ) const;
         QString value( EMediaTags key ) const;
 
@@ -48,7 +54,6 @@ namespace NSABUtils
 
     private:
         EStreamType fStreamType{ EStreamType::eGeneral };
-        QString fStreamName;
         int fStreamNum{ 0 };
         std::vector< std::pair< QString, QString > > fStreamData;
         std::map< QString, QString > fStreamDataMap;
@@ -229,6 +234,7 @@ namespace NSABUtils
     }
 
     CStreamData::CStreamData( MediaInfoDLL::MediaInfo *mediaInfo, EStreamType type, int num ) :
+        fStreamType( type ),
         fStreamNum( num )
     {
         if ( !mediaInfo )
@@ -240,10 +246,15 @@ namespace NSABUtils
         for ( int ii = 0; ii < paramCount; ++ii )
         {
             auto name = QString::fromStdWString( mediaInfo->Get( whichStream, num, ii, MediaInfoDLL::Info_Name ) ).trimmed();
-            auto value = QString::fromStdWString( mediaInfo->Get( whichStream, num, ii ) );
-            fStreamData.emplace_back( std::make_pair( name, value ) );
-            fStreamDataMap[ name ] = value.trimmed();
+            auto value = QString::fromStdWString( mediaInfo->Get( whichStream, num, ii ) ).trimmed();
+            addData( name, value );
         }
+    }
+
+    void CStreamData::addData( const QString &name, const QString &value )
+    {
+        fStreamData.emplace_back( std::make_pair( name, value ) );
+        fStreamDataMap[ name ] = value.trimmed();
     }
 
     QString CStreamData::value( const QString &key ) const
@@ -268,6 +279,7 @@ namespace NSABUtils
     {
     public:
         static CFileBasedCache< std::shared_ptr< CMediaInfoImpl > > sMediaInfoCache;
+        static QString sFFProbeEXE;
 
         static std::shared_ptr< CMediaInfoImpl > createImpl()
         {
@@ -303,16 +315,16 @@ namespace NSABUtils
         }
 
         CMediaInfoImpl() {}
+        CMediaInfoImpl( const QFileInfo &fi ) :
+            CMediaInfoImpl( fi.absoluteFilePath() )
+        {
+        }
         CMediaInfoImpl( const QString &fileName ) :
             fMediaInfo( std::make_unique< MediaInfoDLL::MediaInfo >() ),
             fFileName( fileName )
         {
             initMediaInfo();
-        }
-
-        CMediaInfoImpl( const QFileInfo &fi ) :
-            CMediaInfoImpl( fi.absoluteFilePath() )
-        {
+            loadCodecsFromFFProbe();
         }
 
         ~CMediaInfoImpl() { fMediaInfo->Close(); }
@@ -409,6 +421,14 @@ namespace NSABUtils
                         return QString( "%1x%2" ).arg( width ).arg( height );
                     }
                 }
+                if ( ( key == NSABUtils::EMediaTags::eVideoCodec ) || ( key == NSABUtils::EMediaTags::eAudioCodec ) )
+                {
+                    auto value = currStream->value( "FFMpegCodec" );
+                    if ( !value.isEmpty() )
+                        return value;
+                }
+
+
                 auto value = currStream->value( mediaInfoTagName( key ) );
                 if ( value.isEmpty() )
                     continue;
@@ -434,6 +454,17 @@ namespace NSABUtils
             }
 
             return retVal;
+        }
+
+        std::shared_ptr< CStreamData > streamData( EStreamType whichStream, size_t streamNum ) const
+        {
+            auto pos = fData.find( whichStream );
+            if ( pos == fData.end() )
+                return {};
+
+            if ( streamNum >= ( *pos ).second.size() )
+                return {};
+            return ( *pos ).second[ streamNum ];
         }
 
         void cleanUpValues( std::unordered_map< EMediaTags, QString > &retVal ) const
@@ -540,24 +571,114 @@ namespace NSABUtils
             cleanUpValues( retVal );
             return retVal;
         }
+
+        bool validateFFProbeEXE()
+        {
+            if ( sFFProbeEXE.isEmpty() )
+                return false;
+
+            auto fi = QFileInfo( sFFProbeEXE );
+            bool aOK = fi.exists() && fi.isExecutable();
+            return aOK;
+        }
+
+        void loadCodecsFromFFProbe()
+        {
+            if ( !validateFFProbeEXE() )
+                return;
+
+            auto args = QStringList()   //
+                        << "-v"
+                        << "quiet"   //
+                        << "-print_format"
+                        << "json"   //
+                        << "-show_format"   //
+                        << "-show_streams"   //
+                        << fFileName;
+
+            QProcess process;
+            //process.setProcessChannelMode( QProcess::MergedChannels );
+            process.start( sFFProbeEXE, args );
+            if ( !process.waitForFinished( -1 ) || ( process.exitStatus() != QProcess::NormalExit ) || ( process.exitCode() != 0 ) )
+            {
+                return;
+            }
+            auto data = process.readAll();
+
+            auto doc = QJsonDocument::fromJson( data );
+            if ( !doc.object().contains( "streams" ) )
+                return;
+
+            //qDebug().noquote().nospace() << doc.toJson( QJsonDocument::JsonFormat::Indented );
+
+            std::map< EStreamType, int > streamCount;
+
+            auto streams = doc[ "streams" ].toArray();
+            for ( auto &&ii : streams )
+            {
+                auto stream = ii.toObject();
+                //qDebug().noquote().noquote() << QJsonDocument( stream ).toJson( QJsonDocument::Indented );
+
+                auto codecType = stream[ "codec_type" ].toString();
+                //auto streamNum = stream[ "index" ].toInt();
+                auto codec = stream[ "codec_name" ].toString();
+
+                EStreamType streamType;
+                if ( codecType == "general" )
+                    streamType = EStreamType::eGeneral;
+                else if ( codecType == "video" )
+                    streamType = EStreamType::eVideo;
+                else if ( codecType == "audio" )
+                    streamType = EStreamType::eAudio;
+                else if ( codecType == "subtitle" )
+                    streamType = EStreamType::eText;
+                else if ( codecType == "image" )
+                    streamType = EStreamType::eImage;
+                else if ( codecType == "menu" )
+                    streamType = EStreamType::eMenu;
+                else
+                    streamType = EStreamType::eOther;
+
+                auto streamNum = streamCount[ streamType ]++;
+
+                auto streamData = this->streamData( streamType, streamNum );
+                if ( !streamData )
+                    continue;
+
+                streamData->addData( "FFMpegCodec", codec );
+            }
+        }
+
         QString fVersion;
         QString fFileName;
         std::shared_ptr< MediaInfoDLL::MediaInfo > fMediaInfo;
 
         std::unordered_map< EStreamType, std::vector< std::shared_ptr< CStreamData > > > fData;
+        std::list< std::tuple< EStreamType, int, QString > > fFFProbeData;
         bool fAOK{ false };
     };
 
     CFileBasedCache< std::shared_ptr< CMediaInfoImpl > > CMediaInfoImpl::sMediaInfoCache;
+    QString CMediaInfoImpl::sFFProbeEXE;
+
+    void CMediaInfo::setFFProbeEXE( const QString &path )
+    {
+        CMediaInfoImpl::sFFProbeEXE = path;
+    }
+
+    QString CMediaInfo::ffprobeEXE()
+    {
+        return CMediaInfoImpl::sFFProbeEXE;
+    }
 
     CMediaInfo::CMediaInfo() :
-        fImpl( CMediaInfoImpl::createImpl() ) 
+        fImpl( CMediaInfoImpl::createImpl() )
     {
     }
 
     CMediaInfo::CMediaInfo( const QString &fileName ) :
         fImpl( CMediaInfoImpl::createImpl( fileName ) )
-    { 
+    {
     }
 
     CMediaInfo::CMediaInfo( const QFileInfo &fi ) :
@@ -584,26 +705,13 @@ namespace NSABUtils
         return fImpl->version();
     }
 
-    bool CMediaInfo::isHEVCCodec() const
-    {
-        return isHEVCCodec( getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
-    }
-
     bool CMediaInfo::isHEVCCodec( QString mediaCodecName )
     {
-        return isCodec( "hevc", mediaCodecName ) //
-            || isCodec( "hvc1", mediaCodecName ) //
-            || isCodec( "hev1", mediaCodecName ) //
-            || isCodec( "libx265", mediaCodecName //
-            );
+        return isCodec( "hevc", mediaCodecName );
     }
 
     bool CMediaInfo::isVideoCodec( const QString &checkCodecName ) const
     {
-        if ( checkCodecName.contains( "hevc" ) )
-            return isCodec( "hevc", getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
-        if ( checkCodecName.contains( "libx265" ) )
-            return isCodec( "hevc", getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
         return isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
     }
 
@@ -617,10 +725,29 @@ namespace NSABUtils
         return fImpl->isAudioCodec( checkCodecName );
     }
 
+    void cleanCodec( QString & codec )
+    {
+        codec = codec.toLower();
+        if ( codec.endsWith( "_amf" ) )
+            codec = codec.left( codec.length() - 4 );
+        else if ( codec.endsWith( "_mf" ) )
+            codec = codec.left( codec.length() - 3 );
+        else if ( codec.endsWith( "_nvenc" ) )
+            codec = codec.left( codec.length() - 6 );
+        else if ( codec.endsWith( "_qsv" ) )
+            codec = codec.left( codec.length() - 4 );
+        else if ( codec == "libkvazaar" )
+            codec = "hevc";
+        else if ( codec == "libx265" )
+            codec = "hevc";
+
+        codec = codec.remove( QRegularExpression( R"([-_])" ) );
+    }
+
     bool CMediaInfo::isCodec( QString checkCodecName, QString mediaCodecName )
     {
-        checkCodecName = checkCodecName.toLower().remove( QRegularExpression( R"([-_])" ) );
-        mediaCodecName = mediaCodecName.toLower().remove( QRegularExpression( R"([-_])" ) );
+        cleanCodec( checkCodecName );
+        cleanCodec( mediaCodecName );
         bool isCodec = mediaCodecName.contains( checkCodecName );
         return isCodec;
     }
