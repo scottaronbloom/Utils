@@ -584,18 +584,26 @@ namespace NSABUtils
         return fImpl->version();
     }
 
-    bool CMediaInfo::isHEVCVideo() const
+    bool CMediaInfo::isHEVCCodec() const
     {
-        return isHEVCVideo( getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
+        return isHEVCCodec( getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
     }
 
-    bool CMediaInfo::isHEVCVideo( QString mediaCodecName )
+    bool CMediaInfo::isHEVCCodec( QString mediaCodecName )
     {
-        return isCodec( "hevc", mediaCodecName ) || isCodec( "hvc1", mediaCodecName ) || isCodec( "hev1", mediaCodecName );
+        return isCodec( "hevc", mediaCodecName ) //
+            || isCodec( "hvc1", mediaCodecName ) //
+            || isCodec( "hev1", mediaCodecName ) //
+            || isCodec( "libx265", mediaCodecName //
+            );
     }
 
     bool CMediaInfo::isVideoCodec( const QString &checkCodecName ) const
     {
+        if ( checkCodecName.contains( "hevc" ) )
+            return isCodec( "hevc", getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
+        if ( checkCodecName.contains( "libx265" ) )
+            return isCodec( "hevc", getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
         return isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
     }
 
@@ -607,16 +615,6 @@ namespace NSABUtils
     bool CMediaInfo::isAudioCodec( const QString &checkCodecName ) const
     {
         return fImpl->isAudioCodec( checkCodecName );
-    }
-
-    bool CMediaInfo::isAudioCodec( const QStringList &allowedCodecs ) const
-    {
-        for ( auto &&ii : allowedCodecs )
-        {
-            if ( isAudioCodec( ii ) )
-                return true;
-        }
-        return false;
     }
 
     bool CMediaInfo::isCodec( QString checkCodecName, QString mediaCodecName )

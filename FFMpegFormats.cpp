@@ -21,13 +21,50 @@
 // SOFTWARE.
 
 #include "FFMpegFormats.h"
+#include "GPUDetect.h"
+
 #include <QProcess>
 #include <QFileInfo>
-#include <QImageReader>
 #include <QProgressDialog>
+#include <QRegularExpression>
+#include <QImageReader>
 
 namespace NSABUtils
 {
+    void removeFromlist( QStringList &list, const QString &regex )
+    {
+        auto regExp = QRegularExpression( regex );
+        auto pos = list.indexOf( regExp );
+        while ( pos != -1 )
+        {
+            list.removeAt( pos );
+            pos = list.indexOf( regExp, pos );
+        }
+    }
+
+    void cleanLists( const QString &intel, const QString &nvidia, const QString &amd, QStringList &terse, QStringList &verbose )
+    {
+        SGPUInfo info;
+        QStringList regExs;
+        if ( !info.fIntel )
+        {
+            regExs << intel;
+        }
+
+        if ( !info.fNVidia )
+        {
+            regExs << nvidia;
+        }
+
+        if ( !info.fAMD )
+        {
+            regExs << amd;
+        }
+        auto regEx = regExs.join( "|" );
+        removeFromlist( terse, regEx );
+        removeFromlist( verbose, regEx );
+    }
+
     CFFMpegFormats::CFFMpegFormats()
     {
     }
@@ -37,12 +74,12 @@ namespace NSABUtils
         setFFMpegExecutable( ffmpegExe );
     }
 
-    void CFFMpegFormats::initFormatsFromDefaults( const QStringList &terse, const QStringList &verbose, const TFormatMap &formatExtensions )
+    void CFFMpegFormats::initEncoderFormatsFromDefaults( const QStringList &terse, const QStringList &verbose, const TFormatMap &formatExtensions )
     {
-        fTerseFormats = terse;
-        fVerboseFormats = verbose;
-        fMediaFormatExtensions = formatExtensions;
-        computeReverseExtensionMap();
+        fTerseEncoderFormats = terse;
+        fVerboseEncoderFormats = verbose;
+        fMediaEncoderFormatExtensions = formatExtensions;
+        computeReverseExtensionMap( true );
         checkLoaded();
         if ( loaded() )
         {
@@ -50,10 +87,12 @@ namespace NSABUtils
         }
     }
 
-    void CFFMpegFormats::initVideoCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    void CFFMpegFormats::initDecoderFormatsFromDefaults( const QStringList &terse, const QStringList &verbose, const TFormatMap &formatExtensions )
     {
-        fVideoCodecsTerse = terse;
-        fVideoCodecsVerbose = verbose;
+        fTerseDecoderFormats = terse;
+        fVerboseDecoderFormats = verbose;
+        fMediaDecoderFormatExtensions = formatExtensions;
+        computeReverseExtensionMap( false );
         checkLoaded();
         if ( loaded() )
         {
@@ -61,10 +100,13 @@ namespace NSABUtils
         }
     }
 
-    void CFFMpegFormats::initAudioCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    void CFFMpegFormats::initVideoEncoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
     {
-        fAudioCodecsTerse = terse;
-        fAudioCodecsVerbose = verbose;
+        fVideoEncoderCodecsTerse = terse;
+        fVideoEncoderCodecsVerbose = verbose;
+
+        //cleanLists( R"((.*_qsv.*))", R"((.*_nvenc.*))", R"((.*_amf.*))", fVideoEncoderCodecsTerse, fVideoEncoderCodecsVerbose );
+
         checkLoaded();
         if ( loaded() )
         {
@@ -72,10 +114,71 @@ namespace NSABUtils
         }
     }
 
-    void CFFMpegFormats::initSubtitleCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    void CFFMpegFormats::initVideoDecoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
     {
-        fSubtitleCodecsTerse = terse;
-        fSubtitleCodecsVerbose = verbose;
+        fVideoDecoderCodecsTerse = terse;
+        fVideoDecoderCodecsVerbose = verbose;
+
+        //cleanLists( R"((.*_qsv.*))", R"((.*_nvenc.*))", R"((.*_amf.*))", fVideoDecoderCodecsTerse, fVideoDecoderCodecsVerbose );
+
+        checkLoaded();
+        if ( loaded() )
+        {
+            Q_ASSERT( validate() );
+        }
+    }
+
+    void CFFMpegFormats::initHWAccelsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    {
+        fHWAccelsTerse = terse;
+        fHWAccelsVerbose = verbose;
+
+        //cleanLists( R"((.*qsv.*))", R"((.*nvenc.*))", R"((.*amf.*))", fHWAccelsTerse, fHWAccelsVerbose );
+
+        checkLoaded();
+        if ( loaded() )
+        {
+            Q_ASSERT( validate() );
+        }
+    }
+
+    void CFFMpegFormats::initAudioEncoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    {
+        fAudioEncoderCodecsTerse = terse;
+        fAudioEncoderCodecsVerbose = verbose;
+        checkLoaded();
+        if ( loaded() )
+        {
+            Q_ASSERT( validate() );
+        }
+    }
+
+    void CFFMpegFormats::initAudioDecoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    {
+        fAudioDecoderCodecsTerse = terse;
+        fAudioDecoderCodecsVerbose = verbose;
+        checkLoaded();
+        if ( loaded() )
+        {
+            Q_ASSERT( validate() );
+        }
+    }
+
+    void CFFMpegFormats::initSubtitleEncoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    {
+        fSubtitleEncoderCodecsTerse = terse;
+        fSubtitleEncoderCodecsVerbose = verbose;
+        checkLoaded();
+        if ( loaded() )
+        {
+            Q_ASSERT( validate() );
+        }
+    }
+
+    void CFFMpegFormats::initSubtitleDecoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose )
+    {
+        fSubtitleDecoderCodecsTerse = terse;
+        fSubtitleDecoderCodecsVerbose = verbose;
         checkLoaded();
         if ( loaded() )
         {
@@ -90,7 +193,7 @@ namespace NSABUtils
         clear();
     }
 
-    void CFFMpegFormats::recompute( QProgressDialog * dlg )
+    void CFFMpegFormats::recompute( QProgressDialog *dlg )
     {
         clear();
         Q_ASSERT( validateFFMpegExe() );
@@ -98,37 +201,157 @@ namespace NSABUtils
             return;
 
         loadFormats( dlg );
-        computeReverseExtensionMap();
+        computeReverseExtensionMap( true );
+        computeReverseExtensionMap( false );
         loadCodecs( dlg );
+        loadHWAccels( dlg );
         fLoaded = true;
         Q_ASSERT( validate() );
     }
 
-    bool CFFMpegFormats::isFormat( const QString &suffix, const QString &formatName ) const
+    bool CFFMpegFormats::isEncoderFormat( const QString &suffix, const QString &formatName ) const
     {
         Q_ASSERT( loaded() );
         auto realSuffix = suffix;
         if ( !realSuffix.startsWith( "*." ) )
             realSuffix = "*." + realSuffix;
-        return getExtensionsForFormat( formatName ).contains( realSuffix );
+        return getEncoderExtensionsForFormat( formatName ).contains( realSuffix );
+    }
+
+    bool CFFMpegFormats::isDecoderFormat( const QString &suffix, const QString &formatName ) const
+    {
+        Q_ASSERT( loaded() );
+        auto realSuffix = suffix;
+        if ( !realSuffix.startsWith( "*." ) )
+            realSuffix = "*." + realSuffix;
+        return getDecoderExtensionsForFormat( formatName ).contains( realSuffix );
+    }
+
+    QStringList CFFMpegFormats::encoderFormats( bool verbose ) const
+    {
+        if ( verbose )
+            return fVerboseEncoderFormats;
+        else
+            return fTerseEncoderFormats;
+    }
+
+    QStringList CFFMpegFormats::decoderFormats( bool verbose ) const
+    {
+        if ( verbose )
+            return fVerboseDecoderFormats;
+        else
+            return fTerseDecoderFormats;
+    }
+
+    QStringList CFFMpegFormats::audioEncoderCodecs( bool verbose ) const
+    {
+        if ( verbose )
+            return fAudioEncoderCodecsVerbose;
+        else
+            return fAudioEncoderCodecsTerse;
+    }
+
+    QStringList CFFMpegFormats::audioDecoderCodecs( bool verbose ) const
+    {
+        if ( verbose )
+            return fAudioDecoderCodecsVerbose;
+        else
+            return fAudioDecoderCodecsTerse;
+    }
+
+    QStringList CFFMpegFormats::videoEncoderCodecs( bool verbose ) const
+    {
+        if ( verbose )
+            return fVideoEncoderCodecsVerbose;
+        else
+            return fVideoEncoderCodecsTerse;
+    }
+
+    QStringList CFFMpegFormats::videoDecoderCodecs( bool verbose ) const
+    {
+        if ( verbose )
+            return fVideoDecoderCodecsVerbose;
+        else
+            return fVideoDecoderCodecsTerse;
+    }
+
+    QStringList CFFMpegFormats::subtitleEncoderCodecs( bool verbose ) const
+    {
+        if ( verbose )
+            return fSubtitleEncoderCodecsVerbose;
+        else
+            return fSubtitleEncoderCodecsTerse;
+    }
+
+    QStringList CFFMpegFormats::subtitleDecoderCodecs( bool verbose ) const
+    {
+        if ( verbose )
+            return fSubtitleDecoderCodecsVerbose;
+        else
+            return fSubtitleDecoderCodecsTerse;
+    }
+
+    QStringList CFFMpegFormats::hwAccels( bool verbose ) const
+    {
+        if ( verbose )
+            return fHWAccelsVerbose;
+        else
+            return fHWAccelsTerse;
     }
 
     void CFFMpegFormats::checkLoaded()
     {
-        bool loaded = !fTerseFormats.isEmpty() && !fVerboseFormats.isEmpty() /* && !fMediaFormatExtensions.empty() && !fReverseMediaFormatExtensions.empty() */;
-        loaded = loaded && !fAudioCodecsTerse.isEmpty() && !fAudioCodecsVerbose.isEmpty();
-        loaded = loaded && !fVideoCodecsTerse.isEmpty() && !fVideoCodecsVerbose.isEmpty();
-        loaded = loaded && !fSubtitleCodecsTerse.isEmpty() && !fSubtitleCodecsVerbose.isEmpty();
+        bool loaded =      !fTerseEncoderFormats.isEmpty() && !fVerboseEncoderFormats.isEmpty() /* && !fMediaFormatExtensions.empty() && !fReverseMediaFormatExtensions.empty() */;
+        loaded = loaded && !fTerseDecoderFormats.isEmpty() && !fVerboseDecoderFormats.isEmpty() /* && !fMediaFormatExtensions.empty() && !fReverseMediaFormatExtensions.empty() */;
+
+        loaded = loaded && !fAudioEncoderCodecsTerse.isEmpty() && !fAudioEncoderCodecsVerbose.isEmpty();
+        loaded = loaded && !fAudioDecoderCodecsTerse.isEmpty() && !fAudioDecoderCodecsVerbose.isEmpty();
+
+        loaded = loaded && !fVideoEncoderCodecsTerse.isEmpty() && !fVideoEncoderCodecsVerbose.isEmpty();
+        loaded = loaded && !fVideoDecoderCodecsTerse.isEmpty() && !fVideoDecoderCodecsVerbose.isEmpty();
+
+        loaded = loaded && !fSubtitleEncoderCodecsTerse.isEmpty() && !fSubtitleEncoderCodecsVerbose.isEmpty();
+        loaded = loaded && !fSubtitleDecoderCodecsTerse.isEmpty() && !fSubtitleDecoderCodecsVerbose.isEmpty();
+
+        loaded = loaded && !fSubtitleEncoderCodecsTerse.isEmpty() && !fSubtitleEncoderCodecsVerbose.isEmpty();
+        loaded = loaded && !fSubtitleDecoderCodecsTerse.isEmpty() && !fSubtitleDecoderCodecsVerbose.isEmpty();
+
+        loaded = loaded && !fHWAccelsTerse.isEmpty() && !fHWAccelsVerbose.isEmpty();
         fLoaded = loaded;
     }
 
     void CFFMpegFormats::clear()
     {
         fLoaded = false;
-        fTerseFormats.clear();
-        fVerboseFormats.clear();
-        fMediaFormatExtensions.clear();
-        fReverseMediaFormatExtensions.clear();
+
+        fTerseEncoderFormats.clear();
+        fVerboseEncoderFormats.clear();
+        fTerseDecoderFormats.clear();
+        fVerboseDecoderFormats.clear();
+
+        fMediaEncoderFormatExtensions.clear();
+        fReverseMediaEncoderFormatExtensions.clear();
+
+        fMediaDecoderFormatExtensions.clear();
+        fReverseMediaDecoderFormatExtensions.clear();
+
+        fAudioEncoderCodecsTerse.clear();
+        fAudioEncoderCodecsVerbose.clear();
+        fVideoEncoderCodecsTerse.clear();
+        fVideoEncoderCodecsVerbose.clear();
+        fSubtitleEncoderCodecsTerse.clear();
+        fSubtitleEncoderCodecsVerbose.clear();
+
+        fAudioDecoderCodecsTerse.clear();
+        fAudioDecoderCodecsVerbose.clear();
+        fVideoDecoderCodecsTerse.clear();
+        fVideoDecoderCodecsVerbose.clear();
+        fSubtitleDecoderCodecsTerse.clear();
+        fSubtitleDecoderCodecsVerbose.clear();
+
+        fHWAccelsTerse.clear();
+        fHWAccelsVerbose.clear();
+
         fImageFormats.reset();
     }
 
@@ -145,56 +368,96 @@ namespace NSABUtils
         bool aOK = fi.exists() && fi.isExecutable();
         return aOK;
     }
-    
+
     bool CFFMpegFormats::validate() const
     {
         bool aOK = loaded();
-        aOK = ( fTerseFormats.count() == fVerboseFormats.count() ) && aOK;
+        aOK = ( fTerseEncoderFormats.count() == fVerboseEncoderFormats.count() ) && aOK;
+        aOK = ( fTerseDecoderFormats.count() == fVerboseDecoderFormats.count() ) && aOK;
         //aOK = ( fTerseFormats.count() == fMediaFormatExtensions.size() ) && aOK; // not every format has known extensions
-        aOK = ( fAudioCodecsTerse.count() == fAudioCodecsVerbose.count() ) && aOK;
-        aOK = ( fVideoCodecsTerse.count() == fVideoCodecsVerbose.count() ) && aOK;
-        aOK = ( fSubtitleCodecsTerse.count() == fSubtitleCodecsVerbose.count() ) && aOK;
+        
+        aOK = ( fAudioEncoderCodecsTerse.count() == fAudioEncoderCodecsVerbose.count() ) && aOK;
+        aOK = ( fAudioDecoderCodecsTerse.count() == fAudioDecoderCodecsVerbose.count() ) && aOK;
+        
+        aOK = ( fVideoEncoderCodecsTerse.count() == fVideoEncoderCodecsVerbose.count() ) && aOK;
+        aOK = ( fVideoDecoderCodecsTerse.count() == fVideoDecoderCodecsVerbose.count() ) && aOK;
+        
+        aOK = ( fSubtitleEncoderCodecsTerse.count() == fSubtitleEncoderCodecsVerbose.count() ) && aOK;
+        aOK = ( fSubtitleDecoderCodecsTerse.count() == fSubtitleDecoderCodecsVerbose.count() ) && aOK;
+
+        aOK = ( fHWAccelsTerse.count() == fHWAccelsVerbose.count() ) && aOK;
         return aOK;
     }
 
-    QStringList CFFMpegFormats::getExtensions( NSABUtils::EFormatType extensionType ) const
+    QStringList CFFMpegFormats::getEncoderExtensions( NSABUtils::EFormatType extensionType ) const
     {
-        if ( !loaded() )
-            return {};
-        auto pos = fMediaFormatExtensions.find( extensionType );
-        if ( pos == fMediaFormatExtensions.end() )
+        auto pos = fMediaEncoderFormatExtensions.find( extensionType );
+        if ( pos == fMediaEncoderFormatExtensions.end() )
             return {};
         QStringList retVal;
-        for ( auto &&ii : (*pos).second )
+        for ( auto &&ii : ( *pos ).second )
         {
             retVal << ii.second;
         }
         return retVal;
     }
 
-    QStringList CFFMpegFormats::getVideoExtensions() const
+    QStringList CFFMpegFormats::getDecoderExtensions( NSABUtils::EFormatType extensionType ) const
     {
-        return getExtensions( EFormatType::eVideo );
+        auto pos = fMediaDecoderFormatExtensions.find( extensionType );
+        if ( pos == fMediaDecoderFormatExtensions.end() )
+            return {};
+        QStringList retVal;
+        for ( auto &&ii : ( *pos ).second )
+        {
+            retVal << ii.second;
+        }
+        return retVal;
     }
 
-    QStringList CFFMpegFormats::getAudioExtensions() const
+    QStringList CFFMpegFormats::getVideoEncoderExtensions() const
     {
-        return getExtensions( EFormatType::eAudio );
+        return getEncoderExtensions( EFormatType::eVideo );
     }
 
-    QStringList CFFMpegFormats::getSubtitleExtensions() const
+    QStringList CFFMpegFormats::getAudioEncoderExtensions() const
     {
-        return getExtensions( EFormatType::eSubtitle );
+        return getEncoderExtensions( EFormatType::eAudio );
     }
 
-    QStringList CFFMpegFormats::getImageExtensions() const
+    QStringList CFFMpegFormats::getSubtitleEncoderExtensions() const
     {
-        return getExtensions( EFormatType::eImage );
+        return getEncoderExtensions( EFormatType::eSubtitle );
     }
 
-    QString CFFMpegFormats::getPrimaryExtensionForFormat( const QString &formatName ) const
+    QStringList CFFMpegFormats::getVideoDecoderExtensions() const
     {
-        auto exts = getExtensionsForFormat( formatName );
+        return getDecoderExtensions( EFormatType::eVideo );
+    }
+
+    QStringList CFFMpegFormats::getAudioDecoderExtensions() const
+    {
+        return getDecoderExtensions( EFormatType::eAudio );
+    }
+
+    QStringList CFFMpegFormats::getSubtitleDecoderExtensions() const
+    {
+        return getDecoderExtensions( EFormatType::eSubtitle );
+    }
+
+    QStringList CFFMpegFormats::getImageEncoderExtensions() const
+    {
+        return getEncoderExtensions( EFormatType::eImage );
+    }
+
+    QStringList CFFMpegFormats::getImageDecoderExtensions() const
+    {
+        return getDecoderExtensions( EFormatType::eImage );
+    }
+
+    QString CFFMpegFormats::getPrimaryEncoderExtensionForFormat( const QString &formatName ) const
+    {
+        auto exts = getEncoderExtensionsForFormat( formatName );
         if ( exts.isEmpty() )
             return {};
         auto retVal = exts.front();
@@ -202,9 +465,19 @@ namespace NSABUtils
         return retVal;
     }
 
-    std::optional< QStringList > CFFMpegFormats::formatLoaded( const QString &formatName ) const
+    QString CFFMpegFormats::getPrimaryDecoderExtensionForFormat( const QString &formatName ) const
     {
-        for ( auto &&ii : fMediaFormatExtensions )
+        auto exts = getDecoderExtensionsForFormat( formatName );
+        if ( exts.isEmpty() )
+            return {};
+        auto retVal = exts.front();
+        retVal.remove( "*." );
+        return retVal;
+    }
+
+    std::optional< QStringList > CFFMpegFormats::encoderFormatLoaded( const QString &formatName ) const
+    {
+        for ( auto &&ii : fMediaEncoderFormatExtensions )
         {
             auto pos = ii.second.find( formatName );
             if ( pos == ii.second.end() )
@@ -214,31 +487,82 @@ namespace NSABUtils
         return {};
     }
 
-    QStringList CFFMpegFormats::getExtensionsForFormat( const QString &formatName ) const
+    std::optional< QStringList > CFFMpegFormats::decoderFormatLoaded( const QString &formatName ) const
     {
-        Q_ASSERT( loaded() );
-        for ( auto &&ii : fMediaFormatExtensions )
+        for ( auto &&ii : fMediaDecoderFormatExtensions )
         {
             auto pos = ii.second.find( formatName );
             if ( pos == ii.second.end() )
                 return {};
             return ( *pos ).second;
         }
+        return {};
+    }
+
+    QStringList CFFMpegFormats::getEncoderExtensionsForFormat( const QString &formatName ) const
+    {
+        Q_ASSERT( loaded() );
+        for ( auto &&ii : fMediaEncoderFormatExtensions )
+        {
+            auto pos = ii.second.find( formatName );
+            if ( pos == ii.second.end() )
+                return {};
+            return ( *pos ).second;
+        }
+        return {};
+    }
+
+    QStringList CFFMpegFormats::getDecoderExtensionsForFormat( const QString &formatName ) const
+    {
+        Q_ASSERT( loaded() );
+        for ( auto &&ii : fMediaDecoderFormatExtensions )
+        {
+            auto pos = ii.second.find( formatName );
+            if ( pos == ii.second.end() )
+                return {};
+            return ( *pos ).second;
+        }
+        return {};
+    }
+
+    QString CFFMpegFormats::getTranscodeHWAccel( const QString &formatName ) const
+    {
+        if ( formatName.contains( "_qsv" ) )
+            return "qsv";
+        if ( formatName.contains( "_nvenc" ) )
+            return "cuda";
+        if ( formatName.contains( "_amf" ) )
+            return "amd";
+        return {};
+    }
+
+    QString CFFMpegFormats::getCodecForHWAccel( const QString &hwAccel ) const
+    {
+        if ( hwAccel.contains( "cuda" ) )
+            return "hevc_nvenc";
+        if ( hwAccel.contains( "qsv" ) )
+            return "hevc_qsv";
+        if ( hwAccel.contains( "amd" ) )
+            return "hevc_amf";
         return {};
     }
 
     void CFFMpegFormats::loadCodecs( QProgressDialog *dlg )
     {
+        loadCodecs( true, dlg );
+        loadCodecs( false, dlg );
+    }
+
+    void CFFMpegFormats::loadCodecs( bool isEncoding, QProgressDialog *dlg )
+    {
         if ( !validateFFMpegExe() )
             return;
 
         if ( dlg )
-            dlg->setLabelText( "Loading Codecs" );
+            dlg->setLabelText( QString( "Loading %1 Codecs" ).arg( isEncoding ? "Decoder" : "Decoder" ) );
 
         QProcess process;
-        process.start(
-            fFFMpegExe, QStringList() << "-hide_banner"
-                                      << "-encoders" );
+        process.start( fFFMpegExe, QStringList() << "-hide_banner" << ( isEncoding ? "-encoders" : "-decoders" ) );
         process.waitForFinished();
         auto codecs = process.readAllStandardOutput();
 
@@ -248,19 +572,19 @@ namespace NSABUtils
 
         codecs = codecs.mid( pos + 6 );
         /*
-            * Encoders:
-                V..... = Video
-                A..... = Audio
-                S..... = Subtitle
-            .   F.... = Frame-level multithreading
-                .S... = Slice-level multithreading
-                ...  X.. = Codec is experimental
-            ....   B. = Supports draw_horiz_band
-            .....   D = Supports direct rendering method 1
-                        
-                        
-                V....D a64multi             Multicolor charset for Commodore 64 (codec a64_multi)
-        */
+        *Encoders/Decoders:
+            V..... = Video
+            A..... = Audio
+            S..... = Subtitle
+        .   F.... = Frame-level multithreading
+            .S... = Slice-level multithreading
+            ...  X.. = Codec is experimental
+        ....   B. = Supports draw_horiz_band
+        .....   D = Supports direct rendering method 1
+                    
+                    
+            V....D a64multi             Multicolor charset for Commodore 64 (codec a64_multi)
+    */
         auto regEx = QRegularExpression( R"((?<type>[VAS][FSXBD\.]{5})\s+(?<name>\S+)\s+(?<desc>.*))" );
         auto ii = regEx.globalMatch( codecs );
         if ( dlg )
@@ -293,16 +617,40 @@ namespace NSABUtils
             switch ( type[ 0 ].toLatin1() )
             {
                 case 'A':
-                    fAudioCodecsTerse.push_back( name );
-                    fAudioCodecsVerbose.push_back( name + " - " + desc );
+                    if ( isEncoding )
+                    {
+                        fAudioEncoderCodecsTerse.push_back( name );
+                        fAudioEncoderCodecsVerbose.push_back( name + " - " + desc );
+                    }
+                    else
+                    {
+                        fAudioDecoderCodecsTerse.push_back( name );
+                        fAudioDecoderCodecsVerbose.push_back( name + " - " + desc );
+                    }
                     break;
                 case 'V':
-                    fVideoCodecsTerse.push_back( name );
-                    fVideoCodecsVerbose.push_back( name + " - " + desc );
+                    if ( isEncoding )
+                    {
+                        fVideoEncoderCodecsTerse.push_back( name );
+                        fVideoEncoderCodecsVerbose.push_back( name + " - " + desc );
+                    }
+                    else
+                    {
+                        fVideoDecoderCodecsTerse.push_back( name );
+                        fVideoDecoderCodecsVerbose.push_back( name + " - " + desc );
+                    }
                     break;
                 case 'S':
-                    fSubtitleCodecsTerse.push_back( name );
-                    fSubtitleCodecsVerbose.push_back( name + " - " + desc );
+                    if ( isEncoding )
+                    {
+                        fSubtitleEncoderCodecsTerse.push_back( name );
+                        fSubtitleEncoderCodecsVerbose.push_back( name + " - " + desc );
+                    }
+                    else
+                    {
+                        fSubtitleDecoderCodecsTerse.push_back( name );
+                        fSubtitleDecoderCodecsVerbose.push_back( name + " - " + desc );
+                    }
                     break;
                 default:
                     break;
@@ -310,14 +658,90 @@ namespace NSABUtils
         }
     }
 
-    void CFFMpegFormats::loadFormats( QProgressDialog * dlg )
+    void CFFMpegFormats::loadHWAccels( QProgressDialog *dlg )
+    {
+        if ( !validateFFMpegExe() )
+            return;
+
+        if ( dlg )
+            dlg->setLabelText( "Loading HW Accelerators" );
+
+        QProcess process;
+        process.start(
+            fFFMpegExe, QStringList() << "-hide_banner"
+                                      << "-hwaccels" );
+        process.waitForFinished();
+        auto hwaccels = process.readAllStandardOutput();
+
+        auto pos = hwaccels.indexOf( ":" );
+        if ( pos == -1 )
+            return;
+
+        hwaccels = hwaccels.mid( pos + 1 );
+        /*
+            * Hardware acceleration methods:
+            cuda
+            dxva2
+            qsv
+            d3d11va
+        */
+        auto regEx = QRegularExpression( R"(\s*(?<hwaccel>\S+))" );
+        auto ii = regEx.globalMatch( hwaccels );
+        if ( dlg )
+        {
+            int count = 0;
+            while ( ii.hasNext() )
+            {
+                count++;
+                ii.next();
+            }
+            ii = regEx.globalMatch( hwaccels );
+            dlg->setRange( 0, count );
+            dlg->setValue( 0 );
+        }
+
+        while ( ii.hasNext() )
+        {
+            if ( dlg )
+                dlg->setValue( dlg->value() + 1 );
+            auto match = ii.next();
+            auto type = match.captured( "hwaccel" ).trimmed().toLower();
+            if ( type == "none" )
+                fHWAccelsVerbose.push_back( type + " - Do not use any hardware acceleration (the default)." );
+            else if ( type == "auto" )
+                fHWAccelsVerbose.push_back( type + " - Automatically select the hardware acceleration method." );
+            else if ( type == "vdpau" )
+                fHWAccelsVerbose.push_back( type + " - Use VDPAU (Video Decode and Presentation API for Unix) hardware acceleration." );
+            else if ( type == "dxva2" )
+                fHWAccelsVerbose.push_back( type + " - Use DXVA2 (DirectX Video Acceleration) API hardware acceleration." );
+            else if ( type == "d3d11va" )
+                fHWAccelsVerbose.push_back( type + " - Use D3D11VA (DirectX Video Acceleration) API hardware acceleration." );
+            else if ( type == "vaapi" )
+                fHWAccelsVerbose.push_back( type + " - Use VAAPI (Video Acceleration API) hardware acceleration." );
+            else if ( type == "qsv" )
+                fHWAccelsVerbose.push_back( type + " - Use the Intel QuickSync Video acceleration for video transcoding." );
+            else if ( type == "cuda" )
+                fHWAccelsVerbose.push_back( type + " - Use the nVidia Cuda Video acceleration for video transcoding." );
+            else if ( type == "amf" )
+                fHWAccelsVerbose.push_back( type + " - Use the AMD Advanced Media Framework Video acceleration for video transcoding." );
+            else if ( type == "opencl" )
+                fHWAccelsVerbose.push_back( type + " - Use OpenCL hardware acceleration for API video transcoding.)" );   //
+            else if ( type == "vulkan" )
+                fHWAccelsVerbose.push_back( type + " - Use the Vulkan hardware acceleration API for video transcoding.)" );   //
+            else
+                continue;
+            fHWAccelsTerse.push_back( type );
+        }
+    }
+
+    void CFFMpegFormats::loadFormats( QProgressDialog *dlg )
     {
         if ( !validateFFMpegExe() )
             return;
 
         if ( dlg )
             dlg->setLabelText( "Loading Formats" );
-        
+
         QProcess process;
         process.start(
             fFFMpegExe, QStringList() << "-hide_banner"
@@ -331,7 +755,7 @@ namespace NSABUtils
 
         formats = formats.mid( pos + 2 );
         /*
-        * Encoders:
+        * Encoers/Decoders:
             D. = Demuxing supported
             .E = Muxing supported
                         
@@ -359,34 +783,50 @@ namespace NSABUtils
             if ( dlg )
                 dlg->setValue( dlg->value() + 1 );
             auto match = ii.next();
-            auto type = match.captured( "type" );
-            if ( ( type.length() == 1 ) && ( type[ 0 ] != 'E' ) )
-                continue;
-            if ( ( type.length() == 2 ) && ( type[ 1 ] != 'E' ) )
+            auto type = match.captured( "type" ).trimmed();
+            bool isEncoder = ( ( type.length() == 1 ) && ( type[ 0 ] == 'E' ) ) || ( ( type.length() == 2 ) && ( type[ 1 ] == 'E' ) );
+            bool isDecoder = ( ( type.length() == 1 ) && ( type[ 0 ] == 'D' ) ) || ( ( type.length() == 2 ) && ( type[ 0 ] == 'E' ) );
+            if ( !isEncoder && !isDecoder )
                 continue;
             auto names = match.captured( "name" ).trimmed().split( "," );
-            for ( auto &&ii : names )
+            for ( auto && ii : names )
                 ii = ii.trimmed();
             auto desc = match.captured( "desc" ).trimmed();
 
-            for ( auto &&name : names )
-            {
-                auto exts = computeExtensionsForFormat( name );
-                if ( exts.empty() )
-                    continue;
+            if ( isEncoder )
+                computeExtensionsForFormat( names, desc, true );
+            if ( isDecoder )
+                computeExtensionsForFormat( names, desc, false );
+        }
+    }
 
-                fTerseFormats.push_back( name );
-                fVerboseFormats.push_back( name + " - " + desc + " (" + exts.join( ";" ) + ")" );
+    void CFFMpegFormats::computeExtensionsForFormat( const QStringList & names, const QString & desc, bool isEncoder )
+    {
+        for ( auto &&name : names )
+        {
+            auto exts = computeExtensionsForFormat( name, isEncoder );
+            if ( exts.empty() )
+                continue;
+
+            if ( isEncoder )
+            {
+                fTerseEncoderFormats.push_back( name );
+                fVerboseEncoderFormats.push_back( name + " - " + desc + " (" + exts.join( ";" ) + ")" );
+            }
+            else
+            {
+                fTerseDecoderFormats.push_back( name );
+                fVerboseDecoderFormats.push_back( name + " - " + desc + " (" + exts.join( ";" ) + ")" );
             }
         }
     }
 
-    QStringList CFFMpegFormats::computeExtensionsForFormat( const QString &formatName )
+    QStringList CFFMpegFormats::computeExtensionsForFormat( const QString &formatName, bool encoders )
     {
         if ( !validateFFMpegExe() )
             return {};
 
-        auto retVal = formatLoaded( formatName );
+        auto retVal = encoders ? encoderFormatLoaded( formatName ) : decoderFormatLoaded( formatName );
         if ( !retVal.has_value() )
         {
             retVal = QStringList();
@@ -394,7 +834,7 @@ namespace NSABUtils
             process.start(
                 fFFMpegExe, QStringList() << "-hide_banner"
                                           << "-h"
-                                          << "muxer=" + formatName );
+                                          << ( encoders ? "muxer=" : "demuxer=" ) + formatName );
             process.waitForFinished();
             auto formatHelp = process.readAllStandardOutput();
 
@@ -410,10 +850,10 @@ namespace NSABUtils
                 retVal.value().removeDuplicates();
             }
 
-            auto formatType = EFormatType::eUnknown;
+            std::list< EFormatType > formats;
             auto lc = formatName.toLower();
             if ( ( lc == "image2" ) || ( lc == "webp" ) )
-                formatType = EFormatType::eImage;
+                formats.push_back( EFormatType::eImage );
             else
             {
                 // Mime type: video/x-matroska.
@@ -423,39 +863,48 @@ namespace NSABUtils
                 {
                     auto mime = match.captured( "mimetype" ).trimmed().toLower();
                     if ( mime.contains( "video" ) )
-                        formatType = EFormatType::eVideo;
-                    else if ( mime.contains( "audio" ) )
-                        formatType = EFormatType::eAudio;
-                    else if ( mime.contains( "subtitle" ) )
-                        formatType = EFormatType::eSubtitle;
-                    else if ( mime.contains( "image" ) )
-                        formatType = EFormatType::eImage;
+                        formats.push_back( EFormatType::eVideo );
+                    if ( mime.contains( "audio" ) )
+                        formats.push_back( EFormatType::eAudio );
+                    if ( mime.contains( "subtitle" ) )
+                        formats.push_back( EFormatType::eSubtitle );
+                    if ( mime.contains( "image" ) )
+                        formats.push_back( EFormatType::eImage );
                 }
 
-                if ( formatType == EFormatType::eUnknown )
+                if ( formats.empty() )
                 {
                     regEx = QRegularExpression( R"(Default\s+(?<codec>.*)\s+codec\:)" );
-                    match = regEx.match( formatHelp );
+                    auto ii = regEx.globalMatch( formatHelp );
 
-                    if ( match.hasMatch() )
+                    while( ii.hasNext() )
                     {
+                        auto match = ii.next();
+
                         auto codec = match.captured( "codec" ).toLower().trimmed();
                         if ( codec == "video" )
-                            formatType = EFormatType::eVideo;
+                            formats.push_back( EFormatType::eVideo );
                         else if ( codec == "audio" )
-                            formatType = EFormatType::eAudio;
+                            formats.push_back( EFormatType::eAudio );
                         else if ( codec == "subtitle" )
-                            formatType = EFormatType::eSubtitle;
+                            formats.push_back( EFormatType::eSubtitle );
                         // images will return video codec
                     }
                 }
             }
-            if ( formatType == EFormatType::eUnknown )
-                return {};
-            fMediaFormatExtensions[ formatType ][ formatName ] = retVal.value();
+            if ( !encoders && formats.empty() )
+                formats.push_back( EFormatType::eVideo );
+            for ( auto &&format : formats )
+            {
+                if ( encoders )
+                    fMediaEncoderFormatExtensions[ format ][ formatName ] = retVal.value();
+                else
+                    fMediaDecoderFormatExtensions[ format ][ formatName ] = retVal.value();
+            }
         }
         return retVal.value();
     }
+   
 
     bool CFFMpegFormats::isImageFormat( const QString &ext ) const
     {
@@ -473,17 +922,21 @@ namespace NSABUtils
         return ( fImageFormats.value().find( ext ) != fImageFormats.value().end() );
     }
 
-    void CFFMpegFormats::computeReverseExtensionMap()
+    void CFFMpegFormats::computeReverseExtensionMap( bool encoders )
     {
-        fReverseMediaFormatExtensions.clear();
-        for ( auto &&ii : fMediaFormatExtensions )
+        auto &&whichReversMap = encoders ? fReverseMediaEncoderFormatExtensions : fReverseMediaDecoderFormatExtensions;
+        auto &&whichExtensions = encoders ? fMediaEncoderFormatExtensions : fMediaDecoderFormatExtensions;
+
+        whichReversMap.clear();
+
+        for ( auto &&ii : whichExtensions )
         {
             for ( auto &&jj : ii.second )
             {
                 for ( auto &&kk : jj.second )
                 {
-                    if ( fReverseMediaFormatExtensions.find( kk ) == fReverseMediaFormatExtensions.end() )
-                        fReverseMediaFormatExtensions[ kk ] = jj.first;
+                    if ( whichReversMap.find( kk ) == whichReversMap.end() )
+                        whichReversMap[ kk ] = jj.first;
                 }
             }
         }
@@ -508,4 +961,3 @@ namespace NSABUtils
     }
 
 }
-

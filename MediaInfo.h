@@ -137,9 +137,8 @@ namespace NSABUtils
         QString fileName() const;
         QString version() const;
 
-        bool isHEVCVideo() const;
+        bool isHEVCCodec() const;
         bool isAudioCodec( const QString &checkCodecName ) const;
-        bool isAudioCodec( const QStringList &allowedCodecs ) const;
         
         bool isVideoCodec( const QString &checkCodecName ) const;
         bool isFormat( const QString &formatName ) const;
@@ -154,7 +153,7 @@ namespace NSABUtils
         int64_t getNumberOfMSecs() const;
 
         static bool isCodec( QString checkCodecName, QString mediaCodecName );
-        static bool isHEVCVideo( QString mediaCodecName );
+        static bool isHEVCCodec( QString mediaCodecName );
         static int64_t getNumberOfSeconds( const QString &fileName );
         static int64_t getNumberOfMSecs( const QString &fileName );
 
