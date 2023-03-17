@@ -41,6 +41,7 @@ namespace NSABUtils
 
         bool isIntelGPU() const;
         bool isNVidiaGPU() const;
+        bool isAMDGPU() const;
 
     private:
         QString fAcceleratorCapabilities;
@@ -105,6 +106,14 @@ namespace NSABUtils
     };
 
     SABUTILS_EXPORT std::list< std::shared_ptr< CGPUInfo > > detectGPUs( QString *errorMsg = nullptr );
+    struct SABUTILS_EXPORT SGPUInfo
+    {
+        SGPUInfo( QString *errorMsg = nullptr );
+        bool fIntel{ false };
+        bool fAMD{ false };
+        bool fNVidia{ false };
+    };
+
 };
 
 #endif

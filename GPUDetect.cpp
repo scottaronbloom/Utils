@@ -411,20 +411,51 @@ namespace NSABUtils
     bool CGPUInfo::isIntelGPU() const
     {
         return 
-            fVideoProcessor.contains( "Intel" )   //
-            || fName.contains( "Intel" ) //
-            || fDescription.contains( "Intel" ) //
-            || fCaption.contains( "Intel" ) //
-            || fAdapterCompatibility.contains( "Intel" );
+            fVideoProcessor.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fName.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fDescription.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fCaption.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fAdapterCompatibility.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive );
     }
 
     bool CGPUInfo::isNVidiaGPU() const
     {
-        return
-            fVideoProcessor.contains( "NVIDIA" )   //
-            || fName.contains( "NVIDIA" )   //
-            || fDescription.contains( "NVIDIA" )   //
-            || fCaption.contains( "NVIDIA" )   //
-            || fAdapterCompatibility.contains( "NVIDIA" );
+        return fVideoProcessor.contains( "NVIDIA", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fName.contains( "NVIDIA", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fDescription.contains( "NVIDIA", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fCaption.contains( "NVIDIA", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fAdapterCompatibility.contains( "NVIDIA", Qt::CaseSensitivity::CaseInsensitive );
+    }
+
+    bool CGPUInfo::isAMDGPU() const
+    {
+        return fVideoProcessor.contains( "AMD", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fName.contains( "AMD", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fDescription.contains( "AMD", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fCaption.contains( "AMD", Qt::CaseSensitivity::CaseInsensitive )   //
+               || fAdapterCompatibility.contains( "AMD", Qt::CaseSensitivity::CaseInsensitive );
+    }
+
+    SGPUInfo::SGPUInfo( QString *errorMsg /*= nullptr */ )
+    {
+        auto gpus = NSABUtils::detectGPUs( errorMsg );
+        bool hasIntel = false;
+        bool hasAMD = false;
+        bool hasNVidia = false;
+        for ( auto &&ii : gpus )
+        {
+            if ( ii->isIntelGPU() )
+            {
+                hasIntel = true;
+            }
+            else if ( ii->isNVidiaGPU() )
+            {
+                hasNVidia = true;
+            }
+            else if ( ii->isAMDGPU() )
+            {
+                hasAMD = true;
+            }
+        }
     }
 }
