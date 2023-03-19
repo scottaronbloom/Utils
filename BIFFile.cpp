@@ -68,10 +68,6 @@ namespace NSABUtils
             aOK = true;
             fByteArray = in;
             fPrettyPrint = prettyPrint();
-
-            auto tmp2 = S32BitValue( fValue );
-            if ( *this != tmp2 )
-                int xyz = 0;
         }
 
         QString S32BitValue::prettyPrint( const QByteArray & in )
