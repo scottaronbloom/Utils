@@ -397,11 +397,13 @@ namespace NSABUtils
 
         bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats ) const 
         { 
+            Q_ASSERT( ffmpegFormats != nullptr );
             return ffmpegFormats->isCodec( checkCodecName, mediaCodecName ); 
         }
 
         bool isFormat( const QString &formatName, CFFMpegFormats * ffmpegFormats ) const
         {
+            Q_ASSERT( ffmpegFormats != nullptr );
             return ffmpegFormats->isFormat( fFileName, formatName );
         }
 
