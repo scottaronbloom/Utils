@@ -23,6 +23,7 @@
 #include "MediaInfo.h"
 #include "MKVUtils.h"
 #include "FileBasedCache.h"
+#include "FFMpegFormats.h"
 
 #include "utils.h"
 #include "FileUtils.h"
@@ -260,6 +261,22 @@ namespace NSABUtils
     QString CStreamData::value( const QString &key ) const
     {
         auto pos = fStreamDataMap.find( key );
+        if ( key == "CodecID" )
+        {
+            auto pos2 = fStreamDataMap.find( "FFMpegCodec" );
+            if ( pos2 != fStreamDataMap.end() )
+                pos = pos2;
+        }
+        if ( key == "Resolution" )
+        {
+            auto width = value( mediaInfoTagName( EMediaTags::eWidth ) );
+            auto height = value( mediaInfoTagName( EMediaTags::eHeight ) );
+            if ( !width.isEmpty() && !height.isEmpty() )
+            {
+                return QString( "%1x%2" ).arg( width ).arg( height );
+            }
+        }
+
         if ( pos == fStreamDataMap.end() )
             return {};
 
@@ -362,7 +379,7 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool isAudioCodec( const QString &checkCodecName ) const
+        bool isAudioCodec( const QString &checkCodecName, CFFMpegFormats * ffmpegFormats ) const
         {
             auto values = QStringList()   //
                           << findAllValues( EStreamType::eAudio, mediaInfoTagName( NSABUtils::EMediaTags::eAudioCodec ) )   //
@@ -372,20 +389,20 @@ namespace NSABUtils
 
             for ( auto &&value : values )
             {
-                if ( CMediaInfo::isCodec( checkCodecName, value ) )
+                if ( isCodec( checkCodecName, value, ffmpegFormats ) )
                     return true;
             }
             return false;
         }
 
-        bool isFormat( const QString &formatName ) const
+        bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats ) const 
+        { 
+            return ffmpegFormats->isCodec( checkCodecName, mediaCodecName ); 
+        }
+
+        bool isFormat( const QString &formatName, CFFMpegFormats * ffmpegFormats ) const
         {
-            auto ext = QFileInfo( fFileName ).suffix().toLower();
-            if ( formatName.toLower() == "matroska" || formatName.toLower() == "webm" )
-                return ( ext == "mkv" ) || ( ext == "webm" );
-            else if ( formatName.toLower() == "mp4" )
-                return ext == "mp4";
-            return false;
+            return ffmpegFormats->isFormat( fFileName, formatName );
         }
 
         QString findFirstValue( EStreamType whichStream, const QString &key ) const
@@ -412,23 +429,6 @@ namespace NSABUtils
 
             for ( auto &&currStream : ( *pos ).second )
             {
-                if ( key == NSABUtils::EMediaTags::eResolution )
-                {
-                    auto width = currStream->value( mediaInfoTagName( EMediaTags::eWidth ) );
-                    auto height = currStream->value( mediaInfoTagName( EMediaTags::eHeight ) );
-                    if ( !width.isEmpty() && !height.isEmpty() )
-                    {
-                        return QString( "%1x%2" ).arg( width ).arg( height );
-                    }
-                }
-                if ( ( key == NSABUtils::EMediaTags::eVideoCodec ) || ( key == NSABUtils::EMediaTags::eAudioCodec ) )
-                {
-                    auto value = currStream->value( "FFMpegCodec" );
-                    if ( !value.isEmpty() )
-                        return value;
-                }
-
-
                 auto value = currStream->value( mediaInfoTagName( key ) );
                 if ( value.isEmpty() )
                     continue;
@@ -705,51 +705,29 @@ namespace NSABUtils
         return fImpl->version();
     }
 
-    bool CMediaInfo::isHEVCCodec( QString mediaCodecName )
+    bool CMediaInfo::isHEVCCodec( QString mediaCodecName, CFFMpegFormats *ffmpegFormats )
     {
-        return isCodec( "hevc", mediaCodecName );
+        return fImpl->isCodec( "hevc", mediaCodecName, ffmpegFormats );
     }
 
-    bool CMediaInfo::isVideoCodec( const QString &checkCodecName ) const
+    bool CMediaInfo::isVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eVideoCodec ) );
+        return fImpl->isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eVideoCodec ), ffmpegFormats );
     }
 
-    bool CMediaInfo::isFormat( const QString &formatName ) const
+    bool CMediaInfo::isFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->isFormat( formatName );
+        return fImpl->isFormat( formatName, ffmpegFormats );
     }
 
-    bool CMediaInfo::isAudioCodec( const QString &checkCodecName ) const
+    bool CMediaInfo::isAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->isAudioCodec( checkCodecName );
+        return fImpl->isAudioCodec( checkCodecName, ffmpegFormats );
     }
 
-    void cleanCodec( QString & codec )
+    bool CMediaInfo::isCodec( const QString & checkCodecName, const QString & mediaCodecName, CFFMpegFormats *ffmpegFormats )
     {
-        codec = codec.toLower();
-        if ( codec.endsWith( "_amf" ) )
-            codec = codec.left( codec.length() - 4 );
-        else if ( codec.endsWith( "_mf" ) )
-            codec = codec.left( codec.length() - 3 );
-        else if ( codec.endsWith( "_nvenc" ) )
-            codec = codec.left( codec.length() - 6 );
-        else if ( codec.endsWith( "_qsv" ) )
-            codec = codec.left( codec.length() - 4 );
-        else if ( codec == "libkvazaar" )
-            codec = "hevc";
-        else if ( codec == "libx265" )
-            codec = "hevc";
-
-        codec = codec.remove( QRegularExpression( R"([-_])" ) );
-    }
-
-    bool CMediaInfo::isCodec( QString checkCodecName, QString mediaCodecName )
-    {
-        cleanCodec( checkCodecName );
-        cleanCodec( mediaCodecName );
-        bool isCodec = mediaCodecName.contains( checkCodecName );
-        return isCodec;
+        return fImpl->isCodec( checkCodecName, mediaCodecName, ffmpegFormats );
     }
 
     int64_t CMediaInfo::getBitRate() const
@@ -869,7 +847,8 @@ namespace NSABUtils
                 return "Width";
             case EMediaTags::eHeight:
                 return "Height";
-            //case EMediaTags::eResolution: return "";
+            case EMediaTags::eResolution:
+                return "Resolution";
             case EMediaTags::eVideoCodec:
                 return "CodecID";
             case EMediaTags::eAudioCodec:

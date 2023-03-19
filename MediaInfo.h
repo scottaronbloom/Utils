@@ -67,6 +67,7 @@ namespace std
 
 namespace NSABUtils
 {
+    class CFFMpegFormats;
     enum class EMediaTags
     {
         eFileName,
@@ -139,10 +140,11 @@ namespace NSABUtils
         QString fileName() const;
         QString version() const;
 
-        bool isAudioCodec( const QString &checkCodecName ) const;
-        
-        bool isVideoCodec( const QString &checkCodecName ) const;
-        bool isFormat( const QString &formatName ) const;
+        bool isAudioCodec( const QString &checkCodecName, CFFMpegFormats * ffmpegFormats ) const;
+        bool isVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
+        bool isFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const;
+        bool isCodec( const QString & checkCodecName, const QString & mediaCodecName, CFFMpegFormats *ffmpegFormats );
+        bool isHEVCCodec( QString mediaCodecName, CFFMpegFormats *ffmpegFormats );
 
         std::unordered_map< EMediaTags, QString > getSettableMediaTags() const;
         QString getMediaTag( EMediaTags tag ) const;
@@ -153,8 +155,6 @@ namespace NSABUtils
         int64_t getNumberOfSeconds() const;
         int64_t getNumberOfMSecs() const;
 
-        static bool isCodec( QString checkCodecName, QString mediaCodecName );
-        static bool isHEVCCodec( QString mediaCodecName );
         static int64_t getNumberOfSeconds( const QString &fileName );
         static int64_t getNumberOfMSecs( const QString &fileName );
 

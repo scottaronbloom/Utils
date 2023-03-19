@@ -29,6 +29,7 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <optionaL>
 class QProgressDialog;
 namespace NSABUtils
@@ -43,6 +44,7 @@ namespace NSABUtils
     };
     SABUTILS_EXPORT QString toString( EFormatType type );
     using TFormatMap = std::unordered_map< EFormatType, std::unordered_map< QString, QStringList > >;
+    using TCodecToEncoderDecoderMap =std::unordered_map< EFormatType, std::unordered_multimap< QString, QString > >;
 
     class SABUTILS_EXPORT CFFMpegFormats
     {
@@ -52,32 +54,64 @@ namespace NSABUtils
 
         void initEncoderFormatsFromDefaults( const QStringList &terse, const QStringList &verbose, const TFormatMap &formatExtensions );
         void initDecoderFormatsFromDefaults( const QStringList &terse, const QStringList &verbose, const TFormatMap &formatExtensions );
-        void initVideoEncoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
-        void initAudioEncoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
-        void initSubtitleEncoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
-        void initVideoDecoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
-        void initAudioDecoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
-        void initSubtitleDecoderCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
+
+        void initVideoEncodingCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
+        void initVideoDecodingCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
+
+        void initAudioEncodingCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
+        void initAudioDecodingCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
+
+        void initSubtitleEncodingCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
+        void initSubtitleDecodingCodecsFromDefaults( const QStringList &terse, const QStringList &verbose );
+
+        void initVideoEncodersFromDefaults( const QStringList &terse, const QStringList &verbose );
+        void initVideoDecodersFromDefaults( const QStringList &terse, const QStringList &verbose );
+
+        void initAudioEncodersFromDefaults( const QStringList &terse, const QStringList &verbose );
+        void initAudioDecodersFromDefaults( const QStringList &terse, const QStringList &verbose );
+
+        void initSubtitleEncodersFromDefaults( const QStringList &terse, const QStringList &verbose );
+        void initSubtitleDecodersFromDefaults( const QStringList &terse, const QStringList &verbose );
 
         void initHWAccelsFromDefaults( const QStringList &terse, const QStringList &verbose );
 
+        void initCodecToEncoderMapDefaults( const TCodecToEncoderDecoderMap & encoderMap );
+        void initCodecToDecoderMapDefaults( const TCodecToEncoderDecoderMap & decoderMap );
+
         void setFFMpegExecutable( const QString &ffmpegExe );
-        void recompute( QProgressDialog * dlg = nullptr );
+        void recompute( QProgressDialog *dlg = nullptr );
         bool loaded() const { return fLoaded; }
         TFormatMap mediaEncoderFormatExtensions() const { return fMediaEncoderFormatExtensions; }
         TFormatMap mediaDecoderFormatExtensions() const { return fMediaDecoderFormatExtensions; }
 
-        bool isEncoderFormat( const QString & suffix, const QString & formatName ) const;
+        std::set< QString > getCodecAliases( const QString &formatName ) const;
+        ;   // gets the tersename, the verbose name, the codecname, the encoder name and the decoder name
+        bool isHEVCCodec( const QString &codec ) const { return isCodec( "hevc", codec ); }
+        bool isCodec( const QString &checkCodecName, const QString &mediaCodecName ) const;
+
+        bool isFormat( const QString &fileName, const QString &formatName ) const;
+
+        bool isEncoderFormat( const QString &suffix, const QString &formatName ) const;
         bool isDecoderFormat( const QString &suffix, const QString &formatName ) const;
         QStringList encoderFormats( bool verbose ) const;
         QStringList decoderFormats( bool verbose ) const;
 
-        QStringList audioEncoderCodecs( bool verbose ) const;
-        QStringList videoEncoderCodecs( bool verbose ) const;
-        QStringList subtitleEncoderCodecs( bool verbose ) const;
-        QStringList audioDecoderCodecs( bool verbose ) const;
-        QStringList videoDecoderCodecs( bool verbose ) const;
-        QStringList subtitleDecoderCodecs( bool verbose ) const;
+        QStringList audioEncodingCodecs( bool verbose ) const;
+        QStringList audioDecodingCodecs( bool verbose ) const;
+        QStringList videoEncodingCodecs( bool verbose ) const;
+        QStringList videoDecodingCodecs( bool verbose ) const;
+        QStringList subtitleEncodingCodecs( bool verbose ) const;
+        QStringList subtitleDecodingCodecs( bool verbose ) const;
+
+        QStringList audioEncoders( bool verbose ) const;
+        QStringList audioDecoders( bool verbose ) const;
+        QStringList videoEncoders( bool verbose ) const;
+        QStringList videoDecoders( bool verbose ) const;
+        QStringList subtitleEncoders( bool verbose ) const;
+        QStringList subtitleDecoders( bool verbose ) const;
+
+        TCodecToEncoderDecoderMap codecToEncoderMap() const { return fCodecToEncoderMap; }
+        TCodecToEncoderDecoderMap codecToDecoderMap() const { return fCodecToDecoderMap; }
         QStringList hwAccels( bool verbose ) const;
 
         QStringList getVideoEncoderExtensions() const;
@@ -101,10 +135,12 @@ namespace NSABUtils
         QStringList getDecoderExtensionsForFormat( const QString &formatName ) const;
 
         QString getTranscodeHWAccel( const QString &formatName ) const;
-        QString getCodecForHWAccel( const QString & hwAccel ) const;
+        QString getCodecForHWAccel( const QString &hwAccel ) const;
 
         static bool validateFFMpegExe( const QString &ffmpegExe );
+
     private:
+        void postLoad();
         bool validate() const;
         void checkLoaded();
 
@@ -112,7 +148,9 @@ namespace NSABUtils
         bool validateFFMpegExe() const;
 
         void loadCodecs( QProgressDialog *dlg );
-        void loadCodecs( bool isEncoding, QProgressDialog *dlg );
+
+        void loadEncodersDecoders( QProgressDialog *dlg );
+        void loadEncodersDecoders( bool isEncoding, QProgressDialog *dlg );
 
         void loadFormats( QProgressDialog *dlg );
 
@@ -120,41 +158,125 @@ namespace NSABUtils
 
         bool isImageFormat( const QString &ext ) const;
         void computeReverseExtensionMap( bool encoders );
+        void computeReverseCodecMap( bool encoders );
 
-        void computeExtensionsForFormat( const QStringList &names, const QString &desc, bool isEncoder );
+        void computeExtensionsForFormat( const QString &name, const QString &desc, bool isEncoder );
         QStringList computeExtensionsForFormat( const QString &formatName, bool encoders );
         std::optional< QStringList > encoderFormatLoaded( const QString &formatName ) const;
         std::optional< QStringList > decoderFormatLoaded( const QString &formatName ) const;
 
         bool fLoaded{ false };
-        QStringList fTerseEncoderFormats;
-        QStringList fVerboseEncoderFormats;
-        QStringList fTerseDecoderFormats;
-        QStringList fVerboseDecoderFormats;
-        std::unordered_map< EFormatType, std::unordered_map< QString, QStringList > > fMediaEncoderFormatExtensions;   //terse format name to list of known/common extensions
-        std::unordered_map< QString, QString > fReverseMediaEncoderFormatExtensions;
-        std::unordered_map< EFormatType, std::unordered_map< QString, QStringList > > fMediaDecoderFormatExtensions;   //terse format name to list of known/common extensions
-        std::unordered_map< QString, QString > fReverseMediaDecoderFormatExtensions;
+        struct SStringListPair
+        {
+            SStringListPair() = default;
+            SStringListPair( const std::initializer_list< QStringList > &data );
 
-        QStringList fAudioEncoderCodecsTerse;
-        QStringList fAudioEncoderCodecsVerbose;
-        QStringList fVideoEncoderCodecsTerse;
-        QStringList fVideoEncoderCodecsVerbose;
-        QStringList fSubtitleEncoderCodecsTerse;
-        QStringList fSubtitleEncoderCodecsVerbose;
+            const QStringList &data( bool verbose ) const { return verbose ? fVerbose : fTerse; }
+            const QStringList &terse() const { return fTerse; }
+            const QStringList &verbose() const { return fVerbose; }
+            void push_back( const QString &terse, const QString &verbose );
 
-        QStringList fAudioDecoderCodecsTerse;
-        QStringList fAudioDecoderCodecsVerbose;
-        QStringList fVideoDecoderCodecsTerse;
-        QStringList fVideoDecoderCodecsVerbose;
-        QStringList fSubtitleDecoderCodecsTerse;
-        QStringList fSubtitleDecoderCodecsVerbose;
+            bool isEmpty() const { return fTerse.isEmpty() || fVerbose.isEmpty(); }
+            bool isLoaded() const { return !isEmpty(); }
 
-        QStringList fHWAccelsTerse;
-        QStringList fHWAccelsVerbose;
+            void clear();
+            void addAlias( std::set< QString > &retVal, const QString &name ) const;
+            bool validate() const;
+
+            void sort();
+
+        private:
+            QStringList fTerse;
+            QStringList fVerbose;
+#ifdef _DEBUG
+            std::unordered_set< QString > fExistingTerse;
+#endif
+        };
+
+        struct SVideoAudioSubtitle
+        {
+            SVideoAudioSubtitle() = default;
+
+            const SStringListPair &video() const { return fVideo; }
+            const SStringListPair &audio() const { return fAudio; }
+            const SStringListPair &subtitle() const { return fSubtitle; }
+
+            SStringListPair &video() { return fVideo; }
+            SStringListPair &audio() { return fAudio; }
+            SStringListPair &subtitle() { return fSubtitle; }
+
+            void addAlias( std::set< QString > &retVal, const QString &name ) const;
+            bool isLoaded() const;
+            void clear();
+            bool validate() const;
+            void sort();
+
+        private:
+            SStringListPair fVideo;
+            SStringListPair fAudio;
+            SStringListPair fSubtitle;
+        };
+
+        template< typename T >
+        struct SEncoderDecoderPair
+        {
+            SEncoderDecoderPair() = default;
+
+            const T &encoder() const { return fEncoder; }
+            const T &decoder() const { return fDecoder; }
+
+            T &encoder() { return fEncoder; }
+            T &decoder() { return fDecoder; }
+
+            void push_back( const T &encoder, const T &decoder )
+            {
+                fEncoder = encoder;
+                fDecoder = deconder;
+            }
+
+            void addAlias( std::set< QString > &retVal, const QString &name ) const
+            {
+                fEncoder.addAlias( retVal, name );
+                fDecoder.addAlias( retVal, name );
+            }
+
+            bool isLoaded() const { return fEncoder.isLoaded() && fDecoder.isLoaded(); }
+            void clear()
+            {
+                fEncoder.clear();
+                fDecoder.clear();
+            }
+            bool validate() const { return fEncoder.validate() && fDecoder.validate(); }
+            void sort()
+            {
+                fEncoder.sort();
+                fDecoder.sort();
+            }
+
+        private:
+            T fEncoder;
+            T fDecoder;
+        };
+
+        SEncoderDecoderPair< SStringListPair > fFormats;
+        TFormatMap fMediaEncoderFormatExtensions;   //type -> terse format name to list of known/common extensions
+        std::unordered_map< QString, QString > fExtensionToMediaEncoderFormat;   // extension to terse format
+        TFormatMap fMediaDecoderFormatExtensions;   //type -> terse format name to list of known/common extensions
+        std::unordered_map< QString, QString > fExtensionToMediaDecoderFormat;
+
+        TCodecToEncoderDecoderMap fCodecToEncoderMap;   // type -> terse codec name to the list of encoders
+        std::unordered_map< QString, QString > fEncoderToCodecMap;   // encoder -> codec
+        TCodecToEncoderDecoderMap fCodecToDecoderMap;   // type -> terse codec name to the list of deccoders
+        std::unordered_map< QString, QString > fDecoderToCodecMap;   // encoder -> codec
+
+        SEncoderDecoderPair< SVideoAudioSubtitle > fCodecs;
+        SEncoderDecoderPair< SVideoAudioSubtitle > fEncoderDecoders;
+
+        SStringListPair fHWAccels;
 
         QString fFFMpegExe;
         mutable std::optional< std::unordered_set< QString > > fImageFormats;
+        mutable std::unordered_map< QString, std::set< QString > > fAliases;
     };
 }
 
