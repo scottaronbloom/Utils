@@ -333,11 +333,7 @@ namespace NSABUtils
         {
             return;
         }
-        if ( vtProp.vt != VT_BSTR )
-            int xyz = 0;
-        else
-        //Q_ASSERT( vtProp.vt == VT_BSTR );
-            value = QString::fromUtf16( reinterpret_cast< ushort * >( vtProp.bstrVal ) );
+        value = QString::fromUtf16( reinterpret_cast< ushort * >( vtProp.bstrVal ) );
 
         VariantClear( &vtProp );
     }
