@@ -831,7 +831,7 @@ namespace NSABUtils
 
     bool CMediaInfo::hasAACCodec( CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->hasAudioCodec( "hevc", ffmpegFormats );
+        return fImpl->hasAudioCodec( "aac", ffmpegFormats );
     }
 
     bool CMediaInfo::hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
