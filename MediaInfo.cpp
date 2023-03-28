@@ -34,6 +34,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QThreadPool>
+#include <QTimer>
 
 #include "MediaInfoDLL/MediaInfoDLL_Static.h"
 
@@ -303,29 +305,23 @@ namespace NSABUtils
             auto retVal = sMediaInfoCache.find( QString() );
             if ( !retVal )
             {
-                retVal = std::make_shared< NSABUtils::CMediaInfoImpl >();
+                static std::shared_ptr< CMediaInfoImpl > sNullImpl = std::make_shared< NSABUtils::CMediaInfoImpl >();
+                retVal = sNullImpl;
                 sMediaInfoCache.add( retVal );
             }
             return retVal;
         }
 
-        static std::shared_ptr< CMediaInfoImpl > createImpl( const QFileInfo &fi )
-        {
-            auto retVal = sMediaInfoCache.find( fi );
-            if ( !retVal )
-            {
-                retVal = std::make_shared< NSABUtils::CMediaInfoImpl >( fi );
-                sMediaInfoCache.add( retVal );
-            }
-            return retVal;
-        }
+        static std::shared_ptr< CMediaInfoImpl > createImpl( const QFileInfo &fi, bool loadNow ) { return createImpl( fi.absoluteFilePath(), loadNow ); }
 
-        static std::shared_ptr< CMediaInfoImpl > createImpl( const QString &path )
+        static std::shared_ptr< CMediaInfoImpl > createImpl( const QString &path, bool loadNow )
         {
             auto retVal = sMediaInfoCache.find( path );
             if ( !retVal )
             {
                 retVal = std::make_shared< NSABUtils::CMediaInfoImpl >( path );
+                if ( loadNow )
+                    retVal->load();
                 sMediaInfoCache.add( retVal );
             }
             return retVal;
@@ -336,53 +332,81 @@ namespace NSABUtils
             CMediaInfoImpl( fi.absoluteFilePath() )
         {
         }
+
         CMediaInfoImpl( const QString &fileName ) :
-            fMediaInfo( std::make_unique< MediaInfoDLL::MediaInfo >() ),
             fFileName( fileName )
         {
-            initMediaInfo();
-            loadCodecsFromFFProbe();
         }
 
-        ~CMediaInfoImpl() { fMediaInfo->Close(); }
+        ~CMediaInfoImpl() {}
+
+        bool isQueued() const { return fQueued; };
+        void setQueued( bool value ) { fQueued = value; }
+        void queueLoad( CMediaInfo *mediaInfo )
+        {
+            if ( !aOK() && !isQueued() )
+            {
+                setQueued( true );
+                QThreadPool::globalInstance()->start(
+                    [ this, mediaInfo ]()
+                    {
+                        qDebug() << "Loading media info for" << fFileName;
+                        load();
+                        qDebug() << "Finished loading media info for" << fFileName;
+                        mediaInfo->emitMediaInfoLoaded( fFileName );
+                    } );
+            }
+        }
+
+        bool load()
+        {
+            fAOK = initMediaInfo();
+            fAOK = loadCodecsFromFFProbe() && fAOK;
+            return fAOK;
+        }
 
         bool aOK() const { return fAOK; }
         QString fileName() const { return fFileName; }
         QString version() const { return fVersion; }
-        void initMediaInfo()
+
+        bool initMediaInfo()
         {
-            fVersion = QString::fromStdWString( fMediaInfo->Option( __T( "Info_Version" ), __T( "0.7.13;MediaInfoDLL_Example_MSVC;0.7.13" ) ) );
-            fAOK = fMediaInfo->Open( fFileName.toStdWString() ) != 0;
+            auto mediaInfo = std::make_unique< MediaInfoDLL::MediaInfo >();
+
+            fVersion = QString::fromStdWString( mediaInfo->Option( __T( "Info_Version" ), __T( "0.7.13;MediaInfoDLL_Example_MSVC;0.7.13" ) ) );
+            fAOK = mediaInfo->Open( fFileName.toStdWString() ) != 0;
             if ( fAOK )
             {
                 for ( auto ii = EStreamType::eGeneral; ii <= EStreamType::eMenu; ii = static_cast< EStreamType >( static_cast< int >( ii ) + 1 ) )
                 {
-                    fData[ ii ] = getStreamData( ii );
+                    fData[ ii ] = getStreamData( mediaInfo.get(), ii );
                 }
             }
+            mediaInfo->Close();
+            return fAOK;
         }
 
-        std::vector< std::shared_ptr< CStreamData > > getStreamData( EStreamType whichStream ) const
+        std::vector< std::shared_ptr< CStreamData > > getStreamData( MediaInfoDLL::MediaInfo *mediaInfo, EStreamType whichStream ) const
         {
-            if ( !fAOK )
+            if ( !fAOK || !mediaInfo )
                 return {};
 
             std::vector< std::shared_ptr< CStreamData > > retVal;
 
             auto mediaInfoStream = getMediaInfoStreamType( whichStream );
-            auto streamCount = fMediaInfo->Count_Get( mediaInfoStream );
+            auto streamCount = mediaInfo->Count_Get( mediaInfoStream );
             for ( int jj = 0; jj < streamCount; ++jj )
             {
-                auto data = std::make_shared< CStreamData >( fMediaInfo.get(), whichStream, jj );
+                auto data = std::make_shared< CStreamData >( mediaInfo, whichStream, jj );
                 retVal.emplace_back( data );
             }
             return retVal;
         }
 
-        bool isAudioCodec( const QString &checkCodecName, CFFMpegFormats * ffmpegFormats ) const
+        bool isAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
         {
             auto values = QStringList()   //
-                          << findAllValues( EStreamType::eAudio, mediaInfoTagName( NSABUtils::EMediaTags::eAudioCodec ) )   //
+                          << findAllValues( EStreamType::eAudio, mediaInfoTagName( NSABUtils::EMediaTags::eAllAudioCodecs ) )   //
                           << findAllValues( EStreamType::eAudio, "Format" )   //
                           << findAllValues( EStreamType::eAudio, "InternetMediaType" )   //
                 ;
@@ -395,13 +419,13 @@ namespace NSABUtils
             return false;
         }
 
-        bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats ) const 
-        { 
+        bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats ) const
+        {
             Q_ASSERT( ffmpegFormats != nullptr );
-            return ffmpegFormats->isCodec( checkCodecName, mediaCodecName ); 
+            return ffmpegFormats->isCodec( checkCodecName, mediaCodecName );
         }
 
-        bool isFormat( const QString &formatName, CFFMpegFormats * ffmpegFormats ) const
+        bool isFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const
         {
             Q_ASSERT( ffmpegFormats != nullptr );
             return ffmpegFormats->isFormat( fFileName, formatName );
@@ -421,6 +445,14 @@ namespace NSABUtils
                 return value;
             }
             return {};
+        }
+
+        size_t numStreams( EStreamType whichStream ) const
+        {
+            auto pos = fData.find( whichStream );
+            if ( pos == fData.end() )
+                return 0;
+            return ( *pos ).second.size();
         }
 
         QString findFirstValue( EStreamType whichStream, EMediaTags key ) const
@@ -514,53 +546,103 @@ namespace NSABUtils
             auto realTags = tags;
             if ( tags.empty() )
             {
-                realTags = { EMediaTags::eFileName,   //
-                             EMediaTags::eTitle,   //
-                             EMediaTags::eLengthMS,   //
-                             EMediaTags::eLengthS,   //
-                             EMediaTags::eLength,   //
-                             EMediaTags::eDate,   //
-                             EMediaTags::eComment,   //
-                             EMediaTags::eBPM,   //
-                             EMediaTags::eArtist,   //
-                             EMediaTags::eComposer,   //
-                             EMediaTags::eGenre,   //
-                             EMediaTags::eTrack,   //
-                             EMediaTags::eAlbum,   //
-                             EMediaTags::eAlbumArtist,   //
-                             EMediaTags::eDiscnumber,   //
-                             EMediaTags::eAspectRatio,   //
-                             EMediaTags::eWidth,   //
-                             EMediaTags::eHeight,   //
-                             EMediaTags::eResolution,   //
-                             EMediaTags::eVideoCodec,   //
-                             EMediaTags::eAudioCodec,   //
-                             EMediaTags::eVideoBitrate, EMediaTags::eAudioSampleRate };
+                realTags = {
+                    EMediaTags::eFileName,   //
+                    EMediaTags::eTitle,   //
+                    EMediaTags::eLengthMS,   //
+                    EMediaTags::eLengthS,   //
+                    EMediaTags::eLength,   //
+                    EMediaTags::eDate,   //
+                    EMediaTags::eComment,   //
+                    EMediaTags::eBPM,   //
+                    EMediaTags::eArtist,   //
+                    EMediaTags::eComposer,   //
+                    EMediaTags::eGenre,   //
+                    EMediaTags::eTrack,   //
+                    EMediaTags::eAlbum,   //
+                    EMediaTags::eAlbumArtist,   //
+                    EMediaTags::eDiscnumber,   //
+                    EMediaTags::eAspectRatio,   //
+                    EMediaTags::eWidth,   //
+                    EMediaTags::eHeight,   //
+                    EMediaTags::eResolution,   //
+                    EMediaTags::eFirstVideoCodec,   //
+                    EMediaTags::eFirstAudioCodec,   //
+                    EMediaTags::eVideoBitrate,   //
+                    EMediaTags::eAudioSampleRate,   //
+                    EMediaTags::eAudioSampleRate,   //
+
+                };
             }
 
             std::unordered_map< NSABUtils::EMediaTags, QString > retVal;
             for ( auto &&ii : realTags )
             {
-                if ( ( ii == NSABUtils::EMediaTags::eWidth )   //
-                     || ( ii == NSABUtils::EMediaTags::eHeight )   //
-                     || ( ii == NSABUtils::EMediaTags::eAspectRatio )   //
-                     || ( ii == NSABUtils::EMediaTags::eVideoCodec )   //
-                     || ( ii == NSABUtils::EMediaTags::eResolution )   //
-                     || ( ii == NSABUtils::EMediaTags::eVideoBitrate ) || ( ii == NSABUtils::EMediaTags::eVideoBitrateString ) )
+                if ( ii == NSABUtils::EMediaTags::eNumVideoStreams )
                 {
-                    auto value = findFirstValue( EStreamType::eVideo, ii );
-                    if ( value.isEmpty() && ( ( ii == NSABUtils::EMediaTags::eVideoBitrate ) || ( ii == NSABUtils::EMediaTags::eVideoBitrateString ) ) )
+                    retVal[ ii ] = QString::number( numStreams( EStreamType::eVideo ) );
+                }
+                else if ( ii == NSABUtils::EMediaTags::eNumAudioStreams )
+                {
+                    retVal[ ii ] = QString::number( numStreams( EStreamType::eAudio ) );
+                }
+                else if ( ii == NSABUtils::EMediaTags::eNumSubtitleStreams )   //
+                {
+                    retVal[ ii ] = QString::number( numStreams( EStreamType::eText ) );
+                }
+                else if (
+                    ( ii == NSABUtils::EMediaTags::eWidth )   //
+                    || ( ii == NSABUtils::EMediaTags::eHeight )   //
+                    || ( ii == NSABUtils::EMediaTags::eAspectRatio )   //
+                    || ( ii == NSABUtils::EMediaTags::eFirstVideoCodec )   //
+                    || ( ii == NSABUtils::EMediaTags::eAllVideoCodecs )   //
+                    || ( ii == NSABUtils::EMediaTags::eResolution )   //
+                    || ( ii == NSABUtils::EMediaTags::eVideoBitrate ) || ( ii == NSABUtils::EMediaTags::eVideoBitrateString ) )
+                {
+                    QString value;
+                    if ( ii == NSABUtils::EMediaTags::eAllVideoCodecs )
                     {
-                        value = findFirstValue( EStreamType::eGeneral, EMediaTags::eOverAllBitrate );
+                        auto values = findAllValues( EStreamType::eVideo, ii );
+                        value = values.join( ", " );
+                    }
+                    else
+                    {
+                        value = findFirstValue( EStreamType::eVideo, ii );
+                        if ( value.isEmpty() && ( ( ii == NSABUtils::EMediaTags::eVideoBitrate ) || ( ii == NSABUtils::EMediaTags::eVideoBitrateString ) ) )
+                        {
+                            value = findFirstValue( EStreamType::eGeneral, EMediaTags::eOverAllBitrate );
+                        }
                     }
                     retVal[ ii ] = value;
                 }
                 else if (
-                    ( ii == NSABUtils::EMediaTags::eAudioCodec )   //
+                    ( ii == NSABUtils::EMediaTags::eFirstAudioCodec )   //
+                    || ( ii == NSABUtils::EMediaTags::eAllAudioCodecs )   //
                     || ( ii == NSABUtils::EMediaTags::eAudioSampleRate )   //
-                    || ( ii == NSABUtils::EMediaTags::eAudioSampleRateString ) )
+                    || ( ii == NSABUtils::EMediaTags::eAudioSampleRateString )   //
+                )
                 {
-                    auto value = findFirstValue( EStreamType::eAudio, ii );
+                    QString value;
+                    if ( ii == NSABUtils::EMediaTags::eAllAudioCodecs )
+                    {
+                        auto values = findAllValues( EStreamType::eAudio, ii );
+                        value = values.join( ", " );
+                    }
+                    else
+                        value = findFirstValue( EStreamType::eAudio, ii );
+                    retVal[ ii ] = value;
+                }
+                else if ( ( ii == NSABUtils::EMediaTags::eFirstSubtitle )
+                    || ( ii == NSABUtils::EMediaTags::eAllSubtitles ) )
+                {
+                    QString value;
+                    if ( ii == NSABUtils::EMediaTags::eAllSubtitles )
+                    {
+                        auto values = findAllValues( EStreamType::eText, ii );
+                        value = values.join( ", " );
+                    }
+                    else
+                        value = findFirstValue( EStreamType::eText, ii );
                     retVal[ ii ] = value;
                 }
                 else
@@ -584,10 +666,10 @@ namespace NSABUtils
             return aOK;
         }
 
-        void loadCodecsFromFFProbe()
+        bool loadCodecsFromFFProbe()
         {
             if ( !validateFFProbeEXE() )
-                return;
+                return true;
 
             auto args = QStringList()   //
                         << "-v"
@@ -603,13 +685,13 @@ namespace NSABUtils
             process.start( sFFProbeEXE, args );
             if ( !process.waitForFinished( -1 ) || ( process.exitStatus() != QProcess::NormalExit ) || ( process.exitCode() != 0 ) )
             {
-                return;
+                return false;
             }
             auto data = process.readAll();
 
             auto doc = QJsonDocument::fromJson( data );
             if ( !doc.object().contains( "streams" ) )
-                return;
+                return false;
 
             //qDebug().noquote().nospace() << doc.toJson( QJsonDocument::JsonFormat::Indented );
 
@@ -649,15 +731,16 @@ namespace NSABUtils
 
                 streamData->addData( "FFMpegCodec", codec );
             }
+            return true;
         }
 
         QString fVersion;
         QString fFileName;
-        std::shared_ptr< MediaInfoDLL::MediaInfo > fMediaInfo;
 
         std::unordered_map< EStreamType, std::vector< std::shared_ptr< CStreamData > > > fData;
         std::list< std::tuple< EStreamType, int, QString > > fFFProbeData;
         bool fAOK{ false };
+        bool fQueued{ false };
     };
 
     CFileBasedCache< std::shared_ptr< CMediaInfoImpl > > CMediaInfoImpl::sMediaInfoCache;
@@ -674,18 +757,31 @@ namespace NSABUtils
     }
 
     CMediaInfo::CMediaInfo() :
-        fImpl( CMediaInfoImpl::createImpl() )
+        fImpl( nullptr )
     {
+        fImpl = CMediaInfoImpl::createImpl();
     }
 
-    CMediaInfo::CMediaInfo( const QString &fileName ) :
-        fImpl( CMediaInfoImpl::createImpl( fileName ) )
+    CMediaInfo::CMediaInfo( const QString &fileName, bool loadNow /*= true*/ ) :
+        fImpl( nullptr )
     {
+        fImpl = CMediaInfoImpl::createImpl( fileName, loadNow );
     }
 
-    CMediaInfo::CMediaInfo( const QFileInfo &fi ) :
-        fImpl( CMediaInfoImpl::createImpl( fi ) )
+    CMediaInfo::CMediaInfo( const QFileInfo &fi, bool loadNow /*= true*/ ) :
+        fImpl( nullptr )
     {
+        fImpl = CMediaInfoImpl::createImpl( fi, loadNow );
+    }
+
+    bool CMediaInfo::load()
+    {
+        return fImpl->load();
+    }
+
+    void CMediaInfo::queueLoad()
+    {
+        return fImpl->queueLoad( this );
     }
 
     CMediaInfo ::~CMediaInfo()
@@ -714,7 +810,7 @@ namespace NSABUtils
 
     bool CMediaInfo::isVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eVideoCodec ), ffmpegFormats );
+        return fImpl->isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eFirstVideoCodec ), ffmpegFormats );
     }
 
     bool CMediaInfo::isFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const
@@ -727,7 +823,7 @@ namespace NSABUtils
         return fImpl->isAudioCodec( checkCodecName, ffmpegFormats );
     }
 
-    bool CMediaInfo::isCodec( const QString & checkCodecName, const QString & mediaCodecName, CFFMpegFormats *ffmpegFormats )
+    bool CMediaInfo::isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats )
     {
         return fImpl->isCodec( checkCodecName, mediaCodecName, ffmpegFormats );
     }
@@ -809,6 +905,26 @@ namespace NSABUtils
         return fImpl->getMediaTags( tags );
     }
 
+    void CMediaInfo::emitMediaInfoLoaded( const QString &fileName )
+    {
+        emit sigMediaInfoLoaded( fileName );
+    }
+
+    int CMediaInfo::numAudioStreams() const
+    {
+        return getMediaTag( EMediaTags::eNumAudioStreams ).toInt();
+    }
+
+    int CMediaInfo::numVideoStreams() const
+    {
+        return getMediaTag( EMediaTags::eNumVideoStreams ).toInt();
+    }
+
+    int CMediaInfo::numSubtitleStreams() const
+    {
+        return getMediaTag( EMediaTags::eNumSubtitleStreams ).toInt();
+    }
+
     QString mediaInfoTagName( EMediaTags tag )
     {
         switch ( tag )
@@ -851,10 +967,14 @@ namespace NSABUtils
                 return "Height";
             case EMediaTags::eResolution:
                 return "Resolution";
-            case EMediaTags::eVideoCodec:
+            case EMediaTags::eFirstVideoCodec:
+            case EMediaTags::eAllVideoCodecs:
+            case EMediaTags::eFirstAudioCodec:
+            case EMediaTags::eAllAudioCodecs:
                 return "CodecID";
-            case EMediaTags::eAudioCodec:
-                return "CodecID";
+            case EMediaTags::eFirstSubtitle:
+            case EMediaTags::eAllSubtitles:
+                return "Language";
             case EMediaTags::eVideoBitrate:
                 return "BitRate";
             case EMediaTags::eVideoBitrateString:

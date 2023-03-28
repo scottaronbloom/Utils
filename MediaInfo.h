@@ -31,6 +31,7 @@
 #include <unordered_map>
 #include <map>
 #include <memory>
+#include <QObject>
 
 class QFileInfo;
 namespace MediaInfoDLL
@@ -89,14 +90,21 @@ namespace NSABUtils
         eWidth,
         eHeight,
         eResolution,
-        eVideoCodec,
-        eAudioCodec,
+        eFirstVideoCodec,
+        eAllVideoCodecs,
+        eFirstAudioCodec,
+        eAllAudioCodecs,
         eVideoBitrate,   // if not found falls back to overall bitrate
         eVideoBitrateString,
         eOverAllBitrate,
         eOverAllBitrateString,
         eAudioSampleRate,
         eAudioSampleRateString,
+        eNumVideoStreams,
+        eNumAudioStreams,
+        eNumSubtitleStreams,
+        eFirstSubtitle,
+        eAllSubtitles,
         eLastTag
     };
     SABUTILS_EXPORT QString displayName( EMediaTags tag );
@@ -126,24 +134,30 @@ namespace NSABUtils
     enum class EMediaTags;
     class CStreamData;
     class CMediaInfoImpl;
-    class SABUTILS_EXPORT CMediaInfo
+    class SABUTILS_EXPORT CMediaInfo : public QObject
     {
+        Q_OBJECT;
+
     public:
         static void setFFProbeEXE( const QString &path );
         static QString ffprobeEXE();
+
         CMediaInfo();
-        CMediaInfo( const QString &fileName );
-        CMediaInfo( const QFileInfo &fi );
+        CMediaInfo( const QString &fileName, bool loadNow = true );
+        CMediaInfo( const QFileInfo &fi, bool loadNow = true );
         ~CMediaInfo();
 
+        bool load();
+        void queueLoad();
         bool aOK() const;
+
         QString fileName() const;
         QString version() const;
 
-        bool isAudioCodec( const QString &checkCodecName, CFFMpegFormats * ffmpegFormats ) const;
+        bool isAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
         bool isVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
         bool isFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const;
-        bool isCodec( const QString & checkCodecName, const QString & mediaCodecName, CFFMpegFormats *ffmpegFormats );
+        bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats );
         bool isHEVCCodec( QString mediaCodecName, CFFMpegFormats *ffmpegFormats );
 
         std::unordered_map< EMediaTags, QString > getSettableMediaTags() const;
@@ -160,6 +174,14 @@ namespace NSABUtils
 
         static QString getMediaTag( const QString &fileName, EMediaTags tag );
         static std::unordered_map< EMediaTags, QString > getMediaTags( const QString &path, const std::list< EMediaTags > &tags );
+
+        void emitMediaInfoLoaded( const QString &fileName );
+
+        int numAudioStreams() const;
+        int numVideoStreams() const;
+        int numSubtitleStreams() const;
+    Q_SIGNALS:
+        void sigMediaInfoLoaded( const QString &fileName );
 
     private:
         std::shared_ptr< CMediaInfoImpl > fImpl;
