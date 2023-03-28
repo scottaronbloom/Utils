@@ -615,6 +615,8 @@ namespace NSABUtils
                     {
                         auto values = findAllValues( EStreamType::eVideo, ii );
                         value = values.join( ", " );
+                        if ( values.count() > 1 )
+                            value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
                     }
                     else
                     {
@@ -638,6 +640,8 @@ namespace NSABUtils
                     {
                         auto values = findAllValues( EStreamType::eAudio, ii );
                         value = values.join( ", " );
+                        if ( values.count() > 1 )
+                            value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
                     }
                     else
                         value = findFirstValue( EStreamType::eAudio, ii );
@@ -651,6 +655,8 @@ namespace NSABUtils
                     {
                         auto values = findAllValues( EStreamType::eText, ii );
                         value = values.join( ", " );
+                        if ( values.count() > 1 )
+                            value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
                     }
                     else
                         value = findFirstValue( EStreamType::eText, ii );
