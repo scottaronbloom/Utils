@@ -31,7 +31,6 @@
 #include <unordered_map>
 #include <map>
 #include <memory>
-#include <QObject>
 
 class QFileInfo;
 namespace MediaInfoDLL
@@ -134,10 +133,8 @@ namespace NSABUtils
     enum class EMediaTags;
     class CStreamData;
     class CMediaInfoImpl;
-    class SABUTILS_EXPORT CMediaInfo : public QObject
+    class SABUTILS_EXPORT CMediaInfo
     {
-        Q_OBJECT;
-
     public:
         static void setFFProbeEXE( const QString &path );
         static QString ffprobeEXE();
@@ -148,8 +145,9 @@ namespace NSABUtils
         ~CMediaInfo();
 
         bool load();
-        void queueLoad();
+        [[nodiscard]] bool queueLoad( std::function< void( const QString&fileName ) > onFinish );
         bool aOK() const;
+        bool isQueued() const;
 
         QString fileName() const;
         QString version() const;
@@ -176,14 +174,9 @@ namespace NSABUtils
         static QString getMediaTag( const QString &fileName, EMediaTags tag );
         static std::unordered_map< EMediaTags, QString > getMediaTags( const QString &path, const std::list< EMediaTags > &tags );
 
-        void emitMediaInfoLoaded( const QString &fileName );
-
         int numAudioStreams() const;
         int numVideoStreams() const;
         int numSubtitleStreams() const;
-    Q_SIGNALS:
-        void sigMediaInfoLoaded( const QString &fileName );
-
     private:
         std::shared_ptr< CMediaInfoImpl > fImpl;
     };

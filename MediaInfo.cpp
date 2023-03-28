@@ -342,20 +342,23 @@ namespace NSABUtils
 
         bool isQueued() const { return fQueued; };
         void setQueued( bool value ) { fQueued = value; }
-        void queueLoad( CMediaInfo *mediaInfo )
+        bool queueLoad( std::function< void( const QString &fileName ) > onFinish )
         {
             if ( !aOK() && !isQueued() )
             {
                 setQueued( true );
                 QThreadPool::globalInstance()->start(
-                    [ this, mediaInfo ]()
+                    [ this, onFinish ]()
                     {
                         qDebug() << "Loading media info for" << fFileName;
                         load();
                         qDebug() << "Finished loading media info for" << fFileName;
-                        mediaInfo->emitMediaInfoLoaded( fFileName );
+                        setQueued( false );
+                        onFinish( fFileName );
                     } );
+                return true;
             }
+            return false;
         }
 
         bool load()
@@ -796,9 +799,14 @@ namespace NSABUtils
         return fImpl->load();
     }
 
-    void CMediaInfo::queueLoad()
+    bool CMediaInfo::queueLoad( std::function< void( const QString &fileName ) > onFinish )
     {
-        return fImpl->queueLoad( this );
+        return fImpl->queueLoad( onFinish );
+    }
+
+    bool CMediaInfo::isQueued() const
+    {
+        return fImpl->isQueued();
     }
 
     CMediaInfo ::~CMediaInfo()
@@ -925,11 +933,6 @@ namespace NSABUtils
     std::unordered_map< NSABUtils::EMediaTags, QString > CMediaInfo::getMediaTags( const std::list< NSABUtils::EMediaTags > &tags ) const
     {
         return fImpl->getMediaTags( tags );
-    }
-
-    void CMediaInfo::emitMediaInfoLoaded( const QString &fileName )
-    {
-        emit sigMediaInfoLoaded( fileName );
     }
 
     int CMediaInfo::numAudioStreams() const

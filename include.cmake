@@ -229,11 +229,11 @@ if ( MKVUTILS )
     set(qtproject_H
         ${qtproject_H}
         SetMKVTags.h
-        MediaInfo.h
     )
     set(project_H
         ${project_H}
         MKVUtils.h
+        MediaInfo.h
     )
     set(qtproject_UIS
         ${qtproject_UIS}
