@@ -403,7 +403,18 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool isAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
+        bool hasVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
+        { 
+            auto values = findAllValues( EStreamType::eVideo, mediaInfoTagName( NSABUtils::EMediaTags::eAllVideoCodecs ) );
+            for ( auto && value : values )
+            {
+                if ( isCodec( checkCodecName, value, ffmpegFormats ) )
+                    return true;
+            }
+            return false;
+        }
+
+        bool hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
         {
             auto values = QStringList()   //
                           << findAllValues( EStreamType::eAudio, mediaInfoTagName( NSABUtils::EMediaTags::eAllAudioCodecs ) )   //
@@ -425,10 +436,10 @@ namespace NSABUtils
             return ffmpegFormats->isCodec( checkCodecName, mediaCodecName );
         }
 
-        bool isFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const
+        bool isContainerFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const
         {
             Q_ASSERT( ffmpegFormats != nullptr );
-            return ffmpegFormats->isFormat( fFileName, formatName );
+            return ffmpegFormats->isContainerFormat( fFileName, formatName );
         }
 
         QString findFirstValue( EStreamType whichStream, const QString &key ) const
@@ -808,19 +819,24 @@ namespace NSABUtils
         return fImpl->isCodec( "hevc", mediaCodecName, ffmpegFormats );
     }
 
-    bool CMediaInfo::isVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
+    bool CMediaInfo::hasVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->isCodec( checkCodecName, getMediaTag( NSABUtils::EMediaTags::eFirstVideoCodec ), ffmpegFormats );
+        return fImpl->hasVideoCodec( checkCodecName, ffmpegFormats );
     }
 
-    bool CMediaInfo::isFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const
+    bool CMediaInfo::isContainerFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->isFormat( formatName, ffmpegFormats );
+        return fImpl->isContainerFormat( formatName, ffmpegFormats );
     }
 
-    bool CMediaInfo::isAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
+    bool CMediaInfo::hasAACCodec( CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->isAudioCodec( checkCodecName, ffmpegFormats );
+        return fImpl->hasAudioCodec( "hevc", ffmpegFormats );
+    }
+
+    bool CMediaInfo::hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
+    {
+        return fImpl->hasAudioCodec( checkCodecName, ffmpegFormats );
     }
 
     bool CMediaInfo::isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats )

@@ -89,7 +89,7 @@ namespace NSABUtils
         bool isHEVCCodec( const QString &codec ) const { return isCodec( "hevc", codec ); }
         bool isCodec( const QString &checkCodecName, const QString &mediaCodecName ) const;
 
-        bool isFormat( const QString &fileName, const QString &formatName ) const;
+        bool isContainerFormat( const QString &fileName, const QString &formatName ) const;
 
         bool isEncoderFormat( const QString &suffix, const QString &formatName ) const;
         bool isDecoderFormat( const QString &suffix, const QString &formatName ) const;

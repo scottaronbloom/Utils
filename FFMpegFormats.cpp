@@ -346,7 +346,7 @@ namespace NSABUtils
         return isAlias( lhsAliases, rhsAliases );
     }
 
-    bool CFFMpegFormats::isFormat( const QString &fileName, const QString &formatName ) const
+    bool CFFMpegFormats::isContainerFormat( const QString &fileName, const QString &formatName ) const
     {
         auto ext = QFileInfo( fileName ).suffix().toLower();
         auto pos = fExtensionToMediaEncoderFormat.find( ext );
