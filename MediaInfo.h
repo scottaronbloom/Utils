@@ -92,11 +92,14 @@ namespace NSABUtils
         eFirstVideoCodec,
         eAllVideoCodecs,
         eFirstAudioCodec,
+        eFirstAudioCodecDisp,
         eAllAudioCodecs,
+        eAllAudioCodecsDisp,
         eVideoBitrate,   // if not found falls back to overall bitrate
         eVideoBitrateString,
         eOverAllBitrate,
         eOverAllBitrateString,
+        eNumChannels,
         eAudioSampleRate,
         eAudioSampleRateString,
         eNumVideoStreams,
@@ -153,7 +156,7 @@ namespace NSABUtils
         QString version() const;
 
         bool hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
-        bool hasAACCodec( CFFMpegFormats *ffmpegFormats ) const;
+        bool hasAACCodec( CFFMpegFormats *ffmpegFormats, int maxNumChannels ) const;
         bool hasVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
         bool isContainerFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const;
         bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats );

@@ -262,14 +262,27 @@ namespace NSABUtils
 
     QString CStreamData::value( const QString &key ) const
     {
-        auto pos = fStreamDataMap.find( key );
-        if ( key == "CodecID" )
+        if ( key == "CodecIDDisp" )
         {
-            auto pos2 = fStreamDataMap.find( "FFMpegCodec" );
-            if ( pos2 != fStreamDataMap.end() )
-                pos = pos2;
+            auto codec = value( mediaInfoTagName( EMediaTags::eFirstAudioCodec ) ); // get the codec
+            auto numChannels = value( mediaInfoTagName( EMediaTags::eNumChannels ) );
+            bool aOK = true;
+            auto channelCount = numChannels.toInt( &aOK );
+            if ( !numChannels.isEmpty() && aOK )
+            {
+                QString channelString;
+                if ( channelCount > 2 )
+                    channelString = QString( " %2.1" ).arg( channelCount - 1 );
+                else if ( channelCount == 2 )
+                    channelString = QString( "stereo" );
+                else
+                    channelString = QString( "mono" );
+                return QString( "%1 %2" ).arg( codec ).arg( channelString );
+            }
+            else
+                return codec;
         }
-        if ( key == "Resolution" )
+        else if ( key == "Resolution" )
         {
             auto width = value( mediaInfoTagName( EMediaTags::eWidth ) );
             auto height = value( mediaInfoTagName( EMediaTags::eHeight ) );
@@ -277,6 +290,14 @@ namespace NSABUtils
             {
                 return QString( "%1x%2" ).arg( width ).arg( height );
             }
+        }
+
+        auto pos = fStreamDataMap.find( key );
+        if ( key == "CodecID" )
+        {
+            auto pos2 = fStreamDataMap.find( "FFMpegCodec" );
+            if ( pos2 != fStreamDataMap.end() )
+                pos = pos2;
         }
 
         if ( pos == fStreamDataMap.end() )
@@ -417,17 +438,32 @@ namespace NSABUtils
             return false;
         }
 
-        bool hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
+        bool hasAudioCodec( const QString &checkCodecName, std::optional< int > maxNumChannels, CFFMpegFormats *ffmpegFormats ) const
         {
             auto values = QStringList()   //
-                          << findAllValues( EStreamType::eAudio, mediaInfoTagName( NSABUtils::EMediaTags::eAllAudioCodecs ) )   //
-                          << findAllValues( EStreamType::eAudio, "Format" )   //
-                          << findAllValues( EStreamType::eAudio, "InternetMediaType" )   //
+                          << findAllValues( EStreamType::eAudio, { NSABUtils::EMediaTags::eAllAudioCodecs, NSABUtils::EMediaTags::eNumChannels } )   //
+                          << findAllValues( EStreamType::eAudio, { "Format", mediaInfoTagName( NSABUtils::EMediaTags::eNumChannels ) } )   //
+                          << findAllValues( EStreamType::eAudio, { "InternetMediaType", mediaInfoTagName( NSABUtils::EMediaTags::eNumChannels ) } )   //
                 ;
 
-            for ( auto &&value : values )
+            for( auto ii = 0; ii < values.count(); ii += 2 )
             {
-                if ( isCodec( checkCodecName, value, ffmpegFormats ) )
+                auto codecName = values[ ii ];
+                if ( codecName.isEmpty()  )
+                    continue;
+
+                if ( !isCodec( checkCodecName, codecName, ffmpegFormats ) )
+                    continue;
+
+                if ( !maxNumChannels.has_value() )
+                    return true;
+
+                bool aOK = true;
+                auto numChannels = values[ ii + 1 ].toInt( &aOK );
+                if ( values[ ii + 1 ].isEmpty() || !aOK )
+                    continue;
+
+                if ( numChannels <= maxNumChannels.value() )
                     return true;
             }
             return false;
@@ -483,6 +519,34 @@ namespace NSABUtils
                 return value;
             }
             return {};
+        }
+
+        QStringList findAllValues( EStreamType whichStream, const std::list< EMediaTags > &keys ) const
+        {
+            std::list< QString > tmp;
+            for ( auto &&ii : keys )
+                tmp.emplace_back( mediaInfoTagName( ii ) );
+
+            return findAllValues( whichStream, std::move( tmp ) ); 
+        }
+
+        QStringList findAllValues( EStreamType whichStream, const std::list< QString > & keys ) const
+        {
+            auto pos = fData.find( whichStream );
+            if ( pos == fData.end() )
+                return {};
+
+            QStringList retVal;
+            for ( auto &&currStream : ( *pos ).second )
+            {
+                for( auto && key : keys )
+                {
+                    auto value = currStream->value( key );
+                    retVal << value;
+                }
+            }
+
+            return retVal;
         }
 
         QStringList findAllValues( EStreamType whichStream, EMediaTags key ) const { return findAllValues( whichStream, mediaInfoTagName( key ) ); }
@@ -581,11 +645,10 @@ namespace NSABUtils
                     EMediaTags::eHeight,   //
                     EMediaTags::eResolution,   //
                     EMediaTags::eFirstVideoCodec,   //
-                    EMediaTags::eFirstAudioCodec,   //
+                    EMediaTags::eFirstAudioCodecDisp,   //
                     EMediaTags::eVideoBitrate,   //
                     EMediaTags::eAudioSampleRate,   //
-                    EMediaTags::eAudioSampleRate,   //
-
+                    EMediaTags::eAudioSampleRate   //
                 };
             }
 
@@ -633,13 +696,23 @@ namespace NSABUtils
                 }
                 else if (
                     ( ii == NSABUtils::EMediaTags::eFirstAudioCodec )   //
+                    || ( ii == NSABUtils::EMediaTags::eAllAudioCodecsDisp )   //
+                    || ( ii == NSABUtils::EMediaTags::eFirstAudioCodecDisp )   //
                     || ( ii == NSABUtils::EMediaTags::eAllAudioCodecs )   //
                     || ( ii == NSABUtils::EMediaTags::eAudioSampleRate )   //
                     || ( ii == NSABUtils::EMediaTags::eAudioSampleRateString )   //
+                    || ( ii == NSABUtils::EMediaTags::eNumChannels )
                 )
                 {
                     QString value;
                     if ( ii == NSABUtils::EMediaTags::eAllAudioCodecs )
+                    {
+                        auto values = findAllValues( EStreamType::eAudio, ii );
+                        value = values.join( ", " );
+                        if ( values.count() > 1 )
+                            value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+                    }
+                    else if ( ii == NSABUtils::EMediaTags::eAllAudioCodecsDisp )
                     {
                         auto values = findAllValues( EStreamType::eAudio, ii );
                         value = values.join( ", " );
@@ -843,14 +916,14 @@ namespace NSABUtils
         return fImpl->isContainerFormat( formatName, ffmpegFormats );
     }
 
-    bool CMediaInfo::hasAACCodec( CFFMpegFormats *ffmpegFormats ) const
+    bool CMediaInfo::hasAACCodec( CFFMpegFormats *ffmpegFormats, int maxNumChannels ) const
     {
-        return fImpl->hasAudioCodec( "aac", ffmpegFormats );
+        return fImpl->hasAudioCodec( "aac", maxNumChannels, ffmpegFormats );
     }
 
     bool CMediaInfo::hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->hasAudioCodec( checkCodecName, ffmpegFormats );
+        return fImpl->hasAudioCodec( checkCodecName, {} , ffmpegFormats );
     }
 
     bool CMediaInfo::isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats )
@@ -997,6 +1070,11 @@ namespace NSABUtils
             case EMediaTags::eFirstAudioCodec:
             case EMediaTags::eAllAudioCodecs:
                 return "CodecID";
+            case EMediaTags::eNumChannels:
+                return "Channel(s)";
+            case EMediaTags::eFirstAudioCodecDisp:
+            case EMediaTags::eAllAudioCodecsDisp:
+                return "CodecIDDisp";
             case EMediaTags::eFirstSubtitle:
             case EMediaTags::eAllSubtitles:
                 return "Language";
