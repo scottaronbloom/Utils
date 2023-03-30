@@ -24,149 +24,141 @@ IF(CMAKE_SIZEOF_VOID_P EQUAL 4) #32 bit
     SET( BITSIZE 32 )
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8) #64 bit
     SET( BITSIZE 64 )
-    add_definitions( -D_AMD64_ )
 ELSE () 
     MESSAGE( STATUS "Unknown Bitsize - CMAKE_SIZEOF_VOID_P not set to 4 or 8" )
     MESSAGE( STATUS "-DCMAKE_SIZEOF_VOID_P=4 for 32 bit" )
     MESSAGE( FATAL_ERROR "-DCMAKE_SIZEOF_VOID_P=8 for 64 bit" )
 ENDIF() 
 
-IF(WIN32)
-    IF( ${BITSIZE} EQUAL 32 )
-        SET(CMAKE_CXX_FLAGS_DEBUG          "/EHsc /MP /D_DEBUG /RTC1 /MDd /ZI /W3 /Od             /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_DEBUG            "/EHsc /MP /D_DEBUG /RTC1 /MDd /ZI /W3 /Od             /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/EHsc /MP /MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "/EHsc /MP /MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_CXX_FLAGS_RELEASE        "/EHsc /MP /MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_RELEASE          "/EHsc /MP /MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_CXX_FLAGS_MINSIZEREL     "/EHsc /MP /MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_MINSIZEREL       "/EHsc /MP /MD /Zi /O2 /Ob1 /DNDEBUG                       /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-    ELSE()
-        SET(CMAKE_CXX_FLAGS_DEBUG          "/EHsc /MP /D_DEBUG /RTC1 /MDd /ZI /W3 /Od /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_DEBUG            "/EHsc /MP /D_DEBUG /RTC1 /MDd /ZI /W3 /Od /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w34062 /w44800 /wd4251 /wd4231 /wd4503")
-
-        SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/EHsc /MP /DNDEBUG       /MD /Zi /O2 /Ob1 /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "/EHsc /MP /DNDEBUG       /MD /Zi /O2 /Ob1 /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_CXX_FLAGS_RELEASE        "/EHsc /MP /DNDEBUG       /MD /Zi /O2 /Ob1 /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_RELEASE          "/EHsc /MP /DNDEBU        /MD /Zi /O2 /Ob1 /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_CXX_FLAGS_MINSIZEREL     "/EHsc /MP /DNDEBUG       /MD /Zi /O2 /Ob1 /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503")
-        SET(CMAKE_C_FLAGS_MINSIZEREL       "/EHsc /MP /DNDEBUG       /MD /Zi /O2 /Ob1 /bigobj     /w34700 /w34701 /w34715 /w34716 /w34717 /w44800 /w34062 /wd4251 /wd4231 /wd4503")
-
-	    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${CMAKE_EXE_LINKER_FLAGS_DEBUG}          /STACK:18388608 /HIGHENTROPYVA:NO")
-	    SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /STACK:18388608 /HIGHENTROPYVA:NO")   
-	    SET(CMAKE_EXE_LINKER_FLAGS_RELEASE        "${CMAKE_EXE_LINKER_FLAGS_RELEASE}        /STACK:18388608 /HIGHENTROPYVA:NO")   
-	    SET(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL     "${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL}     /STACK:18388608 /HIGHENTROPYVA:NO")   
-    ENDIF()
-
-    IF(NOT NO_WARNING_AS_ERROR)
-        SET(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} /WX /w34100")
-        SET(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG} /WX /w34100")
-        SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /WX /w34100")
-        SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "${CMAKE_C_FLAGS_RELWITHDEBINFO} /WX /w34100")
-        SET(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} /WX /w34100")
-        SET(CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE} /WX /w34100")
-        SET(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS_MINSIZEREL} /WX /w34100")
-        SET(CMAKE_C_FLAGS_MINSIZEREL       "${CMAKE_C_FLAGS_MINSIZEREL} /WX /w34100")
-    ENDIF()
-
-    IF( WARN_ALL ) 
-        SET(CMAKE_CXX_FLAGS_DEBUG        "${CMAKE_CXX_FLAGS_DEBUG} /W4")
-        SET(CMAKE_C_FLAGS_DEBUG          "${CMAKE_C_FLAGS_DEBUG} /W4")
-        SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /W4")
-        SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "${CMAKE_C_FLAGS_RELWITHDEBINFO} /W4")
-        SET(CMAKE_CXX_FLAGS_RELEASE      "${CMAKE_CXX_FLAGS_RELEASE} /W4")
-        SET(CMAKE_C_FLAGS_RELEASE        "${CMAKE_C_FLAGS_RELEASE} /W4")
-        SET(CMAKE_CXX_FLAGS_MINSIZEREL   "${CMAKE_CXX_FLAGS_MINSIZEREL} /W4")
-        SET(CMAKE_C_FLAGS_MINSIZEREL     "${CMAKE_C_FLAGS_MINSIZEREL} /W4")
-    ENDIF()
-ELSE()
-    IF(NOT NO_EXTENSIVE_WARNINGS)
-        # the following are from -Wall
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Waddress" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wchar-subscripts" )
-
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wcomment" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wformat" )
-
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wmaybe-uninitialized" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wmissing-braces" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wnonnull" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wparentheses" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wreturn-type")
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wsequence-point")
-        #SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wsign-compare") # big changes
-
-        # we dont use -fstrict aliasing or -fstrict-overflow the following 2 are worthless
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wstrict-aliasing" )
-        #SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wstrict-overflow=1" )
-
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wswitch" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wtrigraphs" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wuninitialized" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wunknown-pragmas" ) # have to figure out a way with windows
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wunused-function" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wunused-label" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wunused-value" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wunused-variable" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wvolatile-register-var" )
-
-        #the following are form -Wextra
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wclobbered" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wempty-body" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wignored-qualifiers" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wmissing-field-initializers" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wtype-limits" )
-        #SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wshift-negative-value" ) #not available on our compiler
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wunused-parameter" )
-        SET(C_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wunused-but-set-parameter" )
-
-        SET(CXX_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wno-return-local-addr")
-        SET(CXX_EXTENSIVE_WARNINGS "${C_EXTENSIVE_WARNINGS} -Wreorder")
-        SET(CXX_EXTENSIVE_WARNINGS "${CXX_EXTENSIVE_WARNINGS} -Wc++11-compat" )
-        #SET(CXX_EXTENSIVE_WARNINGS "${CXX_EXTENSIVE_WARNINGS} -Werror=suggest-override" )
-        #SET(CXX_EXTENSIVE_WARNINGS "${CXX_EXTENSIVE_WARNINGS} -Wc++14-compat" ) # not available on our compiler
-        SET(CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} ${CXX_EXTENSIVE_WARNINGS}" )
-        SET(CMAKE_C_FLAGS      "${CMAKE_C_FLAGS} ${C_EXTENSIVE_WARNINGS}" )
-    ELSE()
-        MESSAGE( WARNING "Extensive warnings disabled - ${PROJECT_NAME}" )
-    ENDIF()
-    IF(NOT NO_WARNING_AS_ERROR)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-    ELSE()
-        MESSAGE( WARNING "Warning as an Error disabled - ${PROJECT_NAME}" )
-    ENDIF()
-
-    IF( WARN_ALL )
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+IF(NOT WIN32)
+    IF( NOT WARN_ALL )
         MESSAGE( STATUS  "Warning all enabled - ${CMAKE_PROJECT_NAME}" )
     ENDIF()
-
-    set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -fPIC")
 ENDIF()
 
-IF(WIN32)
-        add_definitions(
-               -D_CRT_SECURE_NO_WARNINGS
-               -D_CRT_SECURE_NO_DEPRECATE
-               -D_CRT_NONSTDC_NO_WARNINGS
-               -D_SCL_SECURE_NO_WARNINGS
-        )
-		IF( ${BITSIZE} EQUAL 32 )
-			if ( ${MSVC_VERSION} GREATER_EQUAL  1800 )
-				add_link_options( "/SAFESEH:NO" )
-			endif()
-		ENDIF()
+IF(${NO_EXTENSIVE_WARNINGS})
+    MESSAGE( WARNING "Extensive warnings disabled - ${PROJECT_NAME}" )
 ENDIF()
 
-add_definitions( -D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING -D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS  )
-
-add_definitions( -DUNICODE )
-if ( SABUTILS_DLL )
-    add_definitions( -DSABUTILS_DLL )
-endif()
-
-IF( SAB_DEBUG_TRACE )
-    add_definitions( -DSAB_DEBUG_TRACE )
+IF( NO_WARNING_AS_ERROR)
+    MESSAGE( WARNING "Warning as an Error disabled - ${PROJECT_NAME}" )
 ENDIF()
+
+IF(${NO_EXTENSIVE_WARNINGS})
+    MESSAGE( WARNING "Extensive warnings disabled - ${PROJECT_NAME}" )
+ENDIF()
+
+
+add_compile_definitions( 
+    _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING 
+    _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS  
+    UNICODE 
+    $<$<BOOL:SABUTILS_DLL>:SABUTILS_DLL>
+    $<$<BOOL:SAB_DEBUG_TRACE>:SAB_DEBUG_TRACE>
+
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:_DEBUG>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:NDEBUG>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:NDEBUG>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:MinSizeRel>>:NDEBUG>
+
+    $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+    $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_DEPRECATE>
+    $<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_WARNINGS>
+    $<$<CXX_COMPILER_ID:MSVC>:_SCL_SECURE_NO_WARNINGS>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},64>>:_AMD64_>
+)
+
+add_link_options(
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},64>>:/STACK:18388608>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},64>>:/HIGHENTROPYVA:NO>
+)
+
+add_compile_options(
+    $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
+    $<$<CXX_COMPILER_ID:MSVC>:/MP>
+    $<$<CXX_COMPILER_ID:MSVC>:/w34700> 
+    $<$<CXX_COMPILER_ID:MSVC>:/w34701> 
+    $<$<CXX_COMPILER_ID:MSVC>:/w34715> 
+    $<$<CXX_COMPILER_ID:MSVC>:/w34716> 
+    $<$<CXX_COMPILER_ID:MSVC>:/w34717> 
+    $<$<CXX_COMPILER_ID:MSVC>:/w34062> 
+    $<$<CXX_COMPILER_ID:MSVC>:/w44800> 
+    $<$<CXX_COMPILER_ID:MSVC>:/wd4251> 
+    $<$<CXX_COMPILER_ID:MSVC>:/wd4231> 
+    $<$<CXX_COMPILER_ID:MSVC>:/wd4503>
+
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/MDd>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/ZI>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/W3>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Od>
+
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/MD>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/Zi>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/O2>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/Ob1>
+
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:/MD>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:/Zi>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:/O2>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:/Ob1>
+
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:MinSizeRel>>:/MD>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:MinSizeRel>>:/Zi>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:MinSizeRel>>:/O2>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:MinSizeRel>>:/Ob1>
+    
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:/WX>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:/w34100>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<BOOL:${WARN_ALL}>>:/W4>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},32>,$<VERSION_GREATER_EQUAL:${MSVC_VERSION},1800>>:/SAFESEH:NO>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},64>>:/bigobj>
+
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Waddress>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wchar-subscripts>
+
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wcomment>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wformat>
+
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmaybe-uninitialized>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmissing-braces>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wnonnull>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wparentheses>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wreturn-type>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wsequence-point>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wsign-compare> # big changes
+
+    # we dont use -fstrict aliasing or -fstrict-overflow the following 2 are worthless
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wstrict-aliasing>
+    # $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wstrict-overflow=1>
+
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wswitch>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wtrigraphs>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wuninitialized>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunknown-pragmas> # have to figure out a way with windows
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-function>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-label>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-value>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-variable>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wvolatile-register-var>
+
+    #the following are form -Wextra
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wclobbered>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wempty-body>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wignored-qualifiers>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmissing-field-initializers>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wtype-limits>
+    # $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wshift-negative-value> #not available on our compiler
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-parameter>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-but-set-parameter>
+
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wno-return-local-addr>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wreorder>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wc++11-compat>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Werror=suggest-override>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wc++14-compat> # not available on our compiler
+
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:-Werror>
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<BOOL:${WARN_ALL}$>>:-Wall>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fPIC>
+)
+

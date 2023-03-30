@@ -22,12 +22,22 @@
 
 include( ${CMAKE_CURRENT_LIST_DIR}/CompilerSettings.cmake )
 
-add_compile_options(
-    "$<$<CONFIG:Debug>:-DQT_DEBUG>" 
-    "$<$<CONFIG:Release>:-DQT_NO_DEBUG -DQT_NO_NDEBUG -DQT_NO_DEBUG_OUTPUT>" 
-    "$<$<CONFIG:RelWithDebInfo>:-DQT_NO_DEBUG -DQT_NO_NDEBUG -DQT_NO_DEBUG_OUTPUT>" 
-    "$<$<CONFIG:MinSizeRel>:-DQT_NO_DEBUG -DQT_NO_NDEBUG -DQT_NO_DEBUG_OUTPUT>" 
-    )
-add_definitions( -DQT_STRICT_ITERATORS )
-add_definitions( -DQT_CC_WARNINGS -DQT_NO_WARNINGS )
+add_compile_definitions(
+    $<$<CONFIG:Debug>:QT_DEBUG>
+    $<$<CONFIG:Release>:QT_NO_DEBUG>
+    $<$<CONFIG:Release>:QT_NO_NDEBUG>
+    $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
+    
+    $<$<CONFIG:RelWithDebInfo>:QT_NO_DEBUG>
+    $<$<CONFIG:RelWithDebInfo>:QT_NO_NDEBUG>
+    $<$<CONFIG:RelWithDebInfo>:QT_NO_DEBUG_OUTPUT>
+    
+    $<$<CONFIG:MinSizeRel>:QT_NO_DEBUG>
+    $<$<CONFIG:MinSizeRel>:QT_NO_NDEBUG>
+    $<$<CONFIG:MinSizeRel>:QT_NO_DEBUG_OUTPUT>
+
+    QT_STRICT_ITERATORS 
+    QT_CC_WARNINGS 
+    QT_NO_WARNINGS
+)
 

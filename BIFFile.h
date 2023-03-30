@@ -85,7 +85,7 @@ namespace NSABUtils
             [[nodiscard]] std::pair< bool, QString > loadImage( QIODevice * device, const QString & fn );
             bool writeIndex( QIODevice * outFile, QString & msg ) const;
             bool writeImage( QIODevice * outFile, QString & msg ) const;
-            S32BitValue fBIFNum{ -1U };
+            S32BitValue fBIFNum{ -1 };
             S32BitValue fOffset;
             uint64_t fSize{ 0 };
             std::optional< std::pair< QByteArray, QImage > > fImage;

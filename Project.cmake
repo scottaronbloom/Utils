@@ -61,7 +61,7 @@ SET( _PROJECT_DEPENDENCIES
 SET( project_pub_DEPS
     # insert and "global default" public depends here
      ${project_pub_DEPS}
-     )
+)
 
 SET( project_pri_DEPS
     # insert and "global default" private depends here
