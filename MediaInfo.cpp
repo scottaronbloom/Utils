@@ -861,12 +861,12 @@ namespace NSABUtils
     }
 
     CMediaInfo::CMediaInfo( const QString &fileName ) :   // loads immediately use the mgr for delayed load
-        CMediaInfo( fileName, false )
+        CMediaInfo( fileName, true )
     {
     }
 
     CMediaInfo::CMediaInfo( const QFileInfo &fi ) :
-        CMediaInfo( fi, false )
+        CMediaInfo( fi, true )
     {
     }
 
