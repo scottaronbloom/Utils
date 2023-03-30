@@ -28,9 +28,12 @@
 #include <QStringList>
 #include <QDateTime>
 #include <QFileInfo>
+#include <QObject>
+#include <QMutex>
 #include <unordered_map>
 #include <map>
 #include <memory>
+#include <set>
 
 class QFileInfo;
 namespace MediaInfoDLL
@@ -136,19 +139,26 @@ namespace NSABUtils
     enum class EMediaTags;
     class CStreamData;
     class CMediaInfoImpl;
-    class SABUTILS_EXPORT CMediaInfo
+    class SABUTILS_EXPORT CMediaInfo : public QObject
     {
+        Q_OBJECT;
+        friend class CMediaInfoMgr;
+
+    private:
+        [[nodiscard]] bool queueLoad( std::function< void( const QString &fileName ) > onFinish );
+        CMediaInfo();
+        CMediaInfo( const QString &fileName, bool delayLoad );
+        CMediaInfo( const QFileInfo &fi, bool delayLoad );
+
     public:
         static void setFFProbeEXE( const QString &path );
         static QString ffprobeEXE();
 
-        CMediaInfo();
-        CMediaInfo( const QString &fileName, bool loadNow = true );
-        CMediaInfo( const QFileInfo &fi, bool loadNow = true );
+        CMediaInfo( const QString &fileName );
+        CMediaInfo( const QFileInfo &fi );
         ~CMediaInfo();
 
         bool load();
-        [[nodiscard]] bool queueLoad( std::function< void( const QString&fileName ) > onFinish );
         bool aOK() const;
         bool isQueued() const;
 
@@ -180,8 +190,34 @@ namespace NSABUtils
         int numAudioStreams() const;
         int numVideoStreams() const;
         int numSubtitleStreams() const;
+    Q_SIGNALS:
+        void sigMediaLoaded( const QString &fileName );
+
     private:
         std::shared_ptr< CMediaInfoImpl > fImpl;
+    };
+
+    class SABUTILS_EXPORT CMediaInfoMgr : public QObject
+    {
+        CMediaInfoMgr() {}
+        Q_OBJECT;
+
+    public:
+        static CMediaInfoMgr * instance();
+        virtual ~CMediaInfoMgr() override {}
+
+        std::shared_ptr< CMediaInfo > getMediaInfo( const QString &fileName );   // creates a mediainfo, then loads it in a background thread, then CMediaInfo will emit when its finished
+        std::shared_ptr< CMediaInfo > getMediaInfo( const QFileInfo &fi );
+    public Q_SLOTS:
+        void slotMediaLoaded( const QString &fileName );
+    Q_SIGNALS:
+        void sigMediaLoaded( const QString &fileName );
+
+    private:
+        void removeFromMediaInfoQueue( const QString &fileName );
+
+        QMutex fMutex;
+        std::unordered_map< QString, std::shared_ptr< CMediaInfo > > fQueuedMediaInfo;   // store here while media is loading
     };
 }
 

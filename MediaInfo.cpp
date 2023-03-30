@@ -264,7 +264,7 @@ namespace NSABUtils
     {
         if ( key == "CodecIDDisp" )
         {
-            auto codec = value( mediaInfoTagName( EMediaTags::eFirstAudioCodec ) ); // get the codec
+            auto codec = value( mediaInfoTagName( EMediaTags::eFirstAudioCodec ) );   // get the codec
             auto numChannels = value( mediaInfoTagName( EMediaTags::eNumChannels ) );
             bool aOK = true;
             auto channelCount = numChannels.toInt( &aOK );
@@ -333,14 +333,12 @@ namespace NSABUtils
             return retVal;
         }
 
-        static std::shared_ptr< CMediaInfoImpl > createImpl( const QFileInfo &fi, bool loadNow ) { return createImpl( fi.absoluteFilePath(), loadNow ); }
-
-        static std::shared_ptr< CMediaInfoImpl > createImpl( const QString &path, bool loadNow )
+        static std::shared_ptr< CMediaInfoImpl > createImpl( const QFileInfo &fi, bool loadNow )
         {
-            auto retVal = sMediaInfoCache.find( path );
+            auto retVal = sMediaInfoCache.find( fi.absoluteFilePath() );
             if ( !retVal )
             {
-                retVal = std::make_shared< NSABUtils::CMediaInfoImpl >( path );
+                retVal = std::make_shared< NSABUtils::CMediaInfoImpl >( fi );
                 if ( loadNow )
                     retVal->load();
                 sMediaInfoCache.add( retVal );
@@ -348,14 +346,11 @@ namespace NSABUtils
             return retVal;
         }
 
+        static std::shared_ptr< CMediaInfoImpl > createImpl( const QString &path, bool loadNow ) { return createImpl( std::move( QFileInfo( path ) ), loadNow ); }
+
         CMediaInfoImpl() {}
         CMediaInfoImpl( const QFileInfo &fi ) :
-            CMediaInfoImpl( fi.absoluteFilePath() )
-        {
-        }
-
-        CMediaInfoImpl( const QString &fileName ) :
-            fFileName( fileName )
+            fFileName( fi.absoluteFilePath() )
         {
         }
 
@@ -428,9 +423,9 @@ namespace NSABUtils
         }
 
         bool hasVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
-        { 
+        {
             auto values = findAllValues( EStreamType::eVideo, mediaInfoTagName( NSABUtils::EMediaTags::eAllVideoCodecs ) );
-            for ( auto && value : values )
+            for ( auto &&value : values )
             {
                 if ( isCodec( checkCodecName, value, ffmpegFormats ) )
                     return true;
@@ -446,10 +441,10 @@ namespace NSABUtils
                           << findAllValues( EStreamType::eAudio, { "InternetMediaType", mediaInfoTagName( NSABUtils::EMediaTags::eNumChannels ) } )   //
                 ;
 
-            for( auto ii = 0; ii < values.count(); ii += 2 )
+            for ( auto ii = 0; ii < values.count(); ii += 2 )
             {
                 auto codecName = values[ ii ];
-                if ( codecName.isEmpty()  )
+                if ( codecName.isEmpty() )
                     continue;
 
                 if ( !isCodec( checkCodecName, codecName, ffmpegFormats ) )
@@ -527,10 +522,10 @@ namespace NSABUtils
             for ( auto &&ii : keys )
                 tmp.emplace_back( mediaInfoTagName( ii ) );
 
-            return findAllValues( whichStream, std::move( tmp ) ); 
+            return findAllValues( whichStream, std::move( tmp ) );
         }
 
-        QStringList findAllValues( EStreamType whichStream, const std::list< QString > & keys ) const
+        QStringList findAllValues( EStreamType whichStream, const std::list< QString > &keys ) const
         {
             auto pos = fData.find( whichStream );
             if ( pos == fData.end() )
@@ -539,7 +534,7 @@ namespace NSABUtils
             QStringList retVal;
             for ( auto &&currStream : ( *pos ).second )
             {
-                for( auto && key : keys )
+                for ( auto &&key : keys )
                 {
                     auto value = currStream->value( key );
                     retVal << value;
@@ -701,8 +696,7 @@ namespace NSABUtils
                     || ( ii == NSABUtils::EMediaTags::eAllAudioCodecs )   //
                     || ( ii == NSABUtils::EMediaTags::eAudioSampleRate )   //
                     || ( ii == NSABUtils::EMediaTags::eAudioSampleRateString )   //
-                    || ( ii == NSABUtils::EMediaTags::eNumChannels )
-                )
+                    || ( ii == NSABUtils::EMediaTags::eNumChannels ) )
                 {
                     QString value;
                     if ( ii == NSABUtils::EMediaTags::eAllAudioCodecs )
@@ -723,8 +717,7 @@ namespace NSABUtils
                         value = findFirstValue( EStreamType::eAudio, ii );
                     retVal[ ii ] = value;
                 }
-                else if ( ( ii == NSABUtils::EMediaTags::eFirstSubtitle )
-                    || ( ii == NSABUtils::EMediaTags::eAllSubtitles ) )
+                else if ( ( ii == NSABUtils::EMediaTags::eFirstSubtitle ) || ( ii == NSABUtils::EMediaTags::eAllSubtitles ) )
                 {
                     QString value;
                     if ( ii == NSABUtils::EMediaTags::eAllSubtitles )
@@ -867,6 +860,16 @@ namespace NSABUtils
         fImpl = CMediaInfoImpl::createImpl( fi, loadNow );
     }
 
+    CMediaInfo::CMediaInfo( const QString &fileName ) :   // loads immediately use the mgr for delayed load
+        CMediaInfo( fileName, false )
+    {
+    }
+
+    CMediaInfo::CMediaInfo( const QFileInfo &fi ) :
+        CMediaInfo( fi, false )
+    {
+    }
+
     bool CMediaInfo::load()
     {
         return fImpl->load();
@@ -923,7 +926,7 @@ namespace NSABUtils
 
     bool CMediaInfo::hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
     {
-        return fImpl->hasAudioCodec( checkCodecName, {} , ffmpegFormats );
+        return fImpl->hasAudioCodec( checkCodecName, {}, ffmpegFormats );
     }
 
     bool CMediaInfo::isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats )
@@ -1127,4 +1130,48 @@ namespace NSABUtils
               EMediaTags::eAlbumArtist,   //
               EMediaTags::eDiscnumber } );
     }
+
+    CMediaInfoMgr *CMediaInfoMgr::instance()
+    {
+        static CMediaInfoMgr retVal;
+        return &retVal;
+    }
+
+    std::shared_ptr< NSABUtils::CMediaInfo > CMediaInfoMgr::getMediaInfo( const QString &fileName )   // creates a mediainfo, then loads it in a background thread, then CMediaInfo will emit when its finished
+    {
+        return getMediaInfo( std::move( QFileInfo( fileName ) ) );
+    }
+
+    std::shared_ptr< NSABUtils::CMediaInfo > CMediaInfoMgr::getMediaInfo( const QFileInfo &fi )
+    {
+        auto retVal = std::shared_ptr< CMediaInfo >( new CMediaInfo( fi, false ) );
+        connect( retVal.get(), &CMediaInfo::sigMediaLoaded, this, &CMediaInfoMgr::slotMediaLoaded );
+        fMutex.lock();
+        fQueuedMediaInfo[ fi.absoluteFilePath() ] = retVal;
+        fMutex.unlock();
+
+        auto queued = retVal->queueLoad( [ this ]( const QString &fileName ) { slotMediaLoaded( fileName ); } );
+        if ( !queued )
+        {
+            removeFromMediaInfoQueue( fi.absoluteFilePath() );
+        }
+
+        return retVal;
+    }
+
+    void CMediaInfoMgr::slotMediaLoaded( const QString &fileName )
+    {
+        removeFromMediaInfoQueue( fileName );
+        emit sigMediaLoaded( fileName );
+    }
+
+    void CMediaInfoMgr::removeFromMediaInfoQueue( const QString &fileName )
+    {
+        fMutex.lock();
+        auto pos = fQueuedMediaInfo.find( fileName );
+        if ( pos != fQueuedMediaInfo.end() )
+            fQueuedMediaInfo.erase( pos );
+        fMutex.unlock();
+    }
+
 }

@@ -57,7 +57,7 @@ namespace NSABUtils
             return false;
         }
 
-        auto mediaInfo = CMediaInfo( fileName, true );
+        auto mediaInfo = CMediaInfo( fileName );
         if ( !mediaInfo.aOK() )
         {
             if ( msg )
