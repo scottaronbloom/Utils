@@ -30,6 +30,7 @@ namespace NSABUtils
 {
     void CStayAwake::run()
     {
+        fStopped = false;
         bool success = false;
         while ( !fStopped )
         {
