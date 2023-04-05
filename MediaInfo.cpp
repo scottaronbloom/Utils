@@ -358,8 +358,12 @@ namespace NSABUtils
 
         bool isQueued() const { return fQueued; };
         void setQueued( bool value ) { fQueued = value; }
-        bool queueLoad( std::function< void( const QString &fileName ) > onFinish )
+        bool queueLoad( std::function< void( const QString & ) > onFinish )
         {
+            QFileInfo fi( fFileName );
+            if ( !fi.exists() || !fi.isReadable() )
+                return false;
+
             if ( !aOK() && !isQueued() )
             {
                 setQueued( true );
@@ -367,7 +371,11 @@ namespace NSABUtils
                     [ this, onFinish ]()
                     {
                         qDebug() << "Loading media info for" << fFileName;
-                        load();
+                        if ( !load() )
+                        {
+                            qDebug() << "Failed to get media info for" << fFileName;
+                            return;
+                        }
                         qDebug() << "Finished loading media info for" << fFileName;
                         setQueued( false );
                         onFinish( fFileName );
