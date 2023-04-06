@@ -33,16 +33,31 @@
 
 namespace NSABUtils
 {
-    void removeFromlist( QStringList &list, const QString &regex )
+    QStringList removeFromlist( const QStringList &list, const QString &regex )
     {
+        auto retVal = std::move( list );
+
         auto regExp = QRegularExpression( regex );
-        auto pos = list.indexOf( regExp );
+        auto pos = retVal.indexOf( regExp );
         while ( pos != -1 )
         {
-            list.removeAt( pos );
-            pos = list.indexOf( regExp, pos );
+            retVal.removeAt( pos );
+            pos = retVal.indexOf( regExp, pos );
         }
+
+        return std::move( retVal );
     }
+
+    QStringList removeFromlist( const QStringList &list, const QStringList & exclude )
+    {
+        auto retVal = std::move( list );
+
+        for ( auto &&ii : exclude )
+            retVal.removeAll( ii );
+
+        return std::move( retVal );
+    }
+
 
     void cleanLists( const QString &intel, const QString &nvidia, const QString &amd, QStringList &terse, QStringList &verbose )
     {
@@ -63,8 +78,8 @@ namespace NSABUtils
             regExs << amd;
         }
         auto regEx = regExs.join( "|" );
-        removeFromlist( terse, regEx );
-        removeFromlist( verbose, regEx );
+        terse = removeFromlist( terse, regEx );
+        verbose = removeFromlist( verbose, regEx );
     }
 
     CFFMpegFormats::CFFMpegFormats()
@@ -530,75 +545,74 @@ namespace NSABUtils
         Q_ASSERT( validate() );
     }
 
-    QStringList CFFMpegFormats::getEncoderExtensions( NSABUtils::EFormatType extensionType ) const
+    QStringList CFFMpegFormats::getExtensions( const TFormatMap & map, NSABUtils::EFormatType extensionType, const QStringList &exclude ) const
     {
-        auto pos = fMediaEncoderFormatExtensions.find( extensionType );
-        if ( pos == fMediaEncoderFormatExtensions.end() )
+        auto pos = map.find( extensionType );
+        if ( pos == map.end() )
             return {};
+
         QStringList retVal;
         for ( auto &&ii : ( *pos ).second )
         {
             retVal << ii.second;
         }
-        return retVal;
+
+        return std::move( removeFromlist( retVal, exclude ) );
     }
 
-    QStringList CFFMpegFormats::getDecoderExtensions( NSABUtils::EFormatType extensionType ) const
+    QStringList CFFMpegFormats::getEncoderExtensions( NSABUtils::EFormatType extensionType, const QStringList &exclude ) const
     {
-        auto pos = fMediaDecoderFormatExtensions.find( extensionType );
-        if ( pos == fMediaDecoderFormatExtensions.end() )
-            return {};
-        QStringList retVal;
-        for ( auto &&ii : ( *pos ).second )
-        {
-            retVal << ii.second;
-        }
-        return retVal;
+        return getExtensions( fMediaEncoderFormatExtensions, extensionType, exclude );
     }
 
-    QStringList CFFMpegFormats::getVideoEncoderExtensions() const
+    QStringList CFFMpegFormats::getDecoderExtensions( NSABUtils::EFormatType extensionType, const QStringList &exclude ) const
     {
-        return getEncoderExtensions( EFormatType::eVideo );
+        return getExtensions( fMediaEncoderFormatExtensions, extensionType, exclude );
     }
 
-    QStringList CFFMpegFormats::getAudioEncoderExtensions() const
+    QStringList CFFMpegFormats::getVideoEncoderExtensions( const QStringList &exclude ) const
     {
-        return getEncoderExtensions( EFormatType::eAudio );
+        return getEncoderExtensions( EFormatType::eVideo, exclude );
     }
 
-    QStringList CFFMpegFormats::getSubtitleEncoderExtensions() const
+    QStringList CFFMpegFormats::getAudioEncoderExtensions( const QStringList &exclude ) const
     {
-        return getEncoderExtensions( EFormatType::eSubtitle );
+        return getEncoderExtensions( EFormatType::eAudio, exclude );
     }
 
-    QStringList CFFMpegFormats::getVideoDecoderExtensions() const
+    QStringList CFFMpegFormats::getSubtitleEncoderExtensions( const QStringList &exclude ) const
     {
-        return getDecoderExtensions( EFormatType::eVideo );
+        return getEncoderExtensions( EFormatType::eSubtitle, exclude );
     }
 
-    QStringList CFFMpegFormats::getAudioDecoderExtensions() const
+    QStringList CFFMpegFormats::getVideoDecoderExtensions( const QStringList &exclude ) const
     {
-        return getDecoderExtensions( EFormatType::eAudio );
+        return getDecoderExtensions( EFormatType::eVideo, exclude );
     }
 
-    QStringList CFFMpegFormats::getSubtitleDecoderExtensions() const
+    QStringList CFFMpegFormats::getAudioDecoderExtensions( const QStringList &exclude ) const
     {
-        return getDecoderExtensions( EFormatType::eSubtitle );
+        return getDecoderExtensions( EFormatType::eAudio, exclude );
     }
 
-    QStringList CFFMpegFormats::getImageEncoderExtensions() const
+    QStringList CFFMpegFormats::getSubtitleDecoderExtensions( const QStringList &exclude ) const
     {
-        return getEncoderExtensions( EFormatType::eImage );
+        return getDecoderExtensions( EFormatType::eSubtitle, exclude );
     }
 
-    QStringList CFFMpegFormats::getImageDecoderExtensions() const
+    QStringList CFFMpegFormats::getImageEncoderExtensions( const QStringList &exclude ) const
     {
-        return getDecoderExtensions( EFormatType::eImage );
+        return getEncoderExtensions( EFormatType::eImage, exclude );
     }
 
-    QString CFFMpegFormats::getPrimaryEncoderExtensionForFormat( const QString &formatName ) const
+    QStringList CFFMpegFormats::getImageDecoderExtensions( const QStringList &exclude ) const
     {
-        auto exts = getEncoderExtensionsForFormat( formatName );
+        return getDecoderExtensions( EFormatType::eImage, exclude );
+    }
+
+    QString CFFMpegFormats::getPrimaryEncoderExtensionForFormat( const QString &formatName, const QStringList &exclude ) const
+    {
+        auto exts = getEncoderExtensionsForFormat( formatName, exclude );
         if ( exts.isEmpty() )
             return {};
         auto retVal = exts.front();
@@ -606,9 +620,9 @@ namespace NSABUtils
         return retVal;
     }
 
-    QString CFFMpegFormats::getPrimaryDecoderExtensionForFormat( const QString &formatName ) const
+    QString CFFMpegFormats::getPrimaryDecoderExtensionForFormat( const QString &formatName, const QStringList &exclude ) const
     {
-        auto exts = getDecoderExtensionsForFormat( formatName );
+        auto exts = getDecoderExtensionsForFormat( formatName, exclude );
         if ( exts.isEmpty() )
             return {};
         auto retVal = exts.front();
@@ -640,30 +654,28 @@ namespace NSABUtils
         return {};
     }
 
-    QStringList CFFMpegFormats::getEncoderExtensionsForFormat( const QString &formatName ) const
+    QStringList CFFMpegFormats::getExtensionsForFormat( const TFormatMap &map, const QString &formatName, const QStringList &exclude ) const
     {
         Q_ASSERT( loaded() );
-        for ( auto &&ii : fMediaEncoderFormatExtensions )
+        for ( auto && ii : map )
         {
             auto pos = ii.second.find( formatName );
             if ( pos == ii.second.end() )
                 return {};
-            return ( *pos ).second;
+
+            return std::move( removeFromlist( ( *pos ).second, exclude ) );
         }
         return {};
     }
 
-    QStringList CFFMpegFormats::getDecoderExtensionsForFormat( const QString &formatName ) const
+    QStringList CFFMpegFormats::getEncoderExtensionsForFormat( const QString &formatName, const QStringList &exclude ) const
     {
-        Q_ASSERT( loaded() );
-        for ( auto &&ii : fMediaDecoderFormatExtensions )
-        {
-            auto pos = ii.second.find( formatName );
-            if ( pos == ii.second.end() )
-                return {};
-            return ( *pos ).second;
-        }
-        return {};
+        return getExtensionsForFormat( fMediaEncoderFormatExtensions, formatName, exclude );
+    }
+
+    QStringList CFFMpegFormats::getDecoderExtensionsForFormat( const QString &formatName, const QStringList &exclude ) const
+    {
+        return getExtensionsForFormat( fMediaDecoderFormatExtensions, formatName, exclude );
     }
 
     QString CFFMpegFormats::getTranscodeHWAccel( const QString &formatName ) const

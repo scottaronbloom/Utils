@@ -222,7 +222,8 @@ namespace NSABUtils
     SABUTILS_EXPORT void move( QSettings &settings, const QString &subGroup, const QString &key, bool overwrite );
     SABUTILS_EXPORT void copy( QSettings &from, QSettings &to, bool overwrite );
 
-    SABUTILS_EXPORT int itemCount( QAbstractItemModel *model, bool rowCountOnly );
+    SABUTILS_EXPORT int itemCount( QAbstractItemModel *model, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &path ) >, int > & excludeFunc = { {}, Qt::DisplayRole } );
+    SABUTILS_EXPORT int itemCount( const QModelIndex &idx, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &path ) >, int > & excludeFunc = { {}, Qt::DisplayRole } );
 
     SABUTILS_EXPORT QStringList getHeadersForModel( QAbstractItemModel *model );
     SABUTILS_EXPORT void writeModel(
