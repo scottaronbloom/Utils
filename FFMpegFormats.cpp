@@ -48,7 +48,7 @@ namespace NSABUtils
         return std::move( retVal );
     }
 
-    QStringList removeFromlist( const QStringList &list, const QStringList & exclude )
+    QStringList removeFromlist( const QStringList &list, const QStringList &exclude )
     {
         auto retVal = std::move( list );
 
@@ -57,7 +57,6 @@ namespace NSABUtils
 
         return std::move( retVal );
     }
-
 
     void cleanLists( const QString &intel, const QString &nvidia, const QString &amd, QStringList &terse, QStringList &verbose )
     {
@@ -285,17 +284,17 @@ namespace NSABUtils
             return;
 
         if ( !dlg->wasCanceled() )
-            loadFormats( dlg );
-        if ( !dlg->wasCanceled() )
             loadCodecs( dlg );
         if ( !dlg->wasCanceled() )
-            computeReverseExtensionMap( true );
-        if ( !dlg->wasCanceled() )
-            computeReverseExtensionMap( false );
+            loadFormats( dlg );
         if ( !dlg->wasCanceled() )
             loadEncodersDecoders( dlg );
         if ( !dlg->wasCanceled() )
             loadHWAccels( dlg );
+        if ( !dlg->wasCanceled() )
+            computeReverseExtensionMap( true );
+        if ( !dlg->wasCanceled() )
+            computeReverseExtensionMap( false );
         if ( !dlg->wasCanceled() )
         {
             fLoaded = true;
@@ -307,7 +306,7 @@ namespace NSABUtils
 
     void addAliases( std::set< QString > &retVal, const QString &formatName, const TCodecToEncoderDecoderMap &map )
     {
-        for( auto && ii : map )
+        for ( auto &&ii : map )
         {
             auto range = ii.second.equal_range( formatName );
             for ( auto kk = range.first; kk != range.second; ++kk )
@@ -316,7 +315,7 @@ namespace NSABUtils
             }
         }
     }
-    
+
     std::set< QString > CFFMpegFormats::getCodecAliases( const QString &formatName ) const
     {
         auto pos = fAliases.find( formatName );
@@ -545,7 +544,7 @@ namespace NSABUtils
         Q_ASSERT( validate() );
     }
 
-    QStringList CFFMpegFormats::getExtensions( const TFormatMap & map, NSABUtils::EFormatType extensionType, const QStringList &exclude ) const
+    QStringList CFFMpegFormats::getExtensions( const TFormatMap &map, NSABUtils::EFormatType extensionType, const QStringList &exclude ) const
     {
         auto pos = map.find( extensionType );
         if ( pos == map.end() )
@@ -567,7 +566,7 @@ namespace NSABUtils
 
     QStringList CFFMpegFormats::getDecoderExtensions( NSABUtils::EFormatType extensionType, const QStringList &exclude ) const
     {
-        return getExtensions( fMediaEncoderFormatExtensions, extensionType, exclude );
+        return getExtensions( fMediaDecoderFormatExtensions, extensionType, exclude );
     }
 
     QStringList CFFMpegFormats::getVideoEncoderExtensions( const QStringList &exclude ) const
@@ -657,7 +656,7 @@ namespace NSABUtils
     QStringList CFFMpegFormats::getExtensionsForFormat( const TFormatMap &map, const QString &formatName, const QStringList &exclude ) const
     {
         Q_ASSERT( loaded() );
-        for ( auto && ii : map )
+        for ( auto &&ii : map )
         {
             auto pos = ii.second.find( formatName );
             if ( pos == ii.second.end() )
@@ -774,6 +773,9 @@ namespace NSABUtils
             auto name = match.captured( "name" ).trimmed();
             auto desc = match.captured( "desc" ).trimmed();
 
+            if ( dlg )
+                dlg->setLabelText( QString( "Loading Codec: %1" ).arg( name ) );
+
             auto objectsRegExp = QRegularExpression( R"((\((?<codertype>encoders|decoders)\:\s*(?<codingCodecs>[^\)\r\n]+)\s*\)\s*))" );
 
             auto jj = objectsRegExp.globalMatch( desc );
@@ -802,7 +804,9 @@ namespace NSABUtils
             if ( lossless )
                 tmp << "(Lossless compression)";
 
-            desc = name + " - " + desc + " - " + tmp.join( " " );
+            desc = name + " - " + desc;
+            if ( !tmp.isEmpty() )
+                desc += " - " + tmp.join( " " );
 
             auto formatType = EFormatType::eUnknown;
             switch ( type[ 0 ].toLatin1() )
@@ -856,6 +860,7 @@ namespace NSABUtils
                     fCodecToEncoderMap[ formatType ].insert( { name, ii } );
                     fEncoderToCodecMap[ ii ] = name;
                 }
+                computeExtensionsForFormat( name, desc, formatType, true );
             }
 
             if ( isDecoder )
@@ -865,6 +870,7 @@ namespace NSABUtils
                     fCodecToDecoderMap[ formatType ].insert( { name, ii } );
                     fDecoderToCodecMap[ ii ] = name;
                 }
+                computeExtensionsForFormat( name, desc, formatType, false );
             }
         }
     }
@@ -942,6 +948,10 @@ namespace NSABUtils
                 continue;
             auto name = match.captured( "name" ).trimmed();
             auto desc = name + " - " + match.captured( "desc" ).trimmed();
+
+            if ( dlg )
+                dlg->setLabelText( QString( "Loading %1: %2" ).arg( isEncoding ? "Encoding Codec" : "Decoding Codec" ).arg( name ) );
+
             switch ( type[ 0 ].toLatin1() )
             {
                 case 'A':
@@ -1032,6 +1042,9 @@ namespace NSABUtils
             }
             auto match = ii.next();
             auto type = match.captured( "hwaccel" ).trimmed().toLower();
+            if ( dlg )
+                dlg->setLabelText( QString( "Loading HW Accelerator: %1" ).arg( type ) );
+
             QString verbose;
             if ( type == "none" )
                 verbose = type + " - Do not use any hardware acceleration (the default).";
@@ -1067,7 +1080,7 @@ namespace NSABUtils
             return;
 
         if ( dlg )
-            dlg->setLabelText( "Loading Formats" );
+            dlg->setLabelText( QObject::tr( "Loading Formats" ) );
 
         QProcess process;
         process.start(
@@ -1115,8 +1128,8 @@ namespace NSABUtils
             }
             auto match = ii.next();
             auto type = match.captured( "type" ).trimmed();
-            bool isEncoder = ( ( type.length() == 1 ) && ( type[ 0 ] == 'E' ) ) || ( ( type.length() == 2 ) && ( type[ 1 ] == 'E' ) );
-            bool isDecoder = ( ( type.length() == 1 ) && ( type[ 0 ] == 'D' ) ) || ( ( type.length() == 2 ) && ( type[ 0 ] == 'E' ) );
+            bool isEncoder = type.contains( 'E' );
+            bool isDecoder = type.contains( 'D' );
             if ( !isEncoder && !isDecoder )
                 continue;
             auto names = match.captured( "name" ).trimmed().split( "," );
@@ -1125,16 +1138,19 @@ namespace NSABUtils
             auto name = names.join( "," ).trimmed();
             auto desc = match.captured( "desc" ).trimmed();
 
+            if ( dlg )
+                dlg->setLabelText( QObject::tr( "Loading Format: %1" ).arg( name ) );
+
             if ( isEncoder )
-                computeExtensionsForFormat( name, desc, true );
+                computeExtensionsForFormat( name, desc, {}, true );
             if ( isDecoder )
-                computeExtensionsForFormat( name, desc, false );
+                computeExtensionsForFormat( name, desc, {}, false );
         }
     }
 
-    void CFFMpegFormats::computeExtensionsForFormat( const QString &name, const QString &desc, bool isEncoder )
+    void CFFMpegFormats::computeExtensionsForFormat( const QString &name, const QString &desc, std::optional< EFormatType > formatType, bool isEncoder )
     {
-        auto exts = computeExtensionsForFormat( name, isEncoder );
+        auto exts = computeExtensionsForFormat( name, formatType, isEncoder );
         if ( exts.empty() )
             return;
 
@@ -1149,19 +1165,19 @@ namespace NSABUtils
         }
     }
 
-    QStringList CFFMpegFormats::computeExtensionsForFormat( const QString &formatName, bool encodingCodecs )
+    QStringList CFFMpegFormats::computeExtensionsForFormat( const QString &formatName, std::optional< EFormatType > formatType, bool isEncoder )
     {
         if ( !validateFFMpegExe() )
             return {};
 
-        auto retVal = encodingCodecs ? encoderFormatLoaded( formatName ) : decoderFormatLoaded( formatName );
+        auto retVal = isEncoder ? encoderFormatLoaded( formatName ) : decoderFormatLoaded( formatName );
         if ( !retVal.has_value() )
         {
             retVal = QStringList();
             QProcess process;
             process.start(
                 fFFMpegExe, QStringList() << "-hide_banner"
-                                          << "-h" << ( encodingCodecs ? "muxer=" : "demuxer=" ) + formatName );
+                                          << "-h" << ( isEncoder ? "muxer=" : "demuxer=" ) + formatName );
             process.waitForFinished();
             auto formatHelp = process.readAllStandardOutput();
 
@@ -1176,6 +1192,8 @@ namespace NSABUtils
                     ii = "*." + ii.trimmed().toLower();
                 retVal.value().removeDuplicates();
             }
+            else
+                return retVal.value();
 
             std::list< EFormatType > formats;
             auto lc = formatName.toLower();
@@ -1219,11 +1237,13 @@ namespace NSABUtils
                     }
                 }
             }
-            if ( !encodingCodecs && formats.empty() )
-                formats.push_back( EFormatType::eVideo );
+            if ( formats.empty() && formatType.has_value() )
+            {
+                formats.push_back( formatType.value() );
+            }
             for ( auto &&format : formats )
             {
-                if ( encodingCodecs )
+                if ( isEncoder )
                     fMediaEncoderFormatExtensions[ format ][ formatName ] = retVal.value();
                 else
                     fMediaDecoderFormatExtensions[ format ][ formatName ] = retVal.value();
@@ -1383,10 +1403,9 @@ namespace NSABUtils
 
     void CFFMpegFormats::SStringListPair::push_back( const QString &terse, const QString &verbose )
     {
-#ifdef _DEBUG
-        Q_ASSERT( fExistingTerse.find( terse ) == fExistingTerse.end() );
+        if ( fExistingTerse.find( terse ) != fExistingTerse.end() )
+            return;
         fExistingTerse.insert( terse );
-#endif
         fTerse.push_back( terse );
         fVerbose.push_back( verbose );
     }

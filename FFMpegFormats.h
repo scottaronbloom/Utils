@@ -160,8 +160,8 @@ namespace NSABUtils
         void computeReverseExtensionMap( bool encoders );
         void computeReverseCodecMap( bool encoders );
 
-        void computeExtensionsForFormat( const QString &name, const QString &desc, bool isEncoder );
-        QStringList computeExtensionsForFormat( const QString &formatName, bool encoders );
+        void computeExtensionsForFormat( const QString &name, const QString &desc, std::optional < EFormatType > formatType, bool isEncoder );
+        QStringList computeExtensionsForFormat( const QString &formatName, std::optional< EFormatType > formatType, bool isEncoder );
         std::optional< QStringList > encoderFormatLoaded( const QString &formatName ) const;
         std::optional< QStringList > decoderFormatLoaded( const QString &formatName ) const;
 
@@ -191,9 +191,7 @@ namespace NSABUtils
         private:
             QStringList fTerse;
             QStringList fVerbose;
-#ifdef _DEBUG
             std::unordered_set< QString > fExistingTerse;
-#endif
         };
 
         struct SVideoAudioSubtitle
