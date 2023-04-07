@@ -4,6 +4,7 @@
 [submodule "MediaInfo/MediaInfoLib"]
 	path = MediaInfo/MediaInfoLib
 	url = https://github.com/towel42-com/MediaInfoLib.git
+	branch = UmrFix
 [submodule "MediaInfo/ZenLib"]
 	path = MediaInfo/ZenLib
 	url = https://github.com/MediaArea/ZenLib.git
