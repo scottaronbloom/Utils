@@ -11,3 +11,6 @@
 [submodule "CMakeNuGetTools"]
 	path = CMakeNuGetTools
 	url = https://github.com/katusk/CMakeNuGetTools.git
+[submodule "MediaInfo/MediaInfoLib"]
+	path = MediaInfo/MediaInfoLib
+	url = http://github.com/towel42-com/MediaInfoLib.git
