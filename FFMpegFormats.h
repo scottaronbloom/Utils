@@ -114,6 +114,10 @@ namespace NSABUtils
         TCodecToEncoderDecoderMap codecToDecoderMap() const { return fCodecToDecoderMap; }
         QStringList hwAccels( bool verbose ) const;
 
+        QStringList getVideoExtensions( const QStringList &exclude = {} ) const;
+        QStringList getSubtitleExtensions( const QStringList &exclude = {} ) const;
+        QStringList getAudioExtensions( const QStringList &exclude = {} ) const;
+
         QStringList getVideoEncoderExtensions( const QStringList &exclude = {} ) const;
         QStringList getSubtitleEncoderExtensions( const QStringList &exclude = {} ) const;
         QStringList getAudioEncoderExtensions( const QStringList &exclude = {} ) const;

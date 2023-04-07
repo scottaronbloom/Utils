@@ -556,6 +556,7 @@ namespace NSABUtils
             retVal << ii.second;
         }
 
+        retVal.removeDuplicates();
         return std::move( removeFromlist( retVal, exclude ) );
     }
 
@@ -567,6 +568,27 @@ namespace NSABUtils
     QStringList CFFMpegFormats::getDecoderExtensions( NSABUtils::EFormatType extensionType, const QStringList &exclude ) const
     {
         return getExtensions( fMediaDecoderFormatExtensions, extensionType, exclude );
+    }
+
+    QStringList CFFMpegFormats::getVideoExtensions( const QStringList &exclude /*= {} */ ) const
+    {
+        auto retVal = QStringList() << getVideoDecoderExtensions( exclude ) << getVideoEncoderExtensions( exclude );
+        retVal.removeDuplicates();
+        return retVal;
+    }
+
+    QStringList CFFMpegFormats::getAudioExtensions( const QStringList &exclude /*= {} */ ) const
+    {
+        auto retVal = QStringList() << getAudioDecoderExtensions( exclude ) << getAudioEncoderExtensions( exclude );
+        retVal.removeDuplicates();
+        return retVal;
+    }
+
+    QStringList CFFMpegFormats::getSubtitleExtensions( const QStringList &exclude /*= {} */ ) const
+    {
+        auto retVal = QStringList() << getSubtitleEncoderExtensions( exclude ) << getSubtitleDecoderExtensions( exclude );
+        retVal.removeDuplicates();
+        return retVal;
     }
 
     QStringList CFFMpegFormats::getVideoEncoderExtensions( const QStringList &exclude ) const
