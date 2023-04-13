@@ -22,12 +22,15 @@
 #ifndef __STAYAWAKE_H
 #define __STAYAWAKE_H
 #include <QRunnable>
+#include <QObject>
 
 #include "SABUtilsExport.h"
 
 #ifdef Q_OS_WINDOWS
 namespace NSABUtils
 {
+    // by default QRunnable has autodelete, when its finished running it automatically deletes.
+    // user can override this
     class SABUTILS_EXPORT CStayAwake : public QRunnable
     {
     public:
@@ -35,16 +38,27 @@ namespace NSABUtils
             fKeepScreenOn( keepScreenOn ),
             QRunnable()
         {
-            setAutoDelete( false );
         };
 
         virtual void run() override;
+
         void stop();
 
     private:
+        bool setKeepAwake( bool enable ); // only part that is OS Specific
         bool fKeepScreenOn{ false };
         bool fStopped{ false };
     };
+
+    class SABUTILS_EXPORT CAutoStayAwake : public QObject   // allows for delete later
+    {
+    public:
+        CAutoStayAwake( bool keepScreenOn, QObject * parent=nullptr );
+        ~CAutoStayAwake();
+    private:
+        CStayAwake *fStayAwake{ nullptr };
+    };
+
 }
 #endif
 

@@ -22,9 +22,11 @@
 
 #include "StayAwake.h"
 #include <QThread>
+#include <QThreadPool>
 
 #ifdef Q_OS_WINDOWS
     #include <qt_windows.h>
+#endif
 
 namespace NSABUtils
 {
@@ -36,34 +38,63 @@ namespace NSABUtils
         {
             try
             {
-                if ( fKeepScreenOn )
-                    success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED | ES_DISPLAY_REQUIRED );
-                else
-                    success = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED );
-                Q_ASSERT( success );
-                if ( !success )
-                    break;
+                success = setKeepAwake( true );
             }
             catch ( ... )
             {
                 success = false;
             }
+            if ( !success )
+                break;
             QThread::sleep( 2 );
         }
         try
         {
             if ( success )
-                success = SetThreadExecutionState( ES_CONTINUOUS );
+                setKeepAwake( false );
         }
         catch ( ... )
         {
         }
     }
 
+#ifdef Q_OS_WINDOWS
+    bool CStayAwake::setKeepAwake( bool enable )
+    {
+        bool retVal = false;
+        if ( enable )
+        {
+            if ( fKeepScreenOn )
+                retVal = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED | ES_DISPLAY_REQUIRED );
+            else
+                retVal = SetThreadExecutionState( ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED );
+        }
+        else
+            retVal = SetThreadExecutionState( ES_CONTINUOUS );
+
+        Q_ASSERT( retVal );
+        return retVal;
+    }
+#else
+#endif
+
     void CStayAwake::stop()
     {
         fStopped = true;
     }
-}
 
-#endif
+    CAutoStayAwake::CAutoStayAwake( bool keepScreenOn, QObject *parent ) :
+        QObject( parent )
+    {
+        if ( !fStayAwake )
+            fStayAwake = new NSABUtils::CStayAwake( true );
+
+        QThreadPool::globalInstance()->start( fStayAwake );
+    }
+
+    CAutoStayAwake::~CAutoStayAwake()
+    {
+        if ( fStayAwake )
+            fStayAwake->stop();
+    }
+}
