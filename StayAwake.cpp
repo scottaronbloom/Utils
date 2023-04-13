@@ -87,7 +87,7 @@ namespace NSABUtils
         QObject( parent )
     {
         if ( !fStayAwake )
-            fStayAwake = new NSABUtils::CStayAwake( true );
+            fStayAwake = new NSABUtils::CStayAwake( keepScreenOn );
 
         QThreadPool::globalInstance()->start( fStayAwake );
     }
