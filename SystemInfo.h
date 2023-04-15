@@ -42,13 +42,60 @@ namespace NSABUtils
 
     namespace NCPUUtilization
     {
-        std::optional< std::pair< void *, void * > > SABUTILS_EXPORT initQuery();   // returns the handle to the query and the specific counter, the first needs to have free query called on it
-        void SABUTILS_EXPORT freeQuery( std::pair< void *, void * > &query );
+        using TQuery = std::pair< void *, std::tuple< void *, void *, void * > >;
+        std::optional< TQuery > SABUTILS_EXPORT initQuery();   // returns the handle to the query and the specific counter, the first needs to have free query called on it
+        void SABUTILS_EXPORT freeQuery( TQuery &query );
 
-        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations( uint64_t sampleTime = 1000 );   // returns a map of logical processor id to %utilization over a 1000 msec sample
-        std::unordered_map< size_t, double > SABUTILS_EXPORT getCPUCoreUtilizations( const std::pair< void *, void * > &query );
+        struct SCPUPercentTime
+        {
+            SCPUPercentTime() {}
+            SCPUPercentTime( const std::list< double > &values )
+            {
+                auto ii = values.begin();
+                if ( ii != values.end() )
+                    fProcessorTime = *ii;
+                ii++;
+                if ( ii != values.end() )
+                    fUserTime = *ii;
+                ii++;
+                if ( ii != values.end() )
+                    fPrivTime = *ii;
+                ii++;
+            }
+            double total() const { return fProcessorTime /*+ fUserTime + fPrivTime;*/; }
+            double fProcessorTime{ 0.0 };
+            double fUserTime{ 0.0 };
+            double fPrivTime{ 0.0 };
+        };
+        std::unordered_map< size_t, SCPUPercentTime > SABUTILS_EXPORT getCPUCoreUtilizations( uint64_t sampleTime = 1000 );   // returns a map of logical processor id to %utilization over a 1000 msec sample
+        std::unordered_map< size_t, SCPUPercentTime > SABUTILS_EXPORT getCPUCoreUtilizations( const TQuery &query );
     }
 
+    namespace NDiskUsage
+    {
+        using TQuery = std::pair< void *, std::pair< void *, void * > >;
+
+        std::optional< TQuery > SABUTILS_EXPORT initQuery();   // returns the handle to the query and the specific counter, the first needs to have free query called on it
+        void SABUTILS_EXPORT freeQuery( TQuery &query );
+
+        struct SDiskTime
+        {
+            SDiskTime(){}
+            SDiskTime( const std::list< double > &values )
+            {
+                auto ii = values.begin();
+                if ( ii != values.end() )
+                    fRead = *ii;
+                ii++;
+                if ( ii != values.end() )
+                    fWrite = *ii;
+            }
+            double fRead{ 0.0 };
+            double fWrite{ 0.0 };
+        };
+        std::unordered_map< std::wstring, SDiskTime > SABUTILS_EXPORT getDiskUtilizations( uint64_t sampleTime = 1000 );   // returns a map of disk name to the read/write bytes/sec
+        std::unordered_map< std::wstring, SDiskTime > SABUTILS_EXPORT getDiskUtilizations( const TQuery &query );
+    }
     class SABUTILS_EXPORT CSystemInfo
     {
     public:
