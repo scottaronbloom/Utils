@@ -1,9 +1,6 @@
 [submodule "googletest"]
 	path = googletest
 	url = https://github.com/google/googletest.git
-[submodule "MediaInfo/MediaInfoLib"]
-	path = MediaInfo/MediaInfoLib
-	url = https://github.com/MediaArea/MediaInfoLib.git
 [submodule "MediaInfo/ZenLib"]
 	path = MediaInfo/ZenLib
 	url = https://github.com/MediaArea/ZenLib.git
@@ -14,3 +11,6 @@
 [submodule "CMakeNuGetTools"]
 	path = CMakeNuGetTools
 	url = https://github.com/katusk/CMakeNuGetTools.git
+[submodule "MediaInfo/MediaInfoLib"]
+	path = MediaInfo/MediaInfoLib
+	url = http://github.com/towel42-com/MediaInfoLib.git

@@ -431,71 +431,69 @@ namespace NSABUtils
         return speed;
     }
 
-    namespace NCPUUtilization
+    std::optional< std::pair< void *, std::list< void * > > > initQuery( const std::list< std::wstring > &paths )
     {
-        std::optional< std::pair< void *, void * > > initQuery()
-        {
-            void *query;
-            auto status = PdhOpenQuery( nullptr, NULL, &query );
-            if ( status != ERROR_SUCCESS )
-                return {};
+        void *query;
+        auto status = PdhOpenQuery( nullptr, NULL, &query );
+        if ( status != ERROR_SUCCESS )
+            return {};
 
-            void *cpuTotal;
-            status = PdhAddCounter( query, L"\\Processor(*)\\% Processor Time", 0, &cpuTotal );
+        std::list< void * > counters;
+        for ( auto &&path : paths )
+        {
+            void *currCounter;
+            status = PdhAddCounter( query, path.c_str(), 0, &currCounter );
             if ( status != ERROR_SUCCESS )
             {
                 qDebug() << "Error (PdhAddCounter): " << status;
                 return {};
             }
-
-            status = PdhCollectQueryData( query );
-            if ( status != ERROR_SUCCESS )
-            {
-                qDebug() << "Error (PdhCollectQueryData): " << status;
-                return {};
-            }
-
-            auto retVal = std::make_pair( query, cpuTotal );
-
-            return retVal;
+            counters.push_back( currCounter );
+        }
+        status = PdhCollectQueryData( query );
+        if ( status != ERROR_SUCCESS )
+        {
+            qDebug() << "Error (PdhCollectQueryData): " << status;
+            return {};
         }
 
-        void freeQuery( std::pair< void *, void * > &query )
+        auto retVal = std::make_pair( query, counters );
+
+        return retVal;
+    }
+
+    std::optional< std::unordered_map< std::wstring, std::list< double > > > getValues( const std::pair< void *, std::list< void * > > &queries )
+    {
+        auto status = PdhCollectQueryData( queries.first );
+        if ( status != ERROR_SUCCESS )
         {
-            if ( query.first )
-                PdhCloseQuery( query.first );
+            qDebug() << "Error (PdhCollectQueryData): " << status;
+            return {};
         }
 
-        std::unordered_map< size_t, double > getCPUCoreUtilizations( const std::pair< void *, void * > &query )
+        std::unordered_map< std::wstring, std::list< double > > retVal;
+        for ( auto &&query : queries.second )
         {
-            auto status = PdhCollectQueryData( query.first );
-            if ( status != ERROR_SUCCESS )
-            {
-                qDebug() << "Error (PdhCollectQueryData): " << status;
-                return {};
-            }
-
-            std::unordered_map< size_t, double > retVal;
             DWORD dwBufferSize = 0;
             DWORD dwItemCount = 0;
             PDH_FMT_COUNTERVALUE_ITEM *pItems = nullptr;
-            status = PdhGetFormattedCounterArray( query.second, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
+            status = PdhGetFormattedCounterArray( query, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
             if ( PDH_MORE_DATA != status )
             {
                 qDebug() << "Error (PdhGetFormattedCounterArray): " << status;
-                return retVal;
+                return {};
             }
 
             pItems = (PDH_FMT_COUNTERVALUE_ITEM *)new uint8_t[ dwBufferSize ];
             if ( !pItems )
             {
                 qDebug() << "Error (new):";
-                return retVal;
+                return {};
             }
 
             if ( pItems )
             {
-                status = PdhGetFormattedCounterArray( query.second, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
+                status = PdhGetFormattedCounterArray( query, PDH_FMT_DOUBLE, &dwBufferSize, &dwItemCount, pItems );
                 if ( ERROR_SUCCESS != status )
                 {
                     qDebug() << "Error (PdhGetFormattedCounterArray): " << status;
@@ -508,31 +506,55 @@ namespace NSABUtils
                     std::wstring nm = pItems[ ii ].szName;
                     if ( nm == L"_Total" )
                     {
-                        retVal[ -1 ] = pItems[ ii ].FmtValue.doubleValue;
+                        nm = std::wstring();
                     }
-                    else
-                    {
-                        try
-                        {
-                            auto cpuID = std::stoll( nm );
-                            retVal[ cpuID ] = pItems[ ii ].FmtValue.doubleValue;
-                            // wprintf( L"counter: %s, value %.20g\n", pItems[ i ].szName, );
-                        }
-                        catch ( ... )
-                        {
-                        }
-                    }
+
+                    retVal[ nm ].push_back( pItems[ ii ].FmtValue.doubleValue );
+                    // wprintf( L"counter: %s, value %.20g\n", pItems[ i ].szName, );
                 }
 
                 delete pItems;
                 pItems = nullptr;
                 dwBufferSize = dwItemCount = 0;
             }
-
-            return retVal;
         }
 
-        std::unordered_map< size_t, double > getCPUCoreUtilizations( uint64_t sampleTime )
+        return retVal;
+    }
+
+    namespace NCPUUtilization
+    {
+        std::optional< TQuery > initQuery()
+        {
+            auto tmp = NSABUtils::initQuery( 
+                { 
+                    L"\\Processor(*)\\% Processor Time", 
+                    L"\\Processor(*)\\% User Time", 
+                    L"\\Processor(*)\\% Privileged Time" 
+                } 
+            );
+            if ( !tmp.has_value() )
+                return {};
+            if ( tmp.value().second.size() != 3 )
+                return {};
+            std::tuple< void *, void *, void * > queryValues;
+            auto ii = tmp.value().second.begin();
+            std::get< 0 >( queryValues ) = *ii;
+            ++ii;
+            std::get< 1 >( queryValues ) = *ii;
+            ++ii;
+            std::get< 2 >( queryValues ) = *ii;
+
+            return std::make_pair( tmp.value().first, queryValues );
+        }
+
+        void freeQuery( TQuery &query )
+        {
+            if ( query.first )
+                PdhCloseQuery( query.first );
+        }
+
+        std::unordered_map< size_t, SCPUPercentTime > getCPUCoreUtilizations( uint64_t sampleTime )
         {
             auto query = initQuery();
 
@@ -544,6 +566,79 @@ namespace NSABUtils
             auto cpuUtilization = getCPUCoreUtilizations( query.value() );
             freeQuery( query.value() );
             return cpuUtilization;
+        }
+
+        std::unordered_map< size_t, SCPUPercentTime > getCPUCoreUtilizations( const TQuery &query )
+        {
+            auto tmp = getValues( std::make_pair( query.first, std::list< void * >( { std::get< 0 >( query.second ), std::get< 1 >( query.second ), std::get< 2 >( query.second ) } ) ) );
+            if ( !tmp.has_value() )
+                return {};
+
+            std::unordered_map< size_t, SCPUPercentTime > retVal;
+            for ( auto &&ii : tmp.value() )
+            {
+                auto &&currKey = ii.first;
+                size_t cpuID = -1;
+                if ( !currKey.empty() )
+                {
+                    try
+                    {
+                        cpuID = std::stoll( currKey );
+                    }
+                    catch ( ... )
+                    {
+                    }
+                }
+                retVal[ cpuID ] = SCPUPercentTime( ii.second );
+            }
+            return retVal;
+        }
+
+    }
+
+    namespace NDiskUsage
+    {
+        std::optional< TQuery > initQuery()
+        {
+            auto tmp = NSABUtils::initQuery( { L"\\PhysicalDisk(*)\\Disk Read Bytes/sec", L"\\PhysicalDisk(*)\\Disk Write Bytes/sec" } );
+            if ( !tmp.has_value() )
+                return {};
+            return std::make_pair( tmp.value().first, std::make_pair( tmp.value().second.front(), tmp.value().second.back() ) );
+        }
+
+        void freeQuery( TQuery &query )
+        {
+            if ( query.first )
+                PdhCloseQuery( query.first );
+        }
+
+        std::unordered_map< std::wstring, SDiskTime > getDiskUtilizations( uint64_t sampleTime )
+        {
+            auto query = initQuery();
+
+            if ( !query.has_value() || !query.value().first )
+                return {};
+
+            Sleep( sampleTime );
+
+            auto cpuUtilization = getDiskUtilizations( query.value() );
+            freeQuery( query.value() );
+            return cpuUtilization;
+        }
+
+        std::unordered_map< std::wstring, SDiskTime > getDiskUtilizations( const TQuery &query )
+        {
+            auto tmp = getValues( std::make_pair( query.first, std::list< void * >( { query.second.first, query.second.second } ) ) );
+            if ( !tmp.has_value() )
+                return {};
+
+            std::unordered_map< std::wstring, SDiskTime > retVal;
+            for ( auto &&ii : tmp.value() )
+            {
+                auto &&currKey = ii.first;
+                retVal[ currKey ] = SDiskTime( ii.second );
+            }
+            return retVal;
         }
     }
 
@@ -557,14 +652,14 @@ namespace NSABUtils
             fUtilization.resize( fNumLogicalCores );
         }
 
-        void updateCPUInfo( const std::unordered_map< size_t, double > &cpuUtilizations )
+        void updateCPUInfo( const std::unordered_map< size_t, NCPUUtilization::SCPUPercentTime > &cpuUtilizations )
         {
             for ( size_t ii = fProcNum; ii < fProcNum + fNumLogicalCores; ++ii )
             {
                 auto pos = cpuUtilizations.find( ii );
                 double utilizationPercentage = 0.0;
                 if ( pos != cpuUtilizations.end() )
-                    utilizationPercentage = ( *pos ).second;
+                    utilizationPercentage = ( *pos ).second.total();
                 fUtilization[ ii - fProcNum ] = utilizationPercentage;
             }
         }
@@ -631,7 +726,7 @@ namespace NSABUtils
                 ii->getCPUInfo( procNum );
         }
 
-        void updateCPUInfo( const std::unordered_map< size_t, double > &cpuUtilizations )
+        void updateCPUInfo( const std::unordered_map< size_t, NCPUUtilization::SCPUPercentTime > &cpuUtilizations )
         {
             for ( auto &&ii : fProcessors )
             {
@@ -641,7 +736,7 @@ namespace NSABUtils
             if ( pos == cpuUtilizations.end() )
                 fAvgUtilization = 0.0;
             else
-                fAvgUtilization = ( *pos ).second;
+                fAvgUtilization = ( *pos ).second.total();
         }
 
         void dump()
@@ -959,5 +1054,4 @@ namespace NSABUtils
             fNics.emplace_back( curr );
         }
     }
-
 }

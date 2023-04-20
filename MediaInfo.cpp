@@ -725,10 +725,21 @@ namespace NSABUtils
                         value = findFirstValue( EStreamType::eAudio, ii );
                     retVal[ ii ] = value;
                 }
-                else if ( ( ii == NSABUtils::EMediaTags::eFirstSubtitle ) || ( ii == NSABUtils::EMediaTags::eAllSubtitles ) )
+                else if (
+                    ( ii == NSABUtils::EMediaTags::eFirstSubtitleLanguage ) 
+                    || ( ii == NSABUtils::EMediaTags::eAllSubtitleLanguages ) 
+                    || ( ii == NSABUtils::EMediaTags::eFirstSubtitleCodec )
+                    || ( ii == NSABUtils::EMediaTags::eAllSubtitleCodecs ) )
                 {
                     QString value;
-                    if ( ii == NSABUtils::EMediaTags::eAllSubtitles )
+                    if ( ii == NSABUtils::EMediaTags::eAllSubtitleLanguages )
+                    {
+                        auto values = findAllValues( EStreamType::eText, ii );
+                        value = values.join( ", " );
+                        if ( values.count() > 1 )
+                            value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+                    }
+                    else if ( ii == NSABUtils::EMediaTags::eAllSubtitleCodecs )
                     {
                         auto values = findAllValues( EStreamType::eText, ii );
                         value = values.join( ", " );
@@ -1034,6 +1045,11 @@ namespace NSABUtils
         return getMediaTag( EMediaTags::eNumSubtitleStreams ).toInt();
     }
 
+    QStringList CMediaInfo::allSubtitleCodecs() const
+    {
+        return fImpl->findAllValues( EStreamType::eText, NSABUtils::EMediaTags::eAllSubtitleCodecs );
+    }
+
     QString mediaInfoTagName( EMediaTags tag )
     {
         switch ( tag )
@@ -1080,14 +1096,16 @@ namespace NSABUtils
             case EMediaTags::eAllVideoCodecs:
             case EMediaTags::eFirstAudioCodec:
             case EMediaTags::eAllAudioCodecs:
+            case EMediaTags::eFirstSubtitleCodec:
+            case EMediaTags::eAllSubtitleCodecs:
                 return "CodecID";
             case EMediaTags::eNumChannels:
                 return "Channel(s)";
             case EMediaTags::eFirstAudioCodecDisp:
             case EMediaTags::eAllAudioCodecsDisp:
                 return "CodecIDDisp";
-            case EMediaTags::eFirstSubtitle:
-            case EMediaTags::eAllSubtitles:
+            case EMediaTags::eFirstSubtitleLanguage:
+            case EMediaTags::eAllSubtitleLanguages:
                 return "Language";
             case EMediaTags::eVideoBitrate:
                 return "BitRate";

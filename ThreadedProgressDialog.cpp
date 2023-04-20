@@ -37,7 +37,7 @@ namespace NSABUtils
         {
         }
 
-        void mRunIt()
+        void runIt()
         {
             dWatcher = new QFutureWatcher< void >( dParent );
             QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedProgressDialog::close );
@@ -96,7 +96,7 @@ namespace NSABUtils
 
     int CThreadedProgressDialog::exec()
     {
-        dImpl->mRunIt();
+        dImpl->runIt();
         return QProgressDialog::exec();
     }
 
@@ -109,7 +109,7 @@ namespace NSABUtils
         {
         }
 
-        void mRunIt()
+        void runIt()
         {
             dWatcher = new QFutureWatcher< void >( dParent );
             QObject::connect( dWatcher, &QFutureWatcher< void >::finished, dParent, &CThreadedEventLoop::mExit );
@@ -142,7 +142,7 @@ namespace NSABUtils
     int CThreadedEventLoop::exec( QEventLoop::ProcessEventsFlags flags )
     {
         QApplication::setOverrideCursor( Qt::WaitCursor );
-        dImpl->mRunIt();
+        dImpl->runIt();
         int lRetVal = QEventLoop::exec( flags );
         QApplication::restoreOverrideCursor();
         return lRetVal;

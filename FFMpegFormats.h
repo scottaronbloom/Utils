@@ -44,7 +44,7 @@ namespace NSABUtils
     };
     SABUTILS_EXPORT QString toString( EFormatType type );
     using TFormatMap = std::unordered_map< EFormatType, std::unordered_map< QString, QStringList > >;
-    using TCodecToEncoderDecoderMap =std::unordered_map< EFormatType, std::unordered_multimap< QString, QString > >;
+    using TCodecToEncoderDecoderMap = std::unordered_map< EFormatType, std::unordered_multimap< QString, QString > >;
 
     class SABUTILS_EXPORT CFFMpegFormats
     {
@@ -75,8 +75,8 @@ namespace NSABUtils
 
         void initHWAccelsFromDefaults( const QStringList &terse, const QStringList &verbose );
 
-        void initCodecToEncoderMapDefaults( const TCodecToEncoderDecoderMap & encoderMap );
-        void initCodecToDecoderMapDefaults( const TCodecToEncoderDecoderMap & decoderMap );
+        void initCodecToEncoderMapDefaults( const TCodecToEncoderDecoderMap &encoderMap );
+        void initCodecToDecoderMapDefaults( const TCodecToEncoderDecoderMap &decoderMap );
 
         void setFFMpegExecutable( const QString &ffmpegExe );
         void recompute( QProgressDialog *dlg = nullptr );
@@ -114,25 +114,29 @@ namespace NSABUtils
         TCodecToEncoderDecoderMap codecToDecoderMap() const { return fCodecToDecoderMap; }
         QStringList hwAccels( bool verbose ) const;
 
-        QStringList getVideoEncoderExtensions() const;
-        QStringList getSubtitleEncoderExtensions() const;
-        QStringList getAudioEncoderExtensions() const;
+        QStringList getVideoExtensions( const QStringList &exclude = {} ) const;
+        QStringList getSubtitleExtensions( const QStringList &exclude = {} ) const;
+        QStringList getAudioExtensions( const QStringList &exclude = {} ) const;
 
-        QStringList getVideoDecoderExtensions() const;
-        QStringList getSubtitleDecoderExtensions() const;
-        QStringList getAudioDecoderExtensions() const;
+        QStringList getVideoEncoderExtensions( const QStringList &exclude = {} ) const;
+        QStringList getSubtitleEncoderExtensions( const QStringList &exclude = {} ) const;
+        QStringList getAudioEncoderExtensions( const QStringList &exclude = {} ) const;
 
-        QStringList getImageEncoderExtensions() const;
-        QStringList getImageDecoderExtensions() const;
+        QStringList getVideoDecoderExtensions( const QStringList &exclude = {} ) const;
+        QStringList getSubtitleDecoderExtensions( const QStringList &exclude = {} ) const;
+        QStringList getAudioDecoderExtensions( const QStringList &exclude = {} ) const;
 
-        QStringList getEncoderExtensions( NSABUtils::EFormatType extensionType ) const;
-        QStringList getDecoderExtensions( NSABUtils::EFormatType extensionType ) const;
+        QStringList getImageEncoderExtensions( const QStringList &exclude = {} ) const;
+        QStringList getImageDecoderExtensions( const QStringList &exclude = {} ) const;
 
-        QString getPrimaryEncoderExtensionForFormat( const QString &formatName ) const;
-        QStringList getEncoderExtensionsForFormat( const QString &formatName ) const;
+        QStringList getEncoderExtensions( NSABUtils::EFormatType extensionType, const QStringList &exclude = {} ) const;
+        QStringList getDecoderExtensions( NSABUtils::EFormatType extensionType, const QStringList &exclude = {} ) const;
 
-        QString getPrimaryDecoderExtensionForFormat( const QString &formatName ) const;
-        QStringList getDecoderExtensionsForFormat( const QString &formatName ) const;
+        QString getPrimaryEncoderExtensionForFormat( const QString &formatName, const QStringList &exclude = {} ) const;
+        QStringList getEncoderExtensionsForFormat( const QString &formatName, const QStringList &exclude = {} ) const;
+
+        QString getPrimaryDecoderExtensionForFormat( const QString &formatName, const QStringList &exclude = {} ) const;
+        QStringList getDecoderExtensionsForFormat( const QString &formatName, const QStringList &exclude = {} ) const;
 
         QString getTranscodeHWAccel( const QString &formatName ) const;
         QString getCodecForHWAccel( const QString &hwAccel ) const;
@@ -160,10 +164,13 @@ namespace NSABUtils
         void computeReverseExtensionMap( bool encoders );
         void computeReverseCodecMap( bool encoders );
 
-        void computeExtensionsForFormat( const QString &name, const QString &desc, bool isEncoder );
-        QStringList computeExtensionsForFormat( const QString &formatName, bool encoders );
+        void computeExtensionsForFormat( const QString &name, const QString &desc, std::optional < EFormatType > formatType, bool isEncoder );
+        QStringList computeExtensionsForFormat( const QString &formatName, std::optional< EFormatType > formatType, bool isEncoder );
         std::optional< QStringList > encoderFormatLoaded( const QString &formatName ) const;
         std::optional< QStringList > decoderFormatLoaded( const QString &formatName ) const;
+
+        QStringList getExtensionsForFormat( const TFormatMap &map, const QString &formatName, const QStringList &exclude ) const;
+        QStringList getExtensions( const TFormatMap &map, NSABUtils::EFormatType extensionType, const QStringList &exclude ) const;
 
         bool fLoaded{ false };
         struct SStringListPair
@@ -188,9 +195,7 @@ namespace NSABUtils
         private:
             QStringList fTerse;
             QStringList fVerbose;
-#ifdef _DEBUG
             std::unordered_set< QString > fExistingTerse;
-#endif
         };
 
         struct SVideoAudioSubtitle

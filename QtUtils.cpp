@@ -42,6 +42,7 @@
 #include <QHeaderView>
 #include <QTreeWidget>
 #include <QApplication>
+#include <QDebug>
 
 #ifdef QT_XMLPATTERNS_LIB
     #include <QXmlQuery>
@@ -719,27 +720,34 @@ namespace NSABUtils
             to.endGroup();
         }
     }
-    int itemCount( const QModelIndex &idx, bool rowCountOnly )
+
+    int itemCount( const QModelIndex &idx, bool rowCountOnly, const std::pair< std::function< bool( const QVariant & value ) >, int > & excludeFunc )
     {
-        int retVal = 1;   // 1 counts self
+        bool excluded = false;
+        if ( excludeFunc.first )
+        {
+            excluded = excludeFunc.first( idx.data( excludeFunc.second ) );
+        }
+
+        int retVal = excluded ? 0 : 1;   // 1 counts self
         for ( int ii = 0; ii < idx.model()->rowCount( idx ); ++ii )
         {
             if ( rowCountOnly )
             {
-                retVal += itemCount( idx.model()->index( ii, 0, idx ), rowCountOnly );
+                retVal += itemCount( idx.model()->index( ii, 0, idx ), rowCountOnly, excludeFunc );
             }
             else
             {
                 for ( int jj = 0; jj < idx.model()->columnCount(); ++jj )
                 {
-                    retVal += itemCount( idx.model()->index( ii, jj, idx ), rowCountOnly );
+                    retVal += itemCount( idx.model()->index( ii, jj, idx ), rowCountOnly, excludeFunc );
                 }
             }
         }
         return retVal;
     }
 
-    int itemCount( QAbstractItemModel *model, bool rowCountOnly )
+    int itemCount( QAbstractItemModel *model, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &value ) >, int > & excludeFunc )
     {
         if ( !model )
             return 0;
@@ -748,13 +756,13 @@ namespace NSABUtils
         {
             if ( rowCountOnly )
             {
-                retVal += itemCount( model->index( ii, 0, QModelIndex() ), rowCountOnly );
+                retVal += itemCount( model->index( ii, 0, QModelIndex() ), rowCountOnly, excludeFunc );
             }
             else
             {
                 for ( int jj = 0; jj < model->columnCount(); ++jj )
                 {
-                    retVal += itemCount( model->index( ii, jj, QModelIndex() ), rowCountOnly );
+                    retVal += itemCount( model->index( ii, jj, QModelIndex() ), rowCountOnly, excludeFunc );
                 }
             }
         }

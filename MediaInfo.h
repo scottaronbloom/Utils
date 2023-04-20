@@ -1,4 +1,5 @@
 // The MIT License( MIT )
+// The MIT License( MIT )
 //
 // Copyright( c ) 2020-2022 Scott Aron Bloom
 //
@@ -108,8 +109,10 @@ namespace NSABUtils
         eNumVideoStreams,
         eNumAudioStreams,
         eNumSubtitleStreams,
-        eFirstSubtitle,
-        eAllSubtitles,
+        eFirstSubtitleLanguage,
+        eAllSubtitleLanguages,
+        eFirstSubtitleCodec,
+        eAllSubtitleCodecs,
         eLastTag
     };
     SABUTILS_EXPORT QString displayName( EMediaTags tag );
@@ -190,6 +193,8 @@ namespace NSABUtils
         int numAudioStreams() const;
         int numVideoStreams() const;
         int numSubtitleStreams() const;
+
+        QStringList allSubtitleCodecs() const;
     Q_SIGNALS:
         void sigMediaLoaded( const QString &fileName );
 
