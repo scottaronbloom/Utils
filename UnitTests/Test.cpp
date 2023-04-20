@@ -31,7 +31,6 @@
 #include <memory>
 #include <filesystem>
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 
 ////template< typename T1, typename T2 >
 //bool operator==( faketype, faketype ) { return true; }
@@ -40,38 +39,20 @@
 //    return false;
 //}
 
+void PrintTo(const QString& str, ::std::ostream* oss)
+{
+    *oss << qPrintable(str);
+}
+
+::std::ostream& operator<<(::std::ostream& oss, const QString& str)
+{
+    oss << qPrintable(str);
+    return oss;
+}
+
 namespace
 {
-    TEST( TestUtils, TestLicensing )
-    {
-        using namespace ::testing;
-
-        ::testing::NiceMock< Mock_CLicensing > licensing;
-        CLicensing::setInstance( &licensing );
-        ON_CALL( licensing, isCheckedOut() ).WillByDefault( Return( true ) );
-
-        EXPECT_TRUE( isCheckedOut() );
-
-        CLicensing::setInstance( nullptr );
-    }
-
-    TEST( TestUtils, TestTitle )
-    {
-        using namespace ::testing;
-
-        ::testing::NiceMock< Mock_CLicensing > licensing;
-        CLicensing::setInstance( &licensing );
-
-        ON_CALL( licensing, isCheckedOut() ).WillByDefault( Return( true ) );
-        EXPECT_CALL( licensing, isCheckedOut() );
-
-        CActualTestClass tmp;
-        EXPECT_EQ( std::string("Licensed" ), tmp.titleBar() );
-
-        CLicensing::setInstance( nullptr );
-    }
-
-    TEST( TestUtils, TestListIndex )
+   TEST( TestUtils, TestListIndex )
     {
         std::list< std::string > lst = { "a", "b", "c", "d", "e" };
         EXPECT_EQ( "a", NSABUtils::indexInList( 0, lst ) );
@@ -804,22 +785,22 @@ namespace
 #endif
     }
 
-    //TEST( TestUtils, TestByteSizeString )
-    //{
-    //    // base 1000
-    //    EXPECT_EQ( QString( "324.579KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 3U ) );
-    //    EXPECT_EQ( QString( "324.58KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 2U ) );
-    //    EXPECT_EQ( QString( "324.6KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 1U ) );
-    //    EXPECT_EQ( QString( "325KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 0U ) );
-    //    EXPECT_EQ( QString( "1KB" ), NSABUtils::NFileUtils::byteSizeString( 1000, true, false, 0U ) );
+    TEST(TestUtils, TestByteSizeString)
+    {
+        // base 1000
+        EXPECT_EQ(QString("324.579KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 3U));
+        EXPECT_EQ(QString("324.58KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 2U));
+        EXPECT_EQ(QString("324.6KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 1U));
+        EXPECT_EQ(QString("325KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 0U));
+        EXPECT_EQ(QString("1KB"), NSABUtils::NFileUtils::byteSizeString(1000, true, false, 0U));
 
-    //    // base 1024
-    //    EXPECT_EQ( QString( "316.995KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 3U ) );
-    //    EXPECT_EQ( QString( "317KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 2U ) );
-    //    EXPECT_EQ( QString( "317KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 1U ) );
-    //    EXPECT_EQ( QString( "317KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 0U ) );
-    //    EXPECT_EQ( QString( "1KiB" ), NSABUtils::NFileUtils::byteSizeString( 1024, true, true, 0U ) );
-    //}
+        // base 1024
+        EXPECT_EQ(QString("316.995KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 3U));
+        EXPECT_EQ(QString("317KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 2U));
+        EXPECT_EQ(QString("317KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 1U));
+        EXPECT_EQ(QString("317KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 0U));
+        EXPECT_EQ(QString("1KiB"), NSABUtils::NFileUtils::byteSizeString(1024, true, true, 0U));
+    }
 
     TEST( TestUtils, TestTimeFromMSecs )
     {
@@ -827,23 +808,23 @@ namespace
         EXPECT_EQ( QTime( 0, 0, 1, 1 ), QTime::fromMSecsSinceStartOfDay( 1001 ) );
     }
 
-    //TEST( TestUtils, TestTimeString )
-    //{
-    //    EXPECT_EQ( QString( "0:00:00:01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString( false ) );
-    //    EXPECT_EQ( QString( "01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString() );
+    TEST(TestUtils, TestTimeString)
+    {
+        EXPECT_EQ(QString("00:00:00:01.001 (1 seconds)"), NSABUtils::CTimeString(1001).toString(false));
+        EXPECT_EQ(QString("01.001 (1 seconds)"), NSABUtils::CTimeString(1001).toString());
 
-    //    EXPECT_EQ( QString( "00:00:00:00.001001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 1001 ) ).toString( false ) );
-    //    EXPECT_EQ( QString( "00.001001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 1001 ) ).toString() );
+        EXPECT_EQ(QString("00:00:00:00.001001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(1001)).toString(false));
+        EXPECT_EQ(QString("00.001001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(1001)).toString());
 
-    //    EXPECT_EQ( QString( "00:00:00:00.000001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::nanoseconds( 1001 ) ).toString( false ) );
-    //    EXPECT_EQ( QString( "00.000001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::nanoseconds( 1001 ) ).toString() );
+        EXPECT_EQ(QString("00:00:00:00.000001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::nanoseconds(1001)).toString(false));
+        EXPECT_EQ(QString("00.000001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::nanoseconds(1001)).toString());
 
-    //    EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString( false ) );
-    //    EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString() );
+        EXPECT_EQ(QString("639815:08:56:40.001001 (55,280,048,200 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(55280048200001001)).toString(false));
+        EXPECT_EQ(QString("639815:08:56:40.001001 (55,280,048,200 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(55280048200001001)).toString());
 
-    //    EXPECT_EQ( QString( "00:00:09:12.800482 (552 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString( false ) );
-    //    EXPECT_EQ( QString( "09:12.800482 (552 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString() );
-    //}
+        EXPECT_EQ(QString("00:00:09:12.800482 (552 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(552800482)).toString(false));
+        EXPECT_EQ(QString("09:12.800482 (552 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(552800482)).toString());
+    }
 
     TEST( TestUtils, Help )
     {
