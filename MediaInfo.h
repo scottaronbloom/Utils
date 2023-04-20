@@ -213,6 +213,10 @@ namespace NSABUtils
 
         std::shared_ptr< CMediaInfo > getMediaInfo( const QString &fileName );   // creates a mediainfo, then loads it in a background thread, then CMediaInfo will emit when its finished
         std::shared_ptr< CMediaInfo > getMediaInfo( const QFileInfo &fi );
+
+        bool isMediaCached( const QString &fileName ) const;
+        bool isMediaCached( const QFileInfo &fi ) const;
+
     public Q_SLOTS:
         void slotMediaLoaded( const QString &fileName );
     Q_SIGNALS:

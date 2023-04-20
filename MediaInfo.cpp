@@ -346,6 +346,11 @@ namespace NSABUtils
             return retVal;
         }
 
+        static bool mediaExists( const QFileInfo &fi )
+        {
+            return sMediaInfoCache.contains( fi.absoluteFilePath() );
+        }
+
         static std::shared_ptr< CMediaInfoImpl > createImpl( const QString &path, bool loadNow ) { return createImpl( std::move( QFileInfo( path ) ), loadNow ); }
 
         CMediaInfoImpl() {}
@@ -726,9 +731,7 @@ namespace NSABUtils
                     retVal[ ii ] = value;
                 }
                 else if (
-                    ( ii == NSABUtils::EMediaTags::eFirstSubtitleLanguage ) 
-                    || ( ii == NSABUtils::EMediaTags::eAllSubtitleLanguages ) 
-                    || ( ii == NSABUtils::EMediaTags::eFirstSubtitleCodec )
+                    ( ii == NSABUtils::EMediaTags::eFirstSubtitleLanguage ) || ( ii == NSABUtils::EMediaTags::eAllSubtitleLanguages ) || ( ii == NSABUtils::EMediaTags::eFirstSubtitleCodec )
                     || ( ii == NSABUtils::EMediaTags::eAllSubtitleCodecs ) )
                 {
                     QString value;
@@ -1183,6 +1186,16 @@ namespace NSABUtils
         }
 
         return retVal;
+    }
+
+    bool CMediaInfoMgr::isMediaCached( const QString &fileName ) const
+    {
+        return isMediaCached( std::move( QFileInfo( fileName ) ) );
+    }
+
+    bool CMediaInfoMgr::isMediaCached( const QFileInfo &fi ) const
+    {
+        return CMediaInfoImpl::mediaExists( fi );
     }
 
     void CMediaInfoMgr::slotMediaLoaded( const QString &fileName )
