@@ -679,6 +679,7 @@ namespace NSABUtils
                     ( ii == NSABUtils::EMediaTags::eWidth )   //
                     || ( ii == NSABUtils::EMediaTags::eHeight )   //
                     || ( ii == NSABUtils::EMediaTags::eAspectRatio )   //
+                    || ( ii == NSABUtils::EMediaTags::eDisplayAspectRatio )
                     || ( ii == NSABUtils::EMediaTags::eFirstVideoCodec )   //
                     || ( ii == NSABUtils::EMediaTags::eAllVideoCodecs )   //
                     || ( ii == NSABUtils::EMediaTags::eResolution )   //
@@ -695,9 +696,16 @@ namespace NSABUtils
                     else
                     {
                         value = findFirstValue( EStreamType::eVideo, ii );
-                        if ( value.isEmpty() && ( ( ii == NSABUtils::EMediaTags::eVideoBitrate ) || ( ii == NSABUtils::EMediaTags::eVideoBitrateString ) ) )
+                        if ( value.isEmpty() )
                         {
-                            value = findFirstValue( EStreamType::eGeneral, EMediaTags::eOverAllBitrate );
+                            if ( ( ii == NSABUtils::EMediaTags::eVideoBitrate ) || ( ii == NSABUtils::EMediaTags::eVideoBitrateString ) )
+                            {
+                                value = findFirstValue( EStreamType::eGeneral, EMediaTags::eOverAllBitrate );
+                            }
+                            else if ( ii == NSABUtils::EMediaTags::eAspectRatio )
+                            {
+                                value = findFirstValue( EStreamType::eVideo, NSABUtils::EMediaTags::eDisplayAspectRatio );
+                            }
                         }
                     }
                     retVal[ ii ] = value;
@@ -1089,6 +1097,8 @@ namespace NSABUtils
                 return "Disc Number";
             case EMediaTags::eAspectRatio:
                 return "AspectRatio";
+            case EMediaTags::eDisplayAspectRatio:
+                return "DisplayAspectRatio";
             case EMediaTags::eWidth:
                 return "Width";
             case EMediaTags::eHeight:

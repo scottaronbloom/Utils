@@ -90,6 +90,7 @@ namespace NSABUtils
         eAlbumArtist,
         eDiscnumber,
         eAspectRatio,
+        eDisplayAspectRatio,
         eWidth,
         eHeight,
         eResolution,
