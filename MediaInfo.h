@@ -181,6 +181,14 @@ namespace NSABUtils
         std::unordered_map< EMediaTags, QString > getMediaTags( const std::list< EMediaTags > &tags = {} ) const;
 
         int64_t getBitRate() const;
+        std::pair< int, int > getResolution() const;
+        bool is4kOrBetterResolution( double threshold = 0.2 ) const;
+        bool isHDResolution( double threshold = 0.2 ) const;
+        bool isGreaterThanHDResolution( double threshold = 0.2 ) const;
+        bool isSubHDResolution( double threshold = 0.2 ) const;
+
+        bool isResolution( const std::pair< int, int > &min, const std::pair< int, int > &max, double threshold = 0.2  ) const; // -1,-1 means ignore
+
 
         int64_t getNumberOfSeconds() const;
         int64_t getNumberOfMSecs() const;
@@ -200,6 +208,9 @@ namespace NSABUtils
         void sigMediaLoaded( const QString &fileName );
 
     private:
+        bool isResolutionOrGreater( const std::pair< int, int > &min, double threshold = 0.2 ) const;
+        bool isResolutionOrLess( const std::pair< int, int > &max, double threshold = 0.2 ) const;
+
         std::shared_ptr< CMediaInfoImpl > fImpl;
     };
 

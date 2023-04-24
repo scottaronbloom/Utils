@@ -346,10 +346,7 @@ namespace NSABUtils
             return retVal;
         }
 
-        static bool mediaExists( const QFileInfo &fi )
-        {
-            return sMediaInfoCache.contains( fi.absoluteFilePath() );
-        }
+        static bool mediaExists( const QFileInfo &fi ) { return sMediaInfoCache.contains( fi.absoluteFilePath() ); }
 
         static std::shared_ptr< CMediaInfoImpl > createImpl( const QString &path, bool loadNow ) { return createImpl( std::move( QFileInfo( path ) ), loadNow ); }
 
@@ -679,7 +676,7 @@ namespace NSABUtils
                     ( ii == NSABUtils::EMediaTags::eWidth )   //
                     || ( ii == NSABUtils::EMediaTags::eHeight )   //
                     || ( ii == NSABUtils::EMediaTags::eAspectRatio )   //
-                    || ( ii == NSABUtils::EMediaTags::eDisplayAspectRatio )
+                    || ( ii == NSABUtils::EMediaTags::eDisplayAspectRatio ) //
                     || ( ii == NSABUtils::EMediaTags::eFirstVideoCodec )   //
                     || ( ii == NSABUtils::EMediaTags::eAllVideoCodecs )   //
                     || ( ii == NSABUtils::EMediaTags::eResolution )   //
@@ -973,6 +970,78 @@ namespace NSABUtils
             return 0;
 
         return retVal;
+    }
+
+    std::pair< int, int > CMediaInfo::getResolution() const
+    {
+        auto value = getMediaTag( EMediaTags::eWidth );
+        bool aOK;
+        auto width = value.toLongLong( &aOK );
+        if ( !aOK )
+            return { 0, 0 };
+
+        value = getMediaTag( EMediaTags::eHeight );
+        auto height = value.toLongLong( &aOK );
+        if ( !aOK )
+            return { 0, 0 };
+
+        return { width, height };
+    }
+
+    bool CMediaInfo::is4kOrBetterResolution( double threshold /* = 0.2 */ ) const
+    {
+        return isResolutionOrGreater( { 3840, 2160 }, threshold );
+    }
+
+    bool CMediaInfo::isHDResolution( double threshold /* = 0.2 */ ) const
+    {
+        return isResolution( { 1920, 1080 }, { 3840, 2160 }, threshold );
+    }
+
+    bool CMediaInfo::isGreaterThanHDResolution( double threshold /* = 0.2 */ ) const
+    {
+        return isResolutionOrGreater( { 1920 * ( 1 + threshold ), 1080 * ( 1 + threshold ) }, 0.0 );
+    }
+
+    bool CMediaInfo::isSubHDResolution( double threshold /* = 0.2 */ ) const
+    {
+        return isResolutionOrLess( { 1920, 1080 }, threshold );
+    }
+
+    bool CMediaInfo::isResolution( const std::pair< int, int > &min, const std::pair< int, int > &max, double threshold /* = 0.2 */ ) const
+    {
+        if ( min.first != -1 )
+        {
+            if ( !isResolutionOrGreater( min, threshold ) )
+                return false;
+        }
+        if ( max.first != -1 )
+        {
+            if ( !isResolutionOrLess( max, threshold ) )
+                return false;
+        }
+        return true;
+    }
+
+    bool CMediaInfo::isResolutionOrGreater( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
+    {
+        auto res = getResolution();
+        auto myPixels = res.first * res.second;
+        auto targetPixels= targetRes.first * targetRes.second;
+        auto targetPixelsMin = ( 1.0 - threshold ) * targetPixels;
+
+        return ( myPixels >= targetPixelsMin );
+    }
+
+    bool CMediaInfo::isResolutionOrLess( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
+    {
+        auto res = getResolution();
+        auto myPixels = res.first * res.second;
+        auto targetPixels = targetRes.first * targetRes.second;
+        //auto targetResMin = 0.95 * targetRes;
+        auto targetPixelsMax = ( 1.0 + threshold ) * targetPixels;
+
+        return ( myPixels <= targetPixelsMax );
     }
 
     int64_t CMediaInfo::getNumberOfSeconds() const
