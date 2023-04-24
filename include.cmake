@@ -60,6 +60,7 @@ set(qtproject_SRCS
     HyperLinkLineEdit.cpp
     ImageScrollBar.cpp
     JsonUtils.cpp
+    LineEditWithSuffix.cpp
     MD5.cpp
     MoveToTrash.cpp
     MenuBarEx.cpp
@@ -105,6 +106,7 @@ set(qtproject_H
     DownloadFile.h
     HyperLinkLineEdit.h
     ImageScrollBar.h
+    LineEditWithSuffix.h
     MD5.h
     MenuBarEx.h
     ScrollMessageBox.h
