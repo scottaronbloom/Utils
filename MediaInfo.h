@@ -104,6 +104,11 @@ namespace NSABUtils
         eVideoBitrateString,
         eOverAllBitrate,
         eOverAllBitrateString,
+        eBitsPerPixel,
+        eBitDepth,
+        eFrameRate,
+        eFrameRateNum,
+        eFrameRateDen,
         eNumChannels,
         eAudioSampleRate,
         eAudioSampleRateString,
@@ -180,8 +185,11 @@ namespace NSABUtils
         QString getMediaTag( EMediaTags tag ) const;
         std::unordered_map< EMediaTags, QString > getMediaTags( const std::list< EMediaTags > &tags = {} ) const;
 
-        int64_t getBitRate() const;
+        uint64_t getBitRate() const;
+        uint64_t getUncompressedBitRate() const; // calculated value = width * height * bits per pixel * frames per second
         std::pair< int, int > getResolution() const;
+        double getFrameRate() const;
+        int getBitsPerPixel() const;
 
         // threshold is on total pixels per frame
         bool is4kOrBetterResolution( double threshold = 0.2 ) const; 

@@ -516,7 +516,8 @@ namespace NSABUtils
             if ( pos == fData.end() )
                 return {};
 
-            for ( auto &&currStream : ( *pos ).second )
+            auto &&streamData = ( *pos ).second;
+            for ( auto &&currStream : streamData )
             {
                 auto value = currStream->value( mediaInfoTagName( key ) );
                 if ( value.isEmpty() )
@@ -680,7 +681,14 @@ namespace NSABUtils
                     || ( ii == NSABUtils::EMediaTags::eFirstVideoCodec )   //
                     || ( ii == NSABUtils::EMediaTags::eAllVideoCodecs )   //
                     || ( ii == NSABUtils::EMediaTags::eResolution )   //
-                    || ( ii == NSABUtils::EMediaTags::eVideoBitrate ) || ( ii == NSABUtils::EMediaTags::eVideoBitrateString ) )
+                    || ( ii == NSABUtils::EMediaTags::eVideoBitrate )   //
+                    || ( ii == NSABUtils::EMediaTags::eVideoBitrateString )   //
+                    || ( ii == NSABUtils::EMediaTags::eBitsPerPixel )   //
+                    || ( ii == NSABUtils::EMediaTags::eBitDepth )   //
+                    || ( ii == NSABUtils::EMediaTags::eFrameRate )   //
+                    || ( ii == NSABUtils::EMediaTags::eFrameRateNum )   //
+                    || ( ii == NSABUtils::EMediaTags::eFrameRateDen )   //
+                )
                 {
                     QString value;
                     if ( ii == NSABUtils::EMediaTags::eAllVideoCodecs )
@@ -703,6 +711,16 @@ namespace NSABUtils
                             {
                                 value = findFirstValue( EStreamType::eVideo, NSABUtils::EMediaTags::eDisplayAspectRatio );
                             }
+                            else if ( ii == NSABUtils::EMediaTags::eFrameRate )
+                            {
+                                auto numerator = 1.0 * findFirstValue( EStreamType::eVideo, NSABUtils::EMediaTags::eFrameRateNum ).toLongLong();
+                                auto denominator = 1.0 * findFirstValue( EStreamType::eVideo, NSABUtils::EMediaTags::eFrameRateDen ).toLongLong();
+                                auto retVal = static_cast< uint64_t >( numerator * 1000.0 / denominator );
+                                value = QString::number( retVal );
+                                value.insert( value.length() - 3, "." );
+                            }
+                            else if ( ii == NSABUtils::EMediaTags::eBitsPerPixel )
+                                value = QString::number( 3 * findFirstValue( EStreamType::eVideo, NSABUtils::EMediaTags::eBitDepth ).toInt() );
                         }
                     }
                     retVal[ ii ] = value;
@@ -961,11 +979,46 @@ namespace NSABUtils
         return fImpl->isCodec( checkCodecName, mediaCodecName, ffmpegFormats );
     }
 
-    int64_t CMediaInfo::getBitRate() const
+    uint64_t CMediaInfo::getUncompressedBitRate() const
+    {
+        auto resolution = getResolution();
+        auto frameRate = getFrameRate();
+        auto bitsPerPixel = getBitsPerPixel();
+
+        uint64_t retVal = resolution.first;
+        retVal *= resolution.second;
+        retVal *= bitsPerPixel;
+        retVal *= frameRate;
+        return retVal;
+    }
+
+    uint64_t CMediaInfo::getBitRate() const
     {
         auto value = getMediaTag( EMediaTags::eVideoBitrate );
         bool aOK;
-        auto retVal = value.toLongLong( &aOK );
+        auto retVal = value.toULongLong( &aOK );
+        if ( !aOK )
+            return 0;
+
+        return retVal;
+    }
+
+    int CMediaInfo::getBitsPerPixel() const
+    {
+        auto value = getMediaTag( EMediaTags::eBitsPerPixel );
+        bool aOK;
+        auto retVal = value.toInt( &aOK );
+        if ( !aOK )
+            return 0;
+
+        return retVal;
+    }
+
+    double CMediaInfo::getFrameRate() const
+    {
+        auto value = getMediaTag( EMediaTags::eFrameRate );
+        bool aOK;
+        auto retVal = value.toDouble( &aOK );
         if ( !aOK )
             return 0;
 
@@ -1011,7 +1064,7 @@ namespace NSABUtils
 
         return ( res.first >= targetWidthMin ) || ( res.second >= targetHeightMin );
     }
-    
+
     bool CMediaInfo::isSubHDResolution( double threshold /* = 0.2 */ ) const
     {
         return isResolutionOrLess( { 1920, 1080 }, threshold );
@@ -1197,6 +1250,16 @@ namespace NSABUtils
                 return "BitRate";
             case EMediaTags::eVideoBitrateString:
                 return "BitRate";
+            case EMediaTags::eBitsPerPixel:
+                return "BitsPerPixel";
+            case EMediaTags::eBitDepth:
+                return "BitDepth";
+            case EMediaTags::eFrameRate:
+                return "FrameRate";
+            case EMediaTags::eFrameRateNum:
+                return "FrameRate_Num";
+            case EMediaTags::eFrameRateDen:
+                return "FrameRate_Den";
             case EMediaTags::eOverAllBitrate:
                 return "OverallBitRate";
             case EMediaTags::eOverAllBitrateString:
