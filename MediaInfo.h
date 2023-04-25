@@ -182,13 +182,16 @@ namespace NSABUtils
 
         int64_t getBitRate() const;
         std::pair< int, int > getResolution() const;
-        bool is4kOrBetterResolution( double threshold = 0.2 ) const;
+
+        // threshold is on total pixels per frame
+        bool is4kOrBetterResolution( double threshold = 0.2 ) const; 
+        bool is4kResolution( double threshold = 0.2 ) const;
         bool isHDResolution( double threshold = 0.2 ) const;
-        bool isGreaterThanHDResolution( double threshold = 0.2 ) const;
         bool isSubHDResolution( double threshold = 0.2 ) const;
 
-        bool isResolution( const std::pair< int, int > &min, const std::pair< int, int > &max, double threshold = 0.2  ) const; // -1,-1 means ignore
+        bool isGreaterThanHDResolution( double threshold = 0.0 ) const;   // threshold is EITHER resolution (width or height), so answer is true for 1920-threshold OR 1080- threshold or greater
 
+        bool isResolution( const std::pair< int, int > &target, double threshold = 0.2 ) const;
 
         int64_t getNumberOfSeconds() const;
         int64_t getNumberOfMSecs() const;
@@ -220,7 +223,7 @@ namespace NSABUtils
         Q_OBJECT;
 
     public:
-        static CMediaInfoMgr * instance();
+        static CMediaInfoMgr *instance();
         virtual ~CMediaInfoMgr() override {}
 
         std::shared_ptr< CMediaInfo > getMediaInfo( const QString &fileName );   // creates a mediainfo, then loads it in a background thread, then CMediaInfo will emit when its finished

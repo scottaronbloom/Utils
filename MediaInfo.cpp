@@ -676,7 +676,7 @@ namespace NSABUtils
                     ( ii == NSABUtils::EMediaTags::eWidth )   //
                     || ( ii == NSABUtils::EMediaTags::eHeight )   //
                     || ( ii == NSABUtils::EMediaTags::eAspectRatio )   //
-                    || ( ii == NSABUtils::EMediaTags::eDisplayAspectRatio ) //
+                    || ( ii == NSABUtils::EMediaTags::eDisplayAspectRatio )   //
                     || ( ii == NSABUtils::EMediaTags::eFirstVideoCodec )   //
                     || ( ii == NSABUtils::EMediaTags::eAllVideoCodecs )   //
                     || ( ii == NSABUtils::EMediaTags::eResolution )   //
@@ -988,46 +988,51 @@ namespace NSABUtils
         return { width, height };
     }
 
-    bool CMediaInfo::is4kOrBetterResolution( double threshold /* = 0.2 */ ) const
+    bool CMediaInfo::is4kOrBetterResolution( double threshold /*= 0.2 */ ) const
     {
         return isResolutionOrGreater( { 3840, 2160 }, threshold );
     }
 
+    bool CMediaInfo::is4kResolution( double threshold /* = 0.2 */ ) const
+    {
+        return isResolution( { 3840, 2160 }, threshold );
+    }
+
     bool CMediaInfo::isHDResolution( double threshold /* = 0.2 */ ) const
     {
-        return isResolution( { 1920, 1080 }, { 3840, 2160 }, threshold );
+        return isResolution( { 1920, 1080 }, threshold );
     }
 
     bool CMediaInfo::isGreaterThanHDResolution( double threshold /* = 0.2 */ ) const
     {
-        return isResolutionOrGreater( { 1920 * ( 1 + threshold ), 1080 * ( 1 + threshold ) }, 0.0 );
-    }
+        auto res = getResolution();
+        auto targetWidthMin = ( 1.0 - threshold ) * res.first;
+        auto targetHeightMin = ( 1.0 - threshold ) * res.second;
 
+        return ( res.first >= targetWidthMin ) || ( res.second >= targetHeightMin );
+    }
+    
     bool CMediaInfo::isSubHDResolution( double threshold /* = 0.2 */ ) const
     {
         return isResolutionOrLess( { 1920, 1080 }, threshold );
     }
 
-    bool CMediaInfo::isResolution( const std::pair< int, int > &min, const std::pair< int, int > &max, double threshold /* = 0.2 */ ) const
+    bool CMediaInfo::isResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
     {
-        if ( min.first != -1 )
-        {
-            if ( !isResolutionOrGreater( min, threshold ) )
-                return false;
-        }
-        if ( max.first != -1 )
-        {
-            if ( !isResolutionOrLess( max, threshold ) )
-                return false;
-        }
-        return true;
+        auto res = getResolution();
+        auto myPixels = res.first * res.second;
+        auto targetPixels = targetRes.first * targetRes.second;
+        auto targetPixelsMin = ( 1.0 - threshold ) * targetPixels;
+        auto targetPixelsMax = ( 1.0 + threshold ) * targetPixels;
+
+        return ( myPixels >= targetPixelsMin ) && ( myPixels <= targetPixelsMax );
     }
 
     bool CMediaInfo::isResolutionOrGreater( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
     {
         auto res = getResolution();
         auto myPixels = res.first * res.second;
-        auto targetPixels= targetRes.first * targetRes.second;
+        auto targetPixels = targetRes.first * targetRes.second;
         auto targetPixelsMin = ( 1.0 - threshold ) * targetPixels;
 
         return ( myPixels >= targetPixelsMin );
@@ -1038,7 +1043,6 @@ namespace NSABUtils
         auto res = getResolution();
         auto myPixels = res.first * res.second;
         auto targetPixels = targetRes.first * targetRes.second;
-        //auto targetResMin = 0.95 * targetRes;
         auto targetPixelsMax = ( 1.0 + threshold ) * targetPixels;
 
         return ( myPixels <= targetPixelsMax );
