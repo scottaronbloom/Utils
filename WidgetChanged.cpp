@@ -332,6 +332,8 @@ namespace NSABUtils
         // qDebug() << "Testing-" << widget << "-" << className << widget->objectName();
 
         QAbstractButton *button = dynamic_cast< QAbstractButton * >( widget );
+        auto checkBox = dynamic_cast< QCheckBox * >( widget );
+        auto radioButton = dynamic_cast< QRadioButton * >( widget );
         QLabel *label = dynamic_cast< QLabel * >( widget );
         QToolButton *tb = dynamic_cast< QToolButton * >( widget );
         QDialogButtonBox *dbb = dynamic_cast< QDialogButtonBox * >( widget );
@@ -341,7 +343,7 @@ namespace NSABUtils
 #else
         QWidget *webview = nullptr;
 #endif
-        if ( label || tb || dbb || button || scrollbar || webview || ( className == "QColumnViewGrip" ) || ( className == "QFrame" ) || ( className == "QTableCornerButton" ) || ( className == "QWidget" ) || ( className == "QSplitter" )
+        if ( label || tb || dbb || ( button && !checkBox && !radioButton ) || scrollbar || webview || ( className == "QColumnViewGrip" ) || ( className == "QFrame" ) || ( className == "QTableCornerButton" ) || ( className == "QWidget" ) || ( className == "QSplitter" )
              || ( className == "QRubberBand" ) || ( className == "QSplitterHandle" ) || ( className == "QToolBar" ) || ( className == "QToolBarSeparator" ) || ( className == "QMenu" ) || ( className == "QMenuBar" )
              || ( className == "QDockWidget" ) || ( className == "QStackedWidget" ) || ( className == "QChartView" ) || ( widget->objectName() == QString( "qt_scrollarea_viewport" ) )
              || ( widget->objectName() == QString( "qt_scrollarea_hcontainer" ) ) || ( widget->objectName() == QString( "qt_scrollarea_vcontainer" ) ) || ( className.indexOf( "private", 0, Qt::CaseInsensitive ) != -1 ) )
