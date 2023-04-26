@@ -33,6 +33,7 @@
 #include <QStringList>
 #include <QFileDevice>
 #include <QList>
+#include <functional>
 
 class QFileInfo;
 class QDateTime;
@@ -137,7 +138,7 @@ namespace NSABUtils
 
         SABUTILS_EXPORT QString getCorrectPathCase( QString path );   // note, on linux returns path, windows does the actual analysis, and returns the absolute path
 
-        SABUTILS_EXPORT std::optional< QList< QFileInfo > > findAllFiles( const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName = false, QString *errorMsg = nullptr );
+        SABUTILS_EXPORT std::optional< QList< QFileInfo > > findAllFiles( const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName = false, QString *errorMsg = nullptr, std::function< bool( const QDir &dir ) > skipDir = {}, std::function< bool( const QFileInfo & file ) > skipFile = {} );
         SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo &info );
 
         SABUTILS_EXPORT std::tuple< uint16_t, uint16_t, uint16_t, uint16_t > getVersionInfoFromFile( const QString &fileName, bool &aOK );

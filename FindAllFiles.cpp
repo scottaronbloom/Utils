@@ -27,7 +27,9 @@ namespace NSABUtils
 {
     namespace NFileUtils
     {
-        std::optional< QList< QFileInfo > > findAllFiles( const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName, QString *errorMsg )
+
+        std::optional< QList< QFileInfo > > findAllFiles(
+            const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName, QString *errorMsg, std::function< bool( const QDir &dir ) > skipDir, std::function< bool( const QFileInfo &file ) > skipFile )
         {
             if ( !dir.exists() || !dir.isReadable() )
             {
@@ -35,17 +37,26 @@ namespace NSABUtils
                     *errorMsg = QString( "Directory '%1' does not exist." ).arg( dir.absolutePath() );
                 return {};
             }
+            if ( skipDir && skipDir( dir ) )
+                return {};
+
             // qDebug() << dir.absolutePath();
-            auto retVal = dir.entryInfoList( nameFilters, QDir::Files, sortByName ? QDir::SortFlag::Name : QDir::SortFlag::NoSort );
+            auto files = dir.entryInfoList( nameFilters, QDir::Files, sortByName ? QDir::SortFlag::Name : QDir::SortFlag::NoSort );
+            QList< QFileInfo > retVal;
+            for ( auto &&ii : files )
+            {
+                if ( skipFile && skipFile( ii ) )
+                    continue;
+                retVal << ii;
+            }
             if ( recursive )
             {
                 auto subDirs = dir.entryInfoList( QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot, sortByName ? QDir::SortFlag::Name : QDir::SortFlag::NoSort );
                 for ( auto &&ii : subDirs )
                 {
-                    auto curr = findAllFiles( QDir( ii.absoluteFilePath() ), nameFilters, recursive, sortByName, errorMsg );
-                    if ( !curr.has_value() )
-                        return curr;
-                    retVal << curr.value();
+                    auto curr = findAllFiles( QDir( ii.absoluteFilePath() ), nameFilters, recursive, sortByName, errorMsg, skipDir, skipFile );
+                    if ( curr.has_value() )
+                        retVal << curr.value();
                 }
             }
             return retVal;
