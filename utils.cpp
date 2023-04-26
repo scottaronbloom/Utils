@@ -26,7 +26,6 @@
 #include <algorithm>
 #include <cctype>
 #include <QString>
-#include <QLocale>
 #include <QDateTime>
 #include <QDebug>
 #include <QRegularExpression>
