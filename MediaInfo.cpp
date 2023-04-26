@@ -618,11 +618,9 @@ namespace NSABUtils
                     return ts.toString( "hh:mm:ss" );
                 } );
 
-            cleanFunc( EMediaTags::eVideoBitrateString, []( uint64_t bitRate ) { return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true, "B/s" ); } );
-
+            cleanFunc( EMediaTags::eVideoBitrateString, []( uint64_t bitRate ) { return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true, "bps" ); } );
             cleanFunc( EMediaTags::eAudioSampleRateString, []( uint64_t bitRate ) { return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 2, true, "Hz" ); } );
-
-            cleanFunc( EMediaTags::eOverAllBitrateString, []( uint64_t bitRate ) { return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true, "B/s" ); } );
+            cleanFunc( EMediaTags::eOverAllBitrateString, []( uint64_t bitRate ) { return NSABUtils::NFileUtils::byteSizeString( bitRate, true, false, 3, true, "bps" ); } );
         }
 
         std::unordered_map< NSABUtils::EMediaTags, QString > getMediaTags( const std::list< NSABUtils::EMediaTags > &tags ) const
@@ -1041,33 +1039,35 @@ namespace NSABUtils
         return { width, height };
     }
 
+    std::pair< int, int > CMediaInfo::k8KResolution = { 7680, 4320 };
+    std::pair< int, int > CMediaInfo::k4KResolution = { 3840, 2160 };
+    std::pair< int, int > CMediaInfo::kHDResolution = { 1920, 1080 };
+    std::pair< int, int > CMediaInfo::k720Resolution = { 1280, 720 };
+    std::pair< int, int > CMediaInfo::k480Resolution = { 640, 480 };
+
     bool CMediaInfo::is4kOrBetterResolution( double threshold /*= 0.2 */ ) const
     {
-        return isResolutionOrGreater( { 3840, 2160 }, threshold );
+        return isResolutionOrGreater( k4KResolution, threshold );
     }
 
     bool CMediaInfo::is4kResolution( double threshold /* = 0.2 */ ) const
     {
-        return isResolution( { 3840, 2160 }, threshold );
+        return isResolution( k4KResolution, threshold );
     }
 
     bool CMediaInfo::isHDResolution( double threshold /* = 0.2 */ ) const
     {
-        return isResolution( { 1920, 1080 }, threshold );
+        return isResolution( kHDResolution, threshold );
     }
 
-    bool CMediaInfo::isGreaterThanHDResolution( double threshold /* = 0.2 */ ) const
+    bool CMediaInfo::isGreaterThanHDResolution( double threshold /* = 0.0 */ ) const
     {
-        auto res = getResolution();
-        auto targetWidthMin = ( 1.0 - threshold ) * res.first;
-        auto targetHeightMin = ( 1.0 - threshold ) * res.second;
-
-        return ( res.first >= targetWidthMin ) || ( res.second >= targetHeightMin );
+        return isResolutionOrGreater( kHDResolution, threshold );
     }
 
     bool CMediaInfo::isSubHDResolution( double threshold /* = 0.2 */ ) const
     {
-        return isResolutionOrLess( { 1920, 1080 }, threshold );
+        return isResolutionOrLess( kHDResolution, threshold );
     }
 
     bool CMediaInfo::isResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const

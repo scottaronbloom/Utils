@@ -160,6 +160,12 @@ namespace NSABUtils
         CMediaInfo( const QFileInfo &fi, bool delayLoad );
 
     public:
+        static std::pair< int, int > k8KResolution;
+        static std::pair< int, int > k4KResolution;
+        static std::pair< int, int > kHDResolution;
+        static std::pair< int, int > k720Resolution;
+        static std::pair< int, int > k480Resolution;
+
         static void setFFProbeEXE( const QString &path );
         static QString ffprobeEXE();
 
@@ -186,13 +192,13 @@ namespace NSABUtils
         std::unordered_map< EMediaTags, QString > getMediaTags( const std::list< EMediaTags > &tags = {} ) const;
 
         uint64_t getBitRate() const;
-        uint64_t getUncompressedBitRate() const; // calculated value = width * height * bits per pixel * frames per second
+        uint64_t getUncompressedBitRate() const;   // calculated value = width * height * bits per pixel * frames per second
         std::pair< int, int > getResolution() const;
         double getFrameRate() const;
         int getBitsPerPixel() const;
 
         // threshold is on total pixels per frame
-        bool is4kOrBetterResolution( double threshold = 0.2 ) const; 
+        bool is4kOrBetterResolution( double threshold = 0.2 ) const;
         bool is4kResolution( double threshold = 0.2 ) const;
         bool isHDResolution( double threshold = 0.2 ) const;
         bool isSubHDResolution( double threshold = 0.2 ) const;
