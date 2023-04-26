@@ -102,6 +102,7 @@ namespace NSABUtils
         eAllAudioCodecsDisp,
         eVideoBitrate,   // if not found falls back to overall bitrate
         eVideoBitrateString,
+        eHDRInfo,
         eOverAllBitrate,
         eOverAllBitrateString,
         eBitsPerPixel,
@@ -109,6 +110,7 @@ namespace NSABUtils
         eFrameRate,
         eFrameRateNum,
         eFrameRateDen,
+        eScanType,
         eNumChannels,
         eAudioSampleRate,
         eAudioSampleRateString,
@@ -148,6 +150,26 @@ namespace NSABUtils
     enum class EMediaTags;
     class CStreamData;
     class CMediaInfoImpl;
+    struct SABUTILS_EXPORT SResolutionInfo
+    {
+        std::pair< int, int > fResolution{ 0, 0 };
+        bool fInterlaced{ false };
+        double fFPS{ 0.0 };
+        int fBitsPerPixel{ 0 };
+
+        uint64_t idealBitrate() const;
+        bool isGreaterThan4kResolution( double threshold = 0.2 ) const;
+        bool is4kResolution( double threshold = 0.2 ) const;
+        bool isGreaterThanHDResolution( double threshold = 0.0 ) const;
+        bool isHDResolution( double threshold = 0.2 ) const;
+        bool isSubHDResolution( double threshold = 0.2 ) const;
+
+        bool isResolution( const std::pair< int, int > &target, double threshold = 0.2 ) const; // within +/- threshold
+        bool isGreaterThanResolution( const std::pair< int, int > &min, double threshold = 0.2 ) const;   // + threshold or greater
+        bool isLessThanResolution( const std::pair< int, int > &max, double threshold = 0.2 ) const;   // - threshold or less
+    private:
+    };
+
     class SABUTILS_EXPORT CMediaInfo : public QObject
     {
         Q_OBJECT;
@@ -160,11 +182,12 @@ namespace NSABUtils
         CMediaInfo( const QFileInfo &fi, bool delayLoad );
 
     public:
-        static std::pair< int, int > k8KResolution;
-        static std::pair< int, int > k4KResolution;
-        static std::pair< int, int > kHDResolution;
-        static std::pair< int, int > k720Resolution;
-        static std::pair< int, int > k480Resolution;
+        static SResolutionInfo k8KResolution;
+        static SResolutionInfo k4KResolution;
+        static SResolutionInfo k1080pResolution;
+        static SResolutionInfo k1080iResolution;
+        static SResolutionInfo k720Resolution;
+        static SResolutionInfo k480Resolution;
 
         static void setFFProbeEXE( const QString &path );
         static QString ffprobeEXE();
@@ -193,17 +216,21 @@ namespace NSABUtils
 
         uint64_t getBitRate() const;
         uint64_t getUncompressedBitRate() const;   // calculated value = width * height * bits per pixel * frames per second
+
+        SResolutionInfo getResolutionInfo() const;
+
         std::pair< int, int > getResolution() const;
         double getFrameRate() const;
         int getBitsPerPixel() const;
+        bool getInterlaced() const;
 
         // threshold is on total pixels per frame
-        bool is4kOrBetterResolution( double threshold = 0.2 ) const;
+        bool isGreaterThan4kResolution( double threshold = 0.2 ) const;
         bool is4kResolution( double threshold = 0.2 ) const;
+        bool isGreaterThanHDResolution( double threshold = 0.0 ) const;  
         bool isHDResolution( double threshold = 0.2 ) const;
         bool isSubHDResolution( double threshold = 0.2 ) const;
 
-        bool isGreaterThanHDResolution( double threshold = 0.0 ) const;   // threshold is EITHER resolution (width or height), so answer is true for 1920-threshold OR 1080- threshold or greater
 
         bool isResolution( const std::pair< int, int > &target, double threshold = 0.2 ) const;
 
@@ -225,9 +252,6 @@ namespace NSABUtils
         void sigMediaLoaded( const QString &fileName );
 
     private:
-        bool isResolutionOrGreater( const std::pair< int, int > &min, double threshold = 0.2 ) const;
-        bool isResolutionOrLess( const std::pair< int, int > &max, double threshold = 0.2 ) const;
-
         std::shared_ptr< CMediaInfoImpl > fImpl;
     };
 

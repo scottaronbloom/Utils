@@ -681,11 +681,13 @@ namespace NSABUtils
                     || ( ii == NSABUtils::EMediaTags::eResolution )   //
                     || ( ii == NSABUtils::EMediaTags::eVideoBitrate )   //
                     || ( ii == NSABUtils::EMediaTags::eVideoBitrateString )   //
+                    || ( ii == NSABUtils::EMediaTags::eHDRInfo )   //
                     || ( ii == NSABUtils::EMediaTags::eBitsPerPixel )   //
                     || ( ii == NSABUtils::EMediaTags::eBitDepth )   //
                     || ( ii == NSABUtils::EMediaTags::eFrameRate )   //
                     || ( ii == NSABUtils::EMediaTags::eFrameRateNum )   //
                     || ( ii == NSABUtils::EMediaTags::eFrameRateDen )   //
+                    || ( ii == NSABUtils::EMediaTags::eScanType )   //
                 )
                 {
                     QString value;
@@ -979,14 +981,16 @@ namespace NSABUtils
 
     uint64_t CMediaInfo::getUncompressedBitRate() const
     {
-        auto resolution = getResolution();
-        auto frameRate = getFrameRate();
-        auto bitsPerPixel = getBitsPerPixel();
+        return getResolutionInfo().idealBitrate();
+    }
 
-        uint64_t retVal = resolution.first;
-        retVal *= resolution.second;
-        retVal *= bitsPerPixel;
-        retVal *= frameRate;
+    NSABUtils::SResolutionInfo CMediaInfo::getResolutionInfo() const
+    {
+        SResolutionInfo retVal;
+        retVal.fResolution = getResolution();
+        retVal.fFPS = getFrameRate();
+        retVal.fBitsPerPixel = getBitsPerPixel();
+        retVal.fInterlaced = getInterlaced();
         return retVal;
     }
 
@@ -1023,6 +1027,12 @@ namespace NSABUtils
         return retVal;
     }
 
+    bool CMediaInfo::getInterlaced() const
+    {
+        auto value = getMediaTag( EMediaTags::eScanType ).toLower();
+        return value == "interlaced";
+    }
+
     std::pair< int, int > CMediaInfo::getResolution() const
     {
         auto value = getMediaTag( EMediaTags::eWidth );
@@ -1039,41 +1049,52 @@ namespace NSABUtils
         return { width, height };
     }
 
-    std::pair< int, int > CMediaInfo::k8KResolution = { 7680, 4320 };
-    std::pair< int, int > CMediaInfo::k4KResolution = { 3840, 2160 };
-    std::pair< int, int > CMediaInfo::kHDResolution = { 1920, 1080 };
-    std::pair< int, int > CMediaInfo::k720Resolution = { 1280, 720 };
-    std::pair< int, int > CMediaInfo::k480Resolution = { 640, 480 };
+    SResolutionInfo CMediaInfo::k8KResolution = { { 7680, 4320 }, false, 60.0, 30 };
+    SResolutionInfo CMediaInfo::k4KResolution = { { 3840, 2160 }, false, 60.0, 24 };
+    SResolutionInfo CMediaInfo::k1080pResolution = { { 1920, 1080 }, false, 60.0, 24 };
+    SResolutionInfo CMediaInfo::k1080iResolution = { { 1920, 1080 }, true, 30.0, 24 };
+    SResolutionInfo CMediaInfo::k720Resolution = { { 1280, 720 }, false, 24.0, 24 };
+    SResolutionInfo CMediaInfo::k480Resolution = { { 640, 480 }, false, 24.0, 24 };
 
-    bool CMediaInfo::is4kOrBetterResolution( double threshold /*= 0.2 */ ) const
+    uint64_t SResolutionInfo::idealBitrate() const
     {
-        return isResolutionOrGreater( k4KResolution, threshold );
+        uint64_t uncompressed = fResolution.first;
+        uncompressed *= fResolution.second;
+        if ( fInterlaced )
+            uncompressed /= 2;
+        uncompressed *= fBitsPerPixel;
+        uncompressed *= fFPS;
+        return uncompressed;
     }
 
-    bool CMediaInfo::is4kResolution( double threshold /* = 0.2 */ ) const
+    bool SResolutionInfo::isGreaterThan4kResolution( double threshold /*= 0.2 */ ) const
     {
-        return isResolution( k4KResolution, threshold );
+        return isGreaterThanResolution( CMediaInfo::k4KResolution.fResolution, threshold );
     }
 
-    bool CMediaInfo::isHDResolution( double threshold /* = 0.2 */ ) const
+    bool SResolutionInfo::is4kResolution( double threshold /* = 0.2 */ ) const
     {
-        return isResolution( kHDResolution, threshold );
+        return isResolution( CMediaInfo::k4KResolution.fResolution, threshold );
     }
 
-    bool CMediaInfo::isGreaterThanHDResolution( double threshold /* = 0.0 */ ) const
+    bool SResolutionInfo::isGreaterThanHDResolution( double threshold /* = 0.0 */ ) const
     {
-        return isResolutionOrGreater( kHDResolution, threshold );
+        return isGreaterThanResolution( CMediaInfo::k1080pResolution.fResolution, threshold );
     }
 
-    bool CMediaInfo::isSubHDResolution( double threshold /* = 0.2 */ ) const
+    bool SResolutionInfo::isHDResolution( double threshold /* = 0.2 */ ) const
     {
-        return isResolutionOrLess( kHDResolution, threshold );
+        return isResolution( CMediaInfo::k1080pResolution.fResolution, threshold );
     }
 
-    bool CMediaInfo::isResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
+    bool SResolutionInfo::isSubHDResolution( double threshold /* = 0.2 */ ) const
     {
-        auto res = getResolution();
-        auto myPixels = res.first * res.second;
+        return isLessThanResolution( CMediaInfo::k1080pResolution.fResolution, threshold );
+    }
+
+    bool SResolutionInfo::isResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
+    {
+        auto myPixels = fResolution.first * fResolution.second;
         auto targetPixels = targetRes.first * targetRes.second;
         auto targetPixelsMin = ( 1.0 - threshold ) * targetPixels;
         auto targetPixelsMax = ( 1.0 + threshold ) * targetPixels;
@@ -1081,24 +1102,51 @@ namespace NSABUtils
         return ( myPixels >= targetPixelsMin ) && ( myPixels <= targetPixelsMax );
     }
 
-    bool CMediaInfo::isResolutionOrGreater( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
+    bool SResolutionInfo::isGreaterThanResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
     {
-        auto res = getResolution();
-        auto myPixels = res.first * res.second;
+        auto myPixels = fResolution.first * fResolution.second;
         auto targetPixels = targetRes.first * targetRes.second;
-        auto targetPixelsMin = ( 1.0 - threshold ) * targetPixels;
+        auto targetPixelsMin = ( 1.0 + threshold ) * targetPixels;
 
         return ( myPixels >= targetPixelsMin );
     }
 
-    bool CMediaInfo::isResolutionOrLess( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
+    bool SResolutionInfo::isLessThanResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
     {
-        auto res = getResolution();
-        auto myPixels = res.first * res.second;
+        auto myPixels = fResolution.first * fResolution.second;
         auto targetPixels = targetRes.first * targetRes.second;
-        auto targetPixelsMax = ( 1.0 + threshold ) * targetPixels;
+        auto targetPixelsMax = ( 1.0 - threshold ) * targetPixels;
 
         return ( myPixels <= targetPixelsMax );
+    }
+
+    bool CMediaInfo::isGreaterThan4kResolution( double threshold /*= 0.2 */ ) const
+    {
+        return getResolutionInfo().isGreaterThan4kResolution( threshold );
+    }
+
+    bool CMediaInfo::is4kResolution( double threshold /* = 0.2 */ ) const
+    {
+        return getResolutionInfo().is4kResolution( threshold );
+    }
+
+    bool CMediaInfo::isHDResolution( double threshold /* = 0.2 */ ) const
+    {
+        return getResolutionInfo().isHDResolution( threshold );
+    }
+
+    bool CMediaInfo::isSubHDResolution( double threshold /* = 0.2 */ ) const
+    {
+        return getResolutionInfo().isSubHDResolution( threshold );
+    }
+    bool CMediaInfo::isGreaterThanHDResolution( double threshold /* = 0.0 */ ) const
+    {
+        return getResolutionInfo().isGreaterThanHDResolution( threshold );
+    }
+
+    bool CMediaInfo::isResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
+    {
+        return getResolutionInfo().isResolution( targetRes, threshold );
     }
 
     int64_t CMediaInfo::getNumberOfSeconds() const
@@ -1250,6 +1298,8 @@ namespace NSABUtils
                 return "BitRate";
             case EMediaTags::eVideoBitrateString:
                 return "BitRate";
+            case EMediaTags::eHDRInfo:
+                return "HDR_Format/String";
             case EMediaTags::eBitsPerPixel:
                 return "BitsPerPixel";
             case EMediaTags::eBitDepth:
@@ -1260,6 +1310,8 @@ namespace NSABUtils
                 return "FrameRate_Num";
             case EMediaTags::eFrameRateDen:
                 return "FrameRate_Den";
+            case EMediaTags::eScanType:
+                return "ScanType";
             case EMediaTags::eOverAllBitrate:
                 return "OverallBitRate";
             case EMediaTags::eOverAllBitrateString:
