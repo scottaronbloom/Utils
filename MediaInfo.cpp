@@ -47,6 +47,8 @@ namespace NSABUtils
         CStreamData() {}
         CStreamData( MediaInfoDLL::MediaInfo *mediaInfo, EStreamType type, int num );
 
+        void setIsDefault( bool value ) { fIsDefault = value; }
+        bool isDefault() const { return fIsDefault; }
         void addData( const QString &name, const QString &value );
 
         QString value( const QString &key ) const;
@@ -58,6 +60,7 @@ namespace NSABUtils
     private:
         EStreamType fStreamType{ EStreamType::eGeneral };
         int fStreamNum{ 0 };
+        bool fIsDefault{ false };
         std::vector< std::pair< QString, QString > > fStreamData;
         std::map< QString, QString > fStreamDataMap;
         std::map< EMediaTags, QString > fKnownTagStreamDataMap;
@@ -510,6 +513,22 @@ namespace NSABUtils
             return ( *pos ).second.size();
         }
 
+        size_t defaultStream( EStreamType whichStream ) const
+        {
+            auto pos = fData.find( whichStream );
+            if ( pos == fData.end() )
+                return 0;
+
+            auto &&streamData = ( *pos ).second;
+            for ( size_t ii = 0; ii < streamData.size(); ++ii )
+            {
+                if ( streamData[ ii ]->isDefault() )
+                    return ii;
+            }
+
+            return 0;
+        }
+
         QString findFirstValue( EStreamType whichStream, EMediaTags key ) const
         {
             auto pos = fData.find( whichStream );
@@ -670,6 +689,18 @@ namespace NSABUtils
                 else if ( ii == NSABUtils::EMediaTags::eNumSubtitleStreams )   //
                 {
                     retVal[ ii ] = QString::number( numStreams( EStreamType::eText ) );
+                }
+                else if ( ii == NSABUtils::EMediaTags::eDefaultAudioStream )
+                {
+                    retVal[ ii ] = QString::number( defaultStream( EStreamType::eAudio ) );
+                }
+                else if ( ii == NSABUtils::EMediaTags::eDefaultVideoStream )
+                {
+                    retVal[ ii ] = QString::number( defaultStream( EStreamType::eVideo ) );
+                }
+                else if ( ii == NSABUtils::EMediaTags::eDefaultSubtitleStream )   //
+                {
+                    retVal[ ii ] = QString::number( defaultStream( EStreamType::eText ) );
                 }
                 else if (
                     ( ii == NSABUtils::EMediaTags::eWidth )   //
@@ -861,6 +892,14 @@ namespace NSABUtils
                     continue;
 
                 streamData->addData( "FFMpegCodec", codec );
+
+                if ( !stream.contains( "disposition" ) )
+                    continue;
+
+                auto disposition = stream[ "disposition" ].toObject();
+                auto defaultDisp = disposition[ "default" ].toInt();
+                streamData->addData( "Disposition_Default", QString( "%1" ).arg( defaultDisp ) );
+                streamData->setIsDefault( defaultDisp != 0 );
             }
             return true;
         }
@@ -1228,6 +1267,21 @@ namespace NSABUtils
     int CMediaInfo::numSubtitleStreams() const
     {
         return getMediaTag( EMediaTags::eNumSubtitleStreams ).toInt();
+    }
+
+    int CMediaInfo::defaultAudioStream() const
+    {
+        return getMediaTag( EMediaTags::eDefaultAudioStream ).toInt();
+    }
+
+    int CMediaInfo::defaultVideoStream() const
+    {
+        return getMediaTag( EMediaTags::eDefaultVideoStream ).toInt();
+    }
+
+    int CMediaInfo::defaultSubtitleStream() const
+    {
+        return getMediaTag( EMediaTags::eDefaultSubtitleStream ).toInt();
     }
 
     QStringList CMediaInfo::allSubtitleCodecs() const

@@ -121,6 +121,9 @@ namespace NSABUtils
         eAllSubtitleLanguages,
         eFirstSubtitleCodec,
         eAllSubtitleCodecs,
+        eDefaultVideoStream,
+        eDefaultAudioStream,
+        eDefaultSubtitleStream,
         eLastTag
     };
     SABUTILS_EXPORT QString displayName( EMediaTags tag );
@@ -246,6 +249,10 @@ namespace NSABUtils
         int numAudioStreams() const;
         int numVideoStreams() const;
         int numSubtitleStreams() const;
+
+        int defaultAudioStream() const;
+        int defaultVideoStream() const;
+        int defaultSubtitleStream() const;
 
         QStringList allSubtitleCodecs() const;
     Q_SIGNALS:
