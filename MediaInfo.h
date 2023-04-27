@@ -168,8 +168,8 @@ namespace NSABUtils
         bool isSubHDResolution( double threshold = 0.2 ) const;
 
         bool isResolution( const std::pair< int, int > &target, double threshold = 0.2 ) const; // within +/- threshold
-        bool isGreaterThanResolution( const std::pair< int, int > &min, double threshold = 0.2 ) const;   // + threshold or greater
-        bool isLessThanResolution( const std::pair< int, int > &max, double threshold = 0.2 ) const;   // - threshold or less
+        bool isGreaterThanResolution( const std::pair< int, int > &min, double threshold = 0.2 ) const;   // greater than + threshold 
+        bool isLessThanResolution( const std::pair< int, int > &max, double threshold = 0.2 ) const;   // less than - threshold
     private:
     };
 
