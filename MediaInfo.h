@@ -94,8 +94,11 @@ namespace NSABUtils
         eWidth,
         eHeight,
         eResolution,
+        eVideoCodec,
         eFirstVideoCodec,
         eAllVideoCodecs,
+        eAudioCodec,
+        eAudioCodecDisp,
         eFirstAudioCodec,
         eFirstAudioCodecDisp,
         eAllAudioCodecs,
@@ -111,14 +114,16 @@ namespace NSABUtils
         eFrameRateNum,
         eFrameRateDen,
         eScanType,
-        eNumChannels,
+        eAudioChannelCount,
         eAudioSampleRate,
         eAudioSampleRateString,
         eNumVideoStreams,
         eNumAudioStreams,
         eNumSubtitleStreams,
+        eSubtitleLanguage,
         eFirstSubtitleLanguage,
         eAllSubtitleLanguages,
+        eSubtitleCodec,
         eFirstSubtitleCodec,
         eAllSubtitleCodecs,
         eDefaultVideoStream,
@@ -131,6 +136,8 @@ namespace NSABUtils
     SABUTILS_EXPORT QString getMKVEditName( EMediaTags tag );
     SABUTILS_EXPORT bool isSettableTag( EMediaTags tag );
     SABUTILS_EXPORT QString mediaInfoTagName( EMediaTags tag );
+    SABUTILS_EXPORT std::list< QString > toStringList( const std::list< EMediaTags > &keys );
+
     SABUTILS_EXPORT EMediaTags fromTagName( const QString &tag );
 
 }
@@ -206,16 +213,18 @@ namespace NSABUtils
         QString fileName() const;
         QString version() const;
 
-        bool hasAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
-        bool hasAACCodec( CFFMpegFormats *ffmpegFormats, int maxNumChannels ) const;
+        bool isDefaultAudioCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
+        bool isDefaultAudioCodecAAC( CFFMpegFormats *ffmpegFormats, int maxNumChannels ) const;
         bool hasVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const;
         bool isContainerFormat( const QString &formatName, CFFMpegFormats *ffmpegFormats ) const;
         bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats );
         bool isHEVCCodec( QString mediaCodecName, CFFMpegFormats *ffmpegFormats );
 
         std::unordered_map< EMediaTags, QString > getSettableMediaTags() const;
-        QString getMediaTag( EMediaTags tag ) const;
         std::unordered_map< EMediaTags, QString > getMediaTags( const std::list< EMediaTags > &tags = {} ) const;
+
+        QString getMediaTag( EMediaTags tag ) const;
+        QString getMediaTag( size_t streamNum, EMediaTags tag ) const;
 
         uint64_t getBitRate() const;
         uint64_t getUncompressedBitRate() const;   // calculated value = width * height * bits per pixel * frames per second
@@ -253,6 +262,8 @@ namespace NSABUtils
         int defaultAudioStream() const;
         int defaultVideoStream() const;
         int defaultSubtitleStream() const;
+
+        int audioChannelCount( size_t streamNum = -1 ) const;
 
         QStringList allSubtitleCodecs() const;
     Q_SIGNALS:
