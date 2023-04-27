@@ -1147,7 +1147,7 @@ namespace NSABUtils
         auto targetPixels = targetRes.first * targetRes.second;
         auto targetPixelsMin = ( 1.0 + threshold ) * targetPixels;
 
-        return ( myPixels >= targetPixelsMin );
+        return ( myPixels > targetPixelsMin );
     }
 
     bool SResolutionInfo::isLessThanResolution( const std::pair< int, int > &targetRes, double threshold /* = 0.2 */ ) const
@@ -1156,7 +1156,7 @@ namespace NSABUtils
         auto targetPixels = targetRes.first * targetRes.second;
         auto targetPixelsMax = ( 1.0 - threshold ) * targetPixels;
 
-        return ( myPixels <= targetPixelsMax );
+        return ( myPixels < targetPixelsMax );
     }
 
     bool CMediaInfo::isGreaterThan4kResolution( double threshold /*= 0.2 */ ) const
