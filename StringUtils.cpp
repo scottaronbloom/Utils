@@ -2808,7 +2808,7 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool isRomanNumeral( const QString &string )
+        bool isRomanNumeral( const QString &string, int * value )
         {
             auto regExStr = "^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$";
             auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
@@ -2816,8 +2816,9 @@ namespace NSABUtils
                 return false;
 
             bool aOK;
-            int value = romanToDecimal( string, aOK );
-            (void)value;
+            int lclValue = romanToDecimal( string, aOK );
+            if ( value )
+                *value = lclValue;
             return aOK;
         }
 
