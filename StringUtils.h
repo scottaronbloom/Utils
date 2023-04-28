@@ -471,7 +471,7 @@ namespace NSABUtils
         SABUTILS_EXPORT bool validateQuotedPrintableString( const std::string &str );
 
         SABUTILS_EXPORT int romanToDecimal( QString string, bool &aOK );   // only valid for roman numbers to 3999 as 4000 requires a vinculum
-        SABUTILS_EXPORT bool isRomanNumeral( const QString &string, int *value=nullptr );
+        SABUTILS_EXPORT bool isRomanNumeral( const QString &string, int *value = nullptr );
 
         SABUTILS_EXPORT QString transformTitle( const QString &title, bool ignoreAllCase = true );
         SABUTILS_EXPORT QString titleCase( const QString &string, bool ignoreAllCase = true );
@@ -513,6 +513,9 @@ namespace NSABUtils
         SABUTILS_EXPORT bool startsOrEndsWithNumber( const QString &string, QString *number = nullptr, QString *extra = nullptr, bool *numIsPrefix = nullptr );   // number_extra or extra_number, prefix = true means the number is a prefix
 
         SABUTILS_EXPORT bool isValidEmailAddress( const QString &email );
+
+        SABUTILS_EXPORT QString toCSV( const QStringList &data );
+
     }
 }
 #endif

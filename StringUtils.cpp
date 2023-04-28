@@ -2656,6 +2656,24 @@ namespace NSABUtils
             return retVal;
         }
 
+        SABUTILS_EXPORT QString toCSV( const QStringList &data )
+        {
+            QString retVal;
+            bool first = true;
+            for ( auto &&ii : data )
+            {
+                if ( !first )
+                    retVal += ",";
+                first = false;
+                auto curr = ii;
+                curr.replace( R"(")", R"(\")" );
+                if ( curr.contains( "," ) )
+                    curr = QString( R"("%1")" ).arg( curr );
+                retVal += curr;
+            }
+            return retVal;
+        }
+
         QString removeDiacriticalCharacters( const QString &str )
         {
             QString retVal;
@@ -2808,7 +2826,7 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool isRomanNumeral( const QString &string, int * value )
+        bool isRomanNumeral( const QString &string, int *value )
         {
             auto regExStr = "^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$";
             auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
