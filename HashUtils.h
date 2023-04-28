@@ -32,6 +32,18 @@
 namespace NSABUtils
 {
     template< typename T >
+    inline std::size_t HashCombine( std::size_t seed, const T &item )
+    {
+        std::hash< T > hasher;
+        auto currValue = hasher( item );
+
+        std::size_t retVal = seed;
+        retVal ^= currValue + 0x9e489236 + ( retVal << 6 ) + ( retVal >> 2 );
+
+        return retVal;
+    }
+
+    template< typename T >
     inline auto HashCombine( size_t seed, const std::initializer_list< T > &values, bool needsHash ) -> typename std::enable_if< std::is_same< std::size_t, T >::value, size_t >::type
     {
         std::hash< T > hasher;
@@ -100,6 +112,7 @@ namespace NSABUtils
             static void apply( size_t &seed, Tuple const &tuple ) { NSABUtils::HashCombine( seed, { std::get< 0 >( tuple ) } ); }
         };
     }
+
     template< typename... TT >
     inline std::size_t HashCombine( const std::tuple< TT... > &tt )
     {
