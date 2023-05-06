@@ -50,9 +50,10 @@ namespace NSABUtils
         void setIsDefault( bool value ) { fIsDefault = value; }
         bool isDefault() const { return fIsDefault; }
         void addData( const QString &name, const QString &value );
+        void replaceData( const QString &name, const QString &value );   // expensive
 
         QString value( const QString &key ) const;
-        QString value( EMediaTags key ) const;
+        bool contains( const QString &key ) const;
 
         QStringList values( const std::list< QString > &keys ) const
         {
@@ -271,8 +272,36 @@ namespace NSABUtils
 
     void CStreamData::addData( const QString &name, const QString &value )
     {
-        fStreamData.emplace_back( std::make_pair( name, value ) );
+        fStreamData.emplace_back( std::make_pair( name, value.trimmed() ) );
         fStreamDataMap[ name ] = value.trimmed();
+    }
+
+    void CStreamData::replaceData( const QString &name, const QString &value )
+    {
+        QStringList keysToRemove;
+        auto nameSlash = name + "/";
+        for ( auto &&ii = fStreamData.begin(); ii != fStreamData.end(); )
+        {
+            if ( ( *ii ).first == name )
+            {
+                ( *ii ).second = value.trimmed();
+                ++ii;
+            }
+            else if ( ( *ii ).first.startsWith( nameSlash ) )
+            {
+                keysToRemove << ( *ii ).first;
+                ii = fStreamData.erase( ii );
+            }
+            else
+                ++ii;
+        }
+        fStreamDataMap[ name ] = value.trimmed();
+        for ( auto &&ii : keysToRemove )
+        {
+            auto pos = fStreamDataMap.find( ii );
+            if ( pos != fStreamDataMap.end() )
+                fStreamDataMap.erase( pos );
+        }
     }
 
     QString CStreamData::value( const QString &key ) const
@@ -321,14 +350,31 @@ namespace NSABUtils
         return ( *pos ).second;
     }
 
-    //QString CStreamData::value( EMediaTags key ) const
-    //{
-    //    auto pos = fKnownTagStreamDataMap.find( key );
-    //    if ( pos == fKnownTagStreamDataMap.end() )
-    //        return {};
+    bool CStreamData::contains( const QString &key ) const
+    {
+        if ( key == "Resolution" )
+        {
+            auto pos = fStreamDataMap.find( mediaInfoTagName( EMediaTags::eWidth ) );
+            if ( pos == fStreamDataMap.end() )
+                return false;
+            pos = fStreamDataMap.find( mediaInfoTagName( EMediaTags::eWidth ) );
+            if ( pos == fStreamDataMap.end() )
+                return false;
+            return true;
+        }
+        else if ( key == "CodecID" )
+        {
+            auto pos = fStreamDataMap.find( "FFMpegCodec" );
+            return ( pos != fStreamDataMap.end() );
+        }
+        else if ( key == "AudioCodecIDDisp" )
+        {
+            return contains( "CodecID" );
+        }
 
-    //    return ( *pos ).second;
-    //}
+        auto pos = fStreamDataMap.find( key );
+        return ( pos != fStreamDataMap.end() );
+    }
 
     class CMediaInfoImpl
     {
@@ -405,7 +451,7 @@ namespace NSABUtils
         bool load()
         {
             fAOK = initMediaInfo();
-            fAOK = loadCodecsFromFFProbe() && fAOK;
+            fAOK = loadInfoFromFFProbe() && fAOK;
             return fAOK;
         }
 
@@ -446,6 +492,10 @@ namespace NSABUtils
             }
             return retVal;
         }
+
+        int numAudioStreams() const { return getMediaTag( -1, EMediaTags::eNumAudioStreams ).toInt(); }
+        int numVideoStreams() const { return getMediaTag( -1, EMediaTags::eNumVideoStreams ).toInt(); }
+        int numSubTitleStreams() const { return getMediaTag( -1, EMediaTags::eNumSubtitleStreams ).toInt(); }
 
         bool hasVideoCodec( const QString &checkCodecName, CFFMpegFormats *ffmpegFormats ) const
         {
@@ -505,7 +555,13 @@ namespace NSABUtils
         {
             auto pos = fDefaultStreams.find( whichStream );
             if ( pos == fDefaultStreams.end() )
-                return 0;
+            {
+                auto numStreams = this->numStreams( whichStream );
+                if ( numStreams )
+                    return 0;
+                else
+                    return -1;
+            }
             return ( *pos ).second;
         }
 
@@ -543,6 +599,14 @@ namespace NSABUtils
             return stream;
         }
 
+        uint64_t getBitRate( EStreamType whichStream, size_t streamNum )
+        {
+            auto retVal = calculateBitRateForStream( whichStream, streamNum );
+            if ( retVal.has_value() )
+                return retVal.value();
+            return 0;
+        }
+
         std::shared_ptr< CStreamData > getDefaultStreamData( EStreamType whichStream ) const { return getStreamData( whichStream, -1 ); }
 
         // finds the value on the default stream
@@ -552,6 +616,25 @@ namespace NSABUtils
         QString findValue( EStreamType whichStream, size_t streamNum, EMediaTags key ) const { return findValue( whichStream, streamNum, mediaInfoTagName( key ) ); }
         QString findValue( EStreamType whichStream, size_t streamNum, const QString &key ) const
         {
+            if ( key == "BitRate" )
+            {
+                auto retVal = calculateBitRateStringForStream( whichStream, streamNum );
+                if ( retVal.has_value() )
+                    return retVal.value();
+            }
+            if ( key == "TotalAudioBitRate" )
+            {
+                auto retVal = getTotalAudioBitrate();
+                if ( retVal.has_value() )
+                    return QString::number( retVal.value() );
+            }
+            if ( key == "Duration" )
+            {
+                auto value = getDurationMS( whichStream, streamNum );
+                if ( value.has_value() )
+                    return QString::number( value.value() );
+            }
+
             auto stream = getStreamData( whichStream, streamNum );
             if ( !stream )
                 return {};
@@ -568,6 +651,117 @@ namespace NSABUtils
                 }
             }
             return value;
+        }
+
+        std::optional< uint64_t > calculateBitRate( std::optional< uint64_t > numBits, std::optional< uint64_t > durationMS ) const
+        {
+            if ( !numBits.has_value() || !durationMS.has_value() )
+                return {};
+
+            if ( durationMS.has_value() && durationMS.value() )
+            {
+                auto durationSecs = durationMS.value() / 1000;
+                auto retValBps = static_cast< uint64_t >( std::round( ( 1.0 * numBits.value() ) / ( 1.0 * durationSecs ) ) );
+                return retValBps;
+            }
+            return {};
+        }
+
+        std::optional< double > getTotalAudioBitrate() const
+        {
+            auto streamCount = numAudioStreams();
+            std::optional< uint64_t > totalBits;
+            for ( size_t ii = 0; ii < streamCount; ++ii )
+            {
+                auto numBits = calculateNumBitsForStream( EStreamType::eAudio, ii );
+                if ( numBits.has_value() )
+                {
+                    if ( totalBits.has_value() )
+                        totalBits.value() += numBits.value();
+                    else
+                        totalBits = numBits.value();
+                }
+            }
+
+            auto durationMS = getDurationMS( EStreamType::eGeneral, -1 );
+            return calculateBitRate( totalBits, durationMS );
+        }
+
+        std::optional< uint64_t > calculateNumBitsForStream( EStreamType whichStream, size_t streamNum ) const
+        {
+            auto stream = getStreamData( whichStream, streamNum );
+            if ( !stream )
+                return {};
+
+            QString sizeKey = "StreamSizeBytes";
+            bool isBytes = true;
+            if ( whichStream == EStreamType::eGeneral )
+            {
+                sizeKey = "FileSize";
+                isBytes = true;
+            }
+            else
+            {
+                if ( !stream->contains( sizeKey ) )
+                {
+                    sizeKey = "StreamSize";
+                    isBytes = false;
+                }
+            }
+
+            auto streamSizeString = stream->value( sizeKey );
+            if ( streamSizeString.trimmed().isEmpty() )
+                return {};
+
+            bool aOK = false;
+            auto streamSizeKBytes = stream->value( sizeKey ).toULongLong( &aOK );
+            if ( aOK )
+            {
+                auto streamSizeBytes = streamSizeKBytes;
+                if ( !isBytes )
+                    streamSizeBytes *= 1000;
+                auto streamSizeBits = streamSizeBytes * 8;
+                return streamSizeBits;
+            }
+            return {};
+        }
+
+        std::optional< uint64_t > calculateBitRateForStream( EStreamType whichStream, size_t streamNum ) const
+        {
+            // prefer to calculate the value, as MediaInfo is often wrong... but the size is not always stored :(
+            auto numBits = calculateNumBitsForStream( whichStream, streamNum );
+            auto durationMS = getDurationMS( whichStream, streamNum );
+            return calculateBitRate( numBits, durationMS );
+        }
+
+        std::optional< uint64_t > getDurationMS( EStreamType whichStream, size_t streamNum ) const
+        {
+            auto stream = getStreamData( whichStream, streamNum );
+            if ( !stream )
+                return {};
+
+            auto durationMSString = stream->value( "Duration" );
+            bool aOK = false;
+            uint64_t durationMSecs = 0;
+            if ( durationMSString.indexOf( '.' ) == -1 )
+                durationMSecs = durationMSString.toULongLong( &aOK );
+            else
+            {
+                auto durationMSDouble = durationMSString.toDouble( &aOK );
+                if ( aOK )
+                    durationMSecs = static_cast< uint64_t >( std::round( durationMSDouble ) );
+            }
+            if ( aOK )
+                return durationMSecs;
+            return {};
+        }
+
+        std::optional< QString > calculateBitRateStringForStream( EStreamType whichStream, size_t streamNum ) const
+        {
+            auto retVal = calculateBitRateForStream( whichStream, streamNum );
+            if ( retVal.has_value() )
+                return QString::number( retVal.value() );
+            return {};
         }
 
         QStringList findDefaultValues( EStreamType whichStream, const std::list< EMediaTags > &keys ) const { return findDefaultValues( whichStream, toStringList( keys ) ); }
@@ -604,12 +798,20 @@ namespace NSABUtils
                 auto pos = retVal.find( tag );
                 if ( pos != retVal.end() )
                 {
-                    bool aOK;
-                    uint64_t numMSecs = ( *pos ).second.toInt( &aOK );
-                    if ( !aOK )
-                        numMSecs = 0;
+                    if ( ( *pos ).second.isEmpty() )
+                        return;
 
-                    auto newString = newStringFunc( numMSecs );
+                    bool aOK;
+                    uint64_t currValue = ( *pos ).second.toLongLong( &aOK );
+                    if ( !aOK )
+                    {
+                        auto tmp = ( *pos ).second.toDouble( &aOK );
+                        if ( aOK )
+                            currValue = static_cast< uint64_t >( std::round( tmp ) );
+                        else
+                            return;
+                    }
+                    auto newString = newStringFunc( currValue );
                     ( *pos ).second = newString;
                 }
             };
@@ -632,6 +834,8 @@ namespace NSABUtils
 
             cleanFunc( EMediaTags::eVideoBitrateString, []( uint64_t bitRate ) { return NFileUtils::byteSizeString( bitRate, true, false, 3, true, "bps" ); } );
             cleanFunc( EMediaTags::eAudioSampleRateString, []( uint64_t bitRate ) { return NFileUtils::byteSizeString( bitRate, true, false, 2, true, "Hz" ); } );
+            cleanFunc( EMediaTags::eAudioBitrateString, []( uint64_t bitRate ) { return NFileUtils::byteSizeString( bitRate, true, false, 2, true, "bps" ); } );
+            cleanFunc( EMediaTags::eTotalAudioBitrateString, []( uint64_t bitRate ) { return NFileUtils::byteSizeString( bitRate, true, false, 2, true, "bps" ); } );
             cleanFunc( EMediaTags::eOverAllBitrateString, []( uint64_t bitRate ) { return NFileUtils::byteSizeString( bitRate, true, false, 3, true, "bps" ); } );
         }
 
@@ -674,6 +878,7 @@ namespace NSABUtils
                 || ( tag == EMediaTags::eVideoBitrate )   //
                 || ( tag == EMediaTags::eVideoBitrateString )   //
                 || ( tag == EMediaTags::eHDRInfo )   //
+                || ( tag == EMediaTags::eFrameCount )   //
                 || ( tag == EMediaTags::eBitsPerPixel )   //
                 || ( tag == EMediaTags::eBitDepth )   //
                 || ( tag == EMediaTags::eFrameRate )   //
@@ -685,21 +890,16 @@ namespace NSABUtils
                 QString value;
                 if ( tag == EMediaTags::eAllVideoCodecs )
                 {
-                    auto values = findAllValues( EStreamType::eVideo, tag );
-                    auto defStreamNum = static_cast< int >( defaultStreamNum( EStreamType::eVideo ) );
-                    values[ defStreamNum ] += " (Default)";
-                    value = values.join( ", " );
-                    if ( values.count() > 1 )
-                        value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+                    value = getAllValues( EStreamType::eVideo, tag );
                 }
                 else
                 {
                     value = findValue( EStreamType::eVideo, streamNum, tag );
                     if ( value.isEmpty() )
                     {
-                        if ( ( tag == EMediaTags::eVideoBitrate ) || ( tag == EMediaTags::eVideoBitrateString ) )
+                        if ( tag == EMediaTags::eFrameCount )
                         {
-                            value = findValue( EStreamType::eGeneral, streamNum, EMediaTags::eOverAllBitrate );
+                            value = findValue( EStreamType::eVideo, streamNum, EMediaTags::eFrameCount );
                         }
                         else if ( tag == EMediaTags::eAspectRatio )
                         {
@@ -720,6 +920,13 @@ namespace NSABUtils
                 retVal = value;
             }
             else if (
+                ( tag == EMediaTags::eOverAllBitrate )   //
+                || ( tag == EMediaTags::eOverAllBitrateString )   //
+            )
+            {
+                retVal = findValue( EStreamType::eGeneral, streamNum, EMediaTags::eOverAllBitrate );
+            }
+            else if (
                 ( tag == EMediaTags::eFirstAudioCodec )   //
                 || ( tag == EMediaTags::eAudioCodec )   //
                 || ( tag == EMediaTags::eAllAudioCodecsDisp )   //
@@ -728,26 +935,20 @@ namespace NSABUtils
                 || ( tag == EMediaTags::eAllAudioCodecs )   //
                 || ( tag == EMediaTags::eAudioSampleRate )   //
                 || ( tag == EMediaTags::eAudioSampleRateString )   //
+                || ( tag == EMediaTags::eAudioBitrate )   //
+                || ( tag == EMediaTags::eAudioBitrateString )   //
+                || ( tag == EMediaTags::eTotalAudioBitrate )   //
+                || ( tag == EMediaTags::eTotalAudioBitrateString )   //
                 || ( tag == EMediaTags::eAudioChannelCount ) )
             {
                 QString value;
                 if ( tag == EMediaTags::eAllAudioCodecs )
                 {
-                    auto values = findAllValues( EStreamType::eAudio, tag );
-                    auto defStreamNum = static_cast< int >( defaultStreamNum( EStreamType::eAudio ) );
-                    values[ defStreamNum ] += " (Default)";
-                    value = values.join( ", " );
-                    if ( values.count() > 1 )
-                        value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+                    value = getAllValues( EStreamType::eAudio, tag );
                 }
                 else if ( tag == EMediaTags::eAllAudioCodecsDisp )
                 {
-                    auto values = findAllValues( EStreamType::eAudio, tag );
-                    auto defStreamNum = static_cast< int >( defaultStreamNum( EStreamType::eAudio ) );
-                    values[ defStreamNum ] += " (Default)";
-                    value = values.join( ", " );
-                    if ( values.count() > 1 )
-                        value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+                    value = getAllValues( EStreamType::eAudio, tag );
                 }
                 else
                     value = findValue( EStreamType::eAudio, streamNum, tag );
@@ -764,21 +965,11 @@ namespace NSABUtils
                 QString value;
                 if ( tag == EMediaTags::eAllSubtitleLanguages )
                 {
-                    auto values = findAllValues( EStreamType::eText, tag );
-                    auto defStreamNum = static_cast< int >( defaultStreamNum( EStreamType::eText ) );
-                    values[ defStreamNum ] += " (Default)";
-                    value = values.join( ", " );
-                    if ( values.count() > 1 )
-                        value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+                    value = getAllValues( EStreamType::eText, tag );
                 }
                 else if ( tag == EMediaTags::eAllSubtitleCodecs )
                 {
-                    auto values = findAllValues( EStreamType::eText, tag );
-                    auto defStreamNum = static_cast< int >( defaultStreamNum( EStreamType::eText ) );
-                    values[ defStreamNum ] += " (Default)";
-                    value = values.join( ", " );
-                    if ( values.count() > 1 )
-                        value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+                    value = getAllValues( EStreamType::eText, tag );
                 }
                 else
                     value = findValue( EStreamType::eText, streamNum, tag );
@@ -790,6 +981,18 @@ namespace NSABUtils
                 retVal = value;
             }
             return retVal;
+        }
+
+        QString getAllValues( NSABUtils::EStreamType whichStream, EMediaTags tag ) const
+        {
+            auto values = findAllValues( whichStream, tag );
+            auto defStreamNum = static_cast< int >( defaultStreamNum( whichStream ) );
+            if ( ( values.length() > 1 ) && ( defStreamNum < values.length() ) )
+                values[ defStreamNum ] += " (Default)";
+            auto value = values.join( ", " );
+            if ( values.count() > 1 )
+                value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+            return value;
         }
 
         std::unordered_map< EMediaTags, QString > getMediaTags( size_t streamNum, const std::list< EMediaTags > &tags ) const
@@ -814,32 +1017,33 @@ namespace NSABUtils
             auto realTags = tags;
             if ( tags.empty() )
             {
-                realTags = {
-                    EMediaTags::eFileName,   //
-                    EMediaTags::eTitle,   //
-                    EMediaTags::eLengthMS,   //
-                    EMediaTags::eLengthS,   //
-                    EMediaTags::eLength,   //
-                    EMediaTags::eDate,   //
-                    EMediaTags::eComment,   //
-                    EMediaTags::eBPM,   //
-                    EMediaTags::eArtist,   //
-                    EMediaTags::eComposer,   //
-                    EMediaTags::eGenre,   //
-                    EMediaTags::eTrack,   //
-                    EMediaTags::eAlbum,   //
-                    EMediaTags::eAlbumArtist,   //
-                    EMediaTags::eDiscnumber,   //
-                    EMediaTags::eAspectRatio,   //
-                    EMediaTags::eWidth,   //
-                    EMediaTags::eHeight,   //
-                    EMediaTags::eResolution,   //
-                    EMediaTags::eFirstVideoCodec,   //
-                    EMediaTags::eFirstAudioCodecDisp,   //
-                    EMediaTags::eVideoBitrate,   //
-                    EMediaTags::eAudioSampleRate,   //
-                    EMediaTags::eAudioSampleRate   //
-                };
+                realTags =   //
+                    {
+                        //
+                        EMediaTags::eFileName,   //
+                        EMediaTags::eTitle,   //
+                        EMediaTags::eLengthMS,   //
+                        EMediaTags::eLengthS,   //
+                        EMediaTags::eLength,   //
+                        EMediaTags::eDate,   //
+                        EMediaTags::eComment,   //
+                        EMediaTags::eBPM,   //
+                        EMediaTags::eArtist,   //
+                        EMediaTags::eComposer,   //
+                        EMediaTags::eGenre,   //
+                        EMediaTags::eTrack,   //
+                        EMediaTags::eAlbum,   //
+                        EMediaTags::eAlbumArtist,   //
+                        EMediaTags::eDiscnumber,   //
+                        EMediaTags::eAspectRatio,   //
+                        EMediaTags::eWidth,   //
+                        EMediaTags::eHeight,   //
+                        EMediaTags::eResolution,   //
+                        EMediaTags::eFirstVideoCodec,   //
+                        EMediaTags::eFirstAudioCodecDisp,   //
+                        EMediaTags::eVideoBitrate,   //
+                        EMediaTags::eTotalAudioBitrate   //
+                    };
             }
             return realTags;
         }
@@ -854,7 +1058,7 @@ namespace NSABUtils
             return aOK;
         }
 
-        bool loadCodecsFromFFProbe()
+        bool loadInfoFromFFProbe()
         {
             if ( !validateFFProbeEXE() )
                 return true;
@@ -917,17 +1121,29 @@ namespace NSABUtils
                 if ( !streamData )
                     continue;
 
-                streamData->addData( "FFMpegCodec", codec );
+                streamData->replaceData( "FFMpegCodec", codec );
 
-                if ( !stream.contains( "disposition" ) )
-                    continue;
-
-                auto disposition = stream[ "disposition" ].toObject();
-                auto defaultDisp = disposition[ "default" ].toInt() != 0;
-                streamData->addData( "Disposition_Default", QString( "%1" ).arg( defaultDisp ) );
-                streamData->setIsDefault( defaultDisp );
-                if ( defaultDisp )
-                    fDefaultStreams[ streamType ] = streamNum;
+                if ( stream.contains( "disposition" ) )
+                {
+                    auto disposition = stream[ "disposition" ].toObject();
+                    auto defaultDisp = disposition[ "default" ].toInt() != 0;
+                    streamData->replaceData( "Disposition_Default", QString( "%1" ).arg( defaultDisp ) );
+                    streamData->setIsDefault( defaultDisp );
+                    if ( defaultDisp )
+                        fDefaultStreams[ streamType ] = streamNum;
+                }
+                if ( stream.contains( "tags" ) )
+                {
+                    auto tags = stream[ "tags" ].toObject();
+                    for ( auto ii = tags.begin(); ii != tags.end(); ++ii )
+                    {
+                        if ( ii.key().startsWith( "NUMBER_OF_BYTES" ) )
+                        {
+                            auto bytes = ii.value().toString();
+                            streamData->replaceData( "StreamSizeBytes", bytes );
+                        }
+                    }
+                }
             }
             return true;
         }
@@ -1047,7 +1263,7 @@ namespace NSABUtils
         return fImpl->isCodec( checkCodecName, mediaCodecName, ffmpegFormats );
     }
 
-    uint64_t CMediaInfo::getUncompressedBitRate() const
+    uint64_t CMediaInfo::getUncompressedVideoBitRate() const
     {
         return getResolutionInfo().idealBitrate();
     }
@@ -1059,10 +1275,23 @@ namespace NSABUtils
         retVal.fFPS = getFrameRate();
         retVal.fBitsPerPixel = getBitsPerPixel();
         retVal.fInterlaced = getInterlaced();
+        retVal.fNumSeconds = getNumberOfSeconds();
+        retVal.fNumFrames = getNumberOfFrames();
         return retVal;
     }
 
-    uint64_t CMediaInfo::getBitRate() const
+    uint64_t CMediaInfo::getOverallBitRate() const
+    {
+        auto value = getMediaTag( EMediaTags::eOverAllBitrate );
+        bool aOK;
+        auto retVal = value.toULongLong( &aOK );
+        if ( !aOK )
+            return 0;
+
+        return retVal;
+    }
+
+    uint64_t CMediaInfo::getVideoBitRate() const
     {
         auto value = getMediaTag( EMediaTags::eVideoBitrate );
         bool aOK;
@@ -1073,11 +1302,32 @@ namespace NSABUtils
         return retVal;
     }
 
-    int CMediaInfo::getBitsPerPixel() const
+    uint64_t CMediaInfo::getDefaultAudioBitRate() const
+    {
+        return getBitRate( EStreamType::eAudio, defaultAudioStream() );
+    }
+
+    uint64_t CMediaInfo::getBitRate( EStreamType streamType, size_t streamNum ) const
+    {
+        return fImpl->getBitRate( streamType, streamNum );
+    }
+
+    uint32_t CMediaInfo::getBitsPerPixel() const
     {
         auto value = getMediaTag( EMediaTags::eBitsPerPixel );
         bool aOK;
-        auto retVal = value.toInt( &aOK );
+        auto retVal = static_cast< uint32_t >( value.toUInt( &aOK ) );
+        if ( !aOK )
+            return 0;
+
+        return retVal;
+    }
+
+    uint64_t CMediaInfo::getNumberOfFrames() const
+    {
+        auto value = getMediaTag( EMediaTags::eFrameCount );
+        bool aOK;
+        auto retVal = value.toDouble( &aOK );
         if ( !aOK )
             return 0;
 
@@ -1290,17 +1540,17 @@ namespace NSABUtils
 
     int CMediaInfo::numAudioStreams() const
     {
-        return getMediaTag( EMediaTags::eNumAudioStreams ).toInt();
+        return fImpl->numAudioStreams();
     }
 
     int CMediaInfo::numVideoStreams() const
     {
-        return getMediaTag( EMediaTags::eNumVideoStreams ).toInt();
+        return fImpl->numVideoStreams();
     }
 
     int CMediaInfo::numSubtitleStreams() const
     {
-        return getMediaTag( EMediaTags::eNumSubtitleStreams ).toInt();
+        return fImpl->numSubTitleStreams();
     }
 
     int CMediaInfo::defaultAudioStream() const
@@ -1337,9 +1587,7 @@ namespace NSABUtils
             case EMediaTags::eTitle:
                 return "Title";
             case EMediaTags::eLengthMS:
-                return "Duration";
             case EMediaTags::eLengthS:
-                return "Duration";
             case EMediaTags::eLength:
                 return "Duration";
             case EMediaTags::eDate:
@@ -1393,15 +1641,23 @@ namespace NSABUtils
             case EMediaTags::eAllSubtitleLanguages:
                 return "Language";
             case EMediaTags::eVideoBitrate:
-                return "BitRate";
             case EMediaTags::eVideoBitrateString:
+            case EMediaTags::eOverAllBitrate:
+            case EMediaTags::eOverAllBitrateString:
+            case EMediaTags::eAudioBitrate:
+            case EMediaTags::eAudioBitrateString:
                 return "BitRate";
+            case EMediaTags::eTotalAudioBitrate:
+            case EMediaTags::eTotalAudioBitrateString:
+                return "TotalAudioBitRate";
             case EMediaTags::eHDRInfo:
                 return "HDR_Format/String";
             case EMediaTags::eBitsPerPixel:
                 return "BitsPerPixel";
             case EMediaTags::eBitDepth:
                 return "BitDepth";
+            case EMediaTags::eFrameCount:
+                return "FrameCount";
             case EMediaTags::eFrameRate:
                 return "FrameRate";
             case EMediaTags::eFrameRateNum:
@@ -1410,12 +1666,7 @@ namespace NSABUtils
                 return "FrameRate_Den";
             case EMediaTags::eScanType:
                 return "ScanType";
-            case EMediaTags::eOverAllBitrate:
-                return "OverallBitRate";
-            case EMediaTags::eOverAllBitrateString:
-                return "OverallBitRate";
             case EMediaTags::eAudioSampleRate:
-                return "SamplingRate";
             case EMediaTags::eAudioSampleRateString:
                 return "SamplingRate";
             default:
@@ -1516,5 +1767,4 @@ namespace NSABUtils
             fQueuedMediaInfo.erase( pos );
         fMutex.unlock();
     }
-
 }

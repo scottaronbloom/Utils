@@ -110,11 +110,16 @@ namespace NSABUtils
         eOverAllBitrateString,
         eBitsPerPixel,
         eBitDepth,
+        eFrameCount,
         eFrameRate,
         eFrameRateNum,
         eFrameRateDen,
         eScanType,
         eAudioChannelCount,
+        eTotalAudioBitrate,
+        eTotalAudioBitrateString,
+        eAudioBitrate,
+        eAudioBitrateString,
         eAudioSampleRate,
         eAudioSampleRateString,
         eNumVideoStreams,
@@ -165,7 +170,9 @@ namespace NSABUtils
         std::pair< int, int > fResolution{ 0, 0 };
         bool fInterlaced{ false };
         double fFPS{ 0.0 };
-        int fBitsPerPixel{ 0 };
+        uint64_t fNumFrames{ 0 };
+        uint64_t fNumSeconds{ 0 };
+        uint32_t fBitsPerPixel{ 0 };
 
         uint64_t idealBitrate() const;
         bool isGreaterThan4kResolution( double threshold = 0.2 ) const;
@@ -174,8 +181,8 @@ namespace NSABUtils
         bool isHDResolution( double threshold = 0.2 ) const;
         bool isSubHDResolution( double threshold = 0.2 ) const;
 
-        bool isResolution( const std::pair< int, int > &target, double threshold = 0.2 ) const; // within +/- threshold
-        bool isGreaterThanResolution( const std::pair< int, int > &min, double threshold = 0.2 ) const;   // greater than + threshold 
+        bool isResolution( const std::pair< int, int > &target, double threshold = 0.2 ) const;   // within +/- threshold
+        bool isGreaterThanResolution( const std::pair< int, int > &min, double threshold = 0.2 ) const;   // greater than + threshold
         bool isLessThanResolution( const std::pair< int, int > &max, double threshold = 0.2 ) const;   // less than - threshold
     private:
     };
@@ -226,23 +233,30 @@ namespace NSABUtils
         QString getMediaTag( EMediaTags tag ) const;
         QString getMediaTag( size_t streamNum, EMediaTags tag ) const;
 
+        uint64_t getBitRate( EStreamType streamType, size_t streamNum ) const;
+
+        uint64_t getOverallBitRate() const;
+        uint64_t getVideoBitRate() const;
+        uint64_t getDefaultAudioBitRate() const;
+        uint64_t getUncompressedVideoBitRate() const;   // calculated value = width * height * bits per pixel * frames per second
+        uint64_t getUncompressedOverallBitRate() const;   // calculated value = width * height * bits per pixel * frames per second + audio size per stream
+
         uint64_t getBitRate() const;
-        uint64_t getUncompressedBitRate() const;   // calculated value = width * height * bits per pixel * frames per second
 
         SResolutionInfo getResolutionInfo() const;
 
         std::pair< int, int > getResolution() const;
+        uint64_t getNumberOfFrames() const;
         double getFrameRate() const;
-        int getBitsPerPixel() const;
+        uint32_t getBitsPerPixel() const;
         bool getInterlaced() const;
 
         // threshold is on total pixels per frame
         bool isGreaterThan4kResolution( double threshold = 0.2 ) const;
         bool is4kResolution( double threshold = 0.2 ) const;
-        bool isGreaterThanHDResolution( double threshold = 0.0 ) const;  
+        bool isGreaterThanHDResolution( double threshold = 0.0 ) const;
         bool isHDResolution( double threshold = 0.2 ) const;
         bool isSubHDResolution( double threshold = 0.2 ) const;
-
 
         bool isResolution( const std::pair< int, int > &target, double threshold = 0.2 ) const;
 
