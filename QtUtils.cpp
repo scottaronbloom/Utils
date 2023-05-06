@@ -721,7 +721,7 @@ namespace NSABUtils
         }
     }
 
-    int itemCount( const QModelIndex &idx, bool rowCountOnly, const std::pair< std::function< bool( const QVariant & value ) >, int > & excludeFunc )
+    int itemCount( const QModelIndex &idx, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &value ) >, int > &excludeFunc )
     {
         bool excluded = false;
         if ( excludeFunc.first )
@@ -747,7 +747,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    int itemCount( QAbstractItemModel *model, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &value ) >, int > & excludeFunc )
+    int itemCount( QAbstractItemModel *model, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &value ) >, int > &excludeFunc )
     {
         if ( !model )
             return 0;
@@ -886,7 +886,10 @@ namespace NSABUtils
             return;
 
         if ( ts )
+        {
             *ts << txt;
+            ts->flush();
+        }
         auto lineStart = 0;
         if ( txt == "\n" || txt == "\r\n" )
         {
