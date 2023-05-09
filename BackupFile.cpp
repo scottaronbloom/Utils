@@ -31,21 +31,21 @@ namespace NSABUtils
 {
     namespace NFileUtils
     {
-        bool backup( const std::string &fileName, const std::string &format /*= "%FN.bak"*/, std::string *msg /*= nullptr*/, bool keepBackups /*= true*/, bool useTrash /*= false*/, EMoveOrCopy moveOrCopyFile /*= EMoveOrCopy::eMove*/ )
+        bool backup( const std::string &fileName, std::string *msg /*= nullptr*/, const std::string &format /*= "%FN.bak"*/, bool keepBackups /*= true*/, bool useTrash /*= false*/, EMoveOrCopy moveOrCopyFile /*= EMoveOrCopy::eMove*/ )
         {
             QString lclErrorMsg;
-            auto retVal = backup( QString::fromStdString( fileName ), QString::fromStdString( format ), &lclErrorMsg, keepBackups, useTrash, moveOrCopyFile );
+            auto retVal = backup( QString::fromStdString( fileName ), &lclErrorMsg, QString::fromStdString( format ), keepBackups, useTrash, moveOrCopyFile );
             if ( msg )
                 *msg = lclErrorMsg.toStdString();
             return retVal;
         }
 
-        bool backup( const QFileInfo & fileInfo, const QString &format /*= "%FN.bak"*/, QString *msg /*= nullptr*/, bool keepBackups /*= true*/, bool useTrash /*= false*/, EMoveOrCopy moveOrCopyFile /*= EMoveOrCopy::eMove*/ )
+        bool backup( const QFileInfo &fileInfo, QString *msg /*= nullptr*/, const QString &format /*= "%FN.bak"*/, bool keepBackups /*= true*/, bool useTrash /*= false*/, EMoveOrCopy moveOrCopyFile /*= EMoveOrCopy::eMove*/ )
         {
-            return backup( fileInfo.absoluteFilePath(), format, msg, keepBackups, useTrash, moveOrCopyFile );
+            return backup( fileInfo.absoluteFilePath(), msg, format, keepBackups, useTrash, moveOrCopyFile );
         }
 
-        bool removeFile( const QString & backupFile, bool useTrash, QString * msg )
+        bool removeFile( const QString &backupFile, bool useTrash, QString *msg )
         {
             if ( !QFileInfo::exists( backupFile ) )
                 return true;
@@ -58,14 +58,14 @@ namespace NSABUtils
             return aOK;
         }
 
-        bool backup( const QString &fileName, const QString &format /*= "%FN.bak"*/, QString *msg /*= nullptr*/, bool keepBackups /*= true*/, bool useTrash /*= false*/, EMoveOrCopy moveOrCopyFile /*= EMoveOrCopy::eMove */ )
+        bool backup( const QString &fileName, QString *msg /*= nullptr*/, const QString &format /*= "%FN.bak"*/, bool keepBackups /*= true*/, bool useTrash /*= false*/, EMoveOrCopy moveOrCopyFile /*= EMoveOrCopy::eMove */ )
         {
             if ( !QFileInfo( fileName ).exists() )
                 return true;
 
             auto backupFile = format;
             if ( backupFile.isEmpty() )
-                backupFile = "%FN.bak"; // filename(num).bak
+                backupFile = "%FN.bak";   // filename(num).bak
 
             auto pos = backupFile.indexOf( "%FN" );
             if ( pos != -1 )
@@ -80,7 +80,7 @@ namespace NSABUtils
             }
 
             if ( backupFile == fileName )
-                backupFile = fileName + ".bak"; // someones is trying to backup the backup
+                backupFile = fileName + ".bak";   // someones is trying to backup the backup
             auto backupFileTemplate = backupFile;
 
             // backup already exists, move it out of the way
