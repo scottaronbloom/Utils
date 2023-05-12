@@ -41,6 +41,7 @@ class QTimer;
 class QLayout;
 class QAbstractItemView;
 class QTreeWidgetItem;
+class QVariant;
 
 class QTableView;
 class QTreeView;
@@ -65,26 +66,26 @@ class QXmlQuery;
 namespace NSABUtils
 {
     template< typename T >
-    QList< T > replaceInList(const QList< T >& inList, int xFirst, int xCount, const QList< T >& values, int xNum = -1)
+    QList< T > replaceInList( const QList< T > &inList, int xFirst, int xCount, const QList< T > &values, int xNum = -1 )
     {
-        auto prefix = inList.mid(0, xFirst);
-        auto mid = values.mid(0, xNum);
-        auto suffix = inList.mid(xFirst + xCount);
+        auto prefix = inList.mid( 0, xFirst );
+        auto mid = values.mid( 0, xNum );
+        auto suffix = inList.mid( xFirst + xCount );
 
         auto lRetVal = prefix + mid + suffix;
         return lRetVal;
     }
 
     template< typename T >
-    QList< T > replaceInList(const QList< T >& inList, int xFirst, int xCount, int xNum, const QList< T >& values)
+    QList< T > replaceInList( const QList< T > &inList, int xFirst, int xCount, int xNum, const QList< T > &values )
     {
         QList< T > retVal = inList;
 
         int jj = 0;
-        for (int ii = xFirst; (ii < retVal.count()) && (ii < xFirst + xCount) && (jj < values.count()) && (jj < xNum); ++ii, ++jj)
+        for ( int ii = xFirst; ( ii < retVal.count() ) && ( ii < xFirst + xCount ) && ( jj < values.count() ) && ( jj < xNum ); ++ii, ++jj )
         {
-            auto curr = values[jj];
-            retVal[ii] = curr;
+            auto curr = values[ jj ];
+            retVal[ ii ] = curr;
         }
 
         return retVal;
@@ -222,8 +223,8 @@ namespace NSABUtils
     SABUTILS_EXPORT void move( QSettings &settings, const QString &subGroup, const QString &key, bool overwrite );
     SABUTILS_EXPORT void copy( QSettings &from, QSettings &to, bool overwrite );
 
-    SABUTILS_EXPORT int itemCount( QAbstractItemModel *model, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &path ) >, int > & excludeFunc = { {}, Qt::DisplayRole } );
-    SABUTILS_EXPORT int itemCount( const QModelIndex &idx, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &path ) >, int > & excludeFunc = { {}, Qt::DisplayRole } );
+    SABUTILS_EXPORT int itemCount( QAbstractItemModel *model, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &path ) >, int > &excludeFunc = { {}, Qt::DisplayRole } );
+    SABUTILS_EXPORT int itemCount( const QModelIndex &idx, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &path ) >, int > &excludeFunc = { {}, Qt::DisplayRole } );
 
     SABUTILS_EXPORT QStringList getHeadersForModel( QAbstractItemModel *model );
     SABUTILS_EXPORT void writeModel(
@@ -273,6 +274,8 @@ namespace NSABUtils
     }
 
     SABUTILS_EXPORT void setDPIAwarenessToMode( int &argc, char **&argv, const char *mode );
+
+    SABUTILS_EXPORT QString getFirstString( const QVariant &value );
 }
 
 template< std::size_t I = 0, typename... Tp >

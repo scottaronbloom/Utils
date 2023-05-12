@@ -43,6 +43,7 @@
 #include <QTreeWidget>
 #include <QApplication>
 #include <QDebug>
+#include <QVariant>
 
 #ifdef QT_XMLPATTERNS_LIB
     #include <QXmlQuery>
@@ -1084,6 +1085,19 @@ namespace NSABUtils
             argc += 2;
             argv = newArgv;
         }
+    }
+
+    QString getFirstString( const QVariant &value )
+    {
+        if ( value.type() == QVariant::StringList )
+        {
+            auto retVal = value.toStringList();
+            if ( retVal.isEmpty() )
+                return {};
+            return retVal.front();
+        }
+        else
+            return value.toString();
     }
 
     int autoSize( QAbstractItemView *view, QHeaderView *header, int minWidth /*=-1*/ )
