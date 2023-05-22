@@ -46,3 +46,17 @@ set_target_properties( ${testProjectName} PROPERTIES
                                     VS_DEBUGGER_COMMAND "$<TARGET_FILE:${testProjectName}>" 
                                     VS_DEBUGGER_ENVIRONMENT "PATH=${DEBUG_PATH}" 
                      )
+
+set( testProjectName "" )
+SAB_UNIT_TEST(CantorHashUtils
+    TestCantorHash.cpp
+    "gmock"
+    testProjectName
+    ../CantorHash.h
+    )
+
+set_target_properties( ${testProjectName} PROPERTIES 
+                                    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${testProjectName}>" 
+                                    VS_DEBUGGER_COMMAND "$<TARGET_FILE:${testProjectName}>" 
+                                    VS_DEBUGGER_ENVIRONMENT "PATH=${DEBUG_PATH}" 
+                     )
