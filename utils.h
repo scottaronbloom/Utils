@@ -137,7 +137,7 @@ namespace NSABUtils
     template< typename T1, typename T2 >
     // FLOATING POINT just use std::pow
     // the return type is the larger of the two T1 and T2 types
-    auto power( T1 x, T2 y ) -> typename std::enable_if< std::is_floating_point< T1 >::value || std::is_floating_point< T2 >::value, TLargestType< T1, T2 > >::type
+    auto power( T1 x, T2 y ) -> typename std::enable_if< std::is_floating_point_v< T1 > || std::is_floating_point_v< T2 >, TLargestType< T1, T2 > >::type
     {
         return std::pow( x, y );
     }
@@ -145,7 +145,7 @@ namespace NSABUtils
     template< typename T1, typename T2 >
     // Integral types
     // the return type is the larger of the two T1 and T2 types
-    auto power( T1 x, T2 y ) -> typename std::enable_if< std::is_integral< T1 >::value && std::is_integral< T2 >::value, TLargestType< T1, T2 > >::type
+    auto power( T1 x, T2 y ) -> typename std::enable_if< std::is_integral_v< T1 > && std::is_integral_v< T2 >, TLargestType< T1, T2 > >::type
     {
         if ( y == 0 )
             return 1;
@@ -201,14 +201,14 @@ namespace NSABUtils
         {
         }
 
-        template< typename U, std::enable_if_t< !std::is_integral< U >::value, int > = 0 >
+        template< typename U, std::enable_if_t< !std::is_integral_v< U >, int > = 0 >
         CTimeString( const U &duration )
         {
             fMicroSecondsAvailable = ( U::period::num == 1 ) && ( U::period::den >= 1000000ULL );
             fDuration = std::chrono::duration_cast< std::chrono::microseconds >( duration );
         }
 
-        template< typename U, std::enable_if_t< std::is_integral< U >::value, int > = 0 >
+        template< typename U, std::enable_if_t< std::is_integral_v< U >, int > = 0 >
         CTimeString( const U &duration ) :
             CTimeString( std::chrono::milliseconds( duration ) )
         {
@@ -511,7 +511,7 @@ namespace NSABUtils
 
     SABUTILS_EXPORT bool isValidURL( const QString &url, int *start = nullptr, int *length = nullptr );
 
-    template< typename T, typename = std::enable_if< std::is_integral< T >::value > >
+    template< typename T, typename = std::enable_if< std::is_integral_v< T > > >
     std::list< std::list< T > > group( const std::list< T > &inList )
     {
         std::list< std::list< T > > retVal;
