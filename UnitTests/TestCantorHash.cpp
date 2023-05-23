@@ -26,13 +26,13 @@
 namespace NSABUtils
 {
     template< typename T1, typename T2 >
-    inline std::enable_if_t< !std::is_integral_v< T1 > || !std::is_integral_v< T2 >, int64_t > cantorHash( const T1 & /*lhs*/, const T2 & /*rhs*/ )
+    inline std::enable_if_t< !std::is_integral_v< T1 > || !std::is_integral_v< T2 >, size_t > cantorHash( const T1 & /*lhs*/, const T2 & /*rhs*/ )
     {
         return -1;
     }
 
     template< typename T1, typename T2 >
-    inline std::enable_if_t< !std::is_integral_v< T1 > || !std::is_integral_v< T2 >, int64_t > cantorHash( const std::pair< T1, T2 > &values )
+    inline std::enable_if_t< !std::is_integral_v< T1 > || !std::is_integral_v< T2 >, size_t > cantorHash( const std::pair< T1, T2 > &values )
     {
         return cantorHash( values.first, values.second );
     }
