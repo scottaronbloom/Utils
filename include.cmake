@@ -122,6 +122,7 @@ set(qtproject_H
 
 set(project_H
     AutoFetch.h
+    CantorHash.h
     EnumUtils.h
     FileCompare.h
     FFMpegFormats.h
@@ -134,6 +135,7 @@ set(project_H
     GPUDetect.h
     QtHashUtils.h
     JsonUtils.h
+    MetaUtils.h
     MoveToTrash.h
     QtDumper.h
     QtUtils.h
@@ -248,9 +250,9 @@ if ( MKVUTILS )
 endif()
 
 SET( project_pub_DEPS
-     Qt5::Concurrent
-     Qt5::Network
-     Qt5::AxContainer
+	#Qt5::Concurrent
+	#Qt5::Network
+	#Qt5::AxContainer
      ${MKVREADERLIB}
      ${MEDIAINFOLIB}
 )
