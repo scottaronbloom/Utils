@@ -36,7 +36,7 @@ namespace NSABUtils
     // base implementation
     // usage value = cantorHash( lhs, rhs );
     template< typename T1, typename T2 >
-    inline std::enable_if_t< std::is_integral_v< T1 > && std::is_integral_v< T2 >, int64_t > cantorHash( const T1 &lhs, const T2 &rhs )
+    inline std::enable_if_t< std::is_integral_v< T1 > && std::is_integral_v< T2 >, size_t > cantorHash( const T1 &lhs, const T2 &rhs )
     {
         static_assert( std::is_integral_v< T1 > );
         static_assert( std::is_integral_v< T2 > );
@@ -45,7 +45,7 @@ namespace NSABUtils
     }
 
     template< typename T1, typename T2 >
-    inline std::enable_if_t< std::is_integral_v< T1 > && std::is_integral_v< T2 >, int64_t > cantorHash( const std::pair< T1, T2 > &values )
+    inline std::enable_if_t< std::is_integral_v< T1 > && std::is_integral_v< T2 >, size_t > cantorHash( const std::pair< T1, T2 > &values )
     {
         static_assert( std::is_integral_v< T1 > );
         static_assert( std::is_integral_v< T2 > );
@@ -56,7 +56,7 @@ namespace NSABUtils
     // usage value = cantorHash( value );
     // equivilent to cantorHash( value, 0 );
     template< typename T1 >
-    inline std::enable_if_t< !is_container_v< T1 > && !is_tuple_v< T1 >, int64_t > cantorHash( const T1 &value )
+    inline std::enable_if_t< !is_container_v< T1 > && !is_tuple_v< T1 >, size_t > cantorHash( const T1 &value )
     {
         static_assert( std::is_integral_v< T1 > );
 
@@ -66,7 +66,7 @@ namespace NSABUtils
     // 2 values, 1 fixed 1 variadic of length 1
     // value = cantorHash( lhs, rhs );
     template< typename T, typename... Targs >
-    inline std::enable_if_t< ( sizeof...( Targs ) == 1 ), int64_t > cantorHash( T lhs, T rhs, Targs... Fargs )
+    inline std::enable_if_t< ( sizeof...( Targs ) == 1 ), size_t > cantorHash( T lhs, T rhs, Targs... Fargs )
     {
         return cantorHash( lhs, cantorHash( rhs, Fargs... ) );
     }
@@ -74,7 +74,7 @@ namespace NSABUtils
     // 3 or more values, 1 fixed, 2 ore more variadic
     // value = cantorHash( lhs, rhs );
     template< typename T, typename... Targs >
-    inline std::enable_if_t< ( sizeof...( Targs ) >= 2 ), int64_t > cantorHash( T lhs, Targs... Fargs )
+    inline std::enable_if_t< ( sizeof...( Targs ) >= 2 ), size_t > cantorHash( T lhs, Targs... Fargs )
     {
         return cantorHash( lhs, cantorHash( Fargs... ) );
     }
@@ -86,7 +86,7 @@ namespace NSABUtils
     // std::container< T > values = {1,2,3};
     // value = cantorHash( values.begin(), values.end() );
     template< class Iterator >
-    inline typename std::enable_if_t< is_iterator_v< Iterator >, int64_t > cantorHash( Iterator begin, const Iterator &end )
+    inline typename std::enable_if_t< is_iterator_v< Iterator >, size_t > cantorHash( Iterator begin, const Iterator &end )
     {
         static_assert( std::is_integral_v< typename std::iterator_traits< Iterator >::value_type > );
         if ( begin == end )
@@ -96,7 +96,7 @@ namespace NSABUtils
             return cantorHash( *begin, 0 );
 
         auto rbegin = end;
-        int64_t retVal = -1;
+        size_t retVal = -1;
         do
         {
             --rbegin;   // if you are getting asyntax error here, your iterator pair is one direction only
@@ -115,7 +115,7 @@ namespace NSABUtils
     // usage
     // value = cantorHash( {1,2,3} );
     template< typename T >
-    inline typename std::enable_if_t< ( std::is_integral_v< T > ), int64_t > cantorHash( const std::initializer_list< T > &value )
+    inline typename std::enable_if_t< (std::is_integral_v< T >), size_t > cantorHash( const std::initializer_list< T > &value )
     {
         return cantorHash( value.begin(), value.end() );
     }
@@ -125,7 +125,7 @@ namespace NSABUtils
     // std::container< T > values = {1,2,3};
     // value = cantorHash( values );
     template< typename T1 >
-    inline std::enable_if_t< is_container_v< T1 >, int64_t > cantorHash( const T1 &value )
+    inline std::enable_if_t< is_container_v< T1 >, size_t > cantorHash( const T1 &value )
     {
         return cantorHash( value.begin(), value.end() );
     }
@@ -134,7 +134,7 @@ namespace NSABUtils
     // cantorHash( std::get< 0 >( tuple ), std::get< 1 >( tuple ), std::get< 2 >( tuple ), .... std::get< sz - 1 >( tuple ) )
     // typically used with cantorHash( std::tuple( ... ) );
     template< typename Tp, size_t... II >
-    inline std::enable_if_t< is_tuple_v< Tp >, int64_t > cantorHash( const Tp &tuple, const std::index_sequence< II... > & /*indexSeq*/ )
+    inline std::enable_if_t< is_tuple_v< Tp >, size_t > cantorHash( const Tp &tuple, const std::index_sequence< II... > & /*indexSeq*/ )
     {
         return cantorHash( std::get< II >( tuple )... );
     }
@@ -142,7 +142,7 @@ namespace NSABUtils
     // usage
     // value = cantorHash( std::make_tuple( 1,2,3 ) );
     template< typename Tp >
-    inline std::enable_if_t< is_tuple_v< Tp >, int64_t > cantorHash( const Tp &tuple )
+    inline std::enable_if_t< is_tuple_v< Tp >, size_t > cantorHash( const Tp &tuple )
     {
         constexpr auto sz = std::tuple_size< Tp >::value;
         auto revSequence = std::make_index_sequence< sz >{};
