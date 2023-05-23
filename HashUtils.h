@@ -44,7 +44,7 @@ namespace NSABUtils
     }
 
     template< typename T >
-    inline auto HashCombine( size_t seed, const std::initializer_list< T > &values, bool needsHash ) -> typename std::enable_if< std::is_same< std::size_t, T >::value, size_t >::type
+    inline auto HashCombine( size_t seed, const std::initializer_list< T > &values, bool needsHash ) -> typename std::enable_if< std::is_same_v< std::size_t, T >, size_t >::type
     {
         std::hash< T > hasher;
         std::size_t retVal = seed;
@@ -58,7 +58,7 @@ namespace NSABUtils
 
     template< typename T >
     inline auto HashCombine( const std::initializer_list< T > &values, bool needsHash )   // only use when needsHash == false
-        -> typename std::enable_if< std::is_same< std::size_t, T >::value, size_t >::type
+        -> typename std::enable_if< std::is_same_v< std::size_t, T >, size_t >::type
     {
         return HashCombine( 0, values, needsHash );
     }
@@ -96,7 +96,7 @@ namespace NSABUtils
 
     namespace
     {
-        template< class Tuple, size_t Index = std::tuple_size< Tuple >::value - 1 >
+        template< class Tuple, size_t Index = std::tuple_size_v< Tuple > - 1 >
         struct HashValueImpl
         {
             static void apply( size_t &seed, Tuple const &tuple )
