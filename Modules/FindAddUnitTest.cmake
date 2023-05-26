@@ -19,7 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-FIND_PACKAGE( Qt5 COMPONENTS Core Widgets Test REQUIRED)
+
+if( Qt5_FOUND )
+	FIND_PACKAGE( Deploy COMPONENTS REQUIRED)
+endif()
+
 FUNCTION(CreateUserProj)
     IF(WIN32)
         SET(USER_VCXPROJ ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.vcxproj.user )
@@ -84,8 +88,10 @@ FUNCTION(SAB_UNIT_TEST_RESOURCE name)
         cmake_policy(SET CMP0020 NEW)
     endif()
 
-    QT5_ADD_RESOURCES( qt_project_QRC_SRCS ${ARGN} )
-    add_library(${RESOURCE_LIB_NAME} STATIC ${qt_project_QRC_SRCS})
+    if( Qt5_FOUND )
+       QT5_ADD_RESOURCES( qt_project_QRC_SRCS ${ARGN} )
+       add_library(${RESOURCE_LIB_NAME} STATIC ${qt_project_QRC_SRCS})
+    endif()
     set_target_properties( ${RESOURCE_LIB_NAME} PROPERTIES FOLDER ${FOLDER_NAME})
 
     set( ${RESOURCE_LIB_NAME} ${RESOURCE_LIB_NAME} PARENT_SCOPE )
@@ -132,17 +138,25 @@ FUNCTION(SAB_UNIT_TEST name file libs tgtNameVar )
     SET( FOLDER_NAME "UnitTests/${FOLDER_NAME}" )
     #MESSAGE( "FOLDER_NAME=${FOLDER_NAME}" )
     set_target_properties( ${TEST_NAME} PROPERTIES FOLDER ${FOLDER_NAME})
-    SET (NEWPATH "${CMAKE_BINARY_DIR}/tcl/src/Debug;${CMAKE_BINARY_DIR}/tcl/src/RelWithDebInfo;${QTDIR}/bin;${OPENSSL_ROOT_DIR};$ENV{PATH}" )
+    if ( Qt5_FOUND )
+        SET (NEWPATH "${CMAKE_BINARY_DIR}/tcl/src/Debug;${CMAKE_BINARY_DIR}/tcl/src/RelWithDebInfo;${QTDIR}/bin;${OPENSSL_ROOT_DIR};$ENV{PATH}" )
+    else()
+        SET (NEWPATH "${CMAKE_BINARY_DIR}/tcl/src/Debug;${CMAKE_BINARY_DIR}/tcl/src/RelWithDebInfo;${OPENSSL_ROOT_DIR};$ENV{PATH}" )
+    endif()
     STRING(REPLACE ";" "\\;" NEWPATH "${NEWPATH}")
     SET_TESTS_PROPERTIES( ${TEST_NAME} PROPERTIES ENVIRONMENT "PATH=${NEWPATH}" )
 
-    STRING(FIND "${libs}" "Qt5::" pos1)
-    STRING(FIND "${libs}" "Qt::" pos2)
+    MESSAGE( STATUS "${libs}" )
+    if ( Qt5_FOUND )
+        STRING(FIND "${libs}" "Qt5::" pos1)
+        STRING(FIND "${libs}" "Qt::" pos2)
 
-    if( NOT ( ( ${pos1} EQUAL -1 ) AND ( ${pos2} EQUAL -1 ) ) )
-        MESSAGE( STATUS "Adding Qt for Test: '${TEST_NAME}'" )
-        DeployQt( ${TEST_NAME} . NON_INSTALL_ONLY 1 NO_TRANSLATIONS 1)
-    ENDIF()
+
+        if( NOT ( ( ${pos1} EQUAL -1 ) AND ( ${pos2} EQUAL -1 ) ) )
+            MESSAGE( STATUS "Adding Qt for Test: '${TEST_NAME}'" )
+            DeployQt( ${TEST_NAME} . NON_INSTALL_ONLY 1 NO_TRANSLATIONS 1)
+        ENDIF()
+    endif()
     
     #MESSAGE( "FOLDER_NAME=${FOLDER_NAME}" )
     #MESSAGE( "TEST_NAME=${TEST_NAME}" )
