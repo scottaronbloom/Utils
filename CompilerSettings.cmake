@@ -74,6 +74,9 @@ add_link_options(
 )
 
 add_compile_options(
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},32>,$<VERSION_GREATER_EQUAL:${MSVC_VERSION},1800>>:/SAFESEH:NO>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},64>>:/bigobj>
+
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
     $<$<CXX_COMPILER_ID:MSVC>:/w34700> 
@@ -86,10 +89,17 @@ add_compile_options(
     $<$<CXX_COMPILER_ID:MSVC>:/wd4251> 
     $<$<CXX_COMPILER_ID:MSVC>:/wd4231> 
     $<$<CXX_COMPILER_ID:MSVC>:/wd4503>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:/w34100>
+
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:/WX>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<BOOL:${WARN_ALL}>>:/W4>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/W3>
+
+    $<$<CXX_COMPILER_ID:MSVC>:/Zc:__cplusplus>
+    $<$<CXX_COMPILER_ID:MSVC>:/Zc:__STDC__>
 
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/MDd>
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/ZI>
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/W3>
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Od>
 
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/MD>
@@ -107,58 +117,52 @@ add_compile_options(
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:MinSizeRel>>:/O2>
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:MinSizeRel>>:/Ob1>
     
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:/WX>
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:/w34100>
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<BOOL:${WARN_ALL}>>:/W4>
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},32>,$<VERSION_GREATER_EQUAL:${MSVC_VERSION},1800>>:/SAFESEH:NO>
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<EQUAL:${BITSIZE},64>>:/bigobj>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Waddress>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wchar-subscripts>
 
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Waddress>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wchar-subscripts>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wcomment>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wformat>
 
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wcomment>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wformat>
-
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmaybe-uninitialized>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmissing-braces>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wnonnull>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wparentheses>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wreturn-type>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wsequence-point>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wsign-compare> # big changes
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmaybe-uninitialized>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmissing-braces>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wnonnull>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wparentheses>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wreturn-type>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wsequence-point>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wsign-compare> # big changes
 
     # we dont use -fstrict aliasing or -fstrict-overflow the following 2 are worthless
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wstrict-aliasing>
-    # $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wstrict-overflow=1>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wstrict-aliasing>
+    # $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wstrict-overflow=1>
 
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wswitch>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wtrigraphs>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wuninitialized>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunknown-pragmas> # have to figure out a way with windows
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-function>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-label>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-value>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-variable>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wvolatile-register-var>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wswitch>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wtrigraphs>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wuninitialized>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunknown-pragmas> # have to figure out a way with windows
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-function>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-label>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-value>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-variable>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wvolatile-register-var>
 
     #the following are form -Wextra
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wclobbered>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wempty-body>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wignored-qualifiers>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmissing-field-initializers>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wtype-limits>
-    # $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wshift-negative-value> #not available on our compiler
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-parameter>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-but-set-parameter>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wclobbered>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wempty-body>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wignored-qualifiers>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wmissing-field-initializers>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wtype-limits>
+    # $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wshift-negative-value> #not available on our compiler
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-parameter>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wunused-but-set-parameter>
 
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wno-return-local-addr>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wreorder>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wc++11-compat>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Werror=suggest-override>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wc++14-compat> # not available on our compiler
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wno-return-local-addr>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wreorder>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wc++11-compat>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Werror=suggest-override>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_EXTENSIVE_WARNINGS}>>>:-Wc++14-compat> # not available on our compiler
 
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:-Werror>
-    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<BOOL:${WARN_ALL}$>>:-Wall>
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fPIC>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<NOT:$<BOOL:${NO_WARNING_AS_ERROR}>>>:-Werror>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<BOOL:${WARN_ALL}$>>:-Wall>
+    $<$<CXX_COMPILER_ID:GNU>:-fPIC>
 )
 
