@@ -21,10 +21,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-find_package(Qt5Core REQUIRED)
+find_package(Qt5 QUIET COMPONENTS Core)
 find_package(DeploySystem REQUIRED)
 
-if( NOT DEFINED DEPLOYQT_EXECUTABLE )
+if( USE_QT AND NOT DEFINED DEPLOYQT_EXECUTABLE )
 	# Retrieve the absolute path to qmake and then use that path to find
 	# the <os>deployqt binaries
 	get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
