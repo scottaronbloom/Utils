@@ -72,9 +72,9 @@ endif()
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
-find_package(Qt5 COMPONENTS Core Widgets Xml Concurrent Network REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Xml Concurrent Network QUIET)
 IF(WIN32)
-    find_package(Qt5 COMPONENTS AxContainer REQUIRED)
+    find_package(Qt5 COMPONENTS AxContainer QUIET)
 ENDIF()
 
 if ( MKVUTILS )
@@ -96,6 +96,7 @@ endif()
 find_package(IncludeProjectSettings REQUIRED)
 include( ${CMAKE_CURRENT_LIST_DIR}/include.cmake )
 project( ${_PROJECT_NAME} ) 
+MESSAGE( "USE_QT=${USE_QT}" )
 IncludeProjectSettings(QT ${USE_QT})
 
 if ( MKVUTILS )
