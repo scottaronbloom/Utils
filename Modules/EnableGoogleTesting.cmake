@@ -35,7 +35,7 @@ if( SAB_ENABLE_TESTING )
 		MESSAGE( FATAL_ERROR "Could not find googletest root directory" )
 	endif()
     MESSAGE( STATUS "Adding support for testing - ${GOOGLETEST_ROOT_DIR}" )
-    SET( gtest_force_shared_crt ON CACHE BOOL "Always use shared crt" )
+    SET( gtest_force_shared_crt ON CACHE BOOL "" FORCE )
     UNSET( INSTALL_GTEST CACHE )
     SET( INSTALL_GTEST OFF CACHE BOOL "Never install gtest" )
     if ( NOT gtest_force_shared_crt )
@@ -47,6 +47,13 @@ if( SAB_ENABLE_TESTING )
     
     enable_testing()
     
+    add_compile_definitions( 
+        $<$<CXX_COMPILER_ID:MSVC>:_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING>
+        $<$<CXX_COMPILER_ID:MSVC>:_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS>
+        $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${SAB_DEBUG_ITERATORS}>>>:_HAS_ITERATOR_DEBUGGING =0>
+        $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${SAB_DEBUG_ITERATORS}>>>:_ITERATOR_DEBUG_LEVEL=0>
+        $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<BOOL:${SAB_DEBUG_ITERATORS}>>>:_CONTAINER_DEBUG_LEVEL=0>
+    )    
     add_subdirectory( ${GOOGLETEST_ROOT_DIR} )
     SET(GOOGLETEST_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googletest)
     SET(GMOCK_SOURCE_DIR ${GOOGLETEST_ROOT_DIR}/googlemock)
