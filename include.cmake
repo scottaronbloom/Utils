@@ -122,6 +122,7 @@ set(qtproject_H
 
 set(project_H
     AutoFetch.h
+    CantorHash.h
     EnumUtils.h
     FileCompare.h
     FFMpegFormats.h

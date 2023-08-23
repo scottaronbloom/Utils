@@ -27,13 +27,11 @@
 #include "MKVUtils.h"
 #include "AutoWaitCursor.h"
 #include "UtilityViews.h"
-
-
+#include "QtUtils.h"
 
 #include <QMessageBox>
 #include <QTimer>
 #include <QFileInfo>
-
 
 namespace NSABUtils
 {
@@ -67,7 +65,7 @@ namespace NSABUtils
         for ( auto && ii : tags )
         {
             bool isEditable = isSettableTag( ii.first );
-            auto item = new QTreeWidgetItem( QStringList() << displayName( ii.first ) + ":" << ii.second, static_cast<int>( ii.first ) );
+            auto item = new QTreeWidgetItem( QStringList() << displayName( ii.first ) + ":" << NSABUtils::getFirstString( ii.second ), static_cast<int>( ii.first ) );
             fImpl->tags->addTopLevelItem( item );
             if ( isEditable )
             {
@@ -78,7 +76,7 @@ namespace NSABUtils
 
     void CSetMKVTags::accept()
     {
-        std::unordered_map< NSABUtils::EMediaTags, QString > tags;
+        TMediaTagMap tags;
         int rowCount = fImpl->tags->topLevelItemCount();
         for ( auto ii = 0; ii < rowCount; ++ii )
         {

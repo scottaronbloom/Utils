@@ -128,6 +128,7 @@ namespace NSABUtils
         eSubtitleLanguage,
         eFirstSubtitleLanguage,
         eAllSubtitleLanguages,
+        eAllSubtitleDispString,
         eSubtitleCodec,
         eFirstSubtitleCodec,
         eAllSubtitleCodecs,
@@ -163,6 +164,8 @@ namespace std
 namespace NSABUtils
 {
     enum class EMediaTags;
+    using TMediaTagMap = std::unordered_map< EMediaTags, QVariant >;
+
     class CStreamData;
     class CMediaInfoImpl;
     struct SABUTILS_EXPORT SResolutionInfo
@@ -193,7 +196,6 @@ namespace NSABUtils
         friend class CMediaInfoMgr;
 
     private:
-        [[nodiscard]] bool queueLoad( std::function< void( const QString &fileName ) > onFinish );
         CMediaInfo();
         CMediaInfo( const QString &fileName, bool delayLoad );
         CMediaInfo( const QFileInfo &fi, bool delayLoad );
@@ -227,8 +229,8 @@ namespace NSABUtils
         bool isCodec( const QString &checkCodecName, const QString &mediaCodecName, CFFMpegFormats *ffmpegFormats );
         bool isHEVCCodec( QString mediaCodecName, CFFMpegFormats *ffmpegFormats );
 
-        std::unordered_map< EMediaTags, QString > getSettableMediaTags() const;
-        std::unordered_map< EMediaTags, QString > getMediaTags( const std::list< EMediaTags > &tags = {} ) const;
+        TMediaTagMap getSettableMediaTags() const;
+        TMediaTagMap getMediaTags( const std::list< EMediaTags > &tags = {} ) const;
 
         QString getMediaTag( EMediaTags tag ) const;
         QString getMediaTag( size_t streamNum, EMediaTags tag ) const;
@@ -267,7 +269,7 @@ namespace NSABUtils
         static int64_t getNumberOfMSecs( const QString &fileName );
 
         static QString getMediaTag( const QString &fileName, EMediaTags tag );
-        static std::unordered_map< EMediaTags, QString > getMediaTags( const QString &path, const std::list< EMediaTags > &tags );
+        static TMediaTagMap getMediaTags( const QString &path, const std::list< EMediaTags > &tags );
 
         int numAudioStreams() const;
         int numVideoStreams() const;
@@ -280,10 +282,8 @@ namespace NSABUtils
         int audioChannelCount( size_t streamNum = -1 ) const;
 
         QStringList allSubtitleCodecs() const;
-    Q_SIGNALS:
-        void sigMediaLoaded( const QString &fileName );
-
     private:
+        [[nodiscard]] bool queueLoad();
         std::shared_ptr< CMediaInfoImpl > fImpl;
     };
 
@@ -306,6 +306,8 @@ namespace NSABUtils
         void slotMediaLoaded( const QString &fileName );
     Q_SIGNALS:
         void sigMediaLoaded( const QString &fileName );
+        void sigMediaQueued( const QString &fileName );
+        void sigMediaFinished( const QString &fileName, bool success );
 
     private:
         void removeFromMediaInfoQueue( const QString &fileName );
