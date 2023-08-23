@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "MKVUtils.h"
+#include "QtUtils.h"
 #include "MediaInfo.h"
 
 #include "SABUtilsResources.h"
@@ -36,7 +37,7 @@
 
 namespace NSABUtils
 {
-    bool setMediaTags( const QString &fileName, const std::unordered_map< EMediaTags, QString > &newTagValues, const QString &mkvPropEdit, QString *msg /*=nullptr */ )
+    bool setMediaTags( const QString &fileName, const TMediaTagMap &newTagValues, const QString &mkvPropEdit, QString *msg /*=nullptr */ )
     {
         initResources();
         if ( !QFileInfo( fileName ).isFile() )
@@ -78,13 +79,13 @@ namespace NSABUtils
                     *msg = QObject::tr( "Tag %1 is invalid" ).arg( displayName( ii.first ) );
                 return false;
             }
-            stringBasedTags[ name ] = ii.second;
+            stringBasedTags[ name ] = NSABUtils::getFirstString( ii.second );
         }
 
         auto newTitle = QString();
         auto pos = currentValues.find( EMediaTags::eTitle );
         if ( pos != currentValues.end() )
-            newTitle = ( *pos ).second;
+            newTitle = NSABUtils::getFirstString( ( *pos ).second );
 
         if ( newTitle.isEmpty() )
             newTitle = QFileInfo( fileName ).baseName();

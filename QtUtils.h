@@ -285,7 +285,7 @@ inline typename std::enable_if< I == sizeof...( Tp ), void >::type printToDebug(
 }
 
 template< std::size_t I = 0, typename... Tp >
-    inline typename std::enable_if < I< sizeof...( Tp ), void >::type printToDebug( QDebug &debug, const std::tuple< Tp... > &value )
+    inline typename std::enable_if < I < sizeof...( Tp ), void >::type printToDebug( QDebug &debug, const std::tuple< Tp... > &value )
 {
     if ( I != 0 )
         debug.nospace() << ", ";

@@ -24,6 +24,7 @@
 #include "MKVUtils.h"
 #include "FileBasedCache.h"
 #include "FFMpegFormats.h"
+#include "QtUtils.h"
 
 #include "utils.h"
 #include "FileUtils.h"
@@ -69,6 +70,67 @@ namespace NSABUtils
 
         size_t size() const { return fStreamData.size(); }
         std::pair< QString, QString > operator[]( size_t idx ) const { return fStreamData[ idx ]; }
+
+        bool postProcess()
+        {
+            if ( fStreamType == EStreamType::eAudio )
+            {
+                auto codec = value( "CodecID" ).trimmed();   // get the codec
+                if ( codec.trimmed().isEmpty() )
+                    return false;
+                auto numChannels = value( mediaInfoTagName( EMediaTags::eAudioChannelCount ) );
+                bool aOK = true;
+                auto channelCount = numChannels.toInt( &aOK );
+                if ( !numChannels.isEmpty() && aOK )
+                {
+                    QString channelString;
+                    if ( channelCount > 2 )
+                        channelString = QString( " %2.1" ).arg( channelCount - 1 );
+                    else if ( channelCount == 2 )
+                        channelString = QString( "stereo" );
+                    else
+                        channelString = QString( "mono" );
+                    codec = QString( "%1 %2" ).arg( codec ).arg( channelString ).trimmed();
+                }
+                if ( !aOK )
+                    return false;
+
+                auto lang = value( "Language" ).trimmed();
+                auto title = value( "Title" ).trimmed();
+
+                QStringList retVal = { title, lang, codec };
+                retVal.removeAll( QString() );
+                auto value = retVal.join( " - " ).trimmed();
+
+                addData( "AudioCodecIDDisp", value );
+            }
+            else if ( fStreamType == EStreamType::eText )
+            {
+                auto lang = value( "Language" ).trimmed();
+                auto title = value( "Title" ).trimmed();
+                auto codec = value( "CodecID" ).trimmed();   // get the codec
+                if ( codec.isEmpty() || lang.isEmpty() )
+                    return false;
+
+                QStringList retVal = { title, lang, codec };
+                retVal.removeAll( QString() );
+                auto value = retVal.join( " - " ).trimmed();
+                addData( "AllSubtitleDispString", value );
+            }
+            if ( fStreamType == EStreamType::eVideo )
+            {
+                auto width = value( mediaInfoTagName( EMediaTags::eWidth ) );
+                auto height = value( mediaInfoTagName( EMediaTags::eHeight ) );
+                if ( !width.isEmpty() && !height.isEmpty() )
+                {
+                    auto value = QString( "%1x%2" ).arg( width ).arg( height );
+                    addData( "Resolution", value );
+                }
+                else
+                    return false;
+            }
+            return true;
+        }
 
     private:
         EStreamType fStreamType{ EStreamType::eGeneral };
@@ -306,36 +368,6 @@ namespace NSABUtils
 
     QString CStreamData::value( const QString &key ) const
     {
-        if ( key == "AudioCodecIDDisp" )
-        {
-            auto codec = value( "CodecID" );   // get the codec
-            auto numChannels = value( mediaInfoTagName( EMediaTags::eAudioChannelCount ) );
-            bool aOK = true;
-            auto channelCount = numChannels.toInt( &aOK );
-            if ( !numChannels.isEmpty() && aOK )
-            {
-                QString channelString;
-                if ( channelCount > 2 )
-                    channelString = QString( " %2.1" ).arg( channelCount - 1 );
-                else if ( channelCount == 2 )
-                    channelString = QString( "stereo" );
-                else
-                    channelString = QString( "mono" );
-                return QString( "%1 %2" ).arg( codec ).arg( channelString );
-            }
-            else
-                return codec;
-        }
-        else if ( key == "Resolution" )
-        {
-            auto width = value( mediaInfoTagName( EMediaTags::eWidth ) );
-            auto height = value( mediaInfoTagName( EMediaTags::eHeight ) );
-            if ( !width.isEmpty() && !height.isEmpty() )
-            {
-                return QString( "%1x%2" ).arg( width ).arg( height );
-            }
-        }
-
         auto pos = fStreamDataMap.find( key );
         if ( key == "CodecID" )
         {
@@ -352,25 +384,9 @@ namespace NSABUtils
 
     bool CStreamData::contains( const QString &key ) const
     {
-        if ( key == "Resolution" )
-        {
-            auto pos = fStreamDataMap.find( mediaInfoTagName( EMediaTags::eWidth ) );
-            if ( pos == fStreamDataMap.end() )
-                return false;
-            pos = fStreamDataMap.find( mediaInfoTagName( EMediaTags::eWidth ) );
-            if ( pos == fStreamDataMap.end() )
-                return false;
-            return true;
-        }
-        else if ( key == "CodecID" )
-        {
-            auto pos = fStreamDataMap.find( "FFMpegCodec" );
-            return ( pos != fStreamDataMap.end() );
-        }
-        else if ( key == "AudioCodecIDDisp" )
-        {
-            return contains( "CodecID" );
-        }
+        auto realKey = key;
+        if ( key == "CodecID" )
+            realKey = "FFMpegCodec";
 
         auto pos = fStreamDataMap.find( key );
         return ( pos != fStreamDataMap.end() );
@@ -399,7 +415,7 @@ namespace NSABUtils
             auto retVal = sMediaInfoCache.find( fi.absoluteFilePath() );
             if ( !retVal )
             {
-                retVal = std::make_shared< CMediaInfoImpl >( fi );
+                retVal = std::make_shared< CMediaInfoImpl >( fi  );
                 if ( loadNow )
                     retVal->load();
                 sMediaInfoCache.add( retVal );
@@ -407,11 +423,14 @@ namespace NSABUtils
             return retVal;
         }
 
-        static bool mediaExists( const QFileInfo &fi ) { return sMediaInfoCache.contains( fi.absoluteFilePath() ); }
-
         static std::shared_ptr< CMediaInfoImpl > createImpl( const QString &path, bool loadNow ) { return createImpl( std::move( QFileInfo( path ) ), loadNow ); }
 
-        CMediaInfoImpl() {}
+        static bool mediaExists( const QFileInfo &fi ) { return sMediaInfoCache.contains( fi.absoluteFilePath() ); }
+
+        CMediaInfoImpl()
+        {
+        }
+
         CMediaInfoImpl( const QFileInfo &fi ) :
             fFileName( fi.absoluteFilePath() )
         {
@@ -421,7 +440,7 @@ namespace NSABUtils
 
         bool isQueued() const { return fQueued; };
         void setQueued( bool value ) { fQueued = value; }
-        bool queueLoad( std::function< void( const QString & ) > onFinish )
+        bool queueLoad()
         {
             QFileInfo fi( fFileName );
             if ( !fi.exists() || !fi.isReadable() )
@@ -431,17 +450,18 @@ namespace NSABUtils
             {
                 setQueued( true );
                 QThreadPool::globalInstance()->start(
-                    [ this, onFinish ]()
+                    [ this ]()
                     {
-                        qDebug() << "Loading media info for" << fFileName;
+                        Q_ASSERT( CMediaInfoMgr::instance() );
+                        emit CMediaInfoMgr::instance()->sigMediaQueued( fFileName );
                         if ( !load() )
                         {
-                            qDebug() << "Failed to get media info for" << fFileName;
+                            emit CMediaInfoMgr::instance()->sigMediaFinished( fFileName, false );
                             return;
                         }
-                        qDebug() << "Finished loading media info for" << fFileName;
+                        emit CMediaInfoMgr::instance()->sigMediaFinished( fFileName, true );
                         setQueued( false );
-                        onFinish( fFileName );
+                        emit CMediaInfoMgr::instance()->sigMediaLoaded( fFileName );
                     } );
                 return true;
             }
@@ -452,6 +472,7 @@ namespace NSABUtils
         {
             fAOK = initMediaInfo();
             fAOK = loadInfoFromFFProbe() && fAOK;
+            fAOK = postProcess() && fAOK;
             return fAOK;
         }
 
@@ -791,21 +812,22 @@ namespace NSABUtils
         QStringList findAllValues( EStreamType whichStream, EMediaTags key ) const { return findAllValues( whichStream, mediaInfoTagName( key ) ); }
         QStringList findAllValues( EStreamType whichStream, const QString &key ) const { return findAllValues( whichStream, std::list< QString >( { key } ) ); }
 
-        void cleanUpValues( std::unordered_map< EMediaTags, QString > &retVal ) const
+        void cleanUpValues( TMediaTagMap &retVal ) const
         {
             auto cleanFunc = [ &retVal ]( EMediaTags tag, std::function< QString( uint64_t ) > newStringFunc )
             {
                 auto pos = retVal.find( tag );
                 if ( pos != retVal.end() )
                 {
-                    if ( ( *pos ).second.isEmpty() )
+                    auto strValue = NSABUtils::getFirstString( ( *pos ).second );
+                    if ( strValue.isEmpty() )
                         return;
 
                     bool aOK;
-                    uint64_t currValue = ( *pos ).second.toLongLong( &aOK );
+                    uint64_t currValue = strValue.toLongLong( &aOK );
                     if ( !aOK )
                     {
-                        auto tmp = ( *pos ).second.toDouble( &aOK );
+                        auto tmp = strValue.toDouble( &aOK );
                         if ( aOK )
                             currValue = static_cast< uint64_t >( std::round( tmp ) );
                         else
@@ -839,9 +861,9 @@ namespace NSABUtils
             cleanFunc( EMediaTags::eOverAllBitrateString, []( uint64_t bitRate ) { return NFileUtils::byteSizeString( bitRate, true, false, 3, true, "bps" ); } );
         }
 
-        QString getMediaTag( size_t streamNum, EMediaTags tag ) const
+        QVariant getMediaTag( size_t streamNum, EMediaTags tag ) const
         {
-            QString retVal;
+            QVariant retVal;
             if ( tag == EMediaTags::eNumVideoStreams )
             {
                 retVal = QString::number( numStreams( EStreamType::eVideo ) );
@@ -887,35 +909,36 @@ namespace NSABUtils
                 || ( tag == EMediaTags::eScanType )   //
             )
             {
-                QString value;
+                QVariant value;
                 if ( tag == EMediaTags::eAllVideoCodecs )
                 {
                     value = getAllValues( EStreamType::eVideo, tag );
                 }
                 else
                 {
-                    value = findValue( EStreamType::eVideo, streamNum, tag );
-                    if ( value.isEmpty() )
+                    auto strValue = findValue( EStreamType::eVideo, streamNum, tag );
+                    if ( strValue.isEmpty() )
                     {
                         if ( tag == EMediaTags::eFrameCount )
                         {
-                            value = findValue( EStreamType::eVideo, streamNum, EMediaTags::eFrameCount );
+                            strValue = findValue( EStreamType::eVideo, streamNum, EMediaTags::eFrameCount );
                         }
                         else if ( tag == EMediaTags::eAspectRatio )
                         {
-                            value = findValue( EStreamType::eVideo, streamNum, EMediaTags::eDisplayAspectRatio );
+                            strValue = findValue( EStreamType::eVideo, streamNum, EMediaTags::eDisplayAspectRatio );
                         }
                         else if ( tag == EMediaTags::eFrameRate )
                         {
                             auto numerator = 1.0 * findValue( EStreamType::eVideo, streamNum, EMediaTags::eFrameRateNum ).toLongLong();
                             auto denominator = 1.0 * findValue( EStreamType::eVideo, streamNum, EMediaTags::eFrameRateDen ).toLongLong();
                             auto retVal = static_cast< uint64_t >( numerator * 1000.0 / denominator );
-                            value = QString::number( retVal );
-                            value.insert( value.length() - 3, "." );
+                            strValue = QString::number( retVal );
+                            strValue.insert( strValue.length() - 3, "." );
                         }
                         else if ( tag == EMediaTags::eBitsPerPixel )
-                            value = QString::number( 3 * findValue( EStreamType::eVideo, streamNum, EMediaTags::eBitDepth ).toInt() );
+                            strValue = QString::number( 3 * findValue( EStreamType::eVideo, streamNum, EMediaTags::eBitDepth ).toInt() );
                     }
+                    value = strValue;
                 }
                 retVal = value;
             }
@@ -941,7 +964,7 @@ namespace NSABUtils
                 || ( tag == EMediaTags::eTotalAudioBitrateString )   //
                 || ( tag == EMediaTags::eAudioChannelCount ) )
             {
-                QString value;
+                QVariant value;
                 if ( tag == EMediaTags::eAllAudioCodecs )
                 {
                     value = getAllValues( EStreamType::eAudio, tag );
@@ -958,12 +981,17 @@ namespace NSABUtils
                 ( tag == EMediaTags::eSubtitleLanguage )   //
                 || ( tag == EMediaTags::eFirstSubtitleLanguage )   //
                 || ( tag == EMediaTags::eAllSubtitleLanguages )   //
+                || ( tag == EMediaTags::eAllSubtitleDispString )   //
                 || ( tag == EMediaTags::eSubtitleCodec )   //
                 || ( tag == EMediaTags::eFirstSubtitleCodec )   //
                 || ( tag == EMediaTags::eAllSubtitleCodecs ) )
             {
-                QString value;
+                QVariant value;
                 if ( tag == EMediaTags::eAllSubtitleLanguages )
+                {
+                    value = getAllValues( EStreamType::eText, tag );
+                }
+                else if ( tag == EMediaTags::eAllSubtitleDispString )
                 {
                     value = getAllValues( EStreamType::eText, tag );
                 }
@@ -983,23 +1011,25 @@ namespace NSABUtils
             return retVal;
         }
 
-        QString getAllValues( NSABUtils::EStreamType whichStream, EMediaTags tag ) const
+        QVariant getAllValues( NSABUtils::EStreamType whichStream, EMediaTags tag ) const
         {
             auto values = findAllValues( whichStream, tag );
             auto defStreamNum = static_cast< int >( defaultStreamNum( whichStream ) );
-            if ( ( values.length() > 1 ) && ( defStreamNum < values.length() ) )
-                values[ defStreamNum ] += " (Default)";
-            auto value = values.join( ", " );
-            if ( values.count() > 1 )
-                value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
-            return value;
+            if ( ( defStreamNum >= 0 ) && ( defStreamNum < values.length() ) && ( values.count() > 1 ) )
+                values[ defStreamNum ] = "*" + values[ defStreamNum ];
+            //auto value = values.join( ", " );
+            //if ( values.count() > 1 )
+            //    value = QString( "(%1) %2" ).arg( values.count() ).arg( value );
+            //if ( values.count() == 1 )
+            //    return values.front();
+            return values;
         }
 
-        std::unordered_map< EMediaTags, QString > getMediaTags( size_t streamNum, const std::list< EMediaTags > &tags ) const
+        TMediaTagMap getMediaTags( size_t streamNum, const std::list< EMediaTags > &tags ) const
         {
             auto realTags = getRealTags( tags );
 
-            std::unordered_map< EMediaTags, QString > retVal;
+            TMediaTagMap retVal;
             for ( auto &&ii : realTags )
             {
                 auto value = getMediaTag( streamNum, ii );
@@ -1010,7 +1040,7 @@ namespace NSABUtils
             return retVal;
         }
 
-        std::unordered_map< EMediaTags, QString > getMediaTags( const std::list< EMediaTags > &tags ) const { return getMediaTags( -1, tags ); }
+        TMediaTagMap getMediaTags( const std::list< EMediaTags > &tags ) const { return getMediaTags( -1, tags ); }
 
         std::list< EMediaTags > getRealTags( const std::list< EMediaTags > &tags ) const
         {
@@ -1056,6 +1086,19 @@ namespace NSABUtils
             auto fi = QFileInfo( sFFProbeEXE );
             bool aOK = fi.exists() && fi.isExecutable();
             return aOK;
+        }
+
+        bool postProcess()
+        {
+            bool retVal = true;
+            for ( auto &&ii : fData )
+            {
+                for ( auto &&jj : ii.second )
+                {
+                    retVal = jj->postProcess() && retVal;
+                }
+            }
+            return retVal;
         }
 
         bool loadInfoFromFFProbe()
@@ -1204,9 +1247,9 @@ namespace NSABUtils
         return fImpl->load();
     }
 
-    bool CMediaInfo::queueLoad( std::function< void( const QString &fileName ) > onFinish )
+    bool CMediaInfo::queueLoad()
     {
-        return fImpl->queueLoad( onFinish );
+        return fImpl->queueLoad();
     }
 
     bool CMediaInfo::isQueued() const
@@ -1521,10 +1564,10 @@ namespace NSABUtils
         auto pos = tmp.find( tag );
         if ( pos == tmp.end() )
             return {};
-        return ( *pos ).second;
+        return NSABUtils::getFirstString( ( *pos ).second );
     }
 
-    std::unordered_map< EMediaTags, QString > CMediaInfo::getMediaTags( const QString &path, const std::list< EMediaTags > &tags )
+    TMediaTagMap CMediaInfo::getMediaTags( const QString &path, const std::list< EMediaTags > &tags )
     {
         auto mediaInfo = CMediaInfo( path );
         if ( !mediaInfo.aOK() )
@@ -1533,7 +1576,7 @@ namespace NSABUtils
         return mediaInfo.getMediaTags( tags );
     }
 
-    std::unordered_map< EMediaTags, QString > CMediaInfo::getMediaTags( const std::list< EMediaTags > &tags ) const
+    TMediaTagMap CMediaInfo::getMediaTags( const std::list< EMediaTags > &tags ) const
     {
         return fImpl->getMediaTags( tags );
     }
@@ -1640,6 +1683,8 @@ namespace NSABUtils
             case EMediaTags::eFirstSubtitleLanguage:
             case EMediaTags::eAllSubtitleLanguages:
                 return "Language";
+            case EMediaTags::eAllSubtitleDispString:
+                return "AllSubtitleDispString";
             case EMediaTags::eVideoBitrate:
             case EMediaTags::eVideoBitrateString:
             case EMediaTags::eOverAllBitrate:
@@ -1699,7 +1744,7 @@ namespace NSABUtils
         return ( *pos ).second;
     }
 
-    std::unordered_map< EMediaTags, QString > CMediaInfo::getSettableMediaTags() const
+    TMediaTagMap CMediaInfo::getSettableMediaTags() const
     {
         return getMediaTags(
             { EMediaTags::eTitle,   //
@@ -1729,12 +1774,11 @@ namespace NSABUtils
     std::shared_ptr< CMediaInfo > CMediaInfoMgr::getMediaInfo( const QFileInfo &fi )
     {
         auto retVal = std::shared_ptr< CMediaInfo >( new CMediaInfo( fi, false ) );
-        connect( retVal.get(), &CMediaInfo::sigMediaLoaded, this, &CMediaInfoMgr::slotMediaLoaded );
         fMutex.lock();
         fQueuedMediaInfo[ fi.absoluteFilePath() ] = retVal;
         fMutex.unlock();
 
-        auto queued = retVal->queueLoad( [ this ]( const QString &fileName ) { slotMediaLoaded( fileName ); } );
+        auto queued = retVal->queueLoad();
         if ( !queued )
         {
             removeFromMediaInfoQueue( fi.absoluteFilePath() );
