@@ -415,7 +415,7 @@ namespace NSABUtils
             auto retVal = sMediaInfoCache.find( fi.absoluteFilePath() );
             if ( !retVal )
             {
-                retVal = std::make_shared< CMediaInfoImpl >( fi );
+                retVal = std::make_shared< CMediaInfoImpl >( fi  );
                 if ( loadNow )
                     retVal->load();
                 sMediaInfoCache.add( retVal );
@@ -427,7 +427,9 @@ namespace NSABUtils
 
         static bool mediaExists( const QFileInfo &fi ) { return sMediaInfoCache.contains( fi.absoluteFilePath() ); }
 
-        CMediaInfoImpl() {}
+        CMediaInfoImpl()
+        {
+        }
 
         CMediaInfoImpl( const QFileInfo &fi ) :
             fFileName( fi.absoluteFilePath() )
@@ -451,15 +453,15 @@ namespace NSABUtils
                     [ this ]()
                     {
                         Q_ASSERT( CMediaInfoMgr::instance() );
-                        emit CMediaInfoMgr::instance() -> sigMediaQueued( fFileName );
+                        emit CMediaInfoMgr::instance()->sigMediaQueued( fFileName );
                         if ( !load() )
                         {
-                            emit CMediaInfoMgr::instance() -> sigMediaFinished( fFileName, false );
+                            emit CMediaInfoMgr::instance()->sigMediaFinished( fFileName, false );
                             return;
                         }
-                        emit CMediaInfoMgr::instance() -> sigMediaFinished( fFileName, true );
+                        emit CMediaInfoMgr::instance()->sigMediaFinished( fFileName, true );
                         setQueued( false );
-                        emit CMediaInfoMgr::instance() -> sigMediaLoaded( fFileName );
+                        emit CMediaInfoMgr::instance()->sigMediaLoaded( fFileName );
                     } );
                 return true;
             }

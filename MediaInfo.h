@@ -282,7 +282,6 @@ namespace NSABUtils
         int audioChannelCount( size_t streamNum = -1 ) const;
 
         QStringList allSubtitleCodecs() const;
-
     private:
         [[nodiscard]] bool queueLoad();
         std::shared_ptr< CMediaInfoImpl > fImpl;
