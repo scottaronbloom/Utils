@@ -32,6 +32,7 @@
 #include <cstdint>
 #include <memory>
 
+class QVariant;
 namespace MediaInfoDLL
 {
     class MediaInfo;
@@ -51,7 +52,8 @@ namespace std
 
 namespace NSABUtils
 {
-    SABUTILS_EXPORT bool setMediaTags( const QString &fileName, const std::unordered_map< EMediaTags, QString > &tags, const QString &mkvPropEdit, QString *msg = nullptr );
+    using TMediaTagMap = std::unordered_map< EMediaTags, QVariant >;
+    SABUTILS_EXPORT bool setMediaTags( const QString &fileName, const TMediaTagMap &tags, const QString &mkvPropEdit, QString *msg = nullptr );
     SABUTILS_EXPORT std::vector< double > getChapterStarts( const QString & fileName, const QString & ffprobeExe, QString & msg );
 }
 

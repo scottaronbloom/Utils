@@ -682,7 +682,7 @@ namespace NSABUtils
         {
             auto pos = ii.second.find( formatName );
             if ( pos == ii.second.end() )
-                return {};
+                continue;
 
             return std::move( removeFromlist( ( *pos ).second, exclude ) );
         }
