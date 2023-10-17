@@ -13,4 +13,4 @@
 	url =  git@github.com:katusk/CMakeNuGetTools.git
 [submodule "MediaInfo/MediaInfoLib"]
 	path = MediaInfo/MediaInfoLib
-	url =  http://github.com/towel42-com/MediaInfoLib.git
+	url =  git@github.com:towel42-com/MediaInfoLib.git
