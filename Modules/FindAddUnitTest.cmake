@@ -121,7 +121,7 @@ FUNCTION(SAB_UNIT_TEST name file libs tgtNameVar )
 
     #MESSAGE( "_lastDir=${_lastDir}" )
 
-    SET( TEST_NAME ${_lastDir}_${name} ) 
+    SET( TEST_NAME Test_${_lastDir}_${name} ) 
     project( ${TEST_NAME} )
 
     # message( "Adding unit test ${TEST_NAME}" )
