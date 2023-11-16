@@ -146,7 +146,7 @@ FUNCTION(SAB_UNIT_TEST name file libs tgtNameVar )
     STRING(REPLACE ";" "\\;" NEWPATH "${NEWPATH}")
     SET_TESTS_PROPERTIES( ${TEST_NAME} PROPERTIES ENVIRONMENT "PATH=${NEWPATH}" )
 
-    MESSAGE( STATUS "${libs}" )
+    #MESSAGE( STATUS "${libs}" )
     if ( Qt5_FOUND )
         STRING(FIND "${libs}" "Qt5::" pos1)
         STRING(FIND "${libs}" "Qt::" pos2)
