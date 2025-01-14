@@ -37,27 +37,29 @@ namespace NSABUtils
         class SABUTILS_EXPORT CModel : public QAbstractListModel
         {
             Q_OBJECT;
+
         public:
             enum ECustomRoles
             {
                 eImage = Qt::UserRole + 1
             };
 
-            CModel( QObject * parent = nullptr );
+            CModel( QObject *parent = nullptr );
 
             void setBIFFile( std::shared_ptr< CFile > bifFile );
 
-            virtual int rowCount( const QModelIndex & parent = QModelIndex() ) const override;
-            virtual QVariant data( const QModelIndex & index, int role = Qt::DisplayRole ) const override;
+            virtual int rowCount( const QModelIndex &parent = QModelIndex() ) const override;
+            virtual QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const override;
 
             QImage image( size_t imageNum );
+
         protected:
-            virtual bool canFetchMore( const QModelIndex & parent ) const override;
-            virtual void fetchMore( const QModelIndex & parent ) override;
+            virtual bool canFetchMore( const QModelIndex &parent ) const override;
+            virtual void fetchMore( const QModelIndex &parent ) override;
+
         private:
             std::shared_ptr< CFile > fBIFFile;
         };
     }
 }
 #endif
-

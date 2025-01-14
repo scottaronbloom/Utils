@@ -343,10 +343,7 @@ namespace NSABUtils
 #else
         QWidget *webview = nullptr;
 #endif
-        if ( label || tb || dbb || ( button && !checkBox && !radioButton ) || scrollbar || webview || ( className == "QColumnViewGrip" ) || ( className == "QFrame" ) || ( className == "QTableCornerButton" ) || ( className == "QWidget" ) || ( className == "QSplitter" )
-             || ( className == "QRubberBand" ) || ( className == "QSplitterHandle" ) || ( className == "QToolBar" ) || ( className == "QToolBarSeparator" ) || ( className == "QMenu" ) || ( className == "QMenuBar" )
-             || ( className == "QDockWidget" ) || ( className == "QStackedWidget" ) || ( className == "QChartView" ) || ( widget->objectName() == QString( "qt_scrollarea_viewport" ) )
-             || ( widget->objectName() == QString( "qt_scrollarea_hcontainer" ) ) || ( widget->objectName() == QString( "qt_scrollarea_vcontainer" ) ) || ( className.indexOf( "private", 0, Qt::CaseInsensitive ) != -1 ) )
+        if ( label || tb || dbb || ( button && !checkBox && !radioButton ) || scrollbar || webview || ( className == "QColumnViewGrip" ) || ( className == "QFrame" ) || ( className == "QTableCornerButton" ) || ( className == "QWidget" ) || ( className == "QSplitter" ) || ( className == "QRubberBand" ) || ( className == "QSplitterHandle" ) || ( className == "QToolBar" ) || ( className == "QToolBarSeparator" ) || ( className == "QMenu" ) || ( className == "QMenuBar" ) || ( className == "QDockWidget" ) || ( className == "QStackedWidget" ) || ( className == "QChartView" ) || ( widget->objectName() == QString( "qt_scrollarea_viewport" ) ) || ( widget->objectName() == QString( "qt_scrollarea_hcontainer" ) ) || ( widget->objectName() == QString( "qt_scrollarea_vcontainer" ) ) || ( className.indexOf( "private", 0, Qt::CaseInsensitive ) != -1 ) )
         {
             isSkipWidget = true;
             // qDebug() << "|---> Skipped Widget" << widget << "-" << widget->metaObject()->className() << widget->objectName();

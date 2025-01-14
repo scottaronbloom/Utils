@@ -22,7 +22,7 @@
 
 #include "WindowsError.h"
 #ifdef Q_OS_WINDOWS
-#include <qt_windows.h>
+    #include <qt_windows.h>
 #endif
 
 namespace NSABUtils

@@ -52,7 +52,7 @@ namespace NSABUtils
 
     public:
         CComputeMD5( const QString &fileName ) :
-            fFileInfo( fileName ){};
+            fFileInfo( fileName ) {};
 
         void run() override;
 

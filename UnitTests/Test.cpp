@@ -39,20 +39,20 @@
 //    return false;
 //}
 
-void PrintTo(const QString& str, ::std::ostream* oss)
+void PrintTo( const QString &str, ::std::ostream *oss )
 {
-    *oss << qPrintable(str);
+    *oss << qPrintable( str );
 }
 
-::std::ostream& operator<<(::std::ostream& oss, const QString& str)
+::std::ostream &operator<<( ::std::ostream &oss, const QString &str )
 {
-    oss << qPrintable(str);
+    oss << qPrintable( str );
     return oss;
 }
 
 namespace
 {
-   TEST( TestUtils, TestListIndex )
+    TEST( TestUtils, TestListIndex )
     {
         std::list< std::string > lst = { "a", "b", "c", "d", "e" };
         EXPECT_EQ( "a", NSABUtils::indexInList( 0, lst ) );
@@ -281,23 +281,7 @@ namespace
 
     TEST( TestUtils, isNarcissistic )
     {
-        std::vector< std::pair< int, std::vector< std::string > > > numbers{
-            { 2, { "1" } },
-            { 3, { "1", "2", "12", "22", "122" } },
-            { 4, { "1", "2", "3", "130", "131", "203", "223", "313", "332", "1103", "3303" } },
-            { 5, { "1", "2", "3", "4", "23", "33", "103", "433", "2124", "2403", "3134", "124030", "124031", "242423" } },
-            { 6, { "1", "2", "3", "4", "5", "243", "514", "14340", "14341", "14432", "23520", "23521", "44405", "435152", "5435254", "12222215", "555435035" } },
-            { 7, { "1", "2", "3", "4", "5", "6", "13", "34", "44", "63", "250", "251", "305", "505", "12205", "12252", "13350", "13351", "15124", "36034" } },
-            { 8, { "1", "2", "3", "4", "5", "6", "7", "24", "64", "134", "205", "463", "660", "661" } },
-            { 9, { "1", "2", "3", "4", "5", "6", "7", "8", "45", "55", "150", "151", "570", "571", "2446", "12036", "12336", "14462" } },
-            { 10, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "153", "370", "371", "407", "1634", "8208", "9474", "54748", "92727", "93084", "548834" } },
-            { 11, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "56", "66", "105", "307", "708", "966", "A06", "A64", "8009", "11720", "11721", "12470" } },
-            { 12, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "25", "A5", "577", "668", "A83", "14765", "938A4", "369862", "A2394A" } },
-            { 13, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "14", "36", "67", "77", "A6", "C4", "490", "491", "509", "B85", "3964", "22593", "5B350" } },
-            { 14, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "136", "409", "74AB5", "153A632" } },
-            { 15, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "78", "88", "C3A", "D87", "1774", "E819", "E829", "7995C", "829BB", "A36BC" } },
-            { 16, { "1",   "2",   "3",   "4",   "5",   "6",   "7",   "8",   "9",    "A",     "B",     "C",     "D",     "E",     "F",     "156",   "173",   "208",   "248",   "285",   "4A5",   "5B0",   "5B1",   "60B",   "64B",  "8C0",
-                    "8C1", "99a", "aa9", "ac3", "ca8", "e69", "ea0", "ea1", "b8d2", "13579", "2b702", "2b722", "5a07c", "5a47c", "c00e0", "c00e1", "c04e0", "c04e1", "c60e7", "c64e7", "c80e0", "c80e1", "c84e0", "c84e1", "de030" } } };
+        std::vector< std::pair< int, std::vector< std::string > > > numbers{ { 2, { "1" } }, { 3, { "1", "2", "12", "22", "122" } }, { 4, { "1", "2", "3", "130", "131", "203", "223", "313", "332", "1103", "3303" } }, { 5, { "1", "2", "3", "4", "23", "33", "103", "433", "2124", "2403", "3134", "124030", "124031", "242423" } }, { 6, { "1", "2", "3", "4", "5", "243", "514", "14340", "14341", "14432", "23520", "23521", "44405", "435152", "5435254", "12222215", "555435035" } }, { 7, { "1", "2", "3", "4", "5", "6", "13", "34", "44", "63", "250", "251", "305", "505", "12205", "12252", "13350", "13351", "15124", "36034" } }, { 8, { "1", "2", "3", "4", "5", "6", "7", "24", "64", "134", "205", "463", "660", "661" } }, { 9, { "1", "2", "3", "4", "5", "6", "7", "8", "45", "55", "150", "151", "570", "571", "2446", "12036", "12336", "14462" } }, { 10, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "153", "370", "371", "407", "1634", "8208", "9474", "54748", "92727", "93084", "548834" } }, { 11, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "56", "66", "105", "307", "708", "966", "A06", "A64", "8009", "11720", "11721", "12470" } }, { 12, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "25", "A5", "577", "668", "A83", "14765", "938A4", "369862", "A2394A" } }, { 13, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "14", "36", "67", "77", "A6", "C4", "490", "491", "509", "B85", "3964", "22593", "5B350" } }, { 14, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "136", "409", "74AB5", "153A632" } }, { 15, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "78", "88", "C3A", "D87", "1774", "E819", "E829", "7995C", "829BB", "A36BC" } }, { 16, { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "156", "173", "208", "248", "285", "4A5", "5B0", "5B1", "60B", "64B", "8C0", "8C1", "99a", "aa9", "ac3", "ca8", "e69", "ea0", "ea1", "b8d2", "13579", "2b702", "2b722", "5a07c", "5a47c", "c00e0", "c00e1", "c04e0", "c04e1", "c60e7", "c64e7", "c80e0", "c80e1", "c84e0", "c84e1", "de030" } } };
 
         bool aOK;
         for ( auto &&ii : numbers )
@@ -317,8 +301,7 @@ namespace
         EXPECT_EQ( std::make_pair( true, std::list< int64_t >( { 1, 2, 4, 5, 8, 10, 20, 25, 40, 50, 100 } ) ), NSABUtils::isSemiPerfect( 200 ) );
         EXPECT_EQ( std::make_pair( false, std::list< int64_t >( { 1, 3, 5, 15, 823, 2469, 4115 } ) ), NSABUtils::isSemiPerfect( 12345 ) );
 
-        std::vector< int64_t > numbers = { 6,   12,  18,  20,  24,  28,  30,  36,  40,  42,  48,  54,  56,  60,  66,  72,  78,  80,  84,  88,  90,  96,  100, 102, 104, 108, 112, 114, 120, 126, 132, 138, 140,
-                                           144, 150, 156, 160, 162, 168, 174, 176, 180, 186, 192, 196, 198, 200, 204, 208, 210, 216, 220, 222, 224, 228, 234, 240, 246, 252, 258, 260, 264, 272, 304, 350 };
+        std::vector< int64_t > numbers = { 6, 12, 18, 20, 24, 28, 30, 36, 40, 42, 48, 54, 56, 60, 66, 72, 78, 80, 84, 88, 90, 96, 100, 102, 104, 108, 112, 114, 120, 126, 132, 138, 140, 144, 150, 156, 160, 162, 168, 174, 176, 180, 186, 192, 196, 198, 200, 204, 208, 210, 216, 220, 222, 224, 228, 234, 240, 246, 252, 258, 260, 264, 272, 304, 350 };
         for ( auto &&ii : numbers )
         {
             EXPECT_EQ( true, NSABUtils::isSemiPerfect( ii ).first );
@@ -341,8 +324,7 @@ namespace
 
     TEST( TestUtils, isAbundant )
     {
-        std::vector< int64_t > numbers = { 12,  18,  20,  24,  30,  36,  40,  42,  48,  54,  56,  60,  66,  70,  72,  78,  80,  84,  88,  90,  96,  100, 102, 104, 108, 112, 114, 120, 126, 132, 138,
-                                           140, 144, 150, 156, 160, 162, 168, 174, 176, 180, 186, 192, 196, 198, 200, 204, 208, 210, 216, 220, 222, 224, 228, 234, 240, 246, 252, 258, 260, 264, 270 };
+        std::vector< int64_t > numbers = { 12, 18, 20, 24, 30, 36, 40, 42, 48, 54, 56, 60, 66, 70, 72, 78, 80, 84, 88, 90, 96, 100, 102, 104, 108, 112, 114, 120, 126, 132, 138, 140, 144, 150, 156, 160, 162, 168, 174, 176, 180, 186, 192, 196, 198, 200, 204, 208, 210, 216, 220, 222, 224, 228, 234, 240, 246, 252, 258, 260, 264, 270 };
         for ( auto &&ii : numbers )
         {
             EXPECT_EQ( true, NSABUtils::isAbundant( ii ).first );
@@ -785,21 +767,21 @@ namespace
 #endif
     }
 
-    TEST(TestUtils, TestByteSizeString)
+    TEST( TestUtils, TestByteSizeString )
     {
         // base 1000
-        EXPECT_EQ(QString("324.579KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 3U));
-        EXPECT_EQ(QString("324.58KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 2U));
-        EXPECT_EQ(QString("324.6KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 1U));
-        EXPECT_EQ(QString("325KB"), NSABUtils::NFileUtils::byteSizeString(324579, true, false, 0U));
-        EXPECT_EQ(QString("1KB"), NSABUtils::NFileUtils::byteSizeString(1000, true, false, 0U));
+        EXPECT_EQ( QString( "324.579KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 3U ) );
+        EXPECT_EQ( QString( "324.58KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 2U ) );
+        EXPECT_EQ( QString( "324.6KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 1U ) );
+        EXPECT_EQ( QString( "325KB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, false, 0U ) );
+        EXPECT_EQ( QString( "1KB" ), NSABUtils::NFileUtils::byteSizeString( 1000, true, false, 0U ) );
 
         // base 1024
-        EXPECT_EQ(QString("316.995KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 3U));
-        EXPECT_EQ(QString("317KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 2U));
-        EXPECT_EQ(QString("317KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 1U));
-        EXPECT_EQ(QString("317KiB"), NSABUtils::NFileUtils::byteSizeString(324579, true, true, 0U));
-        EXPECT_EQ(QString("1KiB"), NSABUtils::NFileUtils::byteSizeString(1024, true, true, 0U));
+        EXPECT_EQ( QString( "316.995KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 3U ) );
+        EXPECT_EQ( QString( "317KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 2U ) );
+        EXPECT_EQ( QString( "317KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 1U ) );
+        EXPECT_EQ( QString( "317KiB" ), NSABUtils::NFileUtils::byteSizeString( 324579, true, true, 0U ) );
+        EXPECT_EQ( QString( "1KiB" ), NSABUtils::NFileUtils::byteSizeString( 1024, true, true, 0U ) );
     }
 
     TEST( TestUtils, TestTimeFromMSecs )
@@ -808,22 +790,22 @@ namespace
         EXPECT_EQ( QTime( 0, 0, 1, 1 ), QTime::fromMSecsSinceStartOfDay( 1001 ) );
     }
 
-    TEST(TestUtils, TestTimeString)
+    TEST( TestUtils, TestTimeString )
     {
-        EXPECT_EQ(QString("00:00:00:01.001 (1 seconds)"), NSABUtils::CTimeString(1001).toString(false));
-        EXPECT_EQ(QString("01.001 (1 seconds)"), NSABUtils::CTimeString(1001).toString());
+        EXPECT_EQ( QString( "00:00:00:01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString( false ) );
+        EXPECT_EQ( QString( "01.001 (1 seconds)" ), NSABUtils::CTimeString( 1001 ).toString() );
 
-        EXPECT_EQ(QString("00:00:00:00.001001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(1001)).toString(false));
-        EXPECT_EQ(QString("00.001001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(1001)).toString());
+        EXPECT_EQ( QString( "00:00:00:00.001001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 1001 ) ).toString( false ) );
+        EXPECT_EQ( QString( "00.001001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 1001 ) ).toString() );
 
-        EXPECT_EQ(QString("00:00:00:00.000001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::nanoseconds(1001)).toString(false));
-        EXPECT_EQ(QString("00.000001 (0 seconds)"), NSABUtils::CTimeString(std::chrono::nanoseconds(1001)).toString());
+        EXPECT_EQ( QString( "00:00:00:00.000001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::nanoseconds( 1001 ) ).toString( false ) );
+        EXPECT_EQ( QString( "00.000001 (0 seconds)" ), NSABUtils::CTimeString( std::chrono::nanoseconds( 1001 ) ).toString() );
 
-        EXPECT_EQ(QString("639815:08:56:40.001001 (55,280,048,200 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(55280048200001001)).toString(false));
-        EXPECT_EQ(QString("639815:08:56:40.001001 (55,280,048,200 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(55280048200001001)).toString());
+        EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString( false ) );
+        EXPECT_EQ( QString( "639815:08:56:40.001001 (55,280,048,200 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 55280048200001001 ) ).toString() );
 
-        EXPECT_EQ(QString("00:00:09:12.800482 (552 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(552800482)).toString(false));
-        EXPECT_EQ(QString("09:12.800482 (552 seconds)"), NSABUtils::CTimeString(std::chrono::microseconds(552800482)).toString());
+        EXPECT_EQ( QString( "00:00:09:12.800482 (552 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString( false ) );
+        EXPECT_EQ( QString( "09:12.800482 (552 seconds)" ), NSABUtils::CTimeString( std::chrono::microseconds( 552800482 ) ).toString() );
     }
 
     TEST( TestUtils, Help )
@@ -1049,9 +1031,7 @@ namespace
 
         EXPECT_EQ( R"("A Tale of Two Cities<<==>>A Tale of Two Cities")", NSABUtils::NStringUtils::regExReplace( "A Tale of Two Cities", pattern, replacement ) );
         EXPECT_EQ( R"("The Hound of the Baskervilles<<==>>The Hound of the Baskervilles")", NSABUtils::NStringUtils::regExReplace( "The Hound of the Baskervilles", pattern, replacement ) );
-        EXPECT_EQ(
-            R"("The Protestant Ethic and the Spirit of Capitalism<<==>>The Protestant Ethic and the Spirit of Capitalism")",
-            NSABUtils::NStringUtils::regExReplace( "The Protestant Ethic and the Spirit of Capitalism", pattern, replacement ) );
+        EXPECT_EQ( R"("The Protestant Ethic and the Spirit of Capitalism<<==>>The Protestant Ethic and the Spirit of Capitalism")", NSABUtils::NStringUtils::regExReplace( "The Protestant Ethic and the Spirit of Capitalism", pattern, replacement ) );
         EXPECT_EQ( R"("The Origin of Species<<==>>The Origin of Species")", NSABUtils::NStringUtils::regExReplace( "The Origin of Species", pattern, replacement ) );
     }
 }

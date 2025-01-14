@@ -115,8 +115,8 @@ namespace NSABUtils
         SABUTILS_EXPORT bool setTimeStamp( const QString &path, bool allTimeStamps, QString *msg = nullptr );   // uses QDateTime::currentDateTime
         SABUTILS_EXPORT bool setTimeStamps( const QString &path, const std::unordered_map< QFileDevice::FileTime, QDateTime > &timeStamps, QString *msg = nullptr );
 
-        SABUTILS_EXPORT QString byteSizeString( const QFileInfo &fi, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1, bool spaceBeforeSuffix = false, const QString &typeNameSuffix = "B" ); // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
-        SABUTILS_EXPORT QString byteSizeString( uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1, bool spaceBeforeSuffix = false, const QString & typeNameSuffix = "B" );
+        SABUTILS_EXPORT QString byteSizeString( const QFileInfo &fi, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1, bool spaceBeforeSuffix = false, const QString &typeNameSuffix = "B" );   // pretty print use suffixes, bytesize=true means using 1024 vs 1000 based suffixes bytsize is ignored if prettyprint is false, precision is 0, 1, 2 or 3 for number of decimal places in a pretty print
+        SABUTILS_EXPORT QString byteSizeString( uint64_t size, bool prettyPrint = true, bool byteBased = true, uint8_t precision = 1, bool spaceBeforeSuffix = false, const QString &typeNameSuffix = "B" );
 
         enum class EAttribute
         {
@@ -138,12 +138,11 @@ namespace NSABUtils
 
         SABUTILS_EXPORT QString getCorrectPathCase( QString path );   // note, on linux returns path, windows does the actual analysis, and returns the absolute path
 
-        SABUTILS_EXPORT std::optional< QList< QFileInfo > > findAllFiles( const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName = false, QString *errorMsg = nullptr, std::function< bool( const QDir &dir ) > skipDir = {}, std::function< bool( const QFileInfo & file ) > skipFile = {} );
+        SABUTILS_EXPORT std::optional< QList< QFileInfo > > findAllFiles( const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName = false, QString *errorMsg = nullptr, std::function< bool( const QDir &dir ) > skipDir = {}, std::function< bool( const QFileInfo &file ) > skipFile = {} );
         SABUTILS_EXPORT bool isIPAddressNetworkPath( const QFileInfo &info );
 
         SABUTILS_EXPORT std::tuple< uint16_t, uint16_t, uint16_t, uint16_t > getVersionInfoFromFile( const QString &fileName, bool &aOK );
-        SABUTILS_EXPORT std::pair< uint32_t, uint32_t > getVersionInfoFromFile32(
-            const QString &fileName, bool &aOK );   // the 32 bit version returns 2 32 bit values, the hiword of the first is the major version, loword is the minor, hi and low of the second value is the patch
+        SABUTILS_EXPORT std::pair< uint32_t, uint32_t > getVersionInfoFromFile32( const QString &fileName, bool &aOK );   // the 32 bit version returns 2 32 bit values, the hiword of the first is the major version, loword is the minor, hi and low of the second value is the patch
     }
 }
 #endif

@@ -35,8 +35,8 @@
 
 namespace NSABUtils
 {
-    CSetMKVTags::CSetMKVTags( const QString & fileName, const QString & mkvPropEdit, QWidget * parent )
-        : QDialog( parent ),
+    CSetMKVTags::CSetMKVTags( const QString &fileName, const QString &mkvPropEdit, QWidget *parent ) :
+        QDialog( parent ),
         fImpl( new Ui::CSetMKVTags ),
         fMKVPropEditExe( mkvPropEdit )
     {
@@ -57,15 +57,15 @@ namespace NSABUtils
     void CSetMKVTags::slotLoadTags()
     {
         NSABUtils::CAutoWaitCursor awc;
-        
+
         auto mediaInfo = CMediaInfo( fImpl->fileName->text() );
         auto tags = mediaInfo.getMediaTags();
-        
+
         fImpl->tags->setHeaderLabels( QStringList() << tr( "Tag Name" ) << tr( "Value" ) );
-        for ( auto && ii : tags )
+        for ( auto &&ii : tags )
         {
             bool isEditable = isSettableTag( ii.first );
-            auto item = new QTreeWidgetItem( QStringList() << displayName( ii.first ) + ":" << NSABUtils::getFirstString( ii.second ), static_cast<int>( ii.first ) );
+            auto item = new QTreeWidgetItem( QStringList() << displayName( ii.first ) + ":" << NSABUtils::getFirstString( ii.second ), static_cast< int >( ii.first ) );
             fImpl->tags->addTopLevelItem( item );
             if ( isEditable )
             {
@@ -83,7 +83,7 @@ namespace NSABUtils
             auto item = fImpl->tags->topLevelItem( ii );
             if ( !item )
                 continue;
-            auto type = static_cast<EMediaTags>( item->type() );
+            auto type = static_cast< EMediaTags >( item->type() );
             if ( !isSettableTag( type ) )
                 continue;
             tags[ type ] = item->text( 1 );

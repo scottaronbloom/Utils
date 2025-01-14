@@ -784,9 +784,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    void writeModel(
-        QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, const QString &plauralSuffix,
-        const std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) > &writeRow )
+    void writeModel( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, const QString &plauralSuffix, const std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) > &writeRow )
     {
         QStringList headers = getHeadersForModel( model );
 

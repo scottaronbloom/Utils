@@ -25,28 +25,27 @@
 #include <QImageIOHandler>
 
 #ifndef GIF_PLUGIN_DECLSPEC
-#if (defined(Q_OS_WINDOWS))
-#  if defined(BUILD_GIF_PLUGIN)
-#    define GIF_PLUGIN_DECLSPEC Q_DECL_EXPORT
-#  else
-#    define GIF_PLUGIN_DECLSPEC Q_DECL_IMPORT
-#  endif
-#else
-#  define GIF_PLUGIN_DECLSPEC
-#endif
+    #if ( defined( Q_OS_WINDOWS ) )
+        #if defined( BUILD_GIF_PLUGIN )
+            #define GIF_PLUGIN_DECLSPEC Q_DECL_EXPORT
+        #else
+            #define GIF_PLUGIN_DECLSPEC Q_DECL_IMPORT
+        #endif
+    #else
+        #define GIF_PLUGIN_DECLSPEC
+    #endif
 #endif
 
 class GIF_PLUGIN_DECLSPEC CGIFPlugin : public QImageIOPlugin
 {
     Q_OBJECT
-        Q_PLUGIN_METADATA( IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "gif.json" )
+    Q_PLUGIN_METADATA( IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "gif.json" )
 public:
     CGIFPlugin() = default;
     ~CGIFPlugin() = default;
 
-    Capabilities capabilities( QIODevice * device, const QByteArray & format ) const override;
-    QImageIOHandler * create( QIODevice * device, const QByteArray & format = QByteArray() ) const override;
-
+    Capabilities capabilities( QIODevice *device, const QByteArray &format ) const override;
+    QImageIOHandler *create( QIODevice *device, const QByteArray &format = QByteArray() ) const override;
 };
 
 #endif

@@ -80,7 +80,7 @@ namespace NSABUtils
 
         struct SDiskTime
         {
-            SDiskTime(){}
+            SDiskTime() {}
             SDiskTime( const std::list< double > &values )
             {
                 auto ii = values.begin();

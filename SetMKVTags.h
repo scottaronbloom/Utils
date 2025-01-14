@@ -30,12 +30,15 @@
 
 namespace NSABUtils
 {
-    namespace Ui { class CSetMKVTags; };
+    namespace Ui
+    {
+        class CSetMKVTags;
+    };
     class SABUTILS_EXPORT CSetMKVTags : public QDialog
     {
         Q_OBJECT
     public:
-        CSetMKVTags( const QString & fileName, const QString & mkvPropEditExe, QWidget * parent = nullptr );
+        CSetMKVTags( const QString &fileName, const QString &mkvPropEditExe, QWidget *parent = nullptr );
         virtual ~CSetMKVTags() override;
         virtual void accept() override;
     public Q_SLOTS:
@@ -46,4 +49,4 @@ namespace NSABUtils
         QString fMKVPropEditExe;
     };
 }
-#endif 
+#endif

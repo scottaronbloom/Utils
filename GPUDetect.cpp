@@ -52,7 +52,7 @@ namespace NSABUtils
             );
         }
 
-        if ( ( hres != RPC_E_TOO_LATE) && FAILED( hres ) )
+        if ( ( hres != RPC_E_TOO_LATE ) && FAILED( hres ) )
         {
             if ( errorMsg )
                 *errorMsg = QString( "Failed to initialize security. Error code = 0x" ).arg( hres, 0, 16 );
@@ -263,8 +263,6 @@ namespace NSABUtils
         VariantClear( &vtProp );
     }
 
-    
-
     void loadValue( IWbemClassObject *gpuInfo, wchar_t *key, bool &value )
     {
         value = false;
@@ -406,8 +404,7 @@ namespace NSABUtils
 
     bool CGPUInfo::isIntelGPU() const
     {
-        return 
-            fVideoProcessor.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
+        return fVideoProcessor.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
                || fName.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
                || fDescription.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //
                || fCaption.contains( "Intel", Qt::CaseSensitivity::CaseInsensitive )   //

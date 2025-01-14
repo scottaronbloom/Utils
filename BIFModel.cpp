@@ -30,10 +30,9 @@ namespace NSABUtils
 {
     namespace NBIF
     {
-        CModel::CModel( QObject * parent /*= nullptr */ ) :
+        CModel::CModel( QObject *parent /*= nullptr */ ) :
             QAbstractListModel( parent )
         {
-
         }
 
         void CModel::setBIFFile( std::shared_ptr< CFile > bifFile )
@@ -43,12 +42,12 @@ namespace NSABUtils
             endResetModel();
         }
 
-        int CModel::rowCount( const QModelIndex & parent ) const
+        int CModel::rowCount( const QModelIndex &parent ) const
         {
             return ( parent.isValid() || !fBIFFile ) ? 0 : fBIFFile->lastImageLoaded();
         }
 
-        QVariant CModel::data( const QModelIndex & index, int role /*= Qt::DisplayRole */ ) const
+        QVariant CModel::data( const QModelIndex &index, int role /*= Qt::DisplayRole */ ) const
         {
             if ( !index.isValid() )
                 return QVariant();
@@ -80,19 +79,19 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool CModel::canFetchMore( const QModelIndex & parent ) const
+        bool CModel::canFetchMore( const QModelIndex &parent ) const
         {
             if ( parent.isValid() )
-                return false; // its a list
+                return false;   // its a list
             if ( !fBIFFile )
                 return false;
             return fBIFFile->canLoadMoreImages();
         }
 
-        void CModel::fetchMore( const QModelIndex & parent )
+        void CModel::fetchMore( const QModelIndex &parent )
         {
             if ( parent.isValid() )
-                return; // its a list
+                return;   // its a list
             if ( !fBIFFile )
                 return;
 

@@ -415,9 +415,7 @@ namespace NSABUtils
     SABUTILS_EXPORT uint64_t numCombinations( int64_t numPossible, int64_t numSelections );
 
     template< typename T >
-    std::vector< std::vector< T > > addVectorElementToSets(
-        const std::vector< std::vector< T > > &currentSets, const std::list< T > &rhs,
-        const std::function< bool( const std::vector< T > &curr, const T &obj ) > &addToResult = std::function< bool( const std::vector< T > &curr, const T &obj ) >() )
+    std::vector< std::vector< T > > addVectorElementToSets( const std::vector< std::vector< T > > &currentSets, const std::list< T > &rhs, const std::function< bool( const std::vector< T > &curr, const T &obj ) > &addToResult = std::function< bool( const std::vector< T > &curr, const T &obj ) >() )
     {
         std::vector< std::vector< T > > retVal;
         for ( auto &&ii : currentSets )
@@ -435,8 +433,7 @@ namespace NSABUtils
     }
 
     template< typename T >
-    std::vector< std::vector< T > > cartiseanProduct(
-        const std::vector< std::list< T > > &arr, const std::function< bool( const std::vector< T > &curr, const T &obj ) > &addToResult = std::function< bool( const std::vector< T > &curr, const T &obj ) >() )
+    std::vector< std::vector< T > > cartiseanProduct( const std::vector< std::list< T > > &arr, const std::function< bool( const std::vector< T > &curr, const T &obj ) > &addToResult = std::function< bool( const std::vector< T > &curr, const T &obj ) >() )
     {
         if ( arr.empty() )
             return {};

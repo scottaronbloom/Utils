@@ -179,8 +179,7 @@ namespace NSABUtils
             if ( *relPath.begin() == '"' && *relPath.rbegin() == '"' )
                 lhs++;
             char firstChar = ::toupper( relPath[ lhs ] );
-            bool isAbs =
-                firstChar == '/' || firstChar == '\\' || ( ( relPath.length() >= ( lhs + 3 ) ) && ( firstChar >= 'A' && firstChar <= 'Z' ) && relPath[ lhs + 1 ] == ':' && ( relPath[ lhs + 2 ] == '/' || relPath[ lhs + 2 ] == '\\' ) );
+            bool isAbs = firstChar == '/' || firstChar == '\\' || ( ( relPath.length() >= ( lhs + 3 ) ) && ( firstChar >= 'A' && firstChar <= 'Z' ) && relPath[ lhs + 1 ] == ':' && ( relPath[ lhs + 2 ] == '/' || relPath[ lhs + 2 ] == '\\' ) );
             return isAbs;
         }
 
@@ -353,7 +352,7 @@ namespace NSABUtils
             return lRetVal;
         }
 
-        QString byteSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix, const QString & typeNameSuffix )
+        QString byteSizeString( const QFileInfo &fi, bool prettyPrint, bool byteSize, uint8_t precision, bool spaceBeforeSuffix, const QString &typeNameSuffix )
         {
             return byteSizeString( fi.size(), prettyPrint, byteSize, precision, spaceBeforeSuffix, typeNameSuffix );
         }
@@ -475,10 +474,7 @@ namespace NSABUtils
             auto realSuffix = QString( "%1%2%3%4" ).arg( spaceBeforeSuffix ? " " : "" ).arg( suffix ).arg( ( !byteSize && typeNameSuffix == "B" ) ? "i" : "" ).arg( typeNameSuffix );
 
             QLocale locale;
-            auto retVal = QString( "%1%2%3" )
-                .arg( locale.toString( static_cast< qulonglong >( size ) ) )
-                .arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() )
-                .arg( realSuffix  );
+            auto retVal = QString( "%1%2%3" ).arg( locale.toString( static_cast< qulonglong >( size ) ) ).arg( remainder != 0 ? QString( ".%1" ).arg( remainder ) : QString() ).arg( realSuffix );
             return retVal;
         }
 
@@ -926,8 +922,7 @@ namespace NSABUtils
         {
             if ( sSystemLibDirs.empty() )
             {
-                sSystemLibDirs = std::unordered_set< std::string, NStringUtils::noCaseStringHash, NStringUtils::noCaseStringEq >(
-                    { "vhdl_packages", "verilog_packages", "ISE", "vivado", "vivado_2014_4", "vivado_2015_2", "15_0", "ProASIC3", "altera_packages" } );
+                sSystemLibDirs = std::unordered_set< std::string, NStringUtils::noCaseStringHash, NStringUtils::noCaseStringEq >( { "vhdl_packages", "verilog_packages", "ISE", "vivado", "vivado_2014_4", "vivado_2015_2", "15_0", "ProASIC3", "altera_packages" } );
             }
             for ( auto ii : dirs )
             {

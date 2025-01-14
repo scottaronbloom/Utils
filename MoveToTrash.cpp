@@ -39,7 +39,7 @@ namespace NSABUtils
         bool moveToTrash( const std::string &path, std::string *msg, std::shared_ptr< SRecycleOptions > options )
         {
             QString lclMsg;
-            bool retVal = moveToTrash( QString::fromStdString( path ), &lclMsg,options );
+            bool retVal = moveToTrash( QString::fromStdString( path ), &lclMsg, options );
             if ( msg )
                 *msg = lclMsg.toStdString();
             return retVal;

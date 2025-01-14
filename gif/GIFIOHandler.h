@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 #ifndef GIFIOHANDLER_H
 #define GIFIOHANDLER_H
 
@@ -32,24 +31,23 @@ public:
     CGIFIOHandler();
     ~CGIFIOHandler();
 
-    static bool canWrite( QIODevice * device );
+    static bool canWrite( QIODevice *device );
 
     virtual bool canRead() const override;
-    virtual bool read( QImage * image ) override;
-    virtual bool write( const QImage & image ) override;
+    virtual bool read( QImage *image ) override;
+    virtual bool write( const QImage &image ) override;
 
     virtual QVariant option( ImageOption option ) const override;
-    virtual void setOption( ImageOption option, const QVariant & value ) override;
+    virtual void setOption( ImageOption option, const QVariant &value ) override;
     virtual bool supportsOption( ImageOption option ) const override;
 
     virtual bool jumpToNextImage() override;
     virtual bool jumpToImage( int imageNumber ) override;
     virtual int loopCount() const override;
     virtual int imageCount() const override;
-    virtual int nextImageDelay() const override; // returns ms
+    virtual int nextImageDelay() const override;   // returns ms
     virtual int currentImageNumber() const override;
     virtual QRect currentImageRect() const override;
 };
 
-
-#endif // CBIFIOHandler_P_H
+#endif   // CBIFIOHandler_P_H

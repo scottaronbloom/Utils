@@ -21,7 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 #include "BIFIOHandler.h"
 #include "SABUtils/BIFFile.h"
 
@@ -31,8 +30,8 @@ namespace NSABUtils
 {
     namespace NBIF
     {
-        CIOHandler::CIOHandler()
-            : fBIFFile( new NBIF::CFile )
+        CIOHandler::CIOHandler() :
+            fBIFFile( new NBIF::CFile )
         {
         }
 
@@ -57,7 +56,7 @@ namespace NSABUtils
             return false;
         }
 
-        bool CIOHandler::canRead( QIODevice * device )
+        bool CIOHandler::canRead( QIODevice *device )
         {
             if ( !device )
             {
@@ -73,7 +72,7 @@ namespace NSABUtils
             return isBIF;
         }
 
-        bool CIOHandler::read( QImage * image )
+        bool CIOHandler::read( QImage *image )
         {
             if ( !fBIFFile )
                 return false;
@@ -114,7 +113,7 @@ namespace NSABUtils
             return QImageIOHandler::currentImageRect();
         }
 
-        bool CIOHandler::write( const QImage & image )
+        bool CIOHandler::write( const QImage &image )
         {
             (void)image;
             return false;
@@ -122,9 +121,7 @@ namespace NSABUtils
 
         bool CIOHandler::supportsOption( ImageOption option ) const
         {
-            return
-                option == Size
-                || option == Animation;
+            return option == Size || option == Animation;
             ;
         }
 
@@ -144,7 +141,7 @@ namespace NSABUtils
             return QVariant();
         }
 
-        void CIOHandler::setOption( ImageOption option, const QVariant & value )
+        void CIOHandler::setOption( ImageOption option, const QVariant &value )
         {
             (void)option;
             (void)value;
@@ -163,7 +160,7 @@ namespace NSABUtils
                 return 0;
 
             fBIFFile->readHeader( device() );
-            return static_cast<int>( fBIFFile->imageCount() );
+            return static_cast< int >( fBIFFile->imageCount() );
         }
 
         void CIOHandler::setLoopCount( int loopCount )

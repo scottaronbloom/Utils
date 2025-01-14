@@ -2,9 +2,9 @@
 #define __NODISCARD_H
 
 #ifdef Q_OS_WINDOWS
-#define NODISCARD [[nodiscard]]
+    #define NODISCARD [[nodiscard]]
 #else
-#define NODISCARD 
+    #define NODISCARD
 #endif
 
 #endif

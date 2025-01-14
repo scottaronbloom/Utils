@@ -37,17 +37,16 @@ namespace NSABUtils
         S32BitValue::S32BitValue() :
             S32BitValue( 0 )
         {
-
         }
 
         S32BitValue::S32BitValue( uint32_t value )
         {
-            fByteArray = QByteArray( reinterpret_cast<const char *>( &value ), 4 );
+            fByteArray = QByteArray( reinterpret_cast< const char * >( &value ), 4 );
             fPrettyPrint = prettyPrint();
             fValue = value;
         }
 
-        S32BitValue::S32BitValue( const QByteArray & in, std::optional< QString > desc, QString & msg, bool & aOK )
+        S32BitValue::S32BitValue( const QByteArray &in, std::optional< QString > desc, QString &msg, bool &aOK )
         {
             aOK = false;
             if ( in.length() > 4 )
@@ -62,7 +61,7 @@ namespace NSABUtils
             fValue = 0;
             for ( auto ii = 0; ii < in.length(); ++ii )
             {
-                auto curr = static_cast<uint8_t>( in.at( ii ) ) << ( 8 * ii );
+                auto curr = static_cast< uint8_t >( in.at( ii ) ) << ( 8 * ii );
                 fValue |= curr;
             }
             aOK = true;
@@ -70,7 +69,7 @@ namespace NSABUtils
             fPrettyPrint = prettyPrint();
         }
 
-        QString S32BitValue::prettyPrint( const QByteArray & in )
+        QString S32BitValue::prettyPrint( const QByteArray &in )
         {
             QString retVal;
             retVal.reserve( in.length() * 3 );
@@ -79,7 +78,7 @@ namespace NSABUtils
             {
                 if ( !first )
                     retVal += " ";
-                retVal += QString( "%1" ).arg( static_cast<uint8_t>( ii ), 2, 16, QChar( '0' ) ).toUpper();
+                retVal += QString( "%1" ).arg( static_cast< uint8_t >( ii ), 2, 16, QChar( '0' ) ).toUpper();
                 first = false;
             }
             return retVal;
@@ -90,7 +89,7 @@ namespace NSABUtils
             return prettyPrint( fByteArray );
         }
 
-        bool S32BitValue::write( QIODevice * outFile, const std::optional< QString > & desc, QString & msg ) const
+        bool S32BitValue::write( QIODevice *outFile, const std::optional< QString > &desc, QString &msg ) const
         {
             if ( !outFile || !outFile->isOpen() || !outFile->isWritable() )
             {
@@ -111,7 +110,7 @@ namespace NSABUtils
 
         static auto sMagicNumber = QByteArray( "\x89\x42\x49\x46\x0d\x0a\x1a\x0a" );
 
-        CFile::CFile( const QString & bifFile, bool loadImages ) :
+        CFile::CFile( const QString &bifFile, bool loadImages ) :
             fBIFFile( bifFile )
         {
             loadBIFFromFile( loadImages );
@@ -121,12 +120,12 @@ namespace NSABUtils
         {
         }
 
-        CFile::CFile( const QList< QFileInfo > & allFiles, uint32_t timespan, QString & msg )
+        CFile::CFile( const QList< QFileInfo > &allFiles, uint32_t timespan, QString &msg )
         {
             init( allFiles, timespan, msg );
         }
 
-        CFile::CFile( const QDir & dir, const QString & filter, uint32_t timespan, QString & msg )
+        CFile::CFile( const QDir &dir, const QString &filter, uint32_t timespan, QString &msg )
         {
             fState = EState::eError;
 
@@ -140,13 +139,13 @@ namespace NSABUtils
             init( allFiles.value(), timespan, msg );
         }
 
-        void CFile::init( const QList< QFileInfo > & images, uint32_t timespan, QString & msg )
+        void CFile::init( const QList< QFileInfo > &images, uint32_t timespan, QString &msg )
         {
             fTimePerFrame = S32BitValue( timespan );
 
             fBIFFrames.reserve( images.count() );
             uint32_t imageNum = 0;
-            for ( auto && ii : images )
+            for ( auto &&ii : images )
             {
                 auto currFrame = SBIFImage( ii.absoluteFilePath(), imageNum );
                 if ( !currFrame.imageValid() )
@@ -160,11 +159,11 @@ namespace NSABUtils
             }
             fMagicNumber = sMagicNumber;
             fVersion = S32BitValue( 0 );
-            fNumImages = S32BitValue( static_cast<uint32_t>( fBIFFrames.size() ) );
+            fNumImages = S32BitValue( static_cast< uint32_t >( fBIFFrames.size() ) );
             fReserved = QByteArray( 44, '\0' );
             fState = EState::eReady;
-            uint32_t offset = static_cast<uint32_t>( 8 * ( fBIFFrames.size() + 1 ) ) + fMagicNumber.size() + fVersion.size() + fNumImages.size() + fTimePerFrame.size() + fReserved.size();
-            for ( auto && ii : fBIFFrames )
+            uint32_t offset = static_cast< uint32_t >( 8 * ( fBIFFrames.size() + 1 ) ) + fMagicNumber.size() + fVersion.size() + fNumImages.size() + fTimePerFrame.size() + fReserved.size();
+            for ( auto &&ii : fBIFFrames )
             {
                 ii.fOffset = S32BitValue( offset );
                 offset += ii.fSize;
@@ -209,7 +208,7 @@ namespace NSABUtils
                 return;
         }
 
-        std::pair< bool, QImage > CFile::read( QIODevice * device, int frameNum )
+        std::pair< bool, QImage > CFile::read( QIODevice *device, int frameNum )
         {
             fIODevice = device;
             if ( !device )
@@ -222,7 +221,7 @@ namespace NSABUtils
             return { !image.isNull() && ( fState == EState::eReadingImages ), image };
         }
 
-        bool CFile::readHeader( QIODevice * device )
+        bool CFile::readHeader( QIODevice *device )
         {
             fIODevice = device;
             if ( !device )
@@ -262,7 +261,7 @@ namespace NSABUtils
             return true;
         }
 
-        bool CFile::save( const QString & fileName, QString & msg )
+        bool CFile::save( const QString &fileName, QString &msg )
         {
             QFile outFile( fileName );
             if ( !outFile.open( QFile::WriteOnly | QFile::Truncate ) )
@@ -280,18 +279,18 @@ namespace NSABUtils
                 return false;
             outFile.write( fReserved );
 
-            for ( auto && ii : fBIFFrames )
+            for ( auto &&ii : fBIFFrames )
             {
                 if ( !ii.writeIndex( &outFile, msg ) )
                     return false;
             }
-            auto sentinel = S32BitValue( static_cast<uint32_t>( -1 ) );
+            auto sentinel = S32BitValue( static_cast< uint32_t >( -1 ) );
             if ( !sentinel.write( &outFile, "Sentinel", msg ) )
                 return false;
             if ( !fFinalIndex.write( &outFile, "Final Offset", msg ) )
                 return false;
 
-            for ( auto && ii : fBIFFrames )
+            for ( auto &&ii : fBIFFrames )
             {
                 if ( !ii.writeImage( &outFile, msg ) )
                     return false;
@@ -308,11 +307,11 @@ namespace NSABUtils
             if ( fState == EState::eError )
                 return false;
             if ( fState != EState::eDeviceOpen )
-                return true;// already been read
+                return true;   // already been read
 
             fState = EState::eError;
             device()->seek( 0 );
-            auto header = device()->read( 64 ); // reads 64 bytes of data, the complete header minus the index
+            auto header = device()->read( 64 );   // reads 64 bytes of data, the complete header minus the index
 
             if ( header.length() != 64 )
             {
@@ -374,7 +373,7 @@ namespace NSABUtils
             }
             else
             {
-                return loadImage( 0, true ).first; // always load one so size can be returned
+                return loadImage( 0, true ).first;   // always load one so size can be returned
             }
             return false;
         }
@@ -464,7 +463,7 @@ namespace NSABUtils
             return true;
         }
 
-        int CFile::extractImageNum( const QString & file )
+        int CFile::extractImageNum( const QString &file )
         {
             static auto regExp = QRegularExpression( R"(img_(\d+)\.jpg)" );
             auto match = regExp.match( file );
@@ -479,7 +478,7 @@ namespace NSABUtils
             return num;
         }
 
-        bool CFile::validateMagicNumber( const QByteArray & magicNumber )
+        bool CFile::validateMagicNumber( const QByteArray &magicNumber )
         {
             return ( magicNumber == sMagicNumber );
         }
@@ -501,7 +500,7 @@ namespace NSABUtils
                 return false;
             }
             fBIFFrames.reserve( numEntries );
-            SBIFImage * prev = nullptr;
+            SBIFImage *prev = nullptr;
             for ( uint32_t ii = 0; ii < numEntries; ++ii )
             {
                 auto tsPos = ( ii * 8 );
@@ -540,7 +539,7 @@ namespace NSABUtils
             return true;
         }
 
-        bool SBIFImage::operator==( const SBIFImage & rhs ) const
+        bool SBIFImage::operator==( const SBIFImage &rhs ) const
         {
             if ( fImage.has_value() != rhs.fImage.has_value() )
                 return false;
@@ -550,7 +549,7 @@ namespace NSABUtils
             return fImage.value() == rhs.fImage.value();
         }
 
-        bool SBIFImage::operator!=( const SBIFImage & rhs ) const
+        bool SBIFImage::operator!=( const SBIFImage &rhs ) const
         {
             return !operator==( rhs );
         }
@@ -562,7 +561,6 @@ namespace NSABUtils
             retVal += fOffset.fByteArray;
             return retVal;
         }
-
 
         bool CFile::loadImages()
         {
@@ -581,10 +579,10 @@ namespace NSABUtils
             return isValid();
         }
 
-        std::pair< bool, QString > CFile::loadImage( size_t frameNum, bool loadImageToFrame, int * insertStart, int * numInserted )
+        std::pair< bool, QString > CFile::loadImage( size_t frameNum, bool loadImageToFrame, int *insertStart, int *numInserted )
         {
             if ( frameNum >= fBIFFrames.size() )
-                return{ false, "Invalid argument" };
+                return { false, "Invalid argument" };
 
             auto retVal = std::make_pair( true, QString() );
 
@@ -594,7 +592,7 @@ namespace NSABUtils
                 if ( insertStart )
                     *insertStart = fLastImageLoaded;
                 if ( numInserted )
-                    *numInserted = static_cast<int>( frameNum - fLastImageLoaded ) + 1;
+                    *numInserted = static_cast< int >( frameNum - fLastImageLoaded ) + 1;
             }
 
             if ( frameNum >= ( fBIFFrames.size() - 1 ) )
@@ -624,7 +622,7 @@ namespace NSABUtils
             }
         }
 
-        QImage CFile::imageToFrame( size_t imageNum, int * insertStart, int * numInserted )
+        QImage CFile::imageToFrame( size_t imageNum, int *insertStart, int *numInserted )
         {
             if ( !loadImage( imageNum, true, insertStart, numInserted ).first || !fBIFFrames[ imageNum ].fImage.has_value() )
                 return QImage();
@@ -661,7 +659,7 @@ namespace NSABUtils
             }
         }
 
-        QIODevice * CFile::device() const
+        QIODevice *CFile::device() const
         {
             if ( fFile )
                 return fFile;
@@ -696,7 +694,7 @@ namespace NSABUtils
             return true;
         }
 
-        SBIFImage::SBIFImage( S32BitValue num, S32BitValue offset, SBIFImage * prev ) :
+        SBIFImage::SBIFImage( S32BitValue num, S32BitValue offset, SBIFImage *prev ) :
             fBIFNum( num ),
             fOffset( offset )
         {
@@ -709,7 +707,7 @@ namespace NSABUtils
             Q_ASSERT( fOffset.fValue );
         }
 
-        SBIFImage::SBIFImage( const QString & fileName, uint32_t bifNum ) :
+        SBIFImage::SBIFImage( const QString &fileName, uint32_t bifNum ) :
             fBIFNum( bifNum )
         {
             auto fi = QFile( fileName );
@@ -735,7 +733,7 @@ namespace NSABUtils
             return ( fBIFNum.fValue == -1 );
         }
 
-        std::pair< bool, QString > SBIFImage::loadImage( QIODevice * ioDevice, const QString & fn )
+        std::pair< bool, QString > SBIFImage::loadImage( QIODevice *ioDevice, const QString &fn )
         {
             if ( fImage.has_value() )
                 return { true, QString() };
@@ -764,7 +762,7 @@ namespace NSABUtils
             return { true, QString() };
         }
 
-        bool SBIFImage::writeIndex( QIODevice * outFile, QString & msg ) const
+        bool SBIFImage::writeIndex( QIODevice *outFile, QString &msg ) const
         {
             if ( !outFile || !outFile->isOpen() || !outFile->isWritable() )
             {
@@ -781,7 +779,7 @@ namespace NSABUtils
             return num == len;
         }
 
-        bool SBIFImage::writeImage( QIODevice * outFile, QString & msg ) const
+        bool SBIFImage::writeImage( QIODevice *outFile, QString &msg ) const
         {
             if ( !outFile || !outFile->isOpen() || !outFile->isWritable() )
             {

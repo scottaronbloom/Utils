@@ -45,72 +45,70 @@ namespace NSABUtils
         static int kTransparentIndex;
 
         CGIFWriter();
-        CGIFWriter( const QString & filename );
-        CGIFWriter( QIODevice * device );
+        CGIFWriter( const QString &filename );
+        CGIFWriter( QIODevice *device );
 
         ~CGIFWriter();
 
-        void setFileName( const QString & fileName );
-        void setDevice( QIODevice * device );
+        void setFileName( const QString &fileName );
+        void setDevice( QIODevice *device );
         void close();
 
         uint16_t loopCount() const { return fLoopCount; }
-        void setLoopCount( uint16_t loopCount )
-        {
-            fLoopCount = loopCount;
-        }
+        void setLoopCount( uint16_t loopCount ) { fLoopCount = loopCount; }
 
         bool writeHeader();
 
-        bool writeImage( const QImage & image, bool lastImage = true );
+        bool writeImage( const QImage &image, bool lastImage = true );
 
         bool writeEnd();
 
         void setDelay( int delay ) { fDelay = delay; }
         uint32_t delay() const { return fDelay; }
 
-        void setDither( bool dither ) { fDither = dither; } // default false
+        void setDither( bool dither ) { fDither = dither; }   // default false
         bool dither() const { return fDither; }
 
-        void setFlipImage( bool flipImage ) { fFlipImage = flipImage; } // default false
+        void setFlipImage( bool flipImage ) { fFlipImage = flipImage; }   // default false
         bool flipImage() const { return fFlipImage; }
 
         void setBitDepth( uint8_t bitDepth ) { fBitDepth = bitDepth; }
         uint8_t bitDepth() const { return fBitDepth; }
 
-        static bool pixelCompare( const uint8_t * lhs, const uint8_t * rhs, int pixelNum );
-        static bool pixelCompare( const uint8_t * lhs, const uint8_t * rhs ); // pixel is at its 0,1,2
-        static bool pixelCompare( const uint8_t * lhs, const std::initializer_list< uint32_t > & rhs ); // pixel is at its 0,1,2 of lhs
+        static bool pixelCompare( const uint8_t *lhs, const uint8_t *rhs, int pixelNum );
+        static bool pixelCompare( const uint8_t *lhs, const uint8_t *rhs );   // pixel is at its 0,1,2
+        static bool pixelCompare( const uint8_t *lhs, const std::initializer_list< uint32_t > &rhs );   // pixel is at its 0,1,2 of lhs
 
-        static bool status( const QDataStream & ds );
-        static bool writeChar( uint8_t ch, QDataStream & ds );
-        static bool writeInt( uint16_t value, QDataStream & ds );
-        static bool writeString( const char * str, QDataStream & ds );
-        static bool writeRaw( const char * str, int len, QDataStream & ds );
+        static bool status( const QDataStream &ds );
+        static bool writeChar( uint8_t ch, QDataStream &ds );
+        static bool writeInt( uint16_t value, QDataStream &ds );
+        static bool writeString( const char *str, QDataStream &ds );
+        static bool writeRaw( const char *str, int len, QDataStream &ds );
 
-        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > & images, bool useNew, bool dither, bool flipImage, int loopCount, int delay, std::function< void(size_t min, size_t max) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget *parent, const QString &fileName, const QList< QImage > &images, bool useNew, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+
     private:
         bool writeCurrImage();
         bool writeChar( uint8_t ch );
         bool writeInt( uint16_t value );
-        bool writeString( const char * str );
-        bool writeRaw( const char * str, int len );
+        bool writeString( const char *str );
+        bool writeRaw( const char *str, int len );
         [[nodiscard]] bool status() const;
-        void ditherImage( const uint8_t * prevImage );
-        void updateQuant( int32_t * quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr, int quantMultiplier );
-        void thresholdImage( const uint8_t * prevImage );
-        bool writeLZW( uint32_t left, uint32_t top, const uint8_t * prevImage );
+        void ditherImage( const uint8_t *prevImage );
+        void updateQuant( int32_t *quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr, int quantMultiplier );
+        void thresholdImage( const uint8_t *prevImage );
+        bool writeLZW( uint32_t left, uint32_t top, const uint8_t *prevImage );
 
         int numPixels() const;
 
         bool fDeleteDevice{ false };
         bool fHeaderWritten{ false };
         bool fFirstFrame{ true };
-        uint16_t fLoopCount{ 0 }; // infinite
-        QIODevice * fDevice{ nullptr };
+        uint16_t fLoopCount{ 0 };   // infinite
+        QIODevice *fDevice{ nullptr };
         QImage fCurrImage;
         QDataStream fDataStream;
-        uint8_t * fPrevFrameData{ nullptr };
+        uint8_t *fPrevFrameData{ nullptr };
         uint8_t fBitDepth{ 8 };
         bool fDither{ false };
         bool fFlipImage{ false };

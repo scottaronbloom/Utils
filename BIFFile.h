@@ -47,23 +47,15 @@ namespace NSABUtils
         public:
             S32BitValue();
             S32BitValue( uint32_t inValue );
-            S32BitValue( const QByteArray & in, std::optional< QString > desc, QString & msg, bool & aOK );
+            S32BitValue( const QByteArray &in, std::optional< QString > desc, QString &msg, bool &aOK );
             QString prettyPrint() const;
 
-            static QString prettyPrint( const QByteArray & in );
+            static QString prettyPrint( const QByteArray &in );
 
-            bool operator==( const S32BitValue & rhs ) const
-            {
-                return fByteArray == rhs.fByteArray
-                    && fPrettyPrint == rhs.fPrettyPrint
-                    && fValue == rhs.fValue;
-            }
-            bool operator!=( const S32BitValue & rhs ) const
-            {
-                return !operator==( rhs );
-            }
+            bool operator==( const S32BitValue &rhs ) const { return fByteArray == rhs.fByteArray && fPrettyPrint == rhs.fPrettyPrint && fValue == rhs.fValue; }
+            bool operator!=( const S32BitValue &rhs ) const { return !operator==( rhs ); }
 
-            bool write( QIODevice * outFile, const std::optional< QString > & desc, QString & msg ) const;
+            bool write( QIODevice *outFile, const std::optional< QString > &desc, QString &msg ) const;
             uint32_t size() const { return fByteArray.length(); }
 
             QByteArray fByteArray;
@@ -73,11 +65,11 @@ namespace NSABUtils
 
         struct SABUTILS_EXPORT SBIFImage
         {
-            SBIFImage( S32BitValue bifNum, S32BitValue offset, SBIFImage * prev );
-            SBIFImage( const QString & fileName, uint32_t bifNum );
+            SBIFImage( S32BitValue bifNum, S32BitValue offset, SBIFImage *prev );
+            SBIFImage( const QString &fileName, uint32_t bifNum );
 
-            bool operator==( const SBIFImage & rhs ) const;
-            bool operator!=( const SBIFImage & rhs ) const;
+            bool operator==( const SBIFImage &rhs ) const;
+            bool operator!=( const SBIFImage &rhs ) const;
 
             QByteArray indexData() const;
             bool imageValid() const;
@@ -91,14 +83,14 @@ namespace NSABUtils
             std::optional< std::pair< QByteArray, QImage > > fImage;
         };
 
-        using TBIFIndex = std::vector< SBIFImage >; // data read in of ts, pos then a pair of pos, size
+        using TBIFIndex = std::vector< SBIFImage >;   // data read in of ts, pos then a pair of pos, size
         class SABUTILS_EXPORT CFile
         {
         public:
             enum class EState
             {
-                eReady, // start
-                eDeviceOpen, // after file open, and iodevice set
+                eReady,   // start
+                eDeviceOpen,   // after file open, and iodevice set
                 eReadHeaderBase,
                 eReadHeaderIndex,
                 eReadingImages,
@@ -106,59 +98,57 @@ namespace NSABUtils
                 eError
             };
 
-            CFile( const QString & bifFile, bool loadImages ); // load the file and go
-            CFile( const QDir & dir, const QString & filter, uint32_t timespan, QString & msg ); // load the file and go
-            CFile( const QList< QFileInfo > & images, uint32_t timespan, QString & msg ); // load the images and go
-            CFile(); // used for IOHandlerStream
+            CFile( const QString &bifFile, bool loadImages );   // load the file and go
+            CFile( const QDir &dir, const QString &filter, uint32_t timespan, QString &msg );   // load the file and go
+            CFile( const QList< QFileInfo > &images, uint32_t timespan, QString &msg );   // load the images and go
+            CFile();   // used for IOHandlerStream
 
             virtual ~CFile();
 
-            static bool validateMagicNumber( const QByteArray & magicNumber );
-            bool save( const QString & fileName, QString & msg );
+            static bool validateMagicNumber( const QByteArray &magicNumber );
+            bool save( const QString &fileName, QString &msg );
 
             QString fileName() const { return fBIFFile; }
             EState state() const { return fState; }
             bool isValid() const { return state() != EState::eError; }
             QString errorString() const { return fErrorString; }
 
-            QString magicNumber() const { return S32BitValue::prettyPrint( fMagicNumber ); } // returns pretty print of the data
-            const S32BitValue & version() const { return fVersion; }
-            const S32BitValue & numImages() const { return fNumImages; }
+            QString magicNumber() const { return S32BitValue::prettyPrint( fMagicNumber ); }   // returns pretty print of the data
+            const S32BitValue &version() const { return fVersion; }
+            const S32BitValue &numImages() const { return fNumImages; }
             QString reserved() const { return S32BitValue::prettyPrint( fReserved ); }
 
-            uint32_t imageDelay() const { return timePerFrame().fValue; } // number of ms to delay per image
+            uint32_t imageDelay() const { return timePerFrame().fValue; }   // number of ms to delay per image
             QSize imageSize() const;
 
-            const S32BitValue & timePerFrame() const { return fTimePerFrame; }
+            const S32BitValue &timePerFrame() const { return fTimePerFrame; }
 
-            bool canLoadMoreImages()
-            {
-                return fLastImageLoaded < imageCount();
-            }
+            bool canLoadMoreImages() { return fLastImageLoaded < imageCount(); }
 
             int lastImageLoaded() { return fLastImageLoaded; }
             std::size_t imageCount() const { return fBIFFrames.size(); }
 
             QImage image( size_t imageNum );
             QList< QImage > images( size_t startFrame, size_t endFrame );
-            QImage imageToFrame( size_t imageNum, int * insertStart = nullptr, int * numInserted = nullptr );
+            QImage imageToFrame( size_t imageNum, int *insertStart = nullptr, int *numInserted = nullptr );
 
             int fetchSize() const { return 8; }
             void fetchMore();
 
-            static bool createBIF( const QDir & dir, uint32_t timespan, const QString & outFile, const QString & bifTool, QString & msg );
+            static bool createBIF( const QDir &dir, uint32_t timespan, const QString &outFile, const QString &bifTool, QString &msg );
 
-            std::pair< bool, QImage > read( QIODevice * device, int frameNumber ); // CFile will own the lifespace of the device
-            bool readHeader( QIODevice * device );
-            void setLoopCount( int loopCount ) { fLoopCount = loopCount; } // default is-1 which is infinite
+            std::pair< bool, QImage > read( QIODevice *device, int frameNumber );   // CFile will own the lifespace of the device
+            bool readHeader( QIODevice *device );
+            void setLoopCount( int loopCount ) { fLoopCount = loopCount; }   // default is-1 which is infinite
             int loopCount() { return fLoopCount; }
+
         private:
-            void init( const QList< QFileInfo > & images, uint32_t timespan, QString & msg );
-            static int extractImageNum( const QString & fileName );
+            void init( const QList< QFileInfo > &images, uint32_t timespan, QString &msg );
+            static int extractImageNum( const QString &fileName );
 
-            std::pair< bool, QString > loadImage( size_t imageNum, bool loadUntilFrame, int * insertStart = nullptr, int * numInserted = nullptr );
+            std::pair< bool, QString > loadImage( size_t imageNum, bool loadUntilFrame, int *insertStart = nullptr, int *numInserted = nullptr );
 
-            QIODevice * device() const;
+            QIODevice *device() const;
             void loadBIFFromFile( bool loadImages );
 
             void closeIfFinished();
@@ -172,7 +162,7 @@ namespace NSABUtils
             bool parseIndex();
             bool loadImages();
 
-            QFile * fFile{ nullptr };
+            QFile *fFile{ nullptr };
             QPointer< QIODevice > fIODevice;
             QString fBIFFile;
             EState fState{ EState::eReady };
@@ -186,9 +176,8 @@ namespace NSABUtils
             TBIFIndex fBIFFrames;
             QByteArray fReserved;
             int fLastImageLoaded{ 0 };
-            int fLoopCount{ -1 }; // infinite = -1
+            int fLoopCount{ -1 };   // infinite = -1
         };
     }
 }
 #endif
-

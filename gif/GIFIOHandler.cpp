@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 #include "GIFIOHandler.h"
 #include "../GIFWriter.h"
 #include <QImage>
@@ -39,7 +38,7 @@ bool CGIFIOHandler::canRead() const
     return false;
 }
 
-bool CGIFIOHandler::canWrite( QIODevice * device )
+bool CGIFIOHandler::canWrite( QIODevice *device )
 {
     if ( !device )
     {
@@ -76,7 +75,7 @@ QRect CGIFIOHandler::currentImageRect() const
     return QImageIOHandler::currentImageRect();
 }
 
-bool CGIFIOHandler::write( const QImage & image )
+bool CGIFIOHandler::write( const QImage &image )
 {
     NSABUtils::CGIFWriter writer( device() );
     writer.setDither( true );
@@ -109,7 +108,7 @@ QVariant CGIFIOHandler::option( ImageOption option ) const
     //return QVariant();
 }
 
-void CGIFIOHandler::setOption( ImageOption option, const QVariant & value )
+void CGIFIOHandler::setOption( ImageOption option, const QVariant &value )
 {
     return QImageIOHandler::setOption( option, value );
     //(void)option;
@@ -119,7 +118,7 @@ void CGIFIOHandler::setOption( ImageOption option, const QVariant & value )
 int CGIFIOHandler::nextImageDelay() const
 {
     return 50;
-    //return fGIFFile->imageDelay();  
+    //return fGIFFile->imageDelay();
 }
 
 int CGIFIOHandler::imageCount() const
@@ -143,7 +142,6 @@ int CGIFIOHandler::loopCount() const
     //fGIFFile->readHeader(device());
     //return static_cast< int >( fGIFFile->imageCount() );
 }
-
 
 int CGIFIOHandler::currentImageNumber() const
 {

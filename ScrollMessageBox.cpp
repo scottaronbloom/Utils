@@ -97,7 +97,7 @@ namespace NSABUtils
         fImpl->buttonBox->setStandardButtons( buttons );
     }
 
-    QPushButton * CScrollMessageBox::button( QDialogButtonBox::StandardButton btn ) const
+    QPushButton *CScrollMessageBox::button( QDialogButtonBox::StandardButton btn ) const
     {
         return fImpl->buttonBox->button( btn );
     }

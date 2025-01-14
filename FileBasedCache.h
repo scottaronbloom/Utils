@@ -34,15 +34,16 @@ namespace NSABUtils
 {
     struct SABUTILS_EXPORT SFileBasedCacheNode
     {
-        explicit SFileBasedCacheNode( const QString & path );
+        explicit SFileBasedCacheNode( const QString &path );
         explicit SFileBasedCacheNode( const QFileInfo &fileInfo );
 
         bool operator==( const SFileBasedCacheNode &rhs ) const;
 
         std::size_t hash() const;
 
-        void setPathOnlySearch( bool value ) { fPathOnlySearch = value;  }
+        void setPathOnlySearch( bool value ) { fPathOnlySearch = value; }
         bool pathOnlySearch() const { return fPathOnlySearch; }
+
     private:
         QFileInfo fFileInfo;
         QDateTime fDateTime;
@@ -72,7 +73,7 @@ namespace NSABUtils
 
     template< typename, typename = void >
     constexpr bool has_fileNamePtr{};
-    
+
     template< typename T >
     constexpr bool has_fileNamePtr< T, std::void_t< decltype( std::declval< T >()->fileName() ) > > = true;
 
@@ -82,13 +83,10 @@ namespace NSABUtils
     class CFileBasedCache
     {
     public:
-        CFileBasedCache(){}
+        CFileBasedCache() {}
 
-        T find( const QString &path ) const 
-        {
-            return find( QFileInfo( path ) );
-        }
-        T find( const QFileInfo & fi ) const
+        T find( const QString &path ) const { return find( QFileInfo( path ) ); }
+        T find( const QFileInfo &fi ) const
         {
             auto node = NSABUtils::SFileBasedCacheNode( fi );
             auto pos = fCache.find( node );
@@ -97,7 +95,7 @@ namespace NSABUtils
             return ( *pos ).second;
         }
 
-        bool contains( const QString &path, bool pathOnlySearch=false ) const { return contains( QFileInfo( path ), pathOnlySearch ); }
+        bool contains( const QString &path, bool pathOnlySearch = false ) const { return contains( QFileInfo( path ), pathOnlySearch ); }
         bool contains( const QFileInfo &fi, bool pathOnlySearch = false ) const
         {
             auto node = NSABUtils::SFileBasedCacheNode( fi );
@@ -106,12 +104,7 @@ namespace NSABUtils
             return ( pos != fCache.end() );
         }
 
-        
-        typename std::enable_if < has_fileNamePtr< T >, void >::type 
-        add( const T &object )
-        {
-            return add( object->fileName(), object );
-        }
+        typename std::enable_if< has_fileNamePtr< T >, void >::type add( const T &object ) { return add( object->fileName(), object ); }
 
         void add( const QString &path, const T &object )
         {
@@ -140,7 +133,7 @@ namespace std
     template<>
     struct hash< NSABUtils::SFileBasedCacheNode >
     {
-        std::size_t operator()( const NSABUtils::SFileBasedCacheNode & key ) const { return key.hash(); }
+        std::size_t operator()( const NSABUtils::SFileBasedCacheNode &key ) const { return key.hash(); }
     };
 
     template<>

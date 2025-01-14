@@ -28,8 +28,7 @@ namespace NSABUtils
     namespace NFileUtils
     {
 
-        std::optional< QList< QFileInfo > > findAllFiles(
-            const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName, QString *errorMsg, std::function< bool( const QDir &dir ) > skipDir, std::function< bool( const QFileInfo &file ) > skipFile )
+        std::optional< QList< QFileInfo > > findAllFiles( const QDir &dir, const QStringList &nameFilters, bool recursive, bool sortByName, QString *errorMsg, std::function< bool( const QDir &dir ) > skipDir, std::function< bool( const QFileInfo &file ) > skipFile )
         {
             if ( !dir.exists() || !dir.isReadable() )
             {

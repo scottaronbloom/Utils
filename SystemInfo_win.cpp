@@ -526,13 +526,7 @@ namespace NSABUtils
     {
         std::optional< TQuery > initQuery()
         {
-            auto tmp = NSABUtils::initQuery( 
-                { 
-                    L"\\Processor(*)\\% Processor Time", 
-                    L"\\Processor(*)\\% User Time", 
-                    L"\\Processor(*)\\% Privileged Time" 
-                } 
-            );
+            auto tmp = NSABUtils::initQuery( { L"\\Processor(*)\\% Processor Time", L"\\Processor(*)\\% User Time", L"\\Processor(*)\\% Privileged Time" } );
             if ( !tmp.has_value() )
                 return {};
             if ( tmp.value().second.size() != 3 )

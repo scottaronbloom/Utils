@@ -164,7 +164,7 @@ namespace NSABUtils
         void computeReverseExtensionMap( bool encoders );
         void computeReverseCodecMap( bool encoders );
 
-        void computeExtensionsForFormat( const QString &name, const QString &desc, std::optional < EFormatType > formatType, bool isEncoder );
+        void computeExtensionsForFormat( const QString &name, const QString &desc, std::optional< EFormatType > formatType, bool isEncoder );
         QStringList computeExtensionsForFormat( const QString &formatName, std::optional< EFormatType > formatType, bool isEncoder );
         std::optional< QStringList > encoderFormatLoaded( const QString &formatName ) const;
         std::optional< QStringList > decoderFormatLoaded( const QString &formatName ) const;

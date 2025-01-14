@@ -36,7 +36,7 @@ namespace NSABUtils
     class SABUTILS_EXPORT CGPUInfo
     {
     public:
-        CGPUInfo(){};
+        CGPUInfo() {};
         CGPUInfo( IWbemClassObject *gpuInfo );
 
         bool isIntelGPU() const;

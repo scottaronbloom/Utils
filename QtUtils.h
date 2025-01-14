@@ -227,10 +227,7 @@ namespace NSABUtils
     SABUTILS_EXPORT int itemCount( const QModelIndex &idx, bool rowCountOnly, const std::pair< std::function< bool( const QVariant &path ) >, int > &excludeFunc = { {}, Qt::DisplayRole } );
 
     SABUTILS_EXPORT QStringList getHeadersForModel( QAbstractItemModel *model );
-    SABUTILS_EXPORT void writeModel(
-        QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, const QString &plauralSuffix,
-        const std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) > &writeRow =
-            std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) >() );
+    SABUTILS_EXPORT void writeModel( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, const QString &plauralSuffix, const std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) > &writeRow = std::function< void( QAbstractItemModel *model, QXmlStreamWriter &writer, const QString &keyName, int rowNum ) >() );
 
     SABUTILS_EXPORT void expandAll( QTreeView *view );
 
@@ -285,7 +282,7 @@ inline typename std::enable_if< I == sizeof...( Tp ), void >::type printToDebug(
 }
 
 template< std::size_t I = 0, typename... Tp >
-    inline typename std::enable_if < I < sizeof...( Tp ), void >::type printToDebug( QDebug &debug, const std::tuple< Tp... > &value )
+    inline typename std::enable_if < I< sizeof...( Tp ), void >::type printToDebug( QDebug &debug, const std::tuple< Tp... > &value )
 {
     if ( I != 0 )
         debug.nospace() << ", ";

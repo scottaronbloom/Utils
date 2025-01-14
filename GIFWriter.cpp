@@ -33,30 +33,30 @@
 #include <QApplication>
 
 #ifdef _ALLOW_OPENSOURCEGIFWRITER_H
-#include "gif/gif-h/gif.h"
+    #include "gif/gif-h/gif.h"
 #endif
 
 namespace NSABUtils
 {
     struct SGIFPalette
     {
-        SGIFPalette( const uint8_t * prevImage, const QImage & image, uint8_t bitDepth, bool dither );
+        SGIFPalette( const uint8_t *prevImage, const QImage &image, uint8_t bitDepth, bool dither );
         ~SGIFPalette();
 
-        void getChangedPixels( const uint8_t * prevImage, uint8_t * currImage, int & numPixels );
-        void splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum );
+        void getChangedPixels( const uint8_t *prevImage, uint8_t *currImage, int &numPixels );
+        void splitPalette( uint8_t *image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum );
 
-        std::tuple< uint8_t, int, int > compuiteRGBRanges( int numPixels, const uint8_t * image, int splitELT, int firstELT, int lastELT );
+        std::tuple< uint8_t, int, int > compuiteRGBRanges( int numPixels, const uint8_t *image, int splitELT, int firstELT, int lastELT );
 
-        void setRGBToMinMax( const uint8_t * image, int numPixels, int location, bool min );
-        void setRGBToAverage( const uint8_t * image, int numPixels, int location );
+        void setRGBToMinMax( const uint8_t *image, int numPixels, int location, bool min );
+        void setRGBToAverage( const uint8_t *image, int numPixels, int location );
 
-        int partition( uint8_t * image, int left, int right, const int elt, int pivot );
-        void partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter );
-        void closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const;
-        void swap( uint8_t * image, int pix1, int pix2 );
+        int partition( uint8_t *image, int left, int right, const int elt, int pivot );
+        void partitionByMedian( uint8_t *image, int left, int right, int com, int neededCenter );
+        void closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t &bestIndex, uint32_t &bestDifference ) const;
+        void swap( uint8_t *image, int pix1, int pix2 );
 
-        bool write( QDataStream & ds );
+        bool write( QDataStream &ds );
 
         uint8_t fBitDepth{ 8 };
 
@@ -78,7 +78,7 @@ namespace NSABUtils
         uint8_t fTreeSplitELT[ 256 ]{ 0 };
         uint8_t fTreeSplit[ 256 ]{ 0 };
         bool fDither{ false };
-        uint8_t * fTmpImage{ nullptr };
+        uint8_t *fTmpImage{ nullptr };
         int fImageWidth{ 0 };
     };
 
@@ -88,14 +88,14 @@ namespace NSABUtils
     {
     }
 
-    CGIFWriter::CGIFWriter( const QString & filename ) :
+    CGIFWriter::CGIFWriter( const QString &filename ) :
         CGIFWriter( new QFile( filename ) )
     {
         fDeleteDevice = true;
         fDevice->open( QIODevice::WriteOnly | QIODevice::Truncate );
     }
 
-    CGIFWriter::CGIFWriter( QIODevice * device ) :
+    CGIFWriter::CGIFWriter( QIODevice *device ) :
         fDevice( device ),
         fDataStream( device )
     {
@@ -108,13 +108,13 @@ namespace NSABUtils
             delete[] fPrevFrameData;
     }
 
-    void CGIFWriter::setFileName( const QString & fileName )
+    void CGIFWriter::setFileName( const QString &fileName )
     {
         setDevice( new QFile( fileName ) );
         fDeleteDevice = true;
     }
 
-    void CGIFWriter::setDevice( QIODevice * device )
+    void CGIFWriter::setDevice( QIODevice *device )
     {
         if ( fDeleteDevice )
             delete fDevice;
@@ -134,7 +134,7 @@ namespace NSABUtils
         return status( fDataStream );
     }
 
-    bool CGIFWriter::status( const QDataStream & ds )
+    bool CGIFWriter::status( const QDataStream &ds )
     {
         return ds.status() == QDataStream::Ok && ds.device()->isOpen() && ds.device()->isWritable();
     }
@@ -144,7 +144,7 @@ namespace NSABUtils
         return writeChar( ch, fDataStream );
     }
 
-    bool CGIFWriter::writeChar( uint8_t ch, QDataStream & ds )
+    bool CGIFWriter::writeChar( uint8_t ch, QDataStream &ds )
     {
         if ( !status( ds ) )
             return false;
@@ -157,7 +157,7 @@ namespace NSABUtils
         return writeInt( val, fDataStream );
     }
 
-    bool CGIFWriter::writeInt( uint16_t val, QDataStream & ds )
+    bool CGIFWriter::writeInt( uint16_t val, QDataStream &ds )
     {
         if ( !status( ds ) )
             return false;
@@ -166,23 +166,23 @@ namespace NSABUtils
         return status( ds );
     }
 
-    bool CGIFWriter::writeString( const char * str )
+    bool CGIFWriter::writeString( const char *str )
     {
         return writeString( str, fDataStream );
     }
 
-    bool CGIFWriter::writeString( const char * str, QDataStream & ds )
+    bool CGIFWriter::writeString( const char *str, QDataStream &ds )
     {
         uint len = qstrlen( str );
         return writeRaw( str, len, ds );
     }
 
-    bool CGIFWriter::writeRaw( const char * str, int len )
+    bool CGIFWriter::writeRaw( const char *str, int len )
     {
         return writeRaw( str, len, fDataStream );
     }
 
-    bool CGIFWriter::writeRaw( const char * str, int len, QDataStream & ds )
+    bool CGIFWriter::writeRaw( const char *str, int len, QDataStream &ds )
     {
         if ( !status( ds ) )
             return false;
@@ -209,14 +209,14 @@ namespace NSABUtils
         fPrevFrameData = new uint8_t[ numBytes ];
         std::memset( fPrevFrameData, 0, numBytes );
 
-        writeString( "GIF" ); // signature
-        writeString( "89a" ); // version
+        writeString( "GIF" );   // signature
+        writeString( "89a" );   // version
         writeInt( fCurrImage.width() );
         writeInt( fCurrImage.height() );
 
-        writeChar( 0xf0 ); // global color table of 2 entries
-        writeChar( 0x0 ); // background color
-        writeChar( 0x0 ); // pixel aspect ratio
+        writeChar( 0xf0 );   // global color table of 2 entries
+        writeChar( 0x0 );   // background color
+        writeChar( 0x0 );   // pixel aspect ratio
 
         // global palette
         // color 0 is black
@@ -229,14 +229,14 @@ namespace NSABUtils
         writeChar( 0x0 );
         writeChar( 0x0 );
 
-        writeChar( 0x21 ); // extension block
-        writeChar( 0xff ); // its an app specific extension
-        writeChar( 11 ); // length 11
+        writeChar( 0x21 );   // extension block
+        writeChar( 0xff );   // its an app specific extension
+        writeChar( 11 );   // length 11
         writeString( "NETSCAPE2.0" );
-        writeChar( 3 ); // 3 bytes of NETSCAPE2.0 data
-        writeChar( 1 ); // interwebs say so
+        writeChar( 3 );   // 3 bytes of NETSCAPE2.0 data
+        writeChar( 1 );   // interwebs say so
         writeInt( fLoopCount );
-        writeChar( 0 ); // end of extension block
+        writeChar( 0 );   // end of extension block
 
         fHeaderWritten = true;
         return status();
@@ -257,7 +257,7 @@ namespace NSABUtils
         return fCurrImage.width() * fCurrImage.height();
     }
 
-    bool CGIFWriter::writeImage( const QImage & image, bool lastFrame )
+    bool CGIFWriter::writeImage( const QImage &image, bool lastFrame )
     {
         fCurrImage = image;
         writeHeader();
@@ -272,19 +272,17 @@ namespace NSABUtils
         return status();
     }
 
-    bool CGIFWriter::pixelCompare( const uint8_t * lhs, const uint8_t * rhs, int pixelNum )
+    bool CGIFWriter::pixelCompare( const uint8_t *lhs, const uint8_t *rhs, int pixelNum )
     {
-        return ( lhs[ pixelNum ] == rhs[ pixelNum ] )
-            && ( lhs[ pixelNum + 1 ] == rhs[ pixelNum + 1 ] )
-            && ( lhs[ pixelNum + 2 ] == rhs[ pixelNum + 2 ] );
+        return ( lhs[ pixelNum ] == rhs[ pixelNum ] ) && ( lhs[ pixelNum + 1 ] == rhs[ pixelNum + 1 ] ) && ( lhs[ pixelNum + 2 ] == rhs[ pixelNum + 2 ] );
     }
 
-    bool CGIFWriter::pixelCompare( const uint8_t * lhs, const uint8_t * rhs )
+    bool CGIFWriter::pixelCompare( const uint8_t *lhs, const uint8_t *rhs )
     {
         return pixelCompare( lhs, rhs, 0 );
     }
 
-    bool CGIFWriter::pixelCompare( const uint8_t * lhs, const std::initializer_list< uint32_t > & rhs )
+    bool CGIFWriter::pixelCompare( const uint8_t *lhs, const std::initializer_list< uint32_t > &rhs )
     {
         if ( rhs.size() != 3 )
             return false;
@@ -298,7 +296,7 @@ namespace NSABUtils
         return true;
     }
 
-    void CGIFWriter::ditherImage( const uint8_t * prevImage )
+    void CGIFWriter::ditherImage( const uint8_t *prevImage )
     {
         Q_ASSERT( fPalette );
         if ( !fPalette )
@@ -306,13 +304,13 @@ namespace NSABUtils
 
         auto numPixels = this->numPixels();
 
-        auto quantPixels = new int32_t[ sizeof( int32_t ) * numPixels * 4 ]; // has to support more than 8 bits
+        auto quantPixels = new int32_t[ sizeof( int32_t ) * numPixels * 4 ];   // has to support more than 8 bits
         auto imagePixels = NSABUtils::imageToPixels( fCurrImage );
 
         for ( int ii = 0; ii < 4 * numPixels; ++ii )
         {
             auto pix = imagePixels[ ii ];
-            auto pix256 = static_cast<uint32_t>( pix ) * 256;
+            auto pix256 = static_cast< uint32_t >( pix ) * 256;
             quantPixels[ ii ] = pix256;
         }
 
@@ -322,15 +320,14 @@ namespace NSABUtils
             {
                 auto pixelNumber = ( currRow * fCurrImage.width() ) + currCol;
                 auto byteNumber = 4 * pixelNumber;
-                int32_t * nextPixel = quantPixels + byteNumber;
+                int32_t *nextPixel = quantPixels + byteNumber;
                 const auto lastPix = prevImage ? ( prevImage + byteNumber ) : nullptr;
 
                 uint32_t rr = ( nextPixel[ 0 ] + 127 ) / 256;
                 uint32_t gg = ( nextPixel[ 1 ] + 127 ) / 256;
                 uint32_t bb = ( nextPixel[ 2 ] + 127 ) / 256;
 
-                if ( prevImage &&
-                     ( pixelCompare( prevImage, { rr, gg, bb } ) ) )
+                if ( prevImage && ( pixelCompare( prevImage, { rr, gg, bb } ) ) )
                 {
                     nextPixel[ 0 ] = rr;
                     nextPixel[ 1 ] = gg;
@@ -353,10 +350,10 @@ namespace NSABUtils
                 nextPixel[ 3 ] = bestIndex;
 
                 // propagate the error to the adjacent locations
-                auto quantLoc7 = pixelNumber + 1;  // to the right
-                auto quantLoc3 = pixelNumber + fCurrImage.width() - 1; // next rowleft
-                auto quantLoc5 = pixelNumber + fCurrImage.width();     // next row
-                auto quantLoc1 = pixelNumber + fCurrImage.width() + 1; // next row righ
+                auto quantLoc7 = pixelNumber + 1;   // to the right
+                auto quantLoc3 = pixelNumber + fCurrImage.width() - 1;   // next rowleft
+                auto quantLoc5 = pixelNumber + fCurrImage.width();   // next row
+                auto quantLoc1 = pixelNumber + fCurrImage.width() + 1;   // next row righ
 
                 updateQuant( quantPixels, quantLoc7, rErr, gErr, bErr, 7 );
                 updateQuant( quantPixels, quantLoc3, rErr, gErr, bErr, 3 );
@@ -368,7 +365,7 @@ namespace NSABUtils
         int numBytes = 0;
         for ( int ii = 0; ii < numPixels * 4; ++ii )
         {
-            fPrevFrameData[ ii ] = static_cast<uint8_t>( quantPixels[ ii ] );
+            fPrevFrameData[ ii ] = static_cast< uint8_t >( quantPixels[ ii ] );
             numBytes++;
         }
 
@@ -376,7 +373,7 @@ namespace NSABUtils
         delete[] quantPixels;
     }
 
-    void CGIFWriter::updateQuant( int32_t * quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr, int quantMultiplier )
+    void CGIFWriter::updateQuant( int32_t *quantPixels, int loc, int32_t rErr, int32_t gErr, int32_t bErr, int quantMultiplier )
     {
         if ( loc < numPixels() )
         {
@@ -391,7 +388,7 @@ namespace NSABUtils
         }
     }
 
-    void CGIFWriter::thresholdImage( const uint8_t * prevImage )
+    void CGIFWriter::thresholdImage( const uint8_t *prevImage )
     {
         auto numPixels = this->numPixels();
 
@@ -435,7 +432,7 @@ namespace NSABUtils
 
     struct SBitStatus
     {
-        SBitStatus( QDataStream & ds ) :
+        SBitStatus( QDataStream &ds ) :
             fDataStream( ds )
         {
         }
@@ -500,14 +497,14 @@ namespace NSABUtils
             qDebug().noquote().nospace() << NSABUtils::dumpArray( "Palette Status", fChunk, fChunk, 256, true, 32 );
         }
 
-        QDataStream & fDataStream;
+        QDataStream &fDataStream;
         uint8_t fBitIndex{ 0 };
         uint8_t fByte{ 0 };
         uint32_t fChunkIndex{ 0 };
         uint8_t fChunk[ 256 ] = { 0 };
     };
 
-    bool CGIFWriter::writeLZW( uint32_t left, uint32_t top, const uint8_t * imagePixels )
+    bool CGIFWriter::writeLZW( uint32_t left, uint32_t top, const uint8_t *imagePixels )
     {
         if ( !status() )
             return false;
@@ -603,7 +600,7 @@ namespace NSABUtils
         return writeLZW( 0, 0, fPrevFrameData );
     }
 
-    SGIFPalette::SGIFPalette( const uint8_t * prevImage, const QImage & image, uint8_t bitDepth, bool dither ) :
+    SGIFPalette::SGIFPalette( const uint8_t *prevImage, const QImage &image, uint8_t bitDepth, bool dither ) :
         fBitDepth( bitDepth ),
         fDither( dither )
     {
@@ -632,7 +629,7 @@ namespace NSABUtils
             delete[] fTmpImage;
     }
 
-    void SGIFPalette::splitPalette( uint8_t * image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum )
+    void SGIFPalette::splitPalette( uint8_t *image, int numPixels, int firstELT, int lastELT, int splitELT, int splitDIST, int treeNodeNum )
     {
         if ( ( lastELT <= firstELT ) || ( numPixels == 0 ) )
             return;
@@ -661,7 +658,6 @@ namespace NSABUtils
         int subPixelsB = -1;
         std::tie( splitOffset, subPixelsA, subPixelsB ) = compuiteRGBRanges( numPixels, image, splitELT, firstELT, lastELT );
 
-
         partitionByMedian( image, 0, numPixels, splitOffset, subPixelsA );
 
         fTreeSplitELT[ treeNodeNum ] = splitOffset;
@@ -671,7 +667,7 @@ namespace NSABUtils
         splitPalette( image + subPixelsA * 4, subPixelsB, splitELT, lastELT, splitELT + splitDIST, splitDIST / 2, ( treeNodeNum * 2 ) + 1 );
     }
 
-    std::tuple< uint8_t, int, int > SGIFPalette::compuiteRGBRanges( int numPixels, const uint8_t * image, int splitELT, int firstELT, int lastELT )
+    std::tuple< uint8_t, int, int > SGIFPalette::compuiteRGBRanges( int numPixels, const uint8_t *image, int splitELT, int firstELT, int lastELT )
     {
         uint8_t minR = 255;
         uint8_t minG = 255;
@@ -712,13 +708,13 @@ namespace NSABUtils
         return std::make_tuple( splitOffset, subPixelsA, subPixelsB );
     }
 
-    void SGIFPalette::swap( uint8_t * image, int lhs, int rhs )
+    void SGIFPalette::swap( uint8_t *image, int lhs, int rhs )
     {
         for ( int ii = 0; ii <= 3; ++ii )
             std::swap( image[ ( lhs * 4 ) + ii ], image[ ( rhs * 4 ) + ii ] );
     }
 
-    int SGIFPalette::partition( uint8_t * image, int left, int right, const int elt, int pivot )
+    int SGIFPalette::partition( uint8_t *image, int left, int right, const int elt, int pivot )
     {
         auto pivotValue = image[ ( pivot * 4 ) + elt ];
         swap( image, pivot, right - 1 );
@@ -746,7 +742,7 @@ namespace NSABUtils
         return storedIndex;
     }
 
-    void SGIFPalette::partitionByMedian( uint8_t * image, int left, int right, int com, int neededCenter )
+    void SGIFPalette::partitionByMedian( uint8_t *image, int left, int right, int com, int neededCenter )
     {
         if ( left < right - 1 )
         {
@@ -760,8 +756,7 @@ namespace NSABUtils
         }
     }
 
-
-    void SGIFPalette::setRGBToAverage( const uint8_t * image, int numPixels, int location )
+    void SGIFPalette::setRGBToAverage( const uint8_t *image, int numPixels, int location )
     {
         uint64_t r = 0;
         uint64_t g = 0;
@@ -787,7 +782,7 @@ namespace NSABUtils
         setBlue( location, b );
     }
 
-    void SGIFPalette::closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t & bestIndex, uint32_t & bestDifference ) const
+    void SGIFPalette::closestColor( int32_t rr, int32_t gg, int32_t bb, int treeNodeNumber, uint32_t &bestIndex, uint32_t &bestDifference ) const
     {
         if ( treeNodeNumber > ( 1 << fBitDepth ) - 1 )
         {
@@ -798,7 +793,7 @@ namespace NSABUtils
                 auto gError = gg - (int32_t)fGreen[ index ];
                 auto bError = bb - (int32_t)fBlue[ index ];
 
-                auto diff = static_cast<uint32_t>( std::abs( rError ) + std::abs( gError ) + std::abs( bError ) );
+                auto diff = static_cast< uint32_t >( std::abs( rError ) + std::abs( gError ) + std::abs( bError ) );
                 if ( diff < bestDifference )
                 {
                     bestIndex = index;
@@ -830,7 +825,7 @@ namespace NSABUtils
         }
     }
 
-    void SGIFPalette::setRGBToMinMax( const uint8_t * image, int numPixels, int location, bool min )
+    void SGIFPalette::setRGBToMinMax( const uint8_t *image, int numPixels, int location, bool min )
     {
         uint8_t r = min ? 255 : 0;
         uint8_t g = min ? 255 : 0;
@@ -851,7 +846,7 @@ namespace NSABUtils
         setBlue( location, b );
     }
 
-    void SGIFPalette::getChangedPixels( const uint8_t * prevImage, uint8_t * currImage, int & numPixels )
+    void SGIFPalette::getChangedPixels( const uint8_t *prevImage, uint8_t *currImage, int &numPixels )
     {
         if ( !prevImage )
             return;
@@ -877,7 +872,7 @@ namespace NSABUtils
         numPixels = retVal;
     }
 
-    bool SGIFPalette::write( QDataStream & ds )
+    bool SGIFPalette::write( QDataStream &ds )
     {
         CGIFWriter::writeChar( 0x80 + fBitDepth - 1, ds );
 
@@ -894,11 +889,9 @@ namespace NSABUtils
             CGIFWriter::writeChar( rr, ds );
             CGIFWriter::writeChar( gg, ds );
             CGIFWriter::writeChar( bb, ds );
-
         }
         return CGIFWriter::status( ds );
     }
-
 
     void SGIFPalette::setRed( int location, uint8_t val )
     {
@@ -923,14 +916,11 @@ namespace NSABUtils
     QString SGIFPalette::dumpText() const
     {
         QString retVal;
-        retVal = "Red:\n" + NSABUtils::dumpArray( "Palette Red", fRed, fRed, 256, true ) + "\n"
-            + "Blue:\n" + NSABUtils::dumpArray( "Palette Blue", fBlue, fBlue, 256, true ) + "\n"
-            + "Green:\n" + NSABUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n"
-            ;
+        retVal = "Red:\n" + NSABUtils::dumpArray( "Palette Red", fRed, fRed, 256, true ) + "\n" + "Blue:\n" + NSABUtils::dumpArray( "Palette Blue", fBlue, fBlue, 256, true ) + "\n" + "Green:\n" + NSABUtils::dumpArray( "Palette Green", fGreen, fGreen, 256, true ) + "\n";
         return retVal;
     }
 
-    bool CGIFWriter::saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > & images, bool useNew, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelledFunc )
+    bool CGIFWriter::saveToGIF( QWidget *parent, const QString &fileName, const QList< QImage > &images, bool useNew, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelledFunc )
     {
         if ( fileName.isEmpty() )
             return true;
@@ -972,7 +962,7 @@ namespace NSABUtils
         bool wasCancelled = false;
         int frame = 0;
         bool aOK = true;
-        for ( auto && image : images )
+        for ( auto &&image : images )
         {
             setCurr( frame++ );
             wasCancelled = wasCancelledFunc();
@@ -1034,4 +1024,3 @@ namespace NSABUtils
         return !wasCancelled && aOK;
     }
 }
-

@@ -44,13 +44,13 @@ namespace NSABUtils
         struct sysinfo info;
         if ( sysinfo( &info ) != 0 )
             return;
-        
-        fSystemMemoryData.push_back( { "Total Physical", locale.toString( (qlonglong)info.totalram * info.mem_unit).toStdString() } );
-        fSystemMemoryData.push_back( { "Available Physical", locale.toString( (qlonglong)info.freeram * info.mem_unit).toStdString() } );
-        fSystemMemoryData.push_back( { "Shared Ram", locale.toString( (qlonglong)info.sharedram * info.mem_unit).toStdString() } );
-        fSystemMemoryData.push_back( { "Buffer Ram", locale.toString( (qlonglong)info.bufferram * info.mem_unit).toStdString() } );
-        fSystemMemoryData.push_back( { "Total high memory size", locale.toString( (qlonglong)info.totalhigh * info.mem_unit).toStdString() } );
-        fSystemMemoryData.push_back( { "Available high memory size", locale.toString( (qlonglong)info.freehigh * info.mem_unit).toStdString() } );
+
+        fSystemMemoryData.push_back( { "Total Physical", locale.toString( (qlonglong)info.totalram * info.mem_unit ).toStdString() } );
+        fSystemMemoryData.push_back( { "Available Physical", locale.toString( (qlonglong)info.freeram * info.mem_unit ).toStdString() } );
+        fSystemMemoryData.push_back( { "Shared Ram", locale.toString( (qlonglong)info.sharedram * info.mem_unit ).toStdString() } );
+        fSystemMemoryData.push_back( { "Buffer Ram", locale.toString( (qlonglong)info.bufferram * info.mem_unit ).toStdString() } );
+        fSystemMemoryData.push_back( { "Total high memory size", locale.toString( (qlonglong)info.totalhigh * info.mem_unit ).toStdString() } );
+        fSystemMemoryData.push_back( { "Available high memory size", locale.toString( (qlonglong)info.freehigh * info.mem_unit ).toStdString() } );
 
         struct rusage rUsage;
         bool aOK = getrusage( RUSAGE_SELF, &rUsage ) == 0;
@@ -66,14 +66,14 @@ namespace NSABUtils
         }
     }
 
-    void getOSInfo( std::string & osName, std::string & osVersion )
+    void getOSInfo( std::string &osName, std::string &osVersion )
     {
         struct utsname uts;
-        if ( uname( &uts) != 0 )
+        if ( uname( &uts ) != 0 )
             return;
 
         osName = uts.sysname ? uts.sysname : "";
-        osVersion  = uts.machine ? uts.machine : "";
+        osVersion = uts.machine ? uts.machine : "";
         osVersion += " ";
         osVersion += uts.release ? uts.release : "";
         osVersion += " ";
@@ -112,17 +112,8 @@ namespace NSABUtils
         int days = info.uptime / 86400;
         int hours = ( info.uptime / 3600 ) - ( days * 24 );
         int mins = ( info.uptime / 60 ) - ( days * 1440 ) - ( hours * 60 );
-        fSystemInformation.push_back( { "Uptime", QString( "%1 days, %2 hours, %3 minutes, %4 seconds" )
-                    .arg( days )
-                    .arg( hours )
-                    .arg( mins )
-                    .arg( info.uptime % 60 ).toStdString() } )
-                    ;
-        fSystemInformation.push_back( { "Load Avgs", QString( "1min(%1) 5min(%2) 15min(%3)" )
-                    .arg( locale.toString( info.loads[ 0 ]/65536.0, 'g', 3 ) )
-                    .arg( locale.toString( info.loads[ 1 ]/65536.0, 'g', 3 ) )
-                    .arg( locale.toString( info.loads[ 2 ]/65536.0, 'g', 3 ) ).toStdString() } )
-                    ;
+        fSystemInformation.push_back( { "Uptime", QString( "%1 days, %2 hours, %3 minutes, %4 seconds" ).arg( days ).arg( hours ).arg( mins ).arg( info.uptime % 60 ).toStdString() } );
+        fSystemInformation.push_back( { "Load Avgs", QString( "1min(%1) 5min(%2) 15min(%3)" ).arg( locale.toString( info.loads[ 0 ] / 65536.0, 'g', 3 ) ).arg( locale.toString( info.loads[ 1 ] / 65536.0, 'g', 3 ) ).arg( locale.toString( info.loads[ 2 ] / 65536.0, 'g', 3 ) ).toStdString() } );
         fSystemInformation.push_back( { "Total Swap", locale.toString( (qlonglong)info.totalswap ).toStdString() } );
         fSystemInformation.push_back( { "Free Swap", locale.toString( (qlonglong)info.freeswap ).toStdString() } );
         fSystemInformation.push_back( { "Number of Processes", locale.toString( (qlonglong)info.procs ).toStdString() } );

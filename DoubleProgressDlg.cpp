@@ -375,7 +375,6 @@ namespace NSABUtils
         return fImpl->fSecondaryBar->defaultFormat();
     }
 
-
     void CDoubleProgressDlg::setPrimaryProgressLabel( const QString &label )
     {
         fImpl->fPrimaryBar->setLabel( label );

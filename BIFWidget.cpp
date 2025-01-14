@@ -47,8 +47,8 @@ namespace NSABUtils
 {
     namespace NBIF
     {
-        CWidget::CWidget( QWidget * parent )
-            : QFrame( parent ),
+        CWidget::CWidget( QWidget *parent ) :
+            QFrame( parent ),
             fImpl( new NSABUtils::NBIF::Ui::CWidget )
         {
             Q_INIT_RESOURCE( BIFPlayerResources );
@@ -241,7 +241,6 @@ namespace NSABUtils
             enableItem( fActionNext, aOK );
             enableItem( fActionSkipForward, aOK );
 
-
             enableItem( fImpl->skipBackwardDiscreteBtn, aOK );
             enableItem( fImpl->prevDiscreteBtn, aOK );
             enableItem( fImpl->playBtn, aOK && !isPlaying() );
@@ -299,7 +298,7 @@ namespace NSABUtils
             fImpl->textLabel->setVisible( false );
         }
 
-        std::shared_ptr< CFile > CWidget::setFileName( const QString & fileName )
+        std::shared_ptr< CFile > CWidget::setFileName( const QString &fileName )
         {
             if ( fileName.isEmpty() || !QFileInfo( fileName ).exists() )
                 fBIF.reset();
@@ -312,7 +311,7 @@ namespace NSABUtils
             return fBIF;
         }
 
-        QAction * CWidget::actionSkipBackward()
+        QAction *CWidget::actionSkipBackward()
         {
             if ( !fActionSkipBackward )
             {
@@ -321,7 +320,7 @@ namespace NSABUtils
             return fActionSkipBackward;
         }
 
-        QAction * CWidget::actionPrev()
+        QAction *CWidget::actionPrev()
         {
             if ( !fActionPrev )
             {
@@ -330,7 +329,7 @@ namespace NSABUtils
             return fActionPrev;
         }
 
-        QAction * CWidget::actionTogglePlayPause( std::optional< bool > asPlayButton )
+        QAction *CWidget::actionTogglePlayPause( std::optional< bool > asPlayButton )
         {
             if ( !fActionTogglePlayPause )
             {
@@ -344,7 +343,7 @@ namespace NSABUtils
             return fActionTogglePlayPause;
         }
 
-        QAction * CWidget::actionPlay()
+        QAction *CWidget::actionPlay()
         {
             if ( !fActionPlay )
             {
@@ -355,7 +354,7 @@ namespace NSABUtils
             return fActionPlay;
         }
 
-        QAction * CWidget::actionPause()
+        QAction *CWidget::actionPause()
         {
             if ( !fActionPause )
             {
@@ -366,7 +365,7 @@ namespace NSABUtils
             return fActionPause;
         }
 
-        QAction * CWidget::actionNext()
+        QAction *CWidget::actionNext()
         {
             if ( !fActionNext )
             {
@@ -375,7 +374,7 @@ namespace NSABUtils
             return fActionNext;
         }
 
-        QAction * CWidget::actionSkipForward()
+        QAction *CWidget::actionSkipForward()
         {
             if ( !fActionSkipForward )
             {
@@ -384,7 +383,7 @@ namespace NSABUtils
             return fActionSkipForward;
         }
 
-        QAction * CWidget::actionDiscreteLayout()
+        QAction *CWidget::actionDiscreteLayout()
         {
             if ( !fActionDiscreteLayout )
             {
@@ -394,7 +393,7 @@ namespace NSABUtils
             return fActionDiscreteLayout;
         }
 
-        QAction * CWidget::actionToggleLayout()
+        QAction *CWidget::actionToggleLayout()
         {
             if ( !fActionToggleLayout )
             {
@@ -404,7 +403,7 @@ namespace NSABUtils
             return fActionToggleLayout;
         }
 
-        QAction * CWidget::actionNoLayout()
+        QAction *CWidget::actionNoLayout()
         {
             if ( !fActionNoLayout )
             {
@@ -414,7 +413,7 @@ namespace NSABUtils
             return fActionNoLayout;
         }
 
-        QAction * CWidget::actionSaveAsGIF()
+        QAction *CWidget::actionSaveAsGIF()
         {
             if ( !fActionSaveAsGIF )
             {
@@ -422,8 +421,6 @@ namespace NSABUtils
             }
             return fActionSaveAsGIF;
         }
-
-
 
         void CWidget::setButtonsLayout( EButtonsLayout layout )
         {
@@ -445,11 +442,11 @@ namespace NSABUtils
             else
             {
                 fImpl->stackedWidget->setVisible( true );
-                fImpl->stackedWidget->setCurrentIndex( static_cast<int>( fButtonLayout ) );
+                fImpl->stackedWidget->setCurrentIndex( static_cast< int >( fButtonLayout ) );
             }
         }
 
-        void CWidget::setInfo( QAction * item, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) )
+        void CWidget::setInfo( QAction *item, const QString &iconPath, const QString &text, void ( CWidget::*slot )() )
         {
             QIcon icon;
             icon.addFile( iconPath, QSize(), QIcon::Normal, QIcon::Off );
@@ -460,7 +457,7 @@ namespace NSABUtils
                 connect( item, &QAction::triggered, this, slot );
         }
 
-        void CWidget::setInfo( QToolButton * item, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) )
+        void CWidget::setInfo( QToolButton *item, const QString &iconPath, const QString &text, void ( CWidget::*slot )() )
         {
             QIcon icon;
             icon.addFile( iconPath, QSize(), QIcon::Normal, QIcon::Off );
@@ -471,7 +468,7 @@ namespace NSABUtils
                 connect( item, &QToolButton::clicked, this, slot );
         }
 
-        QAction * CWidget::createAction( const QString & name, const QString & iconPath, const QString & text, void ( CWidget:: * slot )( ) )
+        QAction *CWidget::createAction( const QString &name, const QString &iconPath, const QString &text, void ( CWidget::*slot )() )
         {
             auto retVal = new QAction( this );
             retVal->setObjectName( name );
@@ -494,7 +491,7 @@ namespace NSABUtils
             setButtonsLayout( EButtonsLayout::eNoButtons );
         }
 
-        QToolBar * CWidget::toolBar()
+        QToolBar *CWidget::toolBar()
         {
             if ( !fToolBar )
             {
@@ -508,7 +505,7 @@ namespace NSABUtils
             return fToolBar;
         }
 
-        QMenu * CWidget::menu()
+        QMenu *CWidget::menu()
         {
             if ( !fMenu )
             {
@@ -565,7 +562,7 @@ namespace NSABUtils
 
             fPlayerSpeedMultiplerSB->setValue( playerSpeedMultiplier() );
 
-            fToolBar->addWidget( fPlayerSpeedMultiplerSB ); // takes ownership
+            fToolBar->addWidget( fPlayerSpeedMultiplerSB );   // takes ownership
             fToolBar->addSeparator();
 
             label = new QLabel( tr( "Frames to Skip:" ) );
@@ -598,11 +595,10 @@ namespace NSABUtils
             connect( fPlayCountSB, qOverload< int >( &QSpinBox::valueChanged ), this, &CWidget::slotSetPlayCount );
             fToolBar->addWidget( fPlayCountSB );
             fToolBar->addSeparator();
-
         }
 
-        template< typename T>
-        void CWidget::updateItemForLayout( T * item )
+        template< typename T >
+        void CWidget::updateItemForLayout( T *item )
         {
             if ( fButtonLayout == EButtonsLayout::eNoButtons )
                 return;
@@ -627,9 +623,8 @@ namespace NSABUtils
             item->addAction( actionSkipForward() );
         }
 
-
         template< typename T >
-        void CWidget::setPlayPause( T * item, bool playPause )
+        void CWidget::setPlayPause( T *item, bool playPause )
         {
             if ( !item )
                 return;
@@ -641,7 +636,7 @@ namespace NSABUtils
         }
 
         template< typename T >
-        void CWidget::checkItem( T * item, bool checked )
+        void CWidget::checkItem( T *item, bool checked )
         {
             if ( !item )
                 return;
@@ -649,7 +644,7 @@ namespace NSABUtils
         }
 
         template< typename T >
-        void CWidget::setItemVisible( T * item, bool visible )
+        void CWidget::setItemVisible( T *item, bool visible )
         {
             if ( !item )
                 return;
@@ -657,7 +652,7 @@ namespace NSABUtils
         }
 
         template< typename T >
-        void CWidget::enableItem( T * item, bool enable )
+        void CWidget::enableItem( T *item, bool enable )
         {
             if ( !item )
                 return;
@@ -669,17 +664,17 @@ namespace NSABUtils
             QDir pluginsDir( QCoreApplication::applicationDirPath() );
             pluginsDir.cd( "imageformats" );
             const QStringList entries = pluginsDir.entryList( QDir::Files );
-            for ( const QString & fileName : entries )
+            for ( const QString &fileName : entries )
             {
                 if ( fileName.startsWith( "bif" ) )
                 {
                     auto absPath = pluginsDir.absoluteFilePath( fileName );
                     QPluginLoader pluginLoader( absPath );
-                    auto bifPlugin = dynamic_cast<CPlugin *>( pluginLoader.instance() );
+                    auto bifPlugin = dynamic_cast< CPlugin * >( pluginLoader.instance() );
                     if ( bifPlugin )
                     {
                         QLibrary lib( absPath );
-                        using TSetLoopCount = void( * )( int );
+                        using TSetLoopCount = void ( * )( int );
 
                         auto setLoopCount = (TSetLoopCount)lib.resolve( "setLoopCount" );
                         if ( setLoopCount )

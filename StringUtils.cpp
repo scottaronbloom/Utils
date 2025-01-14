@@ -488,8 +488,7 @@ namespace NSABUtils
         std::string replaceAllNot( const std::string &inString, const std::string &notOf, char to )
         {
             std::string string = inString;
-            std::replace_if(
-                string.begin(), string.end(), [ notOf ]( char x ) { return ( notOf.find( x ) == std::string::npos ); }, to );
+            std::replace_if( string.begin(), string.end(), [ notOf ]( char x ) { return ( notOf.find( x ) == std::string::npos ); }, to );
             return string;
         }
 
@@ -1601,8 +1600,7 @@ namespace NSABUtils
             std::string hexStr;
             hexStr.reserve( string.length() / 4 + ( string.length() % 4 > 0 ) );
             int bitsSeen = 0;
-            int totalBits = std::count( string.begin(), string.end(), '0' ) + std::count( string.begin(), string.end(), '1' ) + std::count( string.begin(), string.end(), 'Z' ) + std::count( string.begin(), string.end(), 'z' )
-                            + std::count( string.begin(), string.end(), 'X' ) + std::count( string.begin(), string.end(), 'x' ) + std::count( string.begin(), string.end(), '?' );
+            int totalBits = std::count( string.begin(), string.end(), '0' ) + std::count( string.begin(), string.end(), '1' ) + std::count( string.begin(), string.end(), 'Z' ) + std::count( string.begin(), string.end(), 'z' ) + std::count( string.begin(), string.end(), 'X' ) + std::count( string.begin(), string.end(), 'x' ) + std::count( string.begin(), string.end(), '?' );
             ;
 
             unsigned hexChar = 0;
@@ -1990,12 +1988,7 @@ namespace NSABUtils
                     {
                         if ( msg )
                         {
-                            *msg = QString( "Invalid sub-regular expression '%1' post splitting on the hierarchy separator: '%2' - %3(%4)" )
-                                       .arg( QString::fromStdString( ii ) )
-                                       .arg( hsc )
-                                       .arg( regExp.errorString() )
-                                       .arg( regExp.patternErrorOffset() )
-                                       .toStdString();
+                            *msg = QString( "Invalid sub-regular expression '%1' post splitting on the hierarchy separator: '%2' - %3(%4)" ).arg( QString::fromStdString( ii ) ).arg( hsc ).arg( regExp.errorString() ).arg( regExp.patternErrorOffset() ).toStdString();
                             aOK = false;
                             return {};
                         }
@@ -2646,8 +2639,7 @@ namespace NSABUtils
             if ( email.isEmpty() )
                 return false;
 
-            auto regExpStr =
-                R"((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))";
+            auto regExpStr = R"((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))";
             //auto regExpStr = R"(/(?(DEFINE)(?<address>(?&mailbox) | (?&group)) (? (?&name_addr) | (?&addr_spec)) (? (?&display_name)? (?&angle_addr)) (? (?&CFWS)? < (?&addr_spec) > (?&CFWS)?) (? (?&display_name) : (?:(?&mailbox_list) | (?&CFWS))? ; (?&CFWS)?) (? (?&phrase)) (? (?&mailbox) (?: , (?&mailbox))*) (? (?&local_part) \@ (?&domain)) (? (?&dot_atom) | (?&quoted_string)) (? (?&dot_atom) | (?&domain_literal)) (? (?&CFWS)? \[ (?: (?&FWS)? (?&dcontent))* (?&FWS)? \] (?&CFWS)?) (? (?&dtext) | (?&quoted_pair)) (? (?&NO_WS_CTL) | [\x21-\x5a\x5e-\x7e]) (? (?&ALPHA) | (?&DIGIT) | [!#\$%&'*+-/=?^_`{|}~]) (? (?&CFWS)? (?&atext)+ (?&CFWS)?) (? (?&CFWS)? (?&dot_atom_text) (?&CFWS)?) (? (?&atext)+ (?: \. (?&atext)+)*) (? [\x01-\x09\x0b\x0c\x0e-\x7f]) (? \\ (?&text)) (? (?&NO_WS_CTL) | [\x21\x23-\x5b\x5d-\x7e]) (? (?&qtext) | (?&quoted_pair)) (? (?&CFWS)? (?&DQUOTE) (?:(?&FWS)? (?&qcontent))* (?&FWS)? (?&DQUOTE) (?&CFWS)?) (? (?&atom) | (?&quoted_string)) (? (?&word)+) # Folding white space (? (?: (?&WSP)* (?&CRLF))? (?&WSP)+) (? (?&NO_WS_CTL) | [\x21-\x27\x2a-\x5b\x5d-\x7e]) (? (?&ctext) | (?&quoted_pair) | (?&comment)) (? \( (?: (?&FWS)? (?&ccontent))* (?&FWS)? \) ) (? (?: (?&FWS)? (?&comment))* (?: (?:(?&FWS)? (?&comment)) | (?&FWS))) # No whitespace control (? [\x01-\x08\x0b\x0c\x0e-\x1f\x7f]) (? [A-Za-z]) (? [0-9]) (? \x0d \x0a) (? ") (? [\x20\x09]) ) (?&address)/x</address>)";
             QRegularExpression regExp( regExpStr );
             Q_ASSERT( regExp.isValid() );

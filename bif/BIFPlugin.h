@@ -25,15 +25,15 @@
 #include <QImageIOHandler>
 
 #ifndef BIF_PLUGIN_DECLSPEC
-#if (defined(Q_OS_WINDOWS))
-#  if defined(BUILD_BIF_PLUGIN)
-#    define BIF_PLUGIN_DECLSPEC Q_DECL_EXPORT
-#  else
-#    define BIF_PLUGIN_DECLSPEC Q_DECL_IMPORT
-#  endif
-#else
-#  define BIF_PLUGIN_DECLSPEC
-#endif
+    #if ( defined( Q_OS_WINDOWS ) )
+        #if defined( BUILD_BIF_PLUGIN )
+            #define BIF_PLUGIN_DECLSPEC Q_DECL_EXPORT
+        #else
+            #define BIF_PLUGIN_DECLSPEC Q_DECL_IMPORT
+        #endif
+    #else
+        #define BIF_PLUGIN_DECLSPEC
+    #endif
 #endif
 
 namespace NSABUtils
@@ -43,13 +43,13 @@ namespace NSABUtils
         class BIF_PLUGIN_DECLSPEC CPlugin : public QImageIOPlugin
         {
             Q_OBJECT
-                Q_PLUGIN_METADATA( IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "bif.json" )
+            Q_PLUGIN_METADATA( IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "bif.json" )
         public:
             CPlugin();
             ~CPlugin();
 
-            Capabilities capabilities( QIODevice * device, const QByteArray & format ) const override;
-            QImageIOHandler * create( QIODevice * device, const QByteArray & format = QByteArray() ) const override;
+            Capabilities capabilities( QIODevice *device, const QByteArray &format ) const override;
+            QImageIOHandler *create( QIODevice *device, const QByteArray &format = QByteArray() ) const override;
         };
     }
 }

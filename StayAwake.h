@@ -36,16 +36,14 @@ namespace NSABUtils
     public:
         CStayAwake( bool keepScreenOn ) :
             fKeepScreenOn( keepScreenOn ),
-            QRunnable()
-        {
-        };
+            QRunnable() {};
 
         virtual void run() override;
 
         void stop();
 
     private:
-        bool setKeepAwake( bool enable ); // only part that is OS Specific
+        bool setKeepAwake( bool enable );   // only part that is OS Specific
         bool fKeepScreenOn{ false };
         bool fStopped{ false };
     };
@@ -53,8 +51,9 @@ namespace NSABUtils
     class SABUTILS_EXPORT CAutoStayAwake : public QObject   // allows for delete later
     {
     public:
-        CAutoStayAwake( bool keepScreenOn, QObject * parent=nullptr );
+        CAutoStayAwake( bool keepScreenOn, QObject *parent = nullptr );
         ~CAutoStayAwake();
+
     private:
         CStayAwake *fStayAwake{ nullptr };
     };

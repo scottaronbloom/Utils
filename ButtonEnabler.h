@@ -38,8 +38,8 @@ namespace NSABUtils
         Q_OBJECT;
 
     public:
-        CButtonEnabler( QAbstractItemView * view, QAction * action, QObject * parent = nullptr );
-        CButtonEnabler( QLineEdit * le, QAction * action, QObject * parent = nullptr );
+        CButtonEnabler( QAbstractItemView *view, QAction *action, QObject *parent = nullptr );
+        CButtonEnabler( QLineEdit *le, QAction *action, QObject *parent = nullptr );
 
         CButtonEnabler( QAbstractItemView *view, QAbstractButton *btn, QObject *parent = nullptr );
         CButtonEnabler( QLineEdit *le, QAbstractButton *btn, QObject *parent = nullptr );
@@ -54,7 +54,7 @@ namespace NSABUtils
 
     private:
         QAbstractButton *fButton{ nullptr };
-        QAction * fAction{ nullptr };
+        QAction *fAction{ nullptr };
         bool fLineEditIsFile{ true };
     };
 }

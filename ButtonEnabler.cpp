@@ -45,7 +45,7 @@ namespace NSABUtils
             slotSelectionChanged( QItemSelection(), QItemSelection() );
     }
 
-    CButtonEnabler::CButtonEnabler( QAbstractItemView * view, QAction * action, QObject * parent ) :
+    CButtonEnabler::CButtonEnabler( QAbstractItemView *view, QAction *action, QObject *parent ) :
         QObject( parent ),
         fAction( action )
     {
@@ -71,7 +71,7 @@ namespace NSABUtils
         slotTextChanged( le->text() );
     }
 
-    CButtonEnabler::CButtonEnabler( QLineEdit * le, QAction * action, QObject * parent ) :
+    CButtonEnabler::CButtonEnabler( QLineEdit *le, QAction *action, QObject *parent ) :
         QObject( parent ),
         fAction( action )
     {
@@ -95,7 +95,7 @@ namespace NSABUtils
             fAction->setEnabled( enabled );
     }
 
-    void CButtonEnabler::slotSelectionChanged( const QItemSelection & selected, const QItemSelection & )
+    void CButtonEnabler::slotSelectionChanged( const QItemSelection &selected, const QItemSelection & )
     {
         bool enabled = selected.count() && selected.first().isValid();
         if ( !enabled )

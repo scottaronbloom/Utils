@@ -38,27 +38,30 @@ namespace NSABUtils
         class CFile;
     }
 
-    namespace Ui { class CGIFWriterDlg; }
+    namespace Ui
+    {
+        class CGIFWriterDlg;
+    }
     class SABUTILS_EXPORT CGIFWriterDlg : public QDialog
     {
         Q_OBJECT
     public:
-        CGIFWriterDlg( QWidget * parent = nullptr );
-        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, QWidget * parent = nullptr );
-        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget * parent = nullptr );
+        CGIFWriterDlg( QWidget *parent = nullptr );
+        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, QWidget *parent = nullptr );
+        CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget *parent = nullptr );
 
         ~CGIFWriterDlg();
 
-        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > images, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
-        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
-        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > images, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
-        static bool saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget *parent, const QString &fileName, const QList< QFileInfo > images, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget *parent, const QString &fileName, const QList< QFileInfo > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget *parent, const QString &fileName, const QList< QImage > images, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
+        static bool saveToGIF( QWidget *parent, const QString &fileName, const QList< QImage > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled );
 
         void setBIF( std::shared_ptr< NBIF::CFile > bifFile );
         std::shared_ptr< NBIF::CFile > bifFile() const { return fBIF; }
 
         // speed multiplier uses the delay built into the BIF file
-        void setSpeedMultipler( int multiplier ); // delay or multiplier (setting the bif as well) override each other, last one set wins
+        void setSpeedMultipler( int multiplier );   // delay or multiplier (setting the bif as well) override each other, last one set wins
         void setDelay( int msec );
         int delay() const;
 
@@ -89,6 +92,7 @@ namespace NSABUtils
         void slotEndFrameChanged();
     private Q_SLOTS:
         void slotUpdateFileName();
+
     private:
         void updateDelay();
         bool saveToGIF();
@@ -99,4 +103,4 @@ namespace NSABUtils
         std::unique_ptr< Ui::CGIFWriterDlg > fImpl;
     };
 }
-#endif 
+#endif

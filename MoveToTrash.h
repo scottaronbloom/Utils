@@ -54,9 +54,9 @@ namespace NSABUtils
             bool fInteractive{ false };
         };
 
-        SABUTILS_EXPORT bool moveToTrash( const QFileInfo &info, QString * msg=nullptr, std::shared_ptr< SRecycleOptions > options = {} );
+        SABUTILS_EXPORT bool moveToTrash( const QFileInfo &info, QString *msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
         SABUTILS_EXPORT bool moveToTrash( const QString &fileName, QString *msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
-        SABUTILS_EXPORT bool moveToTrash( const std::string &fileName, std::string*msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
+        SABUTILS_EXPORT bool moveToTrash( const std::string &fileName, std::string *msg = nullptr, std::shared_ptr< SRecycleOptions > options = {} );
     }
 }
 #endif

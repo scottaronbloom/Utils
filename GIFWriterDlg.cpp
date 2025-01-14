@@ -34,7 +34,7 @@
 
 namespace NSABUtils
 {
-    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget * parent ) :
+    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, int delayInMSec, QWidget *parent ) :
         QDialog( parent ),
         fImpl( new Ui::CGIFWriterDlg )
     {
@@ -57,12 +57,12 @@ namespace NSABUtils
 #endif
     }
 
-    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, QWidget * parent ) :
+    CGIFWriterDlg::CGIFWriterDlg( std::shared_ptr< NBIF::CFile > bifFile, QWidget *parent ) :
         CGIFWriterDlg( bifFile, 2, parent )
     {
     }
 
-    CGIFWriterDlg::CGIFWriterDlg( QWidget * parent ) :
+    CGIFWriterDlg::CGIFWriterDlg( QWidget *parent ) :
         CGIFWriterDlg( {}, parent )
     {
     }
@@ -139,7 +139,7 @@ namespace NSABUtils
     {
         if ( !fBIF )
             return;
-        auto delay = fBIF->imageDelay(); // delay per frame;
+        auto delay = fBIF->imageDelay();   // delay per frame;
         delay /= fMultipler;
         setDelay( delay );
     }
@@ -217,7 +217,7 @@ namespace NSABUtils
         return fImpl->endFrame->value();
     }
 
-    bool  CGIFWriterDlg::useNew() const
+    bool CGIFWriterDlg::useNew() const
     {
         return fImpl->useNew->isChecked();
     }
@@ -228,7 +228,7 @@ namespace NSABUtils
         slotUpdateFileName();
     }
 
-    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > imageFiles, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
+    bool CGIFWriterDlg::saveToGIF( QWidget *parent, const QString &fileName, const QList< QImage > imageFiles, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
     {
         if ( imageFiles.empty() )
             return false;
@@ -248,17 +248,17 @@ namespace NSABUtils
         return CGIFWriter::saveToGIF( parent, fileName, images, true, dither, flipImage, loopCount, delay, setRange, setCurr, wasCancelled );
     }
 
-    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QImage > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
+    bool CGIFWriterDlg::saveToGIF( QWidget *parent, const QString &fileName, const QList< QImage > images, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
     {
         return saveToGIF( parent, fileName, images, 0, images.count() - 1, dither, flipImage, loopCount, delay, setRange, setCurr, wasCancelled );
     }
 
-    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > imageFiles, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
+    bool CGIFWriterDlg::saveToGIF( QWidget *parent, const QString &fileName, const QList< QFileInfo > imageFiles, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
     {
         return saveToGIF( parent, fileName, imageFiles, 0, imageFiles.count() - 1, dither, flipImage, loopCount, delay, setRange, setCurr, wasCancelled );
     }
 
-    bool CGIFWriterDlg::saveToGIF( QWidget * parent, const QString & fileName, const QList< QFileInfo > imageFiles, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
+    bool CGIFWriterDlg::saveToGIF( QWidget *parent, const QString &fileName, const QList< QFileInfo > imageFiles, int startFrame, int endFrame, bool dither, bool flipImage, int loopCount, int delay, std::function< void( size_t min, size_t max ) > setRange, std::function< void( size_t curr ) > setCurr, std::function< bool() > wasCancelled )
     {
         if ( imageFiles.empty() )
             return false;
@@ -291,20 +291,13 @@ namespace NSABUtils
         dlg.setWindowModality( Qt::WindowModal );
         dlg.show();
 
-        return saveToGIF( this, fImpl->fileName->text(), fBIF->images( startFrame() - 1, endFrame() - 1 ), dither(), flipImage(), loopCount(), delay(),
-                          [ &dlg ]( size_t min, size_t max )
-                          {
-                              dlg.setRange( static_cast<int>( min ), static_cast<int>( max ) );
-                          },
-                          [ &dlg ]( size_t curr )
-                          {
-                              dlg.setValue( static_cast<int>( curr ) );
-                          QApplication::processEvents();
-                          },
-                          [ &dlg ]()
-                          {
-                              return dlg.wasCanceled();
-                          } );
+        return saveToGIF(
+            this, fImpl->fileName->text(), fBIF->images( startFrame() - 1, endFrame() - 1 ), dither(), flipImage(), loopCount(), delay(), [ &dlg ]( size_t min, size_t max ) { dlg.setRange( static_cast< int >( min ), static_cast< int >( max ) ); },
+            [ &dlg ]( size_t curr )
+            {
+                dlg.setValue( static_cast< int >( curr ) );
+                QApplication::processEvents();
+            },
+            [ &dlg ]() { return dlg.wasCanceled(); } );
     }
 }
-

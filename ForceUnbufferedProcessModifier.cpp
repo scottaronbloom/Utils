@@ -40,7 +40,7 @@ namespace NSABUtils
             };
             __pragma( pack( pop ) )
 
-            static_assert( sizeof( DWORD ) == 4 );
+                static_assert( sizeof( DWORD ) == 4 );
             static_assert( sizeof( BYTE ) == 1 );
             static_assert( sizeof( HANDLE ) == 8 );
 

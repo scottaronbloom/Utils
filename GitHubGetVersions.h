@@ -43,7 +43,7 @@ namespace NSABUtils
 {
     struct SABUTILS_EXPORT SVersion
     {
-        SVersion(){};
+        SVersion() {};
         bool setVersionInfo( const QString &tagName, const QString &createdDate );
 
         QString toString( bool verbose ) const;

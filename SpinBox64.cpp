@@ -46,7 +46,7 @@ namespace NSABUtils
     {
     public:
         CSpinBox64Impl( CSpinBox64 *parent ) :
-            fParent( parent ){};
+            fParent( parent ) {};
 
         virtual qlonglong valueFromText( const QString &text ) const;
         virtual QString textFromValue( qlonglong val ) const;

@@ -29,7 +29,7 @@ namespace NSABUtils
 {
     namespace NFileUtils
     {
-        bool removePath( const std::string &path, std::string * msg )
+        bool removePath( const std::string &path, std::string *msg )
         {
             QString lclMsg;
             auto retVal = removePath( QString::fromStdString( path ), &lclMsg );
@@ -38,7 +38,7 @@ namespace NSABUtils
             return retVal;
         }
 
-        bool removePath( const QString &path, QString * msg )
+        bool removePath( const QString &path, QString *msg )
         {
             QFileInfo fi( path );
             if ( !fi.exists() )
@@ -62,7 +62,7 @@ namespace NSABUtils
             return success;
         }
 
-        bool removeInsideOfDir( const QString &dirStr, QString * msg )
+        bool removeInsideOfDir( const QString &dirStr, QString *msg )
         {
             QDir dir( dirStr );
             auto retVal = dir.removeRecursively();

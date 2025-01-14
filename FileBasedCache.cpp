@@ -45,7 +45,7 @@ namespace NSABUtils
     {
     }
 
-    bool SFileBasedCacheNode::operator==( const SFileBasedCacheNode & rhs ) const
+    bool SFileBasedCacheNode::operator==( const SFileBasedCacheNode &rhs ) const
     {
         bool aOK = fFileInfo == rhs.fFileInfo;
         if ( pathOnlySearch() || rhs.pathOnlySearch() )
