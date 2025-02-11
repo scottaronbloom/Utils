@@ -29,16 +29,27 @@ else()
 endif()
 
 IF(WIN32)
-        set( OS_SRCS SystemInfo_win.cpp MoveToTrash_win.cpp ForceUnbufferedProcessModifier.cpp ConsoleUtils.cpp WindowsError.cpp )
-        set( OS_HEADERS ForceUnbufferedProcessModifier.h ConsoleUtils.h WindowsError.h )
+        set( OS_SRCS 
+            SystemInfo_win.cpp 
+            MoveToTrash_win.cpp 
+            ForceUnbufferedProcessModifier.cpp 
+            ConsoleUtils.cpp 
+            WindowsError.cpp 
+        )
+        set( OS_HEADERS 
+            ForceUnbufferedProcessModifier.h 
+            ConsoleUtils.h 
+            WindowsError.h 
+        )
 ELSE()
-        set( OS_SRCS SystemInfo_linux.cpp MoveToTrash_linux.cpp)
+        set( OS_SRCS 
+            SystemInfo_linux.cpp 
+            MoveToTrash_linux.cpp
+        )
 ENDIF()
 
 set(qtproject_SRCS
     FFMpegFormats.cpp
-    GitHubGetVersions.cpp
-    DownloadFile.cpp
     AutoFetch.cpp
     AutoWaitCursor.cpp
     BackgroundFileCheck.cpp
@@ -76,13 +87,10 @@ set(qtproject_SRCS
     StringComparisonClasses.cpp
     StringUtils.cpp
     SystemInfo.cpp
-    ThreadedProgressDialog.cpp
     UtilityModels.cpp
     UtilityViews.cpp
     utils.cpp
     uiUtils.cpp
-    ValidateOpenSSL.cpp
-    VSInstallUtils.cpp
     WidgetEnabler.cpp
     WidgetChanged.cpp
     WordExp.cpp
@@ -102,8 +110,6 @@ set(qtproject_H
     DelayLineEdit.h
     DelaySpinBox.h
     DoubleProgressDlg.h
-    GitHubGetVersions.h
-    DownloadFile.h
     HyperLinkLineEdit.h
     ImageScrollBar.h
     LineEditWithSuffix.h
@@ -113,7 +119,6 @@ set(qtproject_H
     SelectFileUrl.h
     SpinBox64.h
     SpinBox64U.h
-    ThreadedProgressDialog.h
     UtilityModels.h
     UtilityViews.h
     WidgetEnabler.h
@@ -152,8 +157,6 @@ set(project_H
     uiUtils.h
     WidgetChanged.h
     WordExp.h
-    ValidateOpenSSL.h
-    VSInstallUtils.h
     ${OS_HEADERS}
 )
 
@@ -249,11 +252,66 @@ if ( MKVUTILS )
     )
 endif()
 
+if ( QAXOBJECT_SUPPORT )
+    set(qtproject_SRCS
+        ${qtproject_SRCS}
+        VSInstallUtils.cpp
+    )
+    set(project_H
+        ${project_H}
+        VSInstallUtils.h
+    )
+    set(qtproject_H
+        ${qtproject_H}
+    )
+    set(QAXOBJECT_LIB
+        Qt5::AxContainer
+    )
+endif()
+
+if ( QNETWORK_SUPPORT )
+    set(qtproject_SRCS
+        ${qtproject_SRCS}
+        DownloadFile.cpp
+        GitHubGetVersions.cpp
+        ValidateOpenSSL.cpp
+    )
+    set(project_H
+        ${project_H}
+    )
+    set(qtproject_H
+        ${qtproject_H}
+        DownloadFile.h
+        GitHubGetVersions.h
+        ValidateOpenSSL.h
+    )
+    set(QNETWORK_LIB
+        Qt5::Network
+    )
+endif()
+
+if ( QCONCURRENT_SUPPORT )
+    set(qtproject_SRCS
+        ${qtproject_SRCS}
+        ThreadedProgressDialog.cpp
+    )
+    set(project_H
+        ${project_H}
+    )
+    set(qtproject_H
+        ${qtproject_H}
+        ThreadedProgressDialog.h
+    )
+    set(QCONCURRENT_LIB
+        Qt5::Concurrent
+    )
+endif()
+
 SET( project_pub_DEPS
-	#Qt5::Concurrent
-	#Qt5::Network
-	#Qt5::AxContainer
      ${MKVREADERLIB}
      ${MEDIAINFOLIB}
+     ${QAXOBJECT_LIB}
+     ${QNETWORK_LIB}
+     ${QCONCURRENT_LIB}
 )
 
