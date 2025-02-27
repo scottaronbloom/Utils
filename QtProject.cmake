@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.30)
 include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
 
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
