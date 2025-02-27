@@ -610,7 +610,7 @@ namespace NSABUtils
             {
                 streamNum = defaultStreamNum( whichStream );
             }
-            Q_ASSERT( streamNum < streamData.size() );
+            //Q_ASSERT( streamNum < streamData.size() );
             if ( streamNum >= streamData.size() )
                 streamNum = 0;
 

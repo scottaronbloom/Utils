@@ -72,7 +72,7 @@ endif()
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
-find_package(Qt5 COMPONENTS Core Widgets Xml Concurrent Network REQUIRED)
+find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml Network REQUIRED)
 IF(WIN32)
     find_package(Qt5 COMPONENTS AxContainer REQUIRED)
 ENDIF()

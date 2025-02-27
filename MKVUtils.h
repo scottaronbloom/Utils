@@ -53,6 +53,7 @@ namespace std
 namespace NSABUtils
 {
     using TMediaTagMap = std::unordered_map< EMediaTags, QVariant >;
+    using TMediaTagPair = std::pair< EMediaTags, QVariant >;
     SABUTILS_EXPORT bool setMediaTags( const QString &fileName, const TMediaTagMap &tags, const QString &mkvPropEdit, QString *msg = nullptr );
     SABUTILS_EXPORT std::vector< double > getChapterStarts( const QString &fileName, const QString &ffprobeExe, QString &msg );
 }

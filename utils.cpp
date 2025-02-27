@@ -373,22 +373,26 @@ namespace NSABUtils
         return retVal;
     }
 
-    std::list< int > intsFromString( const QString &string, const QString &prefixRegEx, bool sort, bool *aOK )
+    std::list< int > intsFromString( const QString & string, const QString &prefixRegEx, bool sort, bool *aOK )
     {
-        auto regExStr1 = prefixRegEx + QString( R"((?<num>\d+)(?!-))" );   // EXX
-        auto regExStr2 = prefixRegEx + R"((?<startNum>\d+)(?<dash>\-))";
-        if ( !prefixRegEx.isEmpty() )
-            regExStr2 += "?";
-        regExStr2 += prefixRegEx + R"((?<endNum>\d+))";   // EXX-E?YY
+        auto regExpStr1 = R"((^|[^A-Z])E(?<garbage3>PISODE)?(?<episode>\d{1,4})(?!(-|(E(EPISODE)?)))";
+        auto regExpStr2 = R"((^|[^A-Z])E(?<garbage1>PISODE)?(?<startEpisode>\d{1,4})(?<sep>\-)?E(?<garbage2>PISODE)?(?<endEpisode>\d{1,4}))";
 
-        auto regExStr = QString( R"(((%1)|(%2)))" ).arg( regExStr1 ).arg( regExStr2 );
+        //auto regExStr1 = prefixRegEx + R"((?<num>\d{1,4})(?!(-|:|(E(EPISODE)?))))";
+        auto firstNum = R"((?:^|[^A-Z0-9a-z\-]))" + prefixRegEx + R"((?<%1>\d{1,4}))";   // new word/start of line followed by prefix + first num
+        auto secondNum = R"((?<sep>[\-\:]))" + prefixRegEx + R"((?<endNum>\d{1,4}))";   // seperator + prefix + endNum
+
+        auto regExStr = "(?:" + firstNum.arg( "startNum" ) + secondNum + ")|(?:" + firstNum.arg( "num" ) + prefixRegEx + ")";
 
         auto regEx = QRegularExpression( regExStr, QRegularExpression::CaseInsensitiveOption );
-        // auto regEx2 = QRegularExpression( regExStr2, QRegularExpression::CaseInsensitiveOption );
+        //auto regEx2 = QRegularExpression( regExStr2, QRegularExpression::CaseInsensitiveOption );
+        //// auto regEx2 = QRegularExpression( regExStr2, QRegularExpression::CaseInsensitiveOption );
 
         if ( aOK )
+        {
             *aOK = false;
-        Q_ASSERT( regEx.isValid() );
+        }
+        Q_ASSERT( regEx.isValid() /*&& regEx2.isValid()*/ );
 
         std::list< int > retVal;
 
@@ -416,8 +420,8 @@ namespace NSABUtils
                 if ( !localAOK )
                     return {};
 
-                auto hasDash = !match.captured( "dash" ).isEmpty();
-                if ( hasDash )
+                auto hasSep = !match.captured( "sep" ).isEmpty();
+                if ( hasSep )
                 {
                     auto mustSwap = ( start > end );
                     if ( mustSwap )
