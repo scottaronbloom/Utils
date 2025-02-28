@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.30)
 project(ZenLib)
 
 set(ZenLib_MAJOR_VERSION 0)

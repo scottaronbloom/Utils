@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.30)
 
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 if( NOT NO_USE_MEDIAINFO_INSTALL )
