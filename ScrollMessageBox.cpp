@@ -26,7 +26,7 @@
 #include <QAbstractButton>
 #include <QMessageBox>
 #include <QPushButton>
-
+#include <QStyle>
 namespace NSABUtils
 {
 
@@ -82,13 +82,35 @@ namespace NSABUtils
         fImpl->message->setHtml( text );
     }
 
-    void CScrollMessageBox::setIconLabel( const QMessageBox::Icon &icon )
+    void CScrollMessageBox::setIconLabel( const QMessageBox::Icon &whichIcon )
     {
         fImpl->iconLabel->setVisible( true );
-        auto pm = QMessageBox::standardIcon( icon );
+
+        std::optional< QStyle::StandardPixmap > spm;
+        switch ( whichIcon )
+        {
+            case QMessageBox::Icon::NoIcon:
+                break;
+            case QMessageBox::Icon::Information:
+                spm = QStyle::StandardPixmap::SP_MessageBoxInformation;
+                break;
+            case QMessageBox::Icon::Warning:
+                spm = QStyle::StandardPixmap::SP_MessageBoxWarning;
+                break;
+            case QMessageBox::Icon::Critical:
+                spm = QStyle::StandardPixmap::SP_MessageBoxCritical;
+                break;
+            case QMessageBox::Icon::Question:
+                spm = QStyle::StandardPixmap::SP_MessageBoxQuestion;
+                break;
+        }
+
+        QPixmap pm;
+        if ( spm.has_value() )
+            pm = style()->standardPixmap( spm.value() );
         fImpl->iconLabel->setPixmap( pm );
         fImpl->iconLabel->setVisible( !pm.isNull() );
-        if ( icon == QMessageBox::Icon::Critical )
+        if ( whichIcon == QMessageBox::Icon::Critical )
             QApplication::beep();
     }
 
