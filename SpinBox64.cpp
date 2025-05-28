@@ -117,7 +117,7 @@ namespace NSABUtils
 
     QString CSpinBox64Impl::stripped( const QString &t, int *pos ) const
     {
-        QStringRef text( &t );
+        QStringView text( t );
         if ( fSpecialValueText.size() == 0 || text != fSpecialValueText )
         {
             int from = 0;
@@ -255,9 +255,9 @@ namespace NSABUtils
                 num = fParent->locale().toLongLong( copy, &ok );
                 if ( !ok && ( fMaximum >= 1000 || fMinimum <= -1000 ) )
                 {
-                    const QChar sep = fParent->locale().groupSeparator();
-                    const QChar doubleSep[ 2 ] = { sep, sep };
-                    if ( copy.contains( sep ) && !copy.contains( QString( doubleSep, 2 ) ) )
+                    const auto sep = fParent->locale().groupSeparator();
+                    const auto doubleSep = sep + sep;
+                    if ( copy.contains( sep ) && !copy.contains( doubleSep ) )
                     {
                         QString copy2 = copy;
                         copy2.remove( fParent->locale().groupSeparator() );
@@ -404,7 +404,7 @@ namespace NSABUtils
             QStyleOptionSpinBox opt;
             fParent->initStyleOption( &opt );
             QSize hint( w, h );
-            fCachedSizeHint = fParent->style()->sizeFromContents( QStyle::CT_SpinBox, &opt, hint, fParent ).expandedTo( QApplication::globalStrut() );
+            fCachedSizeHint = fParent->style()->sizeFromContents( QStyle::CT_SpinBox, &opt, hint, fParent );
         }
         return fCachedSizeHint;
     }
@@ -594,9 +594,9 @@ namespace NSABUtils
     {
         if ( !lineEdit() )
             return;
-        (void)connect( lineEdit(), &QLineEdit::textChanged, this, &CSpinBox64::slotEditorTextChanged );
-        (void)connect( lineEdit(), &QLineEdit::cursorPositionChanged, this, &CSpinBox64::slotEditorCursorPositionChanged );
-        (void)connect( lineEdit(), &QLineEdit::cursorPositionChanged, this, &CSpinBox64::updateMicroFocus );
+        connect( lineEdit(), &QLineEdit::textChanged, this, &CSpinBox64::slotEditorTextChanged );
+        connect( lineEdit(), &QLineEdit::cursorPositionChanged, this, &CSpinBox64::slotEditorCursorPositionChanged );
+        connect( lineEdit(), &QLineEdit::cursorPositionChanged, [ this ]() { updateMicroFocus(); } );
     }
 
     bool CSpinBox64::wrapping() const
