@@ -373,7 +373,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    std::list< int > intsFromString( const QString & string, const QString &prefixRegEx, bool sort, bool *aOK )
+    std::list< int > intsFromString( const QString &string, const QString &prefixRegEx, bool sort, bool *aOK )
     {
         auto regExpStr1 = R"((^|[^A-Z])E(?<garbage3>PISODE)?(?<episode>\d{1,4})(?!(-|(E(EPISODE)?)))";
         auto regExpStr2 = R"((^|[^A-Z])E(?<garbage1>PISODE)?(?<startEpisode>\d{1,4})(?<sep>\-)?E(?<garbage2>PISODE)?(?<endEpisode>\d{1,4}))";
