@@ -74,9 +74,9 @@ namespace NSABUtils
             QByteArray indexData() const;
             bool imageValid() const;
             bool isLastFrame() const;
-            [[nodiscard]] std::pair< bool, QString > loadImage( QIODevice * device, const QString & fn );
-            bool writeIndex( QIODevice * outFile, QString & msg ) const;
-            bool writeImage( QIODevice * outFile, QString & msg ) const;
+            [[nodiscard]] std::pair< bool, QString > loadImage( QIODevice *device, const QString &fn );
+            bool writeIndex( QIODevice *outFile, QString &msg ) const;
+            bool writeImage( QIODevice *outFile, QString &msg ) const;
             S32BitValue fBIFNum{ static_cast< uint32_t >( -1 ) };
             S32BitValue fOffset;
             uint64_t fSize{ 0 };
