@@ -273,9 +273,9 @@ namespace NSABUtils
         auto checkBox = dynamic_cast< QCheckBox * >( button );
         if ( button->isCheckable() || checkBox )
         {
-            QObject::disconnect( checkBox, QMetaMethod::fromSignal( &QCheckBox::stateChanged ), parentWidget, member );
+            QObject::disconnect( checkBox, QMetaMethod::fromSignal( &QCheckBox::checkStateChanged ), parentWidget, member );
             if ( !isExcluded )
-                QObject::connect( checkBox, QMetaMethod::fromSignal( &QCheckBox::stateChanged ), parentWidget, member );
+                QObject::connect( checkBox, QMetaMethod::fromSignal( &QCheckBox::checkStateChanged ), parentWidget, member );
         }
     }
 
