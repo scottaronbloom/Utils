@@ -263,7 +263,7 @@ namespace NSABUtils
         VariantClear( &vtProp );
     }
 
-    void loadValue( IWbemClassObject *gpuInfo, wchar_t *key, bool &value )
+    void loadValue( IWbemClassObject *gpuInfo, const wchar_t *key, bool &value )
     {
         value = false;
 
@@ -288,7 +288,7 @@ namespace NSABUtils
         VariantClear( &vtProp );
     }
 
-    void loadValue( IWbemClassObject *gpuInfo, wchar_t *key, uint32_t &value )
+    void loadValue( IWbemClassObject *gpuInfo, const wchar_t *key, uint32_t &value )
     {
         value = 0;
 
@@ -313,7 +313,7 @@ namespace NSABUtils
         VariantClear( &vtProp );
     }
 
-    void loadValue( IWbemClassObject *gpuInfo, wchar_t *key, QString &value )
+    void loadValue( IWbemClassObject *gpuInfo, const wchar_t *key, QString &value )
     {
         value.clear();
         VARIANT vtProp;
@@ -331,7 +331,7 @@ namespace NSABUtils
         {
             return;
         }
-        value = QString::fromUtf16( reinterpret_cast< ushort * >( vtProp.bstrVal ) );
+        value = QString::fromUtf16( reinterpret_cast< const char16_t * >( vtProp.bstrVal ) );
 
         VariantClear( &vtProp );
     }
