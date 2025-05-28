@@ -82,6 +82,7 @@ add_compile_options(
 
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
+    $<$<CXX_COMPILER_ID:MSVC>:/Wv:19.00.23506> 
     $<$<CXX_COMPILER_ID:MSVC>:/w34700> 
     $<$<CXX_COMPILER_ID:MSVC>:/w34701> 
     $<$<CXX_COMPILER_ID:MSVC>:/w34715> 
