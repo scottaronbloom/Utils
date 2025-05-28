@@ -236,7 +236,7 @@ namespace NSABUtils
             void push_back( const T &encoder, const T &decoder )
             {
                 fEncoder = encoder;
-                fDecoder = deconder;
+                fDecoder = decoder;
             }
 
             void addAlias( std::set< QString > &retVal, const QString &name ) const
