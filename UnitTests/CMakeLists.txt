@@ -36,7 +36,7 @@ endif()
 set( testProjectName "" )
 SAB_UNIT_TEST(Utils
     Test.cpp
-    "gmock;Qt5::Core"
+    "gmock;Qt6::Core"
     testProjectName
     ../RegExUtils.cpp;../RegExUtils.h;../StringUtils.cpp;../StringUtils.h;../utils.cpp;../utils.h;../FileUtils.cpp;../FileUtils_Remove.cpp;../WindowsError.cpp;../FileUtils.h;../MoveToTrash.cpp;../MoveToTrash_win.cpp;../MoveToTrash.h;../StringComparisonClasses.cpp;../StringComparisonClasses.h;../FromString.cpp;../FromString.h;../WordExp.cpp;../WordExp.h
     )

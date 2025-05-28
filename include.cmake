@@ -248,7 +248,7 @@ if ( MKVUTILS )
     )
     set(MKVREADERLIB  
         MKVReader
-        Qt5::Multimedia
+        Qt6::Multimedia
     )
 endif()
 
@@ -265,7 +265,7 @@ if ( QAXOBJECT_SUPPORT )
         ${qtproject_H}
     )
     set(QAXOBJECT_LIB
-        Qt5::AxContainer
+        Qt6::AxContainer
     )
 endif()
 
@@ -286,7 +286,7 @@ if ( QNETWORK_SUPPORT )
         ValidateOpenSSL.h
     )
     set(QNETWORK_LIB
-        Qt5::Network
+        Qt6::Network
     )
 endif()
 
@@ -303,7 +303,7 @@ if ( QCONCURRENT_SUPPORT )
         ThreadedProgressDialog.h
     )
     set(QCONCURRENT_LIB
-        Qt5::Concurrent
+        Qt6::Concurrent
     )
 endif()
 

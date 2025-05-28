@@ -20,11 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.31)
+
 include( ${CMAKE_CURRENT_LIST_DIR}/Project.cmake )
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
-find_package(Qt5SrcMoc)
+find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt6SrcMoc)
 
 SET(CMAKE_AUTOMOC OFF)
 SET(CMAKE_AUTORCC OFF)
@@ -34,15 +35,15 @@ UNSET( qtproject_UIS_H )
 UNSET( qtproject_MOC_SRCS )
 UNSET( qtproject_CPPMOC_H )
 UNSET( qtproject_QRC_SRCS )
-QT5_WRAP_UI(qtproject_UIS_H ${qtproject_UIS})
+QT6_WRAP_UI(qtproject_UIS_H ${qtproject_UIS})
 if( DEFINED SAB_MOC_OPTIONS )
-    QT5_WRAP_CPP(qtproject_MOC_SRCS ${qtproject_H} OPTIONS ${SAB_MOC_OPTIONS})
+    QT6_WRAP_CPP(qtproject_MOC_SRCS ${qtproject_H} OPTIONS ${SAB_MOC_OPTIONS})
     SAB_WRAP_SRCMOC(qtproject_CPPMOC_H ${qtproject_CPPMOC_SRCS} OPTIONS ${SAB_MOC_OPTIONS})
 else()
-    QT5_WRAP_CPP(qtproject_MOC_SRCS ${qtproject_H})
+    QT6_WRAP_CPP(qtproject_MOC_SRCS ${qtproject_H})
     SAB_WRAP_SRCMOC(qtproject_CPPMOC_H ${qtproject_CPPMOC_SRCS})
 endif()
-QT5_ADD_RESOURCES( qtproject_QRC_SRCS ${qtproject_QRC} )
+QT6_ADD_RESOURCES( qtproject_QRC_SRCS ${qtproject_QRC} )
 
 source_group("Generated Files" FILES ${qtproject_UIS_H} ${qtproject_MOC_SRCS} ${qtproject_QRC_SRCS} ${qtproject_CPPMOC_H})
 source_group("Resource Files"  FILES ${qtproject_QRC} ${qtproject_QRC_SOURCES} )
@@ -74,8 +75,8 @@ SET( _PROJECT_DEPENDENCIES
 )
 
 SET( project_pub_DEPS
-     Qt5::Core
-     Qt5::Widgets
+     Qt6::Core
+     Qt6::Widgets
      ${project_pub_DEPS}
      )
 

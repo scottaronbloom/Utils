@@ -79,19 +79,19 @@ endif()
 
 OPTION(SAB_DEBUG_TRACE "Enable Debug Tracing to std::cout" OFF)
 
-find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml Network REQUIRED)
+find_package(Qt6 COMPONENTS Concurrent Core Widgets Xml Network REQUIRED)
 IF(WIN32)
-    find_package(Qt5 COMPONENTS AxContainer REQUIRED)
+    find_package(Qt6 COMPONENTS AxContainer REQUIRED)
 ENDIF()
 
 if ( MKVUTILS )
-    find_package(Qt5 COMPONENTS Multimedia REQUIRED)
+    find_package(Qt6 COMPONENTS Multimedia REQUIRED)
 endif()
 
-find_package(Qt5 COMPONENTS XmlPatterns QUIET)
+find_package(Qt6 COMPONENTS XmlPatterns QUIET)
 find_package(Deploy REQUIRED)
 find_package(AddUnitTest REQUIRED)
-find_package(Qt5SrcMoc REQUIRED)
+find_package(Qt6SrcMoc REQUIRED)
 
 
 set(SAB_MOC_OPTIONS "-DNON_VIS_BUILD=1")
