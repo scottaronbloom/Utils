@@ -69,7 +69,7 @@ namespace NSABUtils
     }
 
 #ifdef WIN32
-    void DisplayError( LPWSTR pszAPI )
+    void DisplayError( LPCWSTR pszAPI )
     {
         LPVOID lpvMessageBuffer;
 
