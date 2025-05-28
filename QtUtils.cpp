@@ -218,7 +218,7 @@ namespace NSABUtils
     }
 #endif
 
-    int getInt( const QStringRef &str, bool *aOK )
+    int getInt( const QStringView &str, bool *aOK )
     {
         bool lclAOK;
         int retVal = str.toInt( &lclAOK );
@@ -235,7 +235,7 @@ namespace NSABUtils
 
     int getInt( const QString &str, bool *aOK )
     {
-        QStringRef tmp( &str );
+        QStringView tmp( str );
         return getInt( tmp, aOK );
     }
 
@@ -245,7 +245,7 @@ namespace NSABUtils
         return getInt( str, &aOK );
     }
 
-    int getInt( const QStringRef &str )
+    int getInt( const QStringView &str )
     {
         bool aOK;
         return getInt( str, &aOK );
@@ -253,17 +253,17 @@ namespace NSABUtils
 
     int getInt( const QString &value, QXmlStreamReader &reader )
     {
-        QStringRef tmp( &value );
+        QStringView tmp( value );
         return getInt( tmp, reader );
     }
 
     int getInt( const QString &value, int defaultValue, QXmlStreamReader &reader )
     {
-        QStringRef tmp( &value );
+        QStringView tmp( value );
         return getInt( tmp, defaultValue, reader );
     }
 
-    int getInt( const QStringRef &value, QXmlStreamReader &reader )
+    int getInt( const QStringView &value, QXmlStreamReader &reader )
     {
         bool aOK;
         int retVal = getInt( value, &aOK );
@@ -275,7 +275,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    int getInt( const QStringRef &value, int defaultValue, QXmlStreamReader & /*reader*/ )
+    int getInt( const QStringView &value, int defaultValue, QXmlStreamReader & /*reader*/ )
     {
         bool aOK;
         int retVal = getInt( value, &aOK );
@@ -286,7 +286,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    double getDouble( const QStringRef &str, bool *aOK )
+    double getDouble( const QStringView &str, bool *aOK )
     {
         bool lclAOK;
         double retVal = str.toDouble( &lclAOK );
@@ -299,7 +299,7 @@ namespace NSABUtils
 
     double getDouble( const QString &str, bool *aOK )
     {
-        QStringRef tmp( &str );
+        QStringView tmp( str );
         return getDouble( tmp, aOK );
     }
 
@@ -309,7 +309,7 @@ namespace NSABUtils
         return getDouble( str, &aOK );
     }
 
-    double getDouble( const QStringRef &str )
+    double getDouble( const QStringView &str )
     {
         bool aOK;
         return getDouble( str, &aOK );
@@ -317,11 +317,11 @@ namespace NSABUtils
 
     double getDouble( const QString &value, QXmlStreamReader &reader )
     {
-        QStringRef tmp( &value );
+        QStringView tmp( value );
         return getDouble( tmp, reader );
     }
 
-    double getDouble( const QStringRef &value, QXmlStreamReader &reader )
+    double getDouble( const QStringView &value, QXmlStreamReader &reader )
     {
         bool aOK;
         double retVal = getDouble( value, &aOK );
@@ -343,7 +343,7 @@ namespace NSABUtils
         return val != "0" && val != "false" && val != "f" && val != "n" && val != "no" && val != "off";
     }
 
-    bool getBool( const QStringRef &str, bool defaultVal )
+    bool getBool( const QStringView &str, bool defaultVal )
     {
         return getBool( str.toString(), defaultVal );
     }
@@ -563,7 +563,7 @@ namespace NSABUtils
         return retVal;
     }
 
-    QDateTime getDateTime( const QStringRef &value, QXmlStreamReader &reader, bool optional )
+    QDateTime getDateTime( const QStringView &value, QXmlStreamReader &reader, bool optional )
     {
         QDateTime retVal = getDateTime( value.toString() );
         if ( !retVal.isValid() )
@@ -577,7 +577,7 @@ namespace NSABUtils
 
     QDateTime getDateTime( const QString &value, QXmlStreamReader &reader, bool optional )
     {
-        return getDateTime( QStringRef( &value ), reader, optional );
+        return getDateTime( QStringView( value ), reader, optional );
     }
 
     QStringList splitLineCSV( const QString &line )
@@ -1087,7 +1087,7 @@ namespace NSABUtils
 
     QString getFirstString( const QVariant &value )
     {
-        if ( value.type() == QVariant::StringList )
+        if ( value.metaType() == QMetaType( QMetaType::QStringList ) )
         {
             auto retVal = value.toStringList();
             if ( retVal.isEmpty() )

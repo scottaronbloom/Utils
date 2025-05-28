@@ -24,10 +24,11 @@
 #define __QTUTILS_H
 
 #include "SABUtilsExport.h"
+#include "SABUtilsFwd.h"
 #include "nodiscard.h"
 
 class QString;
-class QStringRef;
+class QStringView;
 class QDir;
 class QXmlStreamReader;
 class QXmlStreamWriter;
@@ -91,18 +92,6 @@ namespace NSABUtils
         return retVal;
     }
 
-    struct SABUTILS_EXPORT CCaseInsensitiveHash
-    {
-        size_t operator()( const QString &str ) const;
-    };
-
-    struct SABUTILS_EXPORT CCaseInsensitiveEqual
-    {
-        size_t operator()( const QString &lhs, const QString &rhs ) const;
-    };
-
-    using TCaseInsensitiveHash = std::unordered_set< QString, CCaseInsensitiveHash, CCaseInsensitiveEqual >;
-
     SABUTILS_EXPORT QString allFilesFilter();
     SABUTILS_EXPORT QString defaultFileDialogDir();
 
@@ -119,23 +108,23 @@ namespace NSABUtils
 #endif
 
     SABUTILS_EXPORT int getInt( const QString &str, bool *aOK );
-    SABUTILS_EXPORT int getInt( const QStringRef &str, bool *aOK );
+    SABUTILS_EXPORT int getInt( const QStringView &str, bool *aOK );
     SABUTILS_EXPORT int getInt( const QString &str );
-    SABUTILS_EXPORT int getInt( const QStringRef &str );
+    SABUTILS_EXPORT int getInt( const QStringView &str );
     SABUTILS_EXPORT int getInt( const QString &str, QXmlStreamReader &reader );
-    SABUTILS_EXPORT int getInt( const QStringRef &str, QXmlStreamReader &reader );
+    SABUTILS_EXPORT int getInt( const QStringView &str, QXmlStreamReader &reader );
     SABUTILS_EXPORT int getInt( const QString &str, int defaultValue, QXmlStreamReader &reader );
-    SABUTILS_EXPORT int getInt( const QStringRef &str, int defaultValue, QXmlStreamReader &reader );
+    SABUTILS_EXPORT int getInt( const QStringView &str, int defaultValue, QXmlStreamReader &reader );
 
     SABUTILS_EXPORT double getDouble( const QString &str, bool *aOK );
     SABUTILS_EXPORT double getDouble( const QString &str );
-    SABUTILS_EXPORT double getDouble( const QStringRef &str, bool *aOK );
-    SABUTILS_EXPORT double getDouble( const QStringRef &str );
+    SABUTILS_EXPORT double getDouble( const QStringView &str, bool *aOK );
+    SABUTILS_EXPORT double getDouble( const QStringView &str );
     SABUTILS_EXPORT double getDouble( const QString &str, QXmlStreamReader &reader );
-    SABUTILS_EXPORT double getDouble( const QStringRef &str, QXmlStreamReader &reader );
+    SABUTILS_EXPORT double getDouble( const QStringView &str, QXmlStreamReader &reader );
 
     SABUTILS_EXPORT bool getBool( const QString &str, bool defaultVal = false );   // default returned when string is empty
-    SABUTILS_EXPORT bool getBool( const QStringRef &str, bool defaultVal = false );
+    SABUTILS_EXPORT bool getBool( const QStringView &str, bool defaultVal = false );
 
     SABUTILS_EXPORT QString getFile( const QString &relToDir, QXmlStreamReader &reader, QString *origFile = nullptr );
     SABUTILS_EXPORT QString getFile( const QDir &relToDir, QXmlStreamReader &reader, QString *origFile = nullptr );
@@ -155,7 +144,7 @@ namespace NSABUtils
         bool fAllowMonthYearOnly{ false };
     };
 
-    SABUTILS_EXPORT QDateTime getDateTime( const QStringRef &str, QXmlStreamReader &reader, bool optional );
+    SABUTILS_EXPORT QDateTime getDateTime( const QStringView &str, QXmlStreamReader &reader, bool optional );
     SABUTILS_EXPORT QDateTime getDateTime( const QString &str, QXmlStreamReader &reader, bool optional );
     SABUTILS_EXPORT QDateTime getDateTime( const QString &str );
 
@@ -282,7 +271,7 @@ inline typename std::enable_if< I == sizeof...( Tp ), void >::type printToDebug(
 }
 
 template< std::size_t I = 0, typename... Tp >
-    inline typename std::enable_if < I < sizeof...( Tp ), void >::type printToDebug( QDebug &debug, const std::tuple< Tp... > &value )
+    inline typename std::enable_if < I< sizeof...( Tp ), void >::type printToDebug( QDebug &debug, const std::tuple< Tp... > &value )
 {
     if ( I != 0 )
         debug.nospace() << ", ";
