@@ -33,8 +33,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QDirIterator>
-#include <QRegExp>
-#include <QStringRef>
+#include <QStringView >
 #include <QVector>
 #include <QRegularExpression>
 
@@ -117,13 +116,13 @@ namespace NSABUtils
             if ( extension[ 0 ] == '.' )
                 extStartPos = 1;
 
-            QString qPattern = QString::fromStdString( pattern.substr( patternStartPos, pattern.length() ) );
+            QString qPattern = QRegularExpression::anchoredPattern( QRegularExpression::wildcardToRegularExpression( QString::fromStdString( pattern.substr( patternStartPos, pattern.length() ) ) ) );
             QString qExt = QString::fromStdString( extension.substr( extStartPos, extension.length() ) );
 
             if ( wildcards )
             {
-                QRegExp regExp( qPattern, Qt::CaseSensitivity::CaseInsensitive, QRegExp::PatternSyntax::WildcardUnix );
-                return regExp.exactMatch( qExt );
+                QRegularExpression regExp( qPattern, QRegularExpression::CaseInsensitiveOption );
+                return regExp.match( qExt ).hasMatch();
             }
             else
                 return qPattern == qExt;
@@ -150,12 +149,12 @@ namespace NSABUtils
             bool matches = true;
             for ( ; matches && ( ( currPattern >= 0 ) && ( currFileName >= 0 ) ); currPattern--, currFileName-- )
             {
-                QString pattern = patternList[ currPattern ];
+                QString pattern = QRegularExpression::wildcardToRegularExpression( patternList[ currPattern ] );
                 QString fileName = fileNameList[ currFileName ];
                 if ( wildcards )
                 {
-                    QRegExp regExp( pattern, Qt::CaseSensitivity::CaseInsensitive, QRegExp::PatternSyntax::WildcardUnix );
-                    matches = regExp.exactMatch( fileName );
+                    auto regExp = QRegularExpression( pattern, QRegularExpression::CaseInsensitiveOption );
+                    matches = regExp.match( fileName ).hasMatch();
                 }
                 else
                     matches = pattern == fileName;
@@ -510,8 +509,8 @@ namespace NSABUtils
             QStringList dirElts = dir.split( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
             QStringList fileElts = file.split( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
 #else
-            QVector< QStringRef > dirElts = dir.splitRef( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
-            QVector< QStringRef > fileElts = file.splitRef( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
+            QVector< QStringView > dirElts = dir.splitRef( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
+            QVector< QStringView > fileElts = file.splitRef( QLatin1Char( '/' ), NStringUtils::TSkipEmptyParts );
 #endif
             int ii = 0;
             while ( ii < dirElts.size() && ii < fileElts.size() &&
@@ -1315,7 +1314,7 @@ namespace NSABUtils
                 nextChild = entries[ 0 ];
             else
             {
-                for ( auto &&ii : qAsConst( entries ) )
+                for ( auto &&ii : std::as_const( entries ) )
                 {
                     if ( ii == childPaths[ 0 ] )
                     {
@@ -1418,7 +1417,7 @@ namespace NSABUtils
                 currDir = QDir( retVal );
                 auto entries = currDir.entryInfoList( QDir::AllEntries | QDir::NoDotAndDotDot );
                 std::optional< QFileInfo > currFi;
-                for ( auto &&jj : qAsConst( entries ) )
+                for ( auto &&jj : std::as_const( entries ) )
                 {
                     if ( jj.fileName().compare( parts[ ii ], Qt::CaseInsensitive ) == 0 )
                     {

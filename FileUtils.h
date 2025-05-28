@@ -31,6 +31,7 @@
 #include <unordered_map>
 #include <optional>
 #include <QStringList>
+#include <QString>
 #include <QFileDevice>
 #include <QList>
 #include <functional>
