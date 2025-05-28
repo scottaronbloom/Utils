@@ -32,6 +32,9 @@
 #include <QIcon>
 #include <QBuffer>
 
+#include <QImageWriter>
+#include <QDataStream>
+
 namespace NSABUtils
 {
     QByteArray formatMd5( const QByteArray &digest, bool isHex )
@@ -74,13 +77,13 @@ namespace NSABUtils
         return hash.result();
     }
 
-    QString getMd5( const QString &data, bool isFileName )
+    QByteArray getMd5( const QString &data, bool isFileName )
     {
         if ( isFileName )
             return getMd5( QFileInfo( data ) );
 
         QByteArray inData = data.toLatin1();
-        return QString::fromLatin1( getMd5( inData ) );
+        return getMd5( inData, false );
     }
 
     std::string getMd5( const std::string &data, bool isFileName )
@@ -88,7 +91,7 @@ namespace NSABUtils
         return getMd5( QString::fromStdString( data ), isFileName ).toStdString();
     }
 
-    QString getMd5( const QFileInfo &fi )
+    QByteArray getMd5( const QFileInfo &fi )
     {
         QFile file( fi.absoluteFilePath() );
         if ( !file.open( QIODevice::ReadOnly ) )
@@ -96,25 +99,14 @@ namespace NSABUtils
 
         QCryptographicHash hash( QCryptographicHash::Md5 );
         if ( hash.addData( &file ) )
-            return QString::fromLatin1( formatMd5( hash.result(), false ) );
+            return formatMd5( hash.result(), false );
 
         return {};
     }
 
-    QByteArray getPixmapData( const QPixmap &pixMap )
-    {
-        QByteArray data;
-        QBuffer buffer( &data );
-        buffer.open( QIODevice::WriteOnly );
-        pixMap.save( &buffer, "png" );
-        return data;
-    }
-
     SABUTILS_EXPORT QByteArray getMd5( const QPixmap &pixMap )
     {
-        auto data = getPixmapData( pixMap );
-
-        return getMd5( data );
+        return getMd5( pixMap.toImage() );
     }
 
     SABUTILS_EXPORT QByteArray getMd5( const QIcon &icon )
@@ -123,37 +115,121 @@ namespace NSABUtils
         QCryptographicHash hash( QCryptographicHash::Md5 );
         for ( auto &&ii : sizes )
         {
-            auto data = getPixmapData( icon.pixmap( ii ) );
+            auto data = getImageData( icon.pixmap( ii ).toImage() );
             hash.addData( data );
         }
         return formatMd5( hash.result(), false );
+    }
+
+    SABUTILS_EXPORT QByteArray getMd5( const QImage &image )
+    {
+        QCryptographicHash hash( QCryptographicHash::Md5 );
+        hash.addData( getImageData( image ) );
+        return formatMd5( hash.result(), false );
+    }
+
+    SABUTILS_EXPORT QByteArray getImageData( const QImage &img )
+    {
+        if ( img.isNull() )
+            return {};
+
+        QByteArray retVal;
+        QDataStream ds( &retVal, QDataStream::WriteOnly );
+
+        auto width = img.width();
+        auto height = img.height();
+        auto depth = img.depth();
+        ds << width << height << depth;
+
+        auto bpl = img.bytesPerLine();
+
+        if ( ( img.format() == QImage::Format::Format_RGB32 ) || ( img.format() >= QImage::Format::Format_ARGB32 ) )
+        {
+            if ( ( img.format() >= QImage::Format::Format_ARGB32 ) && ( ( width * depth / 8 ) == bpl ) )
+            {
+                ds.writeBytes( reinterpret_cast< const char * >( img.bits() ), bpl );
+            }
+            else
+            {
+                for ( int line = 0; line < height; ++line )
+                {
+                    ds.writeBytes( reinterpret_cast< const char * >( img.constScanLine( line ) ), bpl );
+                }
+            }
+        }
+        else
+        {
+            const QVector< QRgb > &colortable = img.colorTable();
+            for ( int y = 0; y < height; ++y )
+            {
+                for ( int x = 0; x < width; ++x )
+                {
+                    auto curr = colortable[ img.pixelIndex( x, y ) ];
+                    retVal.push_back( QByteArray( reinterpret_cast< const char * >( &curr ), sizeof( QRgb ) ) );
+                }
+            }
+        }
+        return retVal;
+    }
+    CComputeMD5::CComputeMD5( const QString &fileName ) :
+        fFileInfo( fileName )
+    {
     }
 
     void CComputeMD5::run()
     {
         emit sigStarted( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
 
+        QImage img( fFileInfo.absoluteFilePath() );
+        if ( img.isNull() )
+            processNonImage();
+        else
+            processImage( img );
+
+        emitFinished();
+    
+    }
+
+    unsigned long long CComputeMD5::getThreadID() const
+    {
+        return reinterpret_cast< unsigned long long >( QThread::currentThreadId() );
+    }
+
+    void CComputeMD5::slotStop()
+    {
+        fStopped = true;
+        // qDebug() << "ComputeMD5 stopped";
+    }
+
+    void CComputeMD5::emitFinished()
+    {
+        emit sigFinished( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), fMD5 );
+    }
+
+    void CComputeMD5::processImage( const QImage &img )
+    {
+        fMD5 = getMd5( img );
+        emit sigFinishedReading( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+        emit sigFinishedComputing( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath() );
+    }
+
+    void CComputeMD5::processNonImage()
+    {
         QFile file( fFileInfo.absoluteFilePath() );
-        if ( !file.open( QIODevice::ReadOnly ) )
-            emitFinished();
+        if ( !file.open( QIODevice::ReadOnly ) || !file.isReadable() )
+            return;
 
         QCryptographicHash hash( QCryptographicHash::Md5 );
-        if ( !file.isReadable() )
-            emitFinished();
 
-        char buffer[ 4096 ];
-        int length;
+        QByteArray buffer;
 
         qint64 pos = 0;
-        while ( !fStopped && ( length = file.read( buffer, sizeof( buffer ) ) ) > 0 )
+        while ( !fStopped && ( buffer = file.read( 4096 ) ).length() > 0 )
         {
-            pos += length;
-            hash.addData( buffer, length );
+            pos += buffer.length();
+            hash.addData( buffer );
             emit sigReadPositionStatus( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), pos );
-            if ( QThread::currentThread() && QThread::currentThread()->eventDispatcher() )
-            {
-                QThread::currentThread()->eventDispatcher()->processEvents( QEventLoop::AllEvents );
-            }
+            processEvents();
         }
 
         if ( file.atEnd() )
@@ -173,25 +249,16 @@ namespace NSABUtils
                 return;
             }
 
-            fMD5 = QString::fromLatin1( formatMd5( tmp, false ) );
+            fMD5 = formatMd5( tmp, false );
         }
-        emitFinished();
     }
 
-    unsigned long long CComputeMD5::getThreadID() const
+    void CComputeMD5::processEvents()
     {
-        return reinterpret_cast< unsigned long long >( QThread::currentThreadId() );
-    }
-
-    void CComputeMD5::slotStop()
-    {
-        fStopped = true;
-        // qDebug() << "ComputeMD5 stopped";
-    }
-
-    void CComputeMD5::emitFinished()
-    {
-        emit sigFinished( getThreadID(), QDateTime::currentDateTime(), fFileInfo.absoluteFilePath(), fMD5 );
+        if ( QThread::currentThread() && QThread::currentThread()->eventDispatcher() )
+        {
+            QThread::currentThread()->eventDispatcher()->processEvents( QEventLoop::AllEvents );
+        }
     }
 
 }

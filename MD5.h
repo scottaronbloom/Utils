@@ -30,6 +30,7 @@ class QFileInfo;
 class QString;
 class QIcon;
 class QPixmap;
+class QImage;
 #include <QRunnable>
 #include <string>
 #include <QObject>
@@ -38,12 +39,16 @@ class QPixmap;
 namespace NSABUtils
 {
     SABUTILS_EXPORT QByteArray getMd5( const QByteArray &data );
-    SABUTILS_EXPORT QString getMd5( const QFileInfo &fi );
+    SABUTILS_EXPORT QByteArray getMd5( const QFileInfo &fi );
     SABUTILS_EXPORT QByteArray getMd5( const QStringList &data );
-    SABUTILS_EXPORT QString getMd5( const QString &data, bool isFileName = false );
-    SABUTILS_EXPORT QByteArray getMd5( const QIcon &icon );
-    SABUTILS_EXPORT QByteArray getMd5( const QPixmap &pixmap );
+    SABUTILS_EXPORT QByteArray getMd5( const QString &data, bool isFileName = false );
     SABUTILS_EXPORT std::string getMd5( const std::string &data, bool isFileName = false );
+
+    SABUTILS_EXPORT QByteArray getMd5( const QIcon &icon );
+    SABUTILS_EXPORT QByteArray getMd5( const QPixmap &pixmap ); // only includes image data
+    SABUTILS_EXPORT QByteArray getMd5( const QImage &img );
+    SABUTILS_EXPORT QByteArray getImageData( const QImage &img );
+
     SABUTILS_EXPORT QByteArray formatMd5( const QByteArray &digest, bool isHex );
 
     class SABUTILS_EXPORT CComputeMD5 : public QObject, public QRunnable
@@ -51,14 +56,14 @@ namespace NSABUtils
         Q_OBJECT;
 
     public:
-        CComputeMD5( const QString &fileName ) :
-            fFileInfo( fileName ) {};
+        CComputeMD5( const QString &fileName );;
 
         void run() override;
 
+    public:
         unsigned long long getThreadID() const;
 
-        QString md5() const { return fMD5; }
+        QByteArray md5() const { return fMD5; }
 
         void stop() { slotStop(); }
     Q_SIGNALS:
@@ -71,10 +76,16 @@ namespace NSABUtils
         void slotStop();
 
     private:
+        void processNonImage();
+
+    private:
+        void processEvents();
+
+        void processImage( const QImage &img );
         void emitFinished();
 
         QFileInfo fFileInfo;
-        QString fMD5;
+        QByteArray fMD5;
         bool fStopped{ false };
     };
 
