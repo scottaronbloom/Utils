@@ -144,18 +144,14 @@ namespace NSABUtils
             return;
         }
 
-        if ( NSABUtils::NFileUtils::isIPAddressNetworkPath( fImpl->fPathName ) )
+        if ( NSABUtils::NFileUtils::isIPAddressNetworkPath( QFileInfo( fImpl->fPathName ) ) )
         {
             fImpl->fRetVal = std::make_pair( true, QString() );
             return;
         }
 
 #ifdef Q_OS_WINDOWS
-        CRevertValue revertValue( qt_ntfs_permission_lookup );
-        if ( fImpl->fUseNTFSPermissions )
-        {
-            qt_ntfs_permission_lookup++;
-        }
+        QNtfsPermissionCheckGuard permissionGuard;
 #endif
 
         fImpl->dumpDebug( "checkPathInternal exists: " );
