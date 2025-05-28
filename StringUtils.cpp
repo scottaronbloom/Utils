@@ -25,7 +25,6 @@
 #include "FromString.h"
 
 #include <QString>
-#include <QRegExp>
 #include <QRegularExpression>
 #include <QTextStream>
 #include <algorithm>
@@ -190,31 +189,29 @@ namespace NSABUtils
             return str;
         }
 
-        std::string stripBlanksHead( const std::string &inStr )
+        std::string stripBlanksHead( std::string_view inStr )
         {
             static std::string whitespaces( " \t\f\v\n\r" );
 
             std::string::size_type startIdx = inStr.find_first_not_of( whitespaces );
             if ( startIdx == std::string::npos )
-                return std::string();
-            std::string retVal = inStr;
-            retVal.erase( 0, startIdx );
-            return retVal;
+                return {};
+
+            inStr.remove_prefix( startIdx );
+            return std::string( inStr );
         }
 
-        std::string stripBlanksTail( const std::string &inStr )
+        std::string stripBlanksTail( std::string_view inStr )
         {
             static std::string whitespaces( " \t\f\v\n\r" );
 
             std::string::size_type endIdx = inStr.find_last_not_of( whitespaces );
 
-            std::string retVal = inStr;
-            retVal.erase( endIdx + 1 );
-
-            return retVal;
+            inStr = inStr.substr( 0, endIdx );
+            return std::string( inStr );
         }
 
-        void getBlankIndexes( const std::string &str, size_t &startIdx, size_t &endIdx )
+        void getBlankIndexes( std::string_view str, size_t &startIdx, size_t &endIdx )
         {
             static std::string whitespaces( " \t\f\v\n\r" );
 
@@ -241,16 +238,16 @@ namespace NSABUtils
             str.erase( 0, startIdx );
         }
 
-        std::string stripBlanks( const std::string &inStr )
+        std::string stripBlanks( std::string_view inStr )
         {
             std::string::size_type startIdx;
             std::string::size_type endIdx;
             getBlankIndexes( inStr, startIdx, endIdx );
 
             if ( startIdx == std::string::npos )
-                return std::string();
+                return {};
 
-            std::string retVal = inStr.substr( startIdx, endIdx - startIdx + 1 );
+            std::string retVal = std::string( inStr.substr( startIdx, endIdx - startIdx + 1 ) );
             return retVal;
         }
 
@@ -306,13 +303,20 @@ namespace NSABUtils
 
         QString stripQuotes( const QString &text, const char *quotes )
         {
-            QString retVal = text.trimmed();
+            auto retVal = text.trimmed();
+            if ( retVal.isEmpty() )
+                return retVal;
+
             for ( auto currQuote = quotes; *currQuote; ++currQuote )
             {
-                if ( ( retVal.length() >= 2 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && retVal.rightRef( 1 ).at( 0 ) == *currQuote )
+                auto firstChar = retVal[ 0 ];   // we know its not empty so 0 and length-1 are always valid
+                auto lastChar = retVal[ retVal.length() - 1 ];
+                auto secondToLastChar = ( retVal.length() > 2 ) ? retVal[ retVal.length() - 2 ] : QChar();
+
+                if ( ( retVal.length() >= 2 ) && ( firstChar == *currQuote ) && ( lastChar == *currQuote ) )
                     retVal = retVal.mid( 1, retVal.length() - 2 );
-                if ( ( retVal.length() >= 3 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && ( ( retVal.rightRef( 1 ) == "\\" ) || ( retVal.rightRef( 1 ) == "/" ) ) && retVal.midRef( retVal.length() - 2, 1 ).at( 0 ) == *currQuote )
-                    retVal = retVal.mid( 1, retVal.length() - 3 ) + retVal.rightRef( 1 ).toString();
+                if ( ( retVal.length() >= 3 ) && ( firstChar == *currQuote ) && ( ( lastChar == '\\' ) || ( lastChar == '/' ) ) && ( secondToLastChar == *currQuote ) )
+                    retVal = retVal.mid( 1, retVal.length() - 3 ) + lastChar;
             }
             return retVal;
         }
@@ -364,9 +368,13 @@ namespace NSABUtils
             QString retVal = text.trimmed();
             for ( auto currQuote = quotes; *currQuote; ++currQuote )
             {
-                if ( ( retVal.length() >= 2 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && retVal.rightRef( 1 ).at( 0 ) == *currQuote )
+                auto firstChar = retVal[ 0 ];
+                auto lastChar = retVal[ retVal.length() - 1 ];
+                auto secondToLastChar = ( retVal.length() > 2 ) ? retVal[ retVal.length() - 2 ] : QChar();
+
+                if ( ( retVal.length() >= 2 ) && ( firstChar == *currQuote ) && ( lastChar == *currQuote ) )
                     return true;
-                if ( ( retVal.length() >= 3 ) && retVal.leftRef( 1 ).at( 0 ) == *currQuote && ( ( retVal.rightRef( 1 ) == "\\" ) || ( retVal.rightRef( 1 ) == "/" ) ) && retVal.midRef( retVal.length() - 2, 1 ).at( 0 ) == *currQuote )
+                if ( ( retVal.length() >= 3 ) && ( firstChar == *currQuote ) && ( ( lastChar == "\\" ) || ( lastChar == "/" ) ) && ( secondToLastChar == *currQuote ) )
                     return true;
             }
             return false;
@@ -462,8 +470,9 @@ namespace NSABUtils
             QString pre = QString::fromStdString( prefix );
             if ( *pre.end() != '*' )
                 pre += "*";
-            QRegExp regEx( pre, Qt::CaseSensitive, QRegExp::Wildcard );
-            return regEx.exactMatch( QString::fromStdString( str ) );
+            pre = QRegularExpression::anchoredPattern( QRegularExpression::wildcardToRegularExpression( pre ) );
+            QRegularExpression regEx( pre );
+            return regEx.match( QString::fromStdString( str ) ).hasMatch();
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -481,8 +490,9 @@ namespace NSABUtils
             QString suf = QString::fromStdString( suffix );
             if ( *suf.begin() != '*' )
                 suf.insert( 0, "*" );
-            QRegExp regEx( suf, Qt::CaseSensitive, QRegExp::Wildcard );
-            return regEx.exactMatch( QString::fromStdString( str ) );
+            suf = QRegularExpression::anchoredPattern( QRegularExpression::wildcardToRegularExpression( suf ) );
+            QRegularExpression regEx( suf );
+            return regEx.match( QString::fromStdString( str ) ).hasMatch();
         }
 
         std::string replaceAllNot( const std::string &inString, const std::string &notOf, char to )
@@ -2135,7 +2145,7 @@ namespace NSABUtils
         QStringList asReport( const QStringList &columnNames, const QStringList &subHeader, const QList< QStringList > &data, bool sortData )
         {
             // first row is the columnNames
-            std::vector< int > maxSize;
+            std::vector< qsizetype > maxSize;
             maxSize.resize( columnNames.size() );
             for ( int ii = 0; ii < columnNames.size(); ++ii )
                 maxSize[ ii ] = columnNames[ ii ].length() + 1;

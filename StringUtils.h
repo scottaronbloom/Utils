@@ -171,9 +171,9 @@ namespace NSABUtils
         // must be all 0s or 1s to be numeric
         SABUTILS_EXPORT bool isNumericString( const std::string &constString, uint64_t &val, unsigned int &numBits );
 
-        SABUTILS_EXPORT std::string stripBlanksHead( const std::string &inStr );
-        SABUTILS_EXPORT std::string stripBlanksTail( const std::string &inStr );
-        SABUTILS_EXPORT std::string stripBlanks( const std::string &inStr );
+        SABUTILS_EXPORT std::string stripBlanksHead( std::string_view inStr );
+        SABUTILS_EXPORT std::string stripBlanksTail( std::string_view inStr );
+        SABUTILS_EXPORT std::string stripBlanks( std::string_view inStr );
 
         SABUTILS_EXPORT std::string stripQuotes( const std::string &text, const char *quotes = "\"\'" );
         SABUTILS_EXPORT QString stripQuotes( const QString &text, const char *quotes = "\"\'" );
