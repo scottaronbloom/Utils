@@ -24,12 +24,12 @@
 find_package(DeploySystem REQUIRED)
 
 if( NOT DEFINED USE_QT OR USE_QT )
-	find_package(Qt5Core REQUIRED)
+	find_package(Qt6Core REQUIRED)
 
 	if( NOT DEFINED DEPLOYQT_EXECUTABLE )
 		# Retrieve the absolute path to qmake and then use that path to find
 		# the <os>deployqt binaries
-		get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+		get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
 		get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
 		if( WIN32 )
@@ -83,7 +83,7 @@ endif()
 		if ( NOT _INSTALL_ONLY )
 			SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>" )
 			IF( WIN32 )
-				SET(_QTDEPLOY_OPTIONS_LCL "--verbose=1;--no-compiler-runtime;--no-angle;--no-opengl-sw;--pdb;${NO_TRANSLATIONS_OPT}" )
+				SET(_QTDEPLOY_OPTIONS_LCL "--verbose=1;--no-compiler-runtime;--no-opengl-sw;--pdb;${NO_TRANSLATIONS_OPT}" )
 			ELSEIF( APPLE )
 				SET(_QTDEPLOY_TARGET_DIR "$<TARGET_FILE:${target}>/../.." )
 				SET(_QTDEPLOY_OPTIONS_LCL "--verbose=1;--no-compiler-runtime;--always-overwrite;${NO_TRANSLATIONS_OPT}" )
@@ -116,7 +116,7 @@ endif()
 				"
 				file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_\${CMAKE_INSTALL_CONFIG_NAME}_path\" _file)
 				IF( WIN32 )
-					SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;--no-compiler-runtime;--no-angle;--no-opengl-sw;${NO_TRANSLATIONS_OPT}\" )
+					SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;--no-compiler-runtime;--no-opengl-sw;${NO_TRANSLATIONS_OPT}\" )
 				ELSEIF( APPLE )
 					SET(_QTDEPLOY_OPTIONS \"--dry-run;--list;mapping;${NO_TRANSLATIONS_OPT}\" )
 				ELSEIF( UNIX )

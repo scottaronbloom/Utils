@@ -27,6 +27,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QApplication>
+#include <QTimeZone>
 using TStringType = QString;
 #else
 #include <string>
@@ -57,7 +58,7 @@ namespace NVersion
     inline QDateTime buildDateTime()
     { 
         auto retVal = QDateTime::fromString( NVersion::BUILD_DATE + " " + NVersion::BUILD_TIME, "MM/dd/yyyyZ HH:mm:ssZ" );
-        retVal.setTimeSpec( Qt::TimeSpec::UTC );
+        retVal.setTimeZone( QTimeZone::UTC );
         return retVal;
     }
 #endif
